@@ -1,4 +1,4 @@
-# Copyright (C) 2022 The Takeout Authors.
+# Copyright 2023 defsub
 #
 # This file is part of Takeout.
 #
@@ -49,4 +49,4 @@ WORKDIR $home
 USER $user
 CMD ["/go/bin/takeout", "serve", "--config", "/etc/takeout/takeout.yaml"]
 
-# sudo docker run -name takeout -p 3000:3000 -v /home/mboyns/takeout:/var/lib/takeout takeout:latest /bin/bash
+# sudo docker run -name takeout -p 3000:3000 -v /home/defsub/takeout:/var/lib/takeout takeout:latest /bin/bash

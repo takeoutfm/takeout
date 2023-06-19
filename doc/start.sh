@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (C) 2020 The Takeout Authors.
+# Copyright 2023 defsub
 
 if [ -z "$GOPATH" ]; then
     PATH=$HOME/go/bin:$PATH
