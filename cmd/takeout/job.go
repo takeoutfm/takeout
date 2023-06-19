@@ -19,7 +19,7 @@ package main
 
 import (
 	"errors"
-	"github.com/defsub/takeout/server"
+	"github.com/takeoutfm/takeout/server"
 	"github.com/spf13/cobra"
 )
 

@@ -30,9 +30,9 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/defsub/takeout"
-	g "github.com/defsub/takeout/lib/gorm"
-	"github.com/defsub/takeout/lib/log"
+	"github.com/takeoutfm/takeout"
+	g "github.com/takeoutfm/takeout/lib/gorm"
+	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

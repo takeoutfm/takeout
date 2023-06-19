@@ -22,8 +22,8 @@ package progress
 
 import (
 	"errors"
-	"github.com/defsub/takeout/auth"
-	"github.com/defsub/takeout/config"
+	"github.com/takeoutfm/takeout/auth"
+	"github.com/takeoutfm/takeout/config"
 	"gorm.io/gorm"
 )
 

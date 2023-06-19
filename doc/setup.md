@@ -45,10 +45,10 @@ $ go version
 ```
 
 Download and build the Takeout server from Github. Precompiled versions may be
-available at a later time. Check the [Takeout Releases Page](https://github.com/defsub/takeout/releases).
+available at a later time. Check the [Takeout Releases Page](https://github.com/takeoutfm/takeout/releases).
 
 ```console
-$ git clone https://github.com/defsub/takeout.git
+$ git clone https://github.com/takeoutfm/takeout.git
 $ cd takeout
 $ cd cmd/takeout
 $ go build

@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/keyword"
-	"github.com/defsub/takeout/config"
+	"github.com/takeoutfm/takeout/config"
 	"strings"
 )
 

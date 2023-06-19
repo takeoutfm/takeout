@@ -20,7 +20,7 @@ package view
 import (
 	"testing"
 
-	"github.com/defsub/takeout/config"
+	"github.com/takeoutfm/takeout/config"
 )
 
 func TestArtistView(t *testing.T) {

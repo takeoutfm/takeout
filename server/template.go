@@ -29,12 +29,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/defsub/takeout/config"
-	"github.com/defsub/takeout/lib/date"
-	"github.com/defsub/takeout/music"
-	"github.com/defsub/takeout/podcast"
-	"github.com/defsub/takeout/video"
-	"github.com/defsub/takeout/view"
+	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/lib/date"
+	"github.com/takeoutfm/takeout/music"
+	"github.com/takeoutfm/takeout/podcast"
+	"github.com/takeoutfm/takeout/video"
+	"github.com/takeoutfm/takeout/view"
 )
 
 //go:embed res/static

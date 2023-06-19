@@ -20,7 +20,7 @@ package progress
 import (
 	"time"
 
-	"github.com/defsub/takeout/lib/gorm"
+	"github.com/takeoutfm/takeout/lib/gorm"
 )
 
 type Offset struct {

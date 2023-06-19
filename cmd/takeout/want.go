@@ -19,7 +19,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/defsub/takeout/music"
+	"github.com/takeoutfm/takeout/music"
 	"github.com/spf13/cobra"
 )
 

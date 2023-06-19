@@ -18,7 +18,7 @@
 package video
 
 import (
-	"github.com/defsub/takeout/config"
+	"github.com/takeoutfm/takeout/config"
 	"testing"
 	"fmt"
 )

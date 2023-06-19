@@ -19,7 +19,7 @@ package music
 
 import (
 	"fmt"
-	"github.com/defsub/takeout/lib/gorm"
+	"github.com/takeoutfm/takeout/lib/gorm"
 	"github.com/google/uuid"
 	g "gorm.io/gorm"
 	"time"

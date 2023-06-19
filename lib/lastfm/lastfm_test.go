@@ -20,7 +20,7 @@ package lastfm
 import (
 	"testing"
 	lfm "github.com/shkh/lastfm-go/lastfm"
-	"github.com/defsub/takeout/config"
+	"github.com/takeoutfm/takeout/config"
 )
 
 func TestLast(t *testing.T) {

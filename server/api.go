@@ -26,17 +26,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/defsub/takeout/activity"
-	"github.com/defsub/takeout/auth"
-	"github.com/defsub/takeout/lib/date"
-	"github.com/defsub/takeout/lib/encoding/xspf"
-	"github.com/defsub/takeout/lib/log"
-	"github.com/defsub/takeout/lib/spiff"
-	"github.com/defsub/takeout/lib/str"
-	"github.com/defsub/takeout/music"
-	"github.com/defsub/takeout/progress"
-	"github.com/defsub/takeout/ref"
-	"github.com/defsub/takeout/view"
+	"github.com/takeoutfm/takeout/activity"
+	"github.com/takeoutfm/takeout/auth"
+	"github.com/takeoutfm/takeout/lib/date"
+	"github.com/takeoutfm/takeout/lib/encoding/xspf"
+	"github.com/takeoutfm/takeout/lib/log"
+	"github.com/takeoutfm/takeout/lib/spiff"
+	"github.com/takeoutfm/takeout/lib/str"
+	"github.com/takeoutfm/takeout/music"
+	"github.com/takeoutfm/takeout/progress"
+	"github.com/takeoutfm/takeout/ref"
+	"github.com/takeoutfm/takeout/view"
 )
 
 const (

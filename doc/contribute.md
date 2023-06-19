@@ -12,7 +12,7 @@ service credits when you become a paying customer.
 * Linode - [Try Linode with $100 60-day credit](https://linode.gvw92c.net/c/3608723/903984/10906)
 * Digital Ocean - [Try Digital Ocean with $100 60-day credit](https://m.do.co/c/e2e1eabcb914)
 
-Please contact contribute@defsub.com if you have an affiliate program to
+Please contact contribute@takeoutfm.com if you have an affiliate program to
 include here.
 
 ## Metadata Services

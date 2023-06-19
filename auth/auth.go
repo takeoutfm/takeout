@@ -24,8 +24,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/defsub/takeout"
-	"github.com/defsub/takeout/config"
+	"github.com/takeoutfm/takeout"
+	"github.com/takeoutfm/takeout/config"
 	"github.com/gokyle/filecache"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"

@@ -21,9 +21,9 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/defsub/takeout/config"
-	"github.com/defsub/takeout/lib/client"
-	"github.com/defsub/takeout/lib/search"
+	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/lib/client"
+	"github.com/takeoutfm/takeout/lib/search"
 	"gorm.io/gorm"
 )
 

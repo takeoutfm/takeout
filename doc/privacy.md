@@ -6,7 +6,7 @@ it relates to the original intended design of the Takeout project, independent
 to how it is managed, is described within this document. The Takeout project
 refers to the Takeout server, mobile apps, TV apps, and the web interface. If
 you have questions regarding this privacy policy, please contact
-privacy@defsub.com.
+privacy@takeoutfm.com.
 
 ## Design Considerations
 
@@ -176,4 +176,4 @@ By using the Takeout project, you consent to this privacy policy.
 ## Changes
 
 Any changes made to this privacy policy will be made available in this file at
-the [Takeout server github repository](https://github.com/defsub/takeout).
+the [Takeout server github repository](https://github.com/takeoutfm/takeout).

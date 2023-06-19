@@ -22,8 +22,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/defsub/takeout/lib/date"
-	"github.com/defsub/takeout/lib/tmdb"
+	"github.com/takeoutfm/takeout/lib/date"
+	"github.com/takeoutfm/takeout/lib/tmdb"
 	"github.com/spf13/cobra"
         "gopkg.in/alessio/shellescape.v1"
 )

@@ -18,7 +18,7 @@
 package main
 
 import (
-	"github.com/defsub/takeout/auth"
+	"github.com/takeoutfm/takeout/auth"
 	"github.com/spf13/cobra"
 )
 

@@ -18,8 +18,8 @@
 package tmdb
 
 import (
-	"github.com/defsub/takeout/config"
-	"github.com/defsub/takeout/lib/date"
+	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/lib/date"
 	"testing"
 	"fmt"
 )

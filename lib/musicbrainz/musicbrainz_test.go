@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/defsub/takeout/config"
+	"github.com/takeoutfm/takeout/config"
 )
 
 func TestSearchReleases(t *testing.T) {

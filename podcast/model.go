@@ -18,7 +18,7 @@
 package podcast
 
 import (
-	"github.com/defsub/takeout/lib/gorm"
+	"github.com/takeoutfm/takeout/lib/gorm"
 	"time"
 )
 

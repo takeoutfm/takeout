@@ -21,8 +21,8 @@ import (
 	"encoding/xml"
 	"time"
 
-	"github.com/defsub/takeout/lib/client"
-	"github.com/defsub/takeout/lib/date"
+	"github.com/takeoutfm/takeout/lib/client"
+	"github.com/takeoutfm/takeout/lib/date"
 )
 
 type RSS struct {

@@ -20,7 +20,7 @@
 
 # build stage
 FROM golang:1.19.2-bullseye as builder
-ARG src=/go/src/github.com/defsub/takeout
+ARG src=/go/src/github.com/takeoutfm/takeout
 
 # pre-copy/cache go.mod for pre-downloading dependencies and only redownloading
 # them in subsequent builds if they change
@@ -32,7 +32,7 @@ RUN make install
 
 # final stage
 FROM debian:bullseye-slim
-ARG src=/go/src/github.com/defsub/takeout
+ARG src=/go/src/github.com/takeoutfm/takeout
 ARG user=takeout
 ARG group=$user
 ARG etc=/etc/$user/

@@ -19,8 +19,8 @@ package setlist
 
 import (
 	"fmt"
-	"github.com/defsub/takeout/config"
-	"github.com/defsub/takeout/lib/client"
+	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/lib/client"
 )
 
 type Setlist struct {

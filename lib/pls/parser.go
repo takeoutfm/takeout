@@ -24,7 +24,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/defsub/takeout/lib/str"
+	"github.com/takeoutfm/takeout/lib/str"
 )
 
 const (

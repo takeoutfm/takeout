@@ -1,4 +1,4 @@
-module github.com/defsub/takeout
+module github.com/takeoutfm/takeout
 
 replace github.com/willf/bitset => github.com/bits-and-blooms/bitset v1.2.0
 

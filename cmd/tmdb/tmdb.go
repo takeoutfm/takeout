@@ -21,15 +21,15 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/defsub/takeout/config"
-	"github.com/defsub/takeout/lib/log"
+	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "tmdb",
 	Short: "",
-	Long:  `https://defsub.github.io/`,
+	Long:  `https://takeout.fm/`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO
 	},

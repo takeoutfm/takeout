@@ -18,8 +18,8 @@
 package lastfm
 
 import (
-	"github.com/defsub/takeout/config"
-	"github.com/defsub/takeout/lib/client"
+	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/lib/client"
 	lfm "github.com/shkh/lastfm-go/lastfm"
 	"sort"
 	"strconv"

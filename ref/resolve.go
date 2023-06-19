@@ -25,14 +25,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/defsub/takeout/lib/client"
-	"github.com/defsub/takeout/lib/date"
-	"github.com/defsub/takeout/lib/log"
-	"github.com/defsub/takeout/lib/spiff"
-	"github.com/defsub/takeout/music"
-	"github.com/defsub/takeout/podcast"
-	"github.com/defsub/takeout/video"
-	"github.com/defsub/takeout/view"
+	"github.com/takeoutfm/takeout/lib/client"
+	"github.com/takeoutfm/takeout/lib/date"
+	"github.com/takeoutfm/takeout/lib/log"
+	"github.com/takeoutfm/takeout/lib/spiff"
+	"github.com/takeoutfm/takeout/music"
+	"github.com/takeoutfm/takeout/podcast"
+	"github.com/takeoutfm/takeout/video"
+	"github.com/takeoutfm/takeout/view"
 )
 
 type Locator interface {

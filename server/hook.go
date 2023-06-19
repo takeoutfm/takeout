@@ -21,12 +21,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/defsub/takeout/auth"
-	"github.com/defsub/takeout/config"
-	"github.com/defsub/takeout/lib/actions"
-	"github.com/defsub/takeout/lib/token"
-	"github.com/defsub/takeout/music"
-	"github.com/defsub/takeout/view"
+	"github.com/takeoutfm/takeout/auth"
+	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/lib/actions"
+	"github.com/takeoutfm/takeout/lib/token"
+	"github.com/takeoutfm/takeout/music"
+	"github.com/takeoutfm/takeout/view"
 )
 
 const (

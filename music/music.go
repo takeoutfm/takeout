@@ -26,14 +26,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/defsub/takeout/auth"
-	"github.com/defsub/takeout/config"
-	"github.com/defsub/takeout/lib/bucket"
-	"github.com/defsub/takeout/lib/client"
-	"github.com/defsub/takeout/lib/fanart"
-	"github.com/defsub/takeout/lib/lastfm"
-	"github.com/defsub/takeout/lib/musicbrainz"
-	"github.com/defsub/takeout/lib/search"
+	"github.com/takeoutfm/takeout/auth"
+	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/lib/bucket"
+	"github.com/takeoutfm/takeout/lib/client"
+	"github.com/takeoutfm/takeout/lib/fanart"
+	"github.com/takeoutfm/takeout/lib/lastfm"
+	"github.com/takeoutfm/takeout/lib/musicbrainz"
+	"github.com/takeoutfm/takeout/lib/search"
 	"gorm.io/gorm"
 )
 

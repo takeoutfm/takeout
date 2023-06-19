@@ -36,9 +36,9 @@
 package server
 
 import (
-	"github.com/defsub/takeout/lib/spiff"
-	"github.com/defsub/takeout/progress"
-	"github.com/defsub/takeout/view"
+	"github.com/takeoutfm/takeout/lib/spiff"
+	"github.com/takeoutfm/takeout/progress"
+	"github.com/takeoutfm/takeout/view"
 )
 
 // ---------------------------------------------------------------------------

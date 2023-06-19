@@ -23,9 +23,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/defsub/takeout/lib/hash"
-	"github.com/defsub/takeout/lib/rss"
-	"github.com/defsub/takeout/lib/search"
+	"github.com/takeoutfm/takeout/lib/hash"
+	"github.com/takeoutfm/takeout/lib/rss"
+	"github.com/takeoutfm/takeout/lib/search"
 )
 
 const (

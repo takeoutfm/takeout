@@ -20,10 +20,10 @@ package activity
 import (
 	"time"
 
-	"github.com/defsub/takeout/lib/gorm"
-	"github.com/defsub/takeout/music"
-	"github.com/defsub/takeout/podcast"
-	"github.com/defsub/takeout/video"
+	"github.com/takeoutfm/takeout/lib/gorm"
+	"github.com/takeoutfm/takeout/music"
+	"github.com/takeoutfm/takeout/podcast"
+	"github.com/takeoutfm/takeout/video"
 )
 
 // Activity data should be long-lived and w/o internal sync identifiers.  Use

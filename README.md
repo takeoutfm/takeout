@@ -2,13 +2,13 @@
 
 Takeout is a copyleft media service that indexes organized media files in S3
 buckets using MusicBrainz, Last.fm, Fanart.tv, and The Movie Database to make
-media available for streaming using a [mobile app](https://github.com/defsub/takeout_app),
+media available for streaming using a [mobile app](https://github.com/takeoutfm/takeout_app),
 TV app, web interface and VLC. Media is browsed using the Takeout server and
 streamed directly from S3 using pre-signed time-based URLs.
 
 Takeout is primarily a music player that also supports radio, movies and
-podcasts. It's not intended to be a replacement for more feature-rich systems
-like [Plex](https://plex.tv), [Jellyfin](https://jellyfin.org) and
+podcasts. It's not intended to be a full replacement for more feature-rich
+systems like [Plex](https://plex.tv), [Jellyfin](https://jellyfin.org) and
 [Kodi](https://kodi.tv/). Instead, Takeout takes inspiration from these systems
 and attempts to be a small yet capable system designed around media being
 stored in the cloud. You can take your personal media collection with you, on
@@ -32,7 +32,7 @@ media with free and open source software.
 * Server-based playlist API (using [jsonpatch](http://jsonpatch.com/))
 * Web and JSON views
 * Web playback using HTML5 audio - Chrome, Safari & Firefox tested on desktop & mobile
-* [Flutter app](https://github.com/defsub/takeout_app) available for Android (and iOS)
+* [Flutter app](https://github.com/takeoutfm/takeout_app) available for Android (and iOS)
 * [XSPF ("spiff")](https://xspf.org/) and JSPF playlists
 * Written in [Go](https://go.dev/), with [SQLite3](https://sqlite.org/index.html) and [Bleve](https://blevesearch.com/)
 * Supports [caching](https://github.com/gregjones/httpcache) of metadata API

@@ -20,10 +20,10 @@ package main
 import (
 	"time"
 
-	"github.com/defsub/takeout/config"
-	"github.com/defsub/takeout/music"
-	"github.com/defsub/takeout/podcast"
-	"github.com/defsub/takeout/video"
+	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/music"
+	"github.com/takeoutfm/takeout/podcast"
+	"github.com/takeoutfm/takeout/video"
 	"github.com/spf13/cobra"
 )
 

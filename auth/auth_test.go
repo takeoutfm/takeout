@@ -19,7 +19,7 @@ package auth
 
 import (
 	"fmt"
-	"github.com/defsub/takeout/config"
+	"github.com/takeoutfm/takeout/config"
 	"net/http"
 	"testing"
 	"time"

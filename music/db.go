@@ -21,7 +21,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/defsub/takeout/auth"
+	"github.com/takeoutfm/takeout/auth"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"

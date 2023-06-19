@@ -21,7 +21,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/defsub/takeout/auth"
+	"github.com/takeoutfm/takeout/auth"
 )
 
 type bits uint8

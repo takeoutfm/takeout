@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/defsub/takeout/config"
-	"github.com/defsub/takeout/lib/client"
+	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/golang-jwt/jwt"
 )
 

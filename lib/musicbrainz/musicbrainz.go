@@ -26,9 +26,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/defsub/takeout/config"
-	"github.com/defsub/takeout/lib/client"
-	"github.com/defsub/takeout/lib/date"
+	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/lib/client"
+	"github.com/takeoutfm/takeout/lib/date"
 )
 
 type MusicBrainz struct {

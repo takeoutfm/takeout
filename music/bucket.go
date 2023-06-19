@@ -23,7 +23,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/defsub/takeout/lib/bucket"
+	"github.com/takeoutfm/takeout/lib/bucket"
 )
 
 // Asynchronously obtain all tracks from the bucket.

@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/defsub/takeout/lib/log"
-	"github.com/defsub/takeout/lib/musicbrainz"
-	"github.com/defsub/takeout/lib/search"
+	"github.com/takeoutfm/takeout/lib/log"
+	"github.com/takeoutfm/takeout/lib/musicbrainz"
+	"github.com/takeoutfm/takeout/lib/search"
 )
 
 const (

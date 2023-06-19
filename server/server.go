@@ -21,14 +21,14 @@ import (
 	"net/http"
 
 	"github.com/bmizerany/pat"
-	"github.com/defsub/takeout/activity"
-	"github.com/defsub/takeout/auth"
+	"github.com/takeoutfm/takeout/activity"
+	"github.com/takeoutfm/takeout/auth"
 
-	"github.com/defsub/takeout/config"
-	"github.com/defsub/takeout/lib/client"
-	"github.com/defsub/takeout/lib/hub"
-	"github.com/defsub/takeout/lib/log"
-	"github.com/defsub/takeout/progress"
+	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/lib/client"
+	"github.com/takeoutfm/takeout/lib/hub"
+	"github.com/takeoutfm/takeout/lib/log"
+	"github.com/takeoutfm/takeout/progress"
 )
 
 const (

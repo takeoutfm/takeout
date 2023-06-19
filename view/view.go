@@ -21,13 +21,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/defsub/takeout/activity"
-	"github.com/defsub/takeout/auth"
-	"github.com/defsub/takeout/config"
-	"github.com/defsub/takeout/music"
-	"github.com/defsub/takeout/podcast"
-	"github.com/defsub/takeout/progress"
-	"github.com/defsub/takeout/video"
+	"github.com/takeoutfm/takeout/activity"
+	"github.com/takeoutfm/takeout/auth"
+	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/music"
+	"github.com/takeoutfm/takeout/podcast"
+	"github.com/takeoutfm/takeout/progress"
+	"github.com/takeoutfm/takeout/video"
 )
 
 type Context interface {

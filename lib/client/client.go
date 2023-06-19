@@ -27,9 +27,9 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/defsub/takeout/config"
-	"github.com/defsub/takeout/lib/log"
-	"github.com/defsub/takeout/lib/pls"
+	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/lib/log"
+	"github.com/takeoutfm/takeout/lib/pls"
 	"github.com/gregjones/httpcache"
 	"github.com/gregjones/httpcache/diskcache"
 )
