@@ -333,6 +333,20 @@ func RefreshStation(ctx Context, s *music.Station) *spiff.Playlist {
 				return nil
 			}
 			plist.Spiff.Entries = entries
+		} else if strings.HasSuffix(s.Ref, ".mp3") ||
+			strings.HasSuffix(s.Ref, ".aac") ||
+			strings.HasSuffix(s.Ref, ".ogg") ||
+			strings.HasSuffix(s.Ref, ".flac") {
+			plist.Spiff.Entries = []spiff.Entry{{
+				Creator:    s.Creator,
+				Album:      "",
+				Title:      s.Name,
+				Image:      s.Image,
+				Location:   []string{s.Ref},
+				Identifier: []string{},
+				Size:       []int64{-1},
+				Date:       date.FormatJson(time.Now()),
+			}}
 		} else {
 			// TODO add m3u, others?
 			log.Printf("unsupported stream %s\n", s.Ref)

@@ -9,7 +9,9 @@ require (
 	github.com/blevesearch/bleve/v2 v2.0.3
 	github.com/bmizerany/pat v0.0.0-20210406213842-e4b6760bdd6f
 	github.com/evanphx/json-patch v4.9.0+incompatible
+	github.com/faiface/beep v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/gdamore/tcell/v2 v2.6.0 // indirect
 	github.com/go-co-op/gocron v1.11.0
 	github.com/gobwas/ws v1.1.0
 	github.com/gokyle/filecache v0.0.0-20220803205700-e8a4791094b7
@@ -19,9 +21,13 @@ require (
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/uuid v1.2.0
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
+	github.com/hajimehoshi/go-mp3 v0.3.4 // indirect
+	github.com/hajimehoshi/oto v1.0.1 // indirect
+	github.com/jfreymuth/oggvorbis v1.0.5 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
+	github.com/mewkiz/flac v1.0.8 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/pelletier/go-toml v1.9.1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect

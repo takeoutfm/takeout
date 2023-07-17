@@ -46,19 +46,29 @@ TMDB_CMD_DIR = cmd/tmdb
 TMDB_CMD_TARGET = ${TAKEOUT_CMD_DIR}/tmdb
 TMDB_CMD_SRC = $(wildcard ${TMDB_CMD_DIR}/*.go)
 
+#
+PLAYOUT_CMD_DIR = cmd/playout
+PLAYOUT_CMD_TARGET = ${TAKEOUT_CMD_DIR}/playout
+PLAYOUT_CMD_SRC = $(wildcard ${PLAYOUT_CMD_DIR}/*.go)
+
 .PHONY: all install clean
 
-all: takeout
+all: takeout playout
 
 takeout: ${TAKEOUT_CMD_TARGET}
 
 tmdb: ${TMDB_CMD_TARGET}
+
+playout: ${PLAYOUT_CMD_TARGET}
 
 ${TAKEOUT_CMD_TARGET}: ${TAKEOUT_CMD_SRC} ${SOURCES} ${RESOURCES}
 	@cd ${TAKEOUT_CMD_DIR} && ${GO} build
 
 ${TMDB_CMD_TARGET}: ${TMDB_CMD_SRC} ${SOURCES}
 	@cd ${TMDB_CMD_DIR} && ${GO} build
+
+${PLAYOUT_CMD_TARGET}: ${PLAYOUT_CMD_SRC} ${SOURCES}
+	@cd ${PLAYOUT_CMD_DIR} && ${GO} build
 
 install: all
 	@cd ${TAKEOUT_CMD_DIR} && ${GO} install
@@ -68,6 +78,8 @@ clean:
 	rm -f ${TAKEOUT_CMD_TARGET}
 	@cd ${TMDB_CMD_DIR} && ${GO} clean
 	rm -f ${TMDB_CMD_TARGET}
+	@cd ${PLAYOUT_CMD_DIR} && ${GO} clean
+	rm -f ${PLAYOUT_CMD_TARGET}
 
 docker docker-build: clean
 	${DOCKER} build --rm -t ${DOCKER_IMAGE} .

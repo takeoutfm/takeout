@@ -59,3 +59,11 @@ func SortTitle(s string) string {
 	}
 	return s
 }
+
+func TrimLength(s string, n int) string {
+	overflow := "..."
+	if len(s) > n {
+		s = s[:n-len(overflow)] + overflow
+	}
+	return s
+}
