@@ -769,12 +769,13 @@ func (m *Music) LookupETag(etag string) (*Track, error) {
 	return &track, err
 }
 
-// Simple sql search for artists, releases and tracks. Use config
+// Simple sql search for artists, releases, tracks and stations. Use config
 // SearchLimit to change the result count.
-func (m *Music) Query(query string) ([]Artist, []Release, []Track) {
+func (m *Music) Query(query string) ([]Artist, []Release, []Track, []Station) {
 	var artists []Artist
 	var releases []Release
 	var tracks []Track
+	var stations []Station
 
 	query = "%" + query + "%"
 
@@ -791,7 +792,10 @@ func (m *Music) Query(query string) ([]Artist, []Release, []Track) {
 	m.db.Where("title like ?", query).
 		Order("title").Limit(m.config.Music.SearchLimit).Find(&tracks)
 
-	return artists, releases, tracks
+	m.db.Where("name like ? or creator like ?", query, query).
+		Limit(m.config.Music.SearchLimit).Find(&stations)
+
+	return artists, releases, tracks, stations
 }
 
 // Lookup user playlist.

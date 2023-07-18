@@ -136,6 +136,7 @@ type Search struct {
 	Artists     []music.Artist
 	Releases    []music.Release
 	Tracks      []music.Track
+	Stations    []music.Station
 	Movies      []video.Movie
 	Series      []podcast.Series
 	Episodes    []podcast.Episode
@@ -413,16 +414,21 @@ func SearchView(ctx Context, query string) *Search {
 	v := ctx.Video()
 	p := ctx.Podcast()
 	view := &Search{}
-	artists, releases, _ := m.Query(query)
+	artists, releases, _, stations := m.Query(query)
 	view.Artists = artists
 	view.Releases = releases
+	view.Stations = stations
 	view.Query = query
 	view.Tracks = m.Search(query)
 	view.Movies = v.Search(query)
 	view.Series, view.Episodes = p.Search(query)
-	view.Hits = len(view.Artists) + len(view.Releases) + len(view.Tracks) +
+	view.Hits = len(view.Artists) +
+		len(view.Releases) +
+		len(view.Stations) +
+		len(view.Tracks) +
 		len(view.Movies) +
-		len(view.Series) + len(view.Episodes)
+		len(view.Series) +
+		len(view.Episodes)
 	view.CoverSmall = m.CoverSmall
 	view.PosterSmall = v.MoviePosterSmall
 	return view
