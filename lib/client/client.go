@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/takeoutfm/takeout/config"
+	"github.com/takeoutfm/takeout/lib/header"
 	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/takeoutfm/takeout/lib/pls"
 	"github.com/gregjones/httpcache"
@@ -40,8 +41,6 @@ const (
 )
 
 var (
-	HeaderUserAgent    = http.CanonicalHeaderKey("User-Agent")
-	HeaderCacheControl = http.CanonicalHeaderKey("Cache-Control")
 	ErrCacheMiss       = errors.New("cache miss")
 )
 
@@ -96,7 +95,7 @@ func (c *Client) doGet(headers map[string]string, urlStr string) (*http.Response
 		return nil, err
 	}
 
-	req.Header.Set(HeaderUserAgent, c.userAgent)
+	req.Header.Set(header.UserAgent, c.userAgent)
 	if headers != nil {
 		for k, v := range headers {
 			req.Header.Set(k, v)
@@ -107,9 +106,9 @@ func (c *Client) doGet(headers map[string]string, urlStr string) (*http.Response
 	if c.useCache {
 		maxAge := int(c.maxAge.Seconds())
 		if c.onlyCached {
-			req.Header.Set(HeaderCacheControl, DirectiveOnlyIfCached)
+			req.Header.Set(header.CacheControl, DirectiveOnlyIfCached)
 		} else if maxAge > 0 {
-			req.Header.Set(HeaderCacheControl, fmt.Sprintf("%s=%d", DirectiveMaxAge, maxAge))
+			req.Header.Set(header.CacheControl, fmt.Sprintf("%s=%d", DirectiveMaxAge, maxAge))
 		}
 		// peek into the cache, if there's something there don't slow down
 		cachedResp, err := httpcache.CachedResponse(c.cache, req)

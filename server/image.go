@@ -20,6 +20,8 @@ package server
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/takeoutfm/takeout/lib/header"
 )
 
 const (
@@ -31,12 +33,12 @@ const (
 func checkImageCache(w http.ResponseWriter, r *http.Request, url string) {
 	ctx := contextValue(r)
 	client := ctx.ImageClient()
-	header, img, err := client.Get(url)
+	hdr, img, err := client.Get(url)
 	if err == nil && len(img) > 0 {
-		for k, v := range header {
+		for k, v := range hdr {
 			switch k {
-			case HeaderContentType, HeaderContentLength, HeaderETag,
-				HeaderLastModified, HeaderCacheControl:
+			case header.ContentType, header.ContentLength, header.ETag,
+				header.LastModified, header.CacheControl:
 				w.Header().Set(k, v[0])
 			}
 		}

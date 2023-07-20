@@ -116,6 +116,15 @@ func Home(context ApiContext) (*view.Home, error) {
 	return &result, nil
 }
 
+func Radio(context ApiContext) (*view.Radio, error) {
+	var result view.Radio
+	err := get(context, "/api/radio", &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 func Playlist(context ApiContext) (*spiff.Playlist, error) {
 	var result spiff.Playlist
 	err := get(context, "/api/playlist", &result)
@@ -138,7 +147,7 @@ func Progress(context ApiContext) (*view.Progress, error) {
 	return &result, nil
 }
 
-func Replace(context ApiContext, query string, shuffle bool) (*spiff.Playlist, error) {
+func SearchReplace(context ApiContext, query string, shuffle bool) (*spiff.Playlist, error) {
 	var result spiff.Playlist
 	var radio string
 	if shuffle {
@@ -146,7 +155,17 @@ func Replace(context ApiContext, query string, shuffle bool) (*spiff.Playlist, e
 	}
 	data := patchReplace(
 		strings.Join([]string{"/music/search?q=", url.QueryEscape(query), radio}, ""),
-		"music", "", "")
+		spiff.TypeMusic, "", "")
+	err := patch(context, "/api/playlist", data, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func Replace(context ApiContext, ref, spiffType, creator, title string) (*spiff.Playlist, error) {
+	var result spiff.Playlist
+	data := patchReplace(ref, spiffType, creator, title)
 	err := patch(context, "/api/playlist", data, &result)
 	if err != nil {
 		return nil, err

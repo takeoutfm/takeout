@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/takeoutfm/takeout/auth"
+	"github.com/takeoutfm/takeout/lib/header"
 )
 
 type bits uint8
@@ -31,7 +32,6 @@ const (
 	AllowAccessToken
 	AllowMediaToken
 
-	AuthorizationHeader = "Authorization"
 	BearerAuthorization = "Bearer"
 )
 
@@ -50,7 +50,7 @@ func doCodeAuth(ctx Context, user, pass, value string) error {
 
 // getAuthToken returns the bearer token from the request, if any.
 func getAuthToken(r *http.Request) string {
-	value := r.Header.Get(AuthorizationHeader)
+	value := r.Header.Get(header.Authorization)
 	if value == "" {
 		return ""
 	}

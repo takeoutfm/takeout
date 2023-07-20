@@ -24,6 +24,7 @@ import (
 	"github.com/takeoutfm/takeout/auth"
 	"github.com/takeoutfm/takeout/config"
 	"github.com/takeoutfm/takeout/lib/actions"
+	"github.com/takeoutfm/takeout/lib/header"
 	"github.com/takeoutfm/takeout/lib/token"
 	"github.com/takeoutfm/takeout/music"
 	"github.com/takeoutfm/takeout/view"
@@ -39,7 +40,7 @@ const (
 
 func hookHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	w.Header().Set(HeaderContentType, ApplicationJson)
+	w.Header().Set(header.ContentType, ApplicationJson)
 
 	tokenString := r.Header.Get(actions.GoogleAssistantSignature)
 	err := token.ValidateGoogleToken(ctx.Config(), tokenString, ctx.Config().Assistant.ProjectID)

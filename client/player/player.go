@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/takeoutfm/takeout/client/api"
+	"github.com/takeoutfm/takeout/lib/header"
 	"github.com/takeoutfm/takeout/lib/spiff"
 	"github.com/takeoutfm/takeout/lib/str"
 
@@ -52,20 +53,6 @@ const (
 	ActionPrevious
 	ActionPause
 	ActionStop
-
-)
-
-var (
-	HeaderContentType = http.CanonicalHeaderKey("Content-type")
-
-	HeaderIcyBr          = http.CanonicalHeaderKey("Icy-Br")
-	HeaderIcyDescription = http.CanonicalHeaderKey("Icy-Description")
-	HeaderIcyGenre       = http.CanonicalHeaderKey("Icy-Genre")
-	HeaderIcyMetaData    = http.CanonicalHeaderKey("Icy-MetaData")
-	HeaderIcyMetaInt     = http.CanonicalHeaderKey("Icy-MetaInt")
-	HeaderIcyName        = http.CanonicalHeaderKey("Icy-Name")
-	HeaderIcyPublic      = http.CanonicalHeaderKey("Icy-Pub")
-	HeaderIcyUrl         = http.CanonicalHeaderKey("Icy-Url")
 )
 
 type Options struct {
@@ -123,7 +110,7 @@ func (p *Player) Length() int {
 }
 
 func (p *Player) Title() string {
-	if p.IsStream() && len(p.playing.metadata.StreamTitle) > 0 {
+	if p.IsStream() && p.playing != nil && len(p.playing.metadata.StreamTitle) > 0 {
 		return p.playing.metadata.StreamTitle
 	}
 	return p.current().Title
@@ -258,9 +245,9 @@ func (p *Player) play() {
 		p.errors <- err
 		return
 	}
-
+	req.Header.Add(header.UserAgent, p.context.UserAgent())
 	if p.IsStream() {
-		req.Header.Add(HeaderIcyMetaData, "1")
+		req.Header.Add(header.IcyMetaData, "1")
 	}
 
 	client := http.Client{}
@@ -272,15 +259,15 @@ func (p *Player) play() {
 	reader := resp.Body
 
 	var headers *IcyHeaders
-	if p.IsStream() && resp.Header.Get(HeaderIcyMetaInt) != "" {
+	if p.IsStream() && resp.Header.Get(header.IcyMetaInt) != "" {
 		headers = &IcyHeaders{
-			Bitrate:     str.Atoi(resp.Header.Get(HeaderIcyBr)),
-			Description: resp.Header.Get(HeaderIcyDescription),
-			Genre:       resp.Header.Get(HeaderIcyGenre),
-			Interval:    str.Atoi(resp.Header.Get(HeaderIcyMetaInt)),
-			Name:        resp.Header.Get(HeaderIcyName),
-			Public:      resp.Header.Get(HeaderIcyPublic) == "true",
-			Url:         resp.Header.Get(HeaderIcyUrl),
+			Bitrate:     str.Atoi(resp.Header.Get(header.IcyBr)),
+			Description: resp.Header.Get(header.IcyDescription),
+			Genre:       resp.Header.Get(header.IcyGenre),
+			Interval:    str.Atoi(resp.Header.Get(header.IcyMetaInt)),
+			Name:        resp.Header.Get(header.IcyName),
+			Public:      resp.Header.Get(header.IcyPublic) == "true",
+			Url:         resp.Header.Get(header.IcyUrl),
 		}
 		if headers.Interval > 0 {
 			if headers.Interval > maxIntervalLength {
@@ -291,7 +278,7 @@ func (p *Player) play() {
 		}
 	}
 
-	streamer, format, err := decoder(reader, resp.Header.Get(HeaderContentType), url.Path)
+	streamer, format, err := decoder(reader, resp.Header.Get(header.ContentType), url.Path)
 	if err != nil {
 		reader.Close()
 		p.errors <- err

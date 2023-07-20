@@ -28,6 +28,7 @@ import (
 	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/lib/spiff"
 	"github.com/takeoutfm/takeout/lib/str"
+	"github.com/takeoutfm/takeout/music"
 	"github.com/takeoutfm/takeout/progress"
 )
 
@@ -47,7 +48,6 @@ func doPlay() error {
 	if err != nil {
 		return err
 	}
-
 	offsets := make(map[string]progress.Offset)
 	for _, o := range result.Offsets {
 		offsets[o.ETag] = o
@@ -55,47 +55,87 @@ func doPlay() error {
 
 	var playlist *spiff.Playlist
 
-	if len(query) == 0 {
-		var sb strings.Builder
-		if len(artist) > 0 {
-			eq(&sb, "artist", artist)
+	if len(stream) > 0 || len(radio) > 0 {
+		result, err := api.Radio(playout)
+		if err != nil {
+			return err
 		}
-		if len(release) > 0 {
-			eq(&sb, "release", release)
+
+		var name, spiffType string
+		var list []music.Station
+		if len(stream) > 0 {
+			name = stream
+			spiffType = spiff.TypeStream
+			list = append(list, result.Stream...)
+		} else {
+			name = radio
+			spiffType = spiff.TypeMusic
+			list = append(list, result.Artist...)
+			list = append(list, result.Genre...)
+			list = append(list, result.Other...)
+			list = append(list, result.Period...)
+			list = append(list, result.Series...)
+			list = append(list, result.Similar...)
 		}
-		if len(title) > 0 {
-			eq(&sb, "title", title)
+
+		for _, s := range list {
+			if strings.EqualFold(s.Name, name) {
+				ref := fmt.Sprintf("/music/radio/stations/%d", s.ID)
+				playlist, err = api.Replace(playout, ref,
+					spiffType, s.Creator, s.Name)
+				if err != nil {
+					return err
+				}
+				break
+			}
 		}
-		if len(genre) > 0 {
-			eq(&sb, "genre", genre)
+		if playlist == nil {
+			return fmt.Errorf("radio/stream not found")
 		}
-		if popular {
-			eq(&sb, "type", "popular")
-		}
-		if single {
-			eq(&sb, "type", "single")
-		}
-		if cover {
-			eq(&sb, "type", "cover")
-		}
-		if live {
-			eq(&sb, "type", "live")
-		}
-		if len(before) > 0 {
-			// before is inclusive
-			lte(&sb, "first_date", date.ParseDate(before))
-		}
-		if len(after) > 0 {
-			// after is inclusive
-			gte(&sb, "first_date", date.ParseDate(after))
-		}
-		query = sb.String()
 	}
 
-	if len(query) > 0 {
-		playlist, err = api.Replace(playout, query, shuffle)
-	} else {
-		playlist, err = api.Playlist(playout)
+	if playlist == nil {
+		if len(query) == 0 {
+			var sb strings.Builder
+			if len(artist) > 0 {
+				eq(&sb, "artist", artist)
+			}
+			if len(release) > 0 {
+				eq(&sb, "release", release)
+			}
+			if len(title) > 0 {
+				eq(&sb, "title", title)
+			}
+			if len(genre) > 0 {
+				eq(&sb, "genre", genre)
+			}
+			if popular {
+				eq(&sb, "type", "popular")
+			}
+			if single {
+				eq(&sb, "type", "single")
+			}
+			if cover {
+				eq(&sb, "type", "cover")
+			}
+			if live {
+				eq(&sb, "type", "live")
+			}
+			if len(before) > 0 {
+				// before is inclusive
+				lte(&sb, "first_date", date.ParseDate(before))
+			}
+			if len(after) > 0 {
+				// after is inclusive
+				gte(&sb, "first_date", date.ParseDate(after))
+			}
+			query = sb.String()
+		}
+		if len(query) > 0 {
+			playlist, err = api.SearchReplace(playout, query, shuffle)
+		} else {
+			playlist, err = api.Playlist(playout)
+		}
 	}
 	if err != nil {
 		return err
@@ -146,9 +186,15 @@ func mmss(d time.Duration) string {
 	return fmt.Sprintf("%02d:%02d", m, s)
 }
 
+var maxLine int
 func update(p *player.Player) {
-	pos, len := p.Position()
-	fmt.Printf("[%s - %s] %s / %s\r", mmss(pos), mmss(len), p.Artist(), p.Title())
+	pos, length := p.Position()
+	line := fmt.Sprintf("[%s - %s] %s / %s", mmss(pos), mmss(length), p.Artist(), p.Title())
+	n := len(line)
+	if n > maxLine {
+		maxLine = n
+	}
+	fmt.Print(line, strings.Repeat(" ", maxLine - n), "\r")
 }
 
 func add(sb *strings.Builder, key, op, value string) {
@@ -189,9 +235,14 @@ var live bool
 var before string
 var after string
 var repeat bool
+var stream string
+var radio string
 
 func init() {
 	playCmd.Flags().StringVarP(&query, "query", "q", "", "search query")
+	playCmd.Flags().StringVar(&stream, "stream", "", "name of radio stream")
+	playCmd.Flags().StringVar(&radio, "radio", "", "name of radio station")
+
 	playCmd.Flags().StringVarP(&genre, "genre", "g", "", "genre")
 	playCmd.Flags().StringVarP(&artist, "artist", "a", "", "artist")
 	playCmd.Flags().StringVarP(&release, "release", "r", "", "release/album name")
@@ -204,5 +255,6 @@ func init() {
 	playCmd.Flags().StringVar(&before, "before", "", "released in/on or before")
 	playCmd.Flags().StringVar(&after, "after", "", "released in/on or after")
 	playCmd.Flags().BoolVar(&repeat, "repeat", false, "repeat playlist")
+
 	rootCmd.AddCommand(playCmd)
 }

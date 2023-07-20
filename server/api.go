@@ -30,6 +30,7 @@ import (
 	"github.com/takeoutfm/takeout/auth"
 	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/lib/encoding/xspf"
+	"github.com/takeoutfm/takeout/lib/header"
 	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/takeoutfm/takeout/lib/spiff"
 	"github.com/takeoutfm/takeout/lib/str"
@@ -49,14 +50,6 @@ const (
 	ParamUUID = ":uuid"
 )
 
-var (
-	HeaderContentType   = http.CanonicalHeaderKey("Content-Type")
-	HeaderContentLength = http.CanonicalHeaderKey("Content-Length")
-	HeaderLastModified  = http.CanonicalHeaderKey("Last-Modified")
-	HeaderCacheControl  = http.CanonicalHeaderKey("Cache-Control")
-	HeaderETag          = http.CanonicalHeaderKey("ETag")
-)
-
 type credentials struct {
 	User string
 	Pass string
@@ -71,7 +64,7 @@ type status struct {
 // apiLogin handles login requests and returns a cookie.
 func apiLogin(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	w.Header().Set(HeaderContentType, ApplicationJson)
+	w.Header().Set(header.ContentType, ApplicationJson)
 
 	var creds credentials
 	body, _ := ioutil.ReadAll(r.Body)
@@ -137,7 +130,7 @@ func apiTokenLogin(w http.ResponseWriter, r *http.Request) {
 // authorizeNew creates and sends new tokens for the provided session.
 func authorizeNew(session auth.Session, w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	w.Header().Set(HeaderContentType, ApplicationJson)
+	w.Header().Set(header.ContentType, ApplicationJson)
 
 	var resp tokenResponse
 	var err error
@@ -161,7 +154,7 @@ func authorizeNew(session auth.Session, w http.ResponseWriter, r *http.Request) 
 // MediaToken is unchanged.
 func authorizeRefresh(session auth.Session, w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	w.Header().Set(HeaderContentType, ApplicationJson)
+	w.Header().Set(header.ContentType, ApplicationJson)
 
 	var resp tokenResponse
 	var err error
@@ -200,7 +193,7 @@ type codeResponse struct {
 // The token is used to check if the code has been linked.
 func apiCodeGet(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	w.Header().Set(HeaderContentType, ApplicationJson)
+	w.Header().Set(header.ContentType, ApplicationJson)
 
 	var resp codeResponse
 	var err error
@@ -261,7 +254,7 @@ func writePlaylist(w http.ResponseWriter, r *http.Request, plist *spiff.Playlist
 	if strings.HasSuffix(r.URL.Path, ".xspf") {
 		// create XML spiff with tracks fully resolved
 		ctx := contextValue(r)
-		w.Header().Set(HeaderContentType, xspf.XMLContentType)
+		w.Header().Set(header.ContentType, xspf.XMLContentType)
 		encoder := xspf.NewXMLEncoder(w)
 		encoder.Header(plist.Spiff.Title)
 		for i := range plist.Spiff.Entries {
@@ -286,7 +279,7 @@ func writePlaylist(w http.ResponseWriter, r *http.Request, plist *spiff.Playlist
 
 	} else {
 		// use json spiff with track location
-		w.Header().Set(HeaderContentType, ApplicationJson)
+		w.Header().Set(header.ContentType, ApplicationJson)
 		result, _ := plist.Marshal()
 		w.Write(result)
 	}
@@ -338,7 +331,7 @@ func apiPlaylistGet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	w.Header().Set(HeaderContentType, ApplicationJson)
+	w.Header().Set(header.ContentType, ApplicationJson)
 	w.WriteHeader(http.StatusOK)
 	w.Write(p.Playlist)
 }
@@ -387,7 +380,7 @@ func apiPlaylistPatch(w http.ResponseWriter, r *http.Request) {
 		// entries didn't change, only metadata
 		w.WriteHeader(http.StatusNoContent)
 	} else {
-		w.Header().Set(HeaderContentType, ApplicationJson)
+		w.Header().Set(header.ContentType, ApplicationJson)
 		w.WriteHeader(http.StatusOK)
 		w.Write(p.Playlist)
 	}
@@ -437,7 +430,7 @@ func apiProgressPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiView(w http.ResponseWriter, r *http.Request, view interface{}) {
-	w.Header().Set(HeaderContentType, ApplicationJson)
+	w.Header().Set(header.ContentType, ApplicationJson)
 	json.NewEncoder(w).Encode(view)
 }
 

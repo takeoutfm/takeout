@@ -417,7 +417,11 @@ func SearchView(ctx Context, query string) *Search {
 	artists, releases, _, stations := m.Query(query)
 	view.Artists = artists
 	view.Releases = releases
-	view.Stations = stations
+	for _, s := range stations {
+		if s.Visible(ctx.User()) {
+			view.Stations = append(view.Stations, s)
+		}
+	}
 	view.Query = query
 	view.Tracks = m.Search(query)
 	view.Movies = v.Search(query)
