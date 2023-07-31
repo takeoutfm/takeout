@@ -55,29 +55,35 @@ const (
 	ActionStop
 )
 
-type Options struct {
+type Config struct {
 	Repeat  bool
 	Buffer  time.Duration
+	onStart func(*Player)
 	OnTrack func(*Player)
+	OnPause func(*Player)
 	OnError func(*Player, error)
 }
 
-func NewOptions() *Options {
-	return &Options{Repeat: false, Buffer: 0}
+func NewConfig() *Config {
+	return &Config{Repeat: false, Buffer: 0}
 }
 
 type Player struct {
 	context  api.ApiContext
 	playlist *spiff.Playlist
 	playing  *playing
-	options  *Options
+	config   *Config
 	control  chan playerAction
 	errors   chan error
 	done     chan struct{}
 }
 
-func NewPlayer(context api.ApiContext, playlist *spiff.Playlist, options *Options) *Player {
-	return &Player{context: context, playlist: playlist, options: options}
+func NewPlayer(context api.ApiContext, playlist *spiff.Playlist, config *Config) *Player {
+	return &Player{context: context, playlist: playlist, config: config}
+}
+
+func (p *Player) Context() api.ApiContext {
+	return p.context
 }
 
 func (p *Player) Next() {
@@ -90,6 +96,10 @@ func (p *Player) Previous() {
 
 func (p *Player) Stop() {
 	p.control <- ActionStop
+}
+
+func (p *Player) Pause() {
+	p.control <- ActionPause
 }
 
 func (p *Player) Position() (time.Duration, time.Duration) {
@@ -134,8 +144,8 @@ func (p *Player) Track() (string, string, string, string) {
 }
 
 func (p *Player) Start() {
-	p.control = make(chan playerAction)
-	p.done = make(chan struct{})
+	p.control = make(chan playerAction, 1)
+	p.done = make(chan struct{}, 1)
 	p.play()
 
 	for {
@@ -149,7 +159,8 @@ func (p *Player) Start() {
 				p.prev()
 			case ActionStop:
 				p.stop()
-				// case ActionPause:
+			case ActionPause:
+				p.pause()
 			}
 		case err := <-p.errors:
 			p.handle(err)
@@ -160,23 +171,23 @@ func (p *Player) Start() {
 }
 
 func (p *Player) handle(err error) {
-	if p.options != nil && p.options.OnError != nil {
-		p.options.OnError(p, err)
+	if p.config != nil && p.config.OnError != nil {
+		p.config.OnError(p, err)
 	} else {
 		fmt.Println(err)
 	}
 }
 
 func (p *Player) optionRepeat() bool {
-	if p.options != nil {
-		return p.options.Repeat
+	if p.config != nil {
+		return p.config.Repeat
 	}
 	return false
 }
 
 func (p *Player) optionBuffer() time.Duration {
-	if p.options != nil && p.options.Buffer != 0 {
-		return p.options.Buffer
+	if p.config != nil && p.config.Buffer != 0 {
+		return p.config.Buffer
 	}
 	return time.Second
 }
@@ -190,8 +201,12 @@ func (p *Player) stop() {
 	p.clear()
 	if p.done != nil {
 		p.done <- struct{}{}
-		p.done = nil
 	}
+}
+
+func (p *Player) pause() {
+	// TODO
+	p.onPause()
 }
 
 func (p *Player) clear() {
@@ -325,8 +340,14 @@ func decoder(reader io.ReadCloser, contentType, path string) (beep.StreamSeekClo
 }
 
 func (p *Player) onTrack() {
-	if p.options != nil && p.options.OnTrack != nil {
-		p.options.OnTrack(p)
+	if p.config != nil && p.config.OnTrack != nil {
+		p.config.OnTrack(p)
+	}
+}
+
+func (p *Player) onPause() {
+	if p.config != nil && p.config.OnPause != nil {
+		p.config.OnPause(p)
 	}
 }
 

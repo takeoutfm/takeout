@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/takeoutfm/takeout/config"
 	"github.com/takeoutfm/takeout/lib/client"
 )
 
@@ -54,18 +53,23 @@ const (
 	ProfileOriginal = "original"
 )
 
+type Config struct {
+	Key      string
+	Language string
+}
+
 type TMDB struct {
-	config      *config.Config
-	client      *client.Client
+	config      Config
+	client      client.Client
 	configCache *apiConfig
 	movieGenres Genres
 	tvGenres    Genres
 }
 
-func NewTMDB(config *config.Config) *TMDB {
+func NewTMDB(config Config, client client.Client) *TMDB {
 	return &TMDB{
 		config: config,
-		client: client.NewClient(&config.Client),
+		client: client,
 	}
 }
 
@@ -304,8 +308,8 @@ func (m *TMDB) moviePage(q string, page int) (*moviePage, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/search/movie?api_key=%s&language=%s&query=%s&page=%d",
 		endpoint,
-		m.config.TMDB.Key,
-		m.config.TMDB.Language,
+		m.config.Key,
+		m.config.Language,
 		url.QueryEscape(q), page)
 	var result moviePage
 	err := m.client.GetJson(url, &result)
@@ -322,8 +326,8 @@ func (m *TMDB) MovieDetail(tmid int) (*Movie, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/movie/%d?api_key=%s&language=%s",
 		endpoint, tmid,
-		m.config.TMDB.Key,
-		m.config.TMDB.Language)
+		m.config.Key,
+		m.config.Language)
 	var result Movie
 	err := m.client.GetJson(url, &result)
 	return &result, err
@@ -333,8 +337,8 @@ func (m *TMDB) MovieCredits(tmid int) (*Credits, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/movie/%d/credits?api_key=%s&language=%s",
 		endpoint, tmid,
-		m.config.TMDB.Key,
-		m.config.TMDB.Language)
+		m.config.Key,
+		m.config.Language)
 	var result Credits
 	err := m.client.GetJson(url, &result)
 	return &result, err
@@ -343,7 +347,7 @@ func (m *TMDB) MovieCredits(tmid int) (*Credits, error) {
 func (m *TMDB) MovieReleases(tmid int) (map[string][]Release, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/movie/%d/release_dates?api_key=%s",
-		endpoint, tmid, m.config.TMDB.Key)
+		endpoint, tmid, m.config.Key)
 	var result Releases
 	var countryMap map[string][]Release
 	err := m.client.GetJson(url, &result)
@@ -360,8 +364,8 @@ func (m *TMDB) MovieReleaseType(tmid int, country string, releaseType int) (*Rel
 	url := fmt.Sprintf(
 		"https://%s/3/movie/%d/release_dates?api_key=%s&language=%s",
 		endpoint, tmid,
-		m.config.TMDB.Key,
-		m.config.TMDB.Language)
+		m.config.Key,
+		m.config.Language)
 	var result Releases
 	err := m.client.GetJson(url, &result)
 	if err == nil {
@@ -382,8 +386,8 @@ func (m *TMDB) PersonDetail(peid int) (*Person, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/person/%d?api_key=%s&language=%s",
 		endpoint, peid,
-		m.config.TMDB.Key,
-		m.config.TMDB.Language)
+		m.config.Key,
+		m.config.Language)
 	var result Person
 	err := m.client.GetJson(url, &result)
 	return &result, err
@@ -393,8 +397,8 @@ func (m *TMDB) movieGenreList() (genreList, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/genre/movie/list?api_key=%s&language=%s",
 		endpoint,
-		m.config.TMDB.Key,
-		m.config.TMDB.Language)
+		m.config.Key,
+		m.config.Language)
 	var result genreList
 	err := m.client.GetJson(url, &result)
 	return result, err
@@ -404,8 +408,8 @@ func (m *TMDB) tvGenreList() (genreList, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/genre/tv/list?api_key=%s&language=%s",
 		endpoint,
-		m.config.TMDB.Key,
-		m.config.TMDB.Language)
+		m.config.Key,
+		m.config.Language)
 	var result genreList
 	err := m.client.GetJson(url, &result)
 	return result, err
@@ -470,7 +474,7 @@ func (m *TMDB) TVGenreNames() []string {
 
 func (m *TMDB) MovieKeywordNames(id int) ([]string, error) {
 	url := fmt.Sprintf(
-		"https://%s/3/movie/%d/keywords?api_key=%s", endpoint, id, m.config.TMDB.Key)
+		"https://%s/3/movie/%d/keywords?api_key=%s", endpoint, id, m.config.Key)
 	var result Keywords
 	err := m.client.GetJson(url, &result)
 	var names []string
@@ -483,7 +487,7 @@ func (m *TMDB) MovieKeywordNames(id int) ([]string, error) {
 
 func (m *TMDB) TVKeywordNames(tvid int) ([]string, error) {
 	url := fmt.Sprintf(
-		"https://%s/3/tv/%d/keywords?api_key=%s", endpoint, tvid, m.config.TMDB.Key)
+		"https://%s/3/tv/%d/keywords?api_key=%s", endpoint, tvid, m.config.Key)
 	var result Keywords
 	err := m.client.GetJson(url, &result)
 	var names []string
@@ -497,8 +501,8 @@ func (m *TMDB) tvPage(q string, page int) (*tvPage, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/search/tv?api_key=%s&language=%s&query=%s&page=%d",
 		endpoint,
-		m.config.TMDB.Key,
-		m.config.TMDB.Language,
+		m.config.Key,
+		m.config.Language,
 		url.QueryEscape(q), page)
 	var result tvPage
 	err := m.client.GetJson(url, &result)
@@ -515,8 +519,8 @@ func (m *TMDB) TVDetail(tvid int) (*TV, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/tv/%d?api_key=%s&language=%s",
 		endpoint, tvid,
-		m.config.TMDB.Key,
-		m.config.TMDB.Language)
+		m.config.Key,
+		m.config.Language)
 	var result TV
 	err := m.client.GetJson(url, &result)
 	return &result, err
@@ -526,8 +530,8 @@ func (m *TMDB) EpisodeDetail(tvid, season, episode int) (*Episode, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/tv/%d/season/%d/episode/%d?api_key=%s&language=%s",
 		endpoint, tvid, season, episode,
-		m.config.TMDB.Key,
-		m.config.TMDB.Language)
+		m.config.Key,
+		m.config.Language)
 	var result Episode
 	err := m.client.GetJson(url, &result)
 	return &result, err
@@ -537,8 +541,8 @@ func (m *TMDB) EpisodeCredits(tvid, season, episode int) (*Credits, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/tv/%d/season/%d/episode/%d/credits?api_key=%s&language=%s",
 		endpoint, tvid, season, episode,
-		m.config.TMDB.Key,
-		m.config.TMDB.Language)
+		m.config.Key,
+		m.config.Language)
 	var result Credits
 	err := m.client.GetJson(url, &result)
 	return &result, err
@@ -546,7 +550,7 @@ func (m *TMDB) EpisodeCredits(tvid, season, episode int) (*Credits, error) {
 
 func (m *TMDB) configuration() (*apiConfig, error) {
 	url := fmt.Sprintf(
-		"https://%s/3/configuration?api_key=%s", endpoint, m.config.TMDB.Key)
+		"https://%s/3/configuration?api_key=%s", endpoint, m.config.Key)
 	var result apiConfig
 	err := m.client.GetJson(url, &result)
 	return &result, err

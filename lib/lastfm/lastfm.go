@@ -18,22 +18,26 @@
 package lastfm
 
 import (
-	"github.com/takeoutfm/takeout/config"
-	"github.com/takeoutfm/takeout/lib/client"
 	lfm "github.com/shkh/lastfm-go/lastfm"
+	"github.com/takeoutfm/takeout/lib/client"
 	"sort"
 	"strconv"
 )
 
-type Lastfm struct {
-	config *config.Config
-	client *client.Client
+type Config struct {
+	Key    string
+	Secret string
 }
 
-func NewLastfm(config *config.Config) *Lastfm {
+type Lastfm struct {
+	config Config
+	client client.Client
+}
+
+func NewLastfm(config Config, client client.Client) *Lastfm {
 	return &Lastfm{
 		config: config,
-		client: client.NewClient(&config.Client),
+		client: client,
 	}
 }
 
@@ -43,17 +47,17 @@ func NewLastfm(config *config.Config) *Lastfm {
 // * looking up artists not found by MusicBrainz to get their MBID
 
 type TopTrack struct {
-	Track  string
-	Rank   int
+	Track string
+	Rank  int
 }
 
 func (m *Lastfm) ArtistTopTracks(arid string) []TopTrack {
-	if m.config.LastFM.Key == "" || m.config.LastFM.Secret == "" {
+	if m.config.Key == "" || m.config.Secret == "" {
 		return make([]TopTrack, 0)
 	}
 
 	client.RateLimit("last.fm")
-	api := lfm.New(m.config.LastFM.Key, m.config.LastFM.Secret)
+	api := lfm.New(m.config.Key, m.config.Secret)
 
 	result, _ := api.Artist.GetTopTracks(lfm.P{"mbid": arid})
 	sort.Slice(result.Tracks, func(i, j int) bool {
@@ -72,12 +76,12 @@ func (m *Lastfm) ArtistTopTracks(arid string) []TopTrack {
 }
 
 func (m *Lastfm) SimilarArtists(arid string) map[string]float64 {
-	if m.config.LastFM.Key == "" || m.config.LastFM.Secret == "" {
+	if m.config.Key == "" || m.config.Secret == "" {
 		return make(map[string]float64)
 	}
 
 	client.RateLimit("last.fm")
-	api := lfm.New(m.config.LastFM.Key, m.config.LastFM.Secret)
+	api := lfm.New(m.config.Key, m.config.Secret)
 	result, _ := api.Artist.GetSimilar(lfm.P{"mbid": arid})
 
 	//var mbids []string
@@ -102,12 +106,12 @@ func (m *Lastfm) SimilarArtists(arid string) map[string]float64 {
 }
 
 func (m *Lastfm) ArtistSearch(name string) (string, string) {
-	if m.config.LastFM.Key == "" || m.config.LastFM.Secret == "" {
+	if m.config.Key == "" || m.config.Secret == "" {
 		return "", ""
 	}
 
 	client.RateLimit("last.fm")
-	api := lfm.New(m.config.LastFM.Key, m.config.LastFM.Secret)
+	api := lfm.New(m.config.Key, m.config.Secret)
 	result, _ := api.Artist.Search(lfm.P{"artist": name})
 
 	//var artist *Artist

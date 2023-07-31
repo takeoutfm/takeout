@@ -29,7 +29,6 @@ import (
 	"github.com/takeoutfm/takeout/auth"
 	"github.com/takeoutfm/takeout/config"
 	"github.com/takeoutfm/takeout/lib/bucket"
-	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/takeoutfm/takeout/lib/fanart"
 	"github.com/takeoutfm/takeout/lib/lastfm"
 	"github.com/takeoutfm/takeout/lib/musicbrainz"
@@ -48,19 +47,18 @@ type Music struct {
 	config  *config.Config
 	db      *gorm.DB
 	buckets []bucket.Bucket
-	client  *client.Client
 	lastfm  *lastfm.Lastfm
 	fanart  *fanart.Fanart
 	mbz     *musicbrainz.MusicBrainz
 }
 
 func NewMusic(config *config.Config) *Music {
+	client := config.NewClient()
 	return &Music{
 		config: config,
-		client: client.NewClient(&config.Client),
-		fanart: fanart.NewFanart(config),
-		lastfm: lastfm.NewLastfm(config),
-		mbz:    musicbrainz.NewMusicBrainz(config),
+		fanart: fanart.NewFanart(config.Fanart, client),
+		lastfm: lastfm.NewLastfm(config.LastFM, client),
+		mbz:    musicbrainz.NewMusicBrainz(client),
 	}
 }
 
@@ -212,7 +210,7 @@ func (m *Music) FindTracks(identifiers []string) []Track {
 }
 
 func (m *Music) newSearch() (*search.Search, error) {
-	s := search.NewSearch(m.config)
+	s := search.NewSearch(m.config.Search)
 	s.Keywords = []string{
 		FieldGenre,
 		FieldStatus,

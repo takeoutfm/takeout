@@ -30,10 +30,16 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/takeoutfm/takeout"
-	g "github.com/takeoutfm/takeout/lib/gorm"
-	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/spf13/viper"
+	"github.com/takeoutfm/takeout"
+	"github.com/takeoutfm/takeout/lib/bucket"
+	"github.com/takeoutfm/takeout/lib/client"
+	"github.com/takeoutfm/takeout/lib/fanart"
+	g "github.com/takeoutfm/takeout/lib/gorm"
+	"github.com/takeoutfm/takeout/lib/lastfm"
+	"github.com/takeoutfm/takeout/lib/log"
+	"github.com/takeoutfm/takeout/lib/search"
+	"github.com/takeoutfm/takeout/lib/tmdb"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -47,24 +53,6 @@ const (
 	MediaMusic = "music"
 	MediaVideo = "video"
 )
-
-type BucketConfig struct {
-	Endpoint        string
-	Region          string
-	AccessKeyID     string
-	SecretAccessKey string
-	BucketName      string
-	ObjectPrefix    string
-	UseSSL          bool
-	URLExpiration   time.Duration
-	Media           string
-	RewriteRules    []RewriteRule
-}
-
-type RewriteRule struct {
-	Pattern string
-	Replace string
-}
 
 type DatabaseConfig struct {
 	Driver string
@@ -169,7 +157,7 @@ type VideoConfig struct {
 type PodcastConfig struct {
 	DB           DatabaseConfig
 	Series       []string
-	Client       ClientConfig
+	Client       client.Config
 	RecentLimit  int
 	EpisodeLimit int
 	SyncInterval time.Duration
@@ -202,19 +190,8 @@ type DateRecommend struct {
 	Query  string
 }
 
-type LastFMAPIConfig struct {
-	Key    string
-	Secret string
-}
-
-type FanartAPIConfig struct {
-	ProjectKey  string
-	PersonalKey string
-}
-
 type TMDBAPIConfig struct {
-	Key          string
-	Language     string
+	tmdb.Config
 	FileTemplate Template
 }
 
@@ -239,50 +216,42 @@ type AuthConfig struct {
 	CodeToken     TokenConfig
 }
 
-type SearchConfig struct {
-	BleveDir string
-}
-
 type ServerConfig struct {
 	Listen      string
 	DataDir     string
 	MediaDir    string
-	ImageClient ClientConfig
-}
-
-type ClientConfig struct {
-	CacheDir  string
-	MaxAge    time.Duration
-	UseCache  bool
-	UserAgent string
-}
-
-func (c *ClientConfig) Merge(o ClientConfig) {
-	if o.CacheDir != "" {
-		c.CacheDir = o.CacheDir
-	}
-	c.MaxAge = o.MaxAge
-	c.UseCache = o.UseCache
-	if o.UserAgent != "" {
-		c.UserAgent = o.UserAgent
-	}
+	ImageClient client.Config
 }
 
 type Config struct {
 	Auth      AuthConfig
-	Buckets   []BucketConfig
-	Client    ClientConfig
-	Fanart    FanartAPIConfig
-	LastFM    LastFMAPIConfig
+	Buckets   []bucket.Config
+	Client    client.Config
+	Fanart    fanart.Config
+	LastFM    lastfm.Config
 	Music     MusicConfig
 	TMDB      TMDBAPIConfig
-	Search    SearchConfig
+	Search    search.Config
 	Server    ServerConfig
 	Video     VideoConfig
 	Assistant AssistantConfig
 	Podcast   PodcastConfig
 	Progress  ProgressConfig
 	Activity  ActivityConfig
+}
+
+func (c Config) NewClient() client.Client {
+	return client.NewClient(c.Client)
+}
+
+func (c Config) NewClientWith(o client.Config) client.Client {
+	newConfig := c.Client
+	newConfig.Merge(o)
+	return client.NewClient(newConfig)
+}
+
+func (c Config) NewCacheOnlyClient() client.Client {
+	return client.NewCacheOnlyClient(c.Client)
 }
 
 func (mc *MusicConfig) UserArtistID(name string) (string, bool) {
@@ -309,7 +278,6 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Server.Listen", "127.0.0.1:3000")
 	v.SetDefault("Server.DataDir", ".")
 	v.SetDefault("Server.MediaDir", ".")
-	v.SetDefault("Server.ImageClient.UseCache", true)
 	v.SetDefault("Server.ImageClient.CacheDir", "imagecache")
 	v.SetDefault("Server.ImageClient.UserAgent", userAgent())
 
@@ -353,7 +321,6 @@ func configDefaults(v *viper.Viper) {
 
 	v.SetDefault("Client.CacheDir", ".httpcache")
 	v.SetDefault("Client.MaxAge", "720h") // 30 days in hours
-	v.SetDefault("Client.UseCache", false)
 	v.SetDefault("Client.UserAgent", userAgent())
 
 	v.SetDefault("Fanart.ProjectKey", "93ede276ba6208318031727060b697c8")
@@ -549,7 +516,6 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Assistant.MediaObjectDesc.Text", "{{.Artist}} \u2022 {{.Release}}")
 
 	v.SetDefault("Podcast.Client.MaxAge", "15m")
-	v.SetDefault("Podcast.Client.UseCache", true)
 	v.SetDefault("Podcast.DB.Driver", "sqlite3")
 	v.SetDefault("Podcast.DB.Source", "podcast.db")
 	v.SetDefault("Podcast.DB.Logger", "default")

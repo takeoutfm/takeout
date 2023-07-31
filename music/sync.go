@@ -25,7 +25,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/takeoutfm/takeout/config"
 	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/lib/log"
@@ -1142,12 +1141,11 @@ func doRelease(artist string, r musicbrainz.Release) Release {
 	}
 }
 
-func (m *Music) SyncCovers(cfg config.ClientConfig) error {
-	return m.syncCoversFor(cfg, m.Artists())
+func (m *Music) SyncCovers(c client.Client) error {
+	return m.syncCoversFor(c, m.Artists())
 }
 
-func (m *Music) syncCoversFor(cfg config.ClientConfig, artists []Artist) error {
-	client := client.NewClient(&cfg)
+func (m *Music) syncCoversFor(client client.Client, artists []Artist) error {
 	for _, a := range artists {
 		releases := m.ArtistReleases(&a)
 		for _, r := range releases {
@@ -1161,12 +1159,11 @@ func (m *Music) syncCoversFor(cfg config.ClientConfig, artists []Artist) error {
 	return nil
 }
 
-func (m *Music) SyncFanArt(cfg config.ClientConfig) error {
-	return m.syncFanArtFor(cfg, m.Artists())
+func (m *Music) SyncFanArt(c client.Client) error {
+	return m.syncFanArtFor(c, m.Artists())
 }
 
-func (m *Music) syncFanArtFor(cfg config.ClientConfig, artists []Artist) error {
-	client := client.NewClient(&cfg)
+func (m *Music) syncFanArtFor(client client.Client, artists []Artist) error {
 	for _, a := range artists {
 		thumbs := m.artistImages(&a)
 		for _, img := range thumbs {

@@ -193,7 +193,6 @@ Podcast:
 
 ## HTTP Client Configuration
 
-* UseCache - Enable or disable http caching (default false)
 * MaxAge - Age in seconds to use cached responses (default 30 days)
 * CacheDir - Directory to store cached responses (default .httpcache)
 

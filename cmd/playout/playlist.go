@@ -38,8 +38,9 @@ func playlist() error {
 	if err != nil {
 		return err
 	}
-	for _, t := range playlist.Spiff.Entries {
-		fmt.Printf("%s / %s / %s / %s / %d\n", t.Creator, t.Album, t.Title, t.Location[0], t.Size[0])
+	fmt.Printf("Index: %v, Position: %v\n", playlist.Index, playlist.Position)
+	for i, t := range playlist.Spiff.Entries {
+		fmt.Printf("%d. %s / %s / %s / %s / %d\n", i, t.Creator, t.Album, t.Title, t.Location[0], t.Size[0])
 	}
 	return nil
 }

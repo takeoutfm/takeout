@@ -19,18 +19,15 @@ package setlist
 
 import (
 	"fmt"
-	"github.com/takeoutfm/takeout/config"
 	"github.com/takeoutfm/takeout/lib/client"
 )
 
 type Setlist struct {
-	config *config.Config
-	client *client.Client
+	client client.Client
 }
 
-func NewSetlist(config *config.Config, client *client.Client) *Setlist {
+func NewSetlist(client client.Client) *Setlist {
 	return &Setlist{
-		config: config,
 		client: client,
 	}
 }
@@ -108,7 +105,7 @@ type setlistResponse struct {
 func (s *Setlist) ArtistYear(arid string, year int) []setlist {
 	format := fmt.Sprintf("https://api.setlist.fm/rest/1.0/search/setlists?artistMbid=%s&year=%d",
 		arid, year)
-	return setlistFetch(format + "&page=%d")
+	return s.setlistFetch(format + "&page=%d")
 }
 
 func (s *Setlist) setlistFetch(format string) []setlist {

@@ -25,7 +25,6 @@ import (
 
 	"github.com/takeoutfm/takeout/config"
 	"github.com/takeoutfm/takeout/lib/bucket"
-	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/lib/search"
 	"github.com/takeoutfm/takeout/lib/tmdb"
@@ -35,7 +34,6 @@ import (
 type Video struct {
 	config  *config.Config
 	db      *gorm.DB
-	client  *client.Client
 	tmdb    *tmdb.TMDB
 	buckets []bucket.Bucket
 }
@@ -43,8 +41,7 @@ type Video struct {
 func NewVideo(config *config.Config) *Video {
 	return &Video{
 		config: config,
-		client: client.NewClient(&config.Client),
-		tmdb:   tmdb.NewTMDB(config),
+		tmdb:   tmdb.NewTMDB(config.TMDB.Config, config.NewClient()),
 	}
 }
 
@@ -86,7 +83,7 @@ func (v *Video) FindMovies(identifiers []string) []Movie {
 }
 
 func (v *Video) newSearch() (*search.Search, error) {
-	s := search.NewSearch(v.config)
+	s := search.NewSearch(v.config.Search)
 	s.Keywords = []string{
 		FieldGenre,
 		FieldKeyword,

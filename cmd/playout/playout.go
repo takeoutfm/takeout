@@ -23,23 +23,10 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	"github.com/takeoutfm/takeout"
+	"github.com/takeoutfm/takeout/client/playout"
 )
 
-const (
-	UserAgent = "Playout/" + takeout.Version + " (" + takeout.Contact + ")"
-
-	TokenAccess  = "accesstoken"
-	TokenRefresh = "refreshtoken"
-	TokenMedia   = "mediatoken"
-	TokenCode    = "codetoken"
-
-	Code     = "code"
-	Endpoint = "endpoint"
-)
-
-func globalConfig() *viper.Viper {
+func systemConfig() *viper.Viper {
 	cfg := viper.New()
 	cfg.SetConfigName("config")
 	cfg.SetConfigType("yaml")
@@ -58,13 +45,17 @@ func tokensConfig() *viper.Viper {
 	return cfg
 }
 
-type Playout struct {
-	config *viper.Viper
-	tokens *viper.Viper
+var rootCmd = &cobra.Command{
+	Use:   "playout",
+	Short: "playout",
+	Long:  `https://takeout.fm/`,
+	Run: func(cmd *cobra.Command, args []string) {
+		// TODO
+	},
 }
 
-func NewPlayout() *Playout {
-	config := globalConfig()
+func NewPlayout() *playout.Playout {
+	config := systemConfig()
 	err := config.ReadInConfig()
 	if err != nil {
 		panic(err)
@@ -77,92 +68,19 @@ func NewPlayout() *Playout {
 		fmt.Printf("tokens %s\n", err)
 	}
 
-	// fmt.Printf("Code is %s\n", tokens.GetString(Code))
-	// fmt.Printf("CodeToken is %s\n", tokens.GetString(TokenCode))
-	// fmt.Printf("AccessToken is %s\n", tokens.GetString(TokenAccess))
-	// fmt.Printf("RefreshToken is %s\n", tokens.GetString(TokenRefresh))
-	// fmt.Printf("MediaToken is %s\n", tokens.GetString(TokenMedia))
-
-	p := Playout{config: config, tokens: tokens}
-	return &p
-}
-
-func (p Playout) UpdateAccessCode(code, access string) error {
-	p.tokens.Set(Code, code)
-	p.tokens.Set(TokenCode, access)
-	return p.writeTokens()
-}
-
-func (p Playout) UpdateTokens(access, refresh, media string) error {
-	p.tokens.Set(TokenAccess, access)
-	p.tokens.Set(TokenRefresh, refresh)
-	p.tokens.Set(TokenMedia, media)
-	return p.writeTokens()
-}
-
-func (p Playout) UpdateAccessToken(value string) {
-	p.tokens.Set(TokenAccess, value)
-	err := p.writeTokens()
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (p Playout) writeTokens() error {
-	err := p.tokens.WriteConfig()
-	if err != nil {
-		err = p.tokens.SafeWriteConfig()
-	}
-	return err
-}
-
-func (p Playout) Endpoint() string {
-	return p.config.GetString(Endpoint)
-}
-
-func (p Playout) UserAgent() string {
-	return UserAgent
-}
-
-func (p Playout) Code() string {
-	return p.tokens.GetString(Code)
-}
-
-func (p Playout) CodeToken() string {
-	return p.tokens.GetString(TokenCode)
-}
-
-func (p Playout) AccessToken() string {
-	return p.tokens.GetString(TokenAccess)
-}
-
-func (p Playout) RefreshToken() string {
-	return p.tokens.GetString(TokenRefresh)
-}
-
-func (p Playout) MediaToken() string {
-	return p.tokens.GetString(TokenMedia)
-}
-
-var rootCmd = &cobra.Command{
-	Use:   "playout",
-	Short: "playout",
-	Long:  `https://takeout.fm/`,
-	Run: func(cmd *cobra.Command, args []string) {
-		// TODO
-	},
+	return playout.NewPlayout(config, tokens)
 }
 
 func main() {
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
-	viper.AddConfigPath("$HOME/.config/playout")
-	viper.AddConfigPath("$HOME/.playout")
-	viper.AddConfigPath("/etc/playout")
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	// viper.SetConfigType("yaml")
+	// viper.AddConfigPath(".")
+	// viper.AddConfigPath("$HOME/.config/playout")
+	// viper.AddConfigPath("$HOME/.playout")
+	// viper.AddConfigPath("/etc/playout")
+	// if err := viper.ReadInConfig(); err != nil {
+	// 	fmt.Println(err)
+	// 	os.Exit(1)
+	// }
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

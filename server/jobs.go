@@ -142,7 +142,7 @@ func syncMusicCovers(config *config.Config, mediaConfig *config.Config) error {
 		return err
 	}
 	defer m.Close()
-	m.SyncCovers(config.Server.ImageClient)
+	m.SyncCovers(config.NewClientWith(config.Server.ImageClient))
 	return nil
 }
 
@@ -153,7 +153,7 @@ func syncMusicFanArt(config *config.Config, mediaConfig *config.Config) error {
 		return err
 	}
 	defer m.Close()
-	m.SyncFanArt(config.Server.ImageClient)
+	m.SyncFanArt(config.NewClientWith(config.Server.ImageClient))
 	return nil
 }
 
@@ -174,7 +174,7 @@ func syncVideoPosters(config *config.Config, mediaConfig *config.Config) error {
 		return err
 	}
 	defer v.Close()
-	v.SyncPosters(config.Server.ImageClient)
+	v.SyncPosters(config.NewClientWith(config.Server.ImageClient))
 	return nil
 }
 
@@ -185,7 +185,7 @@ func syncVideoBackdrops(config *config.Config, mediaConfig *config.Config) error
 		return err
 	}
 	defer v.Close()
-	v.SyncBackdrops(config.Server.ImageClient)
+	v.SyncBackdrops(config.NewClientWith(config.Server.ImageClient))
 	return nil
 }
 
@@ -196,7 +196,7 @@ func syncVideoProfileImages(config *config.Config, mediaConfig *config.Config) e
 		return err
 	}
 	defer v.Close()
-	v.SyncProfileImages(config.Server.ImageClient)
+	v.SyncProfileImages(config.NewClientWith(config.Server.ImageClient))
 	return nil
 }
 

@@ -26,18 +26,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/takeoutfm/takeout/config"
 	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/takeoutfm/takeout/lib/date"
 )
 
 type MusicBrainz struct {
-	client *client.Client
+	client client.Client
 }
 
-func NewMusicBrainz(config *config.Config) *MusicBrainz {
+func NewMusicBrainz(client client.Client) *MusicBrainz {
 	return &MusicBrainz{
-		client: client.NewClient(&config.Client),
+		client: client,
 	}
 }
 

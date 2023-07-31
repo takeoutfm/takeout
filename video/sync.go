@@ -24,7 +24,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/takeoutfm/takeout/config"
 	"github.com/takeoutfm/takeout/lib/bucket"
 	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/takeoutfm/takeout/lib/date"
@@ -93,7 +92,7 @@ func (v *Video) syncBucket(bucket bucket.Bucket, lastSync time.Time) error {
 		return err
 	}
 
-	client := tmdb.NewTMDB(v.config)
+	client := tmdb.NewTMDB(v.config.TMDB.Config, v.config.NewClient())
 
 	s, err := v.newSearch()
 	if err != nil {
@@ -468,8 +467,7 @@ func (v *Video) processCredits(tmid int64, client *tmdb.TMDB, credits *tmdb.Cred
 	return nil
 }
 
-func (v *Video) SyncPosters(cfg config.ClientConfig) {
-	client := client.NewClient(&cfg)
+func (v *Video) SyncPosters(client client.Client) {
 	for _, m := range v.Movies() {
 		// sync poster
 		img := v.TMDBMoviePoster(m)
@@ -487,8 +485,7 @@ func (v *Video) SyncPosters(cfg config.ClientConfig) {
 	}
 }
 
-func (v *Video) SyncBackdrops(cfg config.ClientConfig) {
-	client := client.NewClient(&cfg)
+func (v *Video) SyncBackdrops(client client.Client) {
 	for _, m := range v.Movies() {
 		// sync backdrop
 		img := v.TMDBMovieBackdrop(m)
@@ -499,8 +496,7 @@ func (v *Video) SyncBackdrops(cfg config.ClientConfig) {
 	}
 }
 
-func (v *Video) SyncProfileImages(cfg config.ClientConfig) {
-	client := client.NewClient(&cfg)
+func (v *Video) SyncProfileImages(client client.Client) {
 	for _, m := range v.Movies() {
 		// cast images
 		cast := v.Cast(m)

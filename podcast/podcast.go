@@ -30,18 +30,19 @@ import (
 type Podcast struct {
 	config *config.Config
 	db     *gorm.DB
-	client *client.Client
+	client client.Client
 }
 
 func NewPodcast(config *config.Config) *Podcast {
+	client := config.NewClientWith(config.Podcast.Client)
 	return &Podcast{
 		config: config,
-		client: client.NewClient(mergeClientConfig(config)),
+		client: client,
 	}
 }
 
 func (p *Podcast) newSearch() (*search.Search, error) {
-	s := search.NewSearch(p.config)
+	s := search.NewSearch(p.config.Search)
 	s.Keywords = []string{
 		FieldAuthor,
 		FieldDescription,
@@ -52,13 +53,6 @@ func (p *Podcast) newSearch() (*search.Search, error) {
 		return nil, err
 	}
 	return s, nil
-}
-
-func mergeClientConfig(cfg *config.Config) *config.ClientConfig {
-	var merged config.ClientConfig
-	merged = cfg.Client
-	merged.Merge(cfg.Podcast.Client)
-	return &merged
 }
 
 func (p *Podcast) Open() (err error) {

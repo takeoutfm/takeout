@@ -27,12 +27,11 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/takeoutfm/takeout/config"
+	"github.com/gregjones/httpcache"
+	"github.com/gregjones/httpcache/diskcache"
 	"github.com/takeoutfm/takeout/lib/header"
 	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/takeoutfm/takeout/lib/pls"
-	"github.com/gregjones/httpcache"
-	"github.com/gregjones/httpcache/diskcache"
 )
 
 const (
@@ -41,10 +40,34 @@ const (
 )
 
 var (
-	ErrCacheMiss       = errors.New("cache miss")
+	ErrCacheMiss = errors.New("cache miss")
 )
 
-type Client struct {
+type Config struct {
+	UserAgent string
+	CacheDir  string
+	MaxAge    time.Duration
+}
+
+func (c *Config) Merge(o Config) {
+	if o.CacheDir != "" {
+		c.CacheDir = o.CacheDir
+	}
+	c.MaxAge = o.MaxAge
+	if o.UserAgent != "" {
+		c.UserAgent = o.UserAgent
+	}
+}
+
+type Client interface {
+	Get(url string) (http.Header, []byte, error)
+	GetJson(url string, result interface{}) error
+	GetJsonWith(headers map[string]string, url string, result interface{}) error
+	GetXML(url string, result interface{}) error
+	GetPLS(url string) (pls.Playlist, error)
+}
+
+type client struct {
 	client     *http.Client
 	useCache   bool
 	userAgent  string
@@ -53,10 +76,23 @@ type Client struct {
 	onlyCached bool
 }
 
-func NewClient(config *config.ClientConfig) *Client {
-	c := Client{}
+func NewCacheOnlyClient(config Config) Client {
+	c := client{}
+	c.onlyCached = true
+	c.useCache = true
 	c.userAgent = config.UserAgent
-	c.useCache = config.UseCache
+	c.maxAge = config.MaxAge
+	c.cache = diskcache.New(config.CacheDir)
+	transport := httpcache.NewTransport(c.cache)
+	c.client = transport.Client()
+	return c
+
+}
+
+func NewClient(config Config) Client {
+	c := client{}
+	c.userAgent = config.UserAgent
+	c.useCache = len(config.CacheDir) > 0
 	if c.useCache {
 		c.maxAge = config.MaxAge
 		c.cache = diskcache.New(config.CacheDir)
@@ -65,7 +101,7 @@ func NewClient(config *config.ClientConfig) *Client {
 	} else {
 		c.client = &http.Client{}
 	}
-	return &c
+	return c
 }
 
 var lastRequest map[string]time.Time = map[string]time.Time{}
@@ -83,11 +119,7 @@ func RateLimit(host string) {
 	lastRequest[host] = t
 }
 
-func (c *Client) UseOnlyIfCached(enabled bool) {
-	c.onlyCached = enabled
-}
-
-func (c *Client) doGet(headers map[string]string, urlStr string) (*http.Response, error) {
+func (c client) doGet(headers map[string]string, urlStr string) (*http.Response, error) {
 	// log.Printf("doGet %s\n", urlStr)
 	url, _ := url.Parse(urlStr)
 	req, err := http.NewRequest(http.MethodGet, url.String(), nil)
@@ -150,7 +182,7 @@ const (
 	backoff     = time.Second * 3
 )
 
-func (c *Client) doGetWithRetry(headers map[string]string, url string) (*http.Response, error) {
+func (c client) doGetWithRetry(headers map[string]string, url string) (*http.Response, error) {
 	var resp *http.Response
 	var err error
 
@@ -178,7 +210,7 @@ func (c *Client) doGetWithRetry(headers map[string]string, url string) (*http.Re
 	return resp, err
 }
 
-func (c *Client) GetWith(headers map[string]string, url string) (http.Header, []byte, error) {
+func (c client) GetWith(headers map[string]string, url string) (http.Header, []byte, error) {
 	resp, err := c.doGetWithRetry(headers, url)
 	if err != nil {
 		return nil, nil, err
@@ -188,15 +220,15 @@ func (c *Client) GetWith(headers map[string]string, url string) (http.Header, []
 	return resp.Header, body, err
 }
 
-func (c *Client) Get(url string) (http.Header, []byte, error) {
+func (c client) Get(url string) (http.Header, []byte, error) {
 	return c.GetWith(nil, url)
 }
 
-func (c *Client) GetJson(url string, result interface{}) error {
+func (c client) GetJson(url string, result interface{}) error {
 	return c.GetJsonWith(nil, url, result)
 }
 
-func (c *Client) GetJsonWith(headers map[string]string, url string, result interface{}) error {
+func (c client) GetJsonWith(headers map[string]string, url string, result interface{}) error {
 	resp, err := c.doGetWithRetry(headers, url)
 	if err != nil {
 		return err
@@ -209,7 +241,7 @@ func (c *Client) GetJsonWith(headers map[string]string, url string, result inter
 	return nil
 }
 
-func (c *Client) GetXML(urlString string, result interface{}) error {
+func (c client) GetXML(urlString string, result interface{}) error {
 	// TODO use only for testing
 	// if strings.HasPrefix(urlString, "file:") {
 	// 	u, err := url.Parse(urlString)
@@ -238,7 +270,7 @@ func (c *Client) GetXML(urlString string, result interface{}) error {
 	return nil
 }
 
-func (c *Client) GetPLS(urlString string) (pls.Playlist, error) {
+func (c client) GetPLS(urlString string) (pls.Playlist, error) {
 	resp, err := c.doGet(nil, urlString)
 	if err != nil {
 		return pls.Playlist{}, err

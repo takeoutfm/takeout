@@ -19,19 +19,23 @@ package fanart
 
 import (
 	"fmt"
-	"github.com/takeoutfm/takeout/config"
 	"github.com/takeoutfm/takeout/lib/client"
 )
 
-type Fanart struct {
-	config *config.Config
-	client *client.Client
+type Config struct {
+	PersonalKey string
+	ProjectKey  string
 }
 
-func NewFanart(config *config.Config) *Fanart {
+type Fanart struct {
+	config Config
+	client client.Client
+}
+
+func NewFanart(config Config, client client.Client) *Fanart {
 	return &Fanart{
 		config: config,
-		client: client.NewClient(&config.Client),
+		client: client,
 	}
 }
 
@@ -57,10 +61,10 @@ type Artist struct {
 	MusicBanners      []Art            `json:"musicbanner"`
 }
 
-func (f *Fanart) ArtistArt(arid string) *Artist {
-	key := f.config.Fanart.PersonalKey
+func (f Fanart) ArtistArt(arid string) *Artist {
+	key := f.config.PersonalKey
 	if key == "" {
-		key = f.config.Fanart.ProjectKey
+		key = f.config.ProjectKey
 	}
 	if key == "" {
 		return nil

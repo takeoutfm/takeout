@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/takeoutfm/takeout/config"
 	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/golang-jwt/jwt"
 )
@@ -85,27 +84,25 @@ type JWKS struct {
 
 // See https://ldapwiki.com/wiki/Openid-configuration
 // https://[base-server-url]/.well-known/openid-configuration
-func DiscoverConfiguration(config *config.Config, url string) (OpenIDConfiguration, error) {
+func DiscoverConfiguration(c client.Client, url string) (OpenIDConfiguration, error) {
 	var result OpenIDConfiguration
-	c := client.NewClient(&config.Client)
 	err := c.GetJson(url, &result)
 	return result, err
 }
 
-func GetJWKS(config *config.Config, url string) (JWKS, error) {
+func GetJWKS(c client.Client, url string) (JWKS, error) {
 	var result JWKS
-	c := client.NewClient(&config.Client)
 	err := c.GetJson(url, &result)
 	return result, err
 }
 
-func GoogleWebKey(config *config.Config, kid string) (JSONWebKey, error) {
+func GoogleWebKey(client client.Client, kid string) (JSONWebKey, error) {
 	var result JSONWebKey
-	cfg, err := DiscoverConfiguration(config, GoogleOpenIDConfigurationURI)
+	cfg, err := DiscoverConfiguration(client, GoogleOpenIDConfigurationURI)
 	if err != nil {
 		return result, err
 	}
-	jwks, err := GetJWKS(config, cfg.JWKS_URI)
+	jwks, err := GetJWKS(client, cfg.JWKS_URI)
 	if err != nil {
 		return result, err
 	}
@@ -147,7 +144,7 @@ func (k JSONWebKey) PublicKey() (*rsa.PublicKey, error) {
 // Google JWT request tokens to ensure they come from Google servers.
 var keyCache map[string]*rsa.PublicKey = make(map[string]*rsa.PublicKey)
 
-func ValidateGoogleToken(config *config.Config, tokenString, audience string) error {
+func ValidateGoogleToken(client client.Client, tokenString, audience string) error {
 	// first parse to find the public key
 	var claims jwt.StandardClaims
 	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, &claims)
@@ -168,7 +165,7 @@ func ValidateGoogleToken(config *config.Config, tokenString, audience string) er
 	kid := token.Header[HeaderKeyID].(string)
 	pub, ok := keyCache[kid]
 	if !ok {
-		key, err := GoogleWebKey(config, kid)
+		key, err := GoogleWebKey(client, kid)
 		if err != nil {
 			return err
 		}

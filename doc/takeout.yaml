@@ -21,7 +21,6 @@ Server:
   DataDir: /var/lib/takeout
   MediaDir: /var/lib/takeout/media
   ImageCache:
-    UseCache: true
     CacheDir: /var/cache/takeout/imagecache
 
 # Security configuration

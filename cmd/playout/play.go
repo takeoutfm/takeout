@@ -18,18 +18,12 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/takeoutfm/takeout/client/api"
-	"github.com/takeoutfm/takeout/client/player"
+	"github.com/takeoutfm/takeout/client/playout"
 	"github.com/takeoutfm/takeout/lib/date"
-	"github.com/takeoutfm/takeout/lib/spiff"
-	"github.com/takeoutfm/takeout/lib/str"
-	"github.com/takeoutfm/takeout/music"
-	"github.com/takeoutfm/takeout/progress"
 )
 
 var playCmd = &cobra.Command{
@@ -37,164 +31,63 @@ var playCmd = &cobra.Command{
 	Short: "",
 	Long:  "",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if visual == false && simple == false {
+			visual = true
+		}
 		return doPlay()
 	},
 }
 
 func doPlay() error {
-	playout := NewPlayout()
+	var options playout.PlayOptions
 
-	result, err := api.Progress(playout)
-	if err != nil {
-		return err
-	}
-	offsets := make(map[string]progress.Offset)
-	for _, o := range result.Offsets {
-		offsets[o.ETag] = o
-	}
-
-	var playlist *spiff.Playlist
-
-	if len(stream) > 0 || len(radio) > 0 {
-		result, err := api.Radio(playout)
-		if err != nil {
-			return err
+	if len(query) == 0 {
+		var sb strings.Builder
+		if len(artist) > 0 {
+			eq(&sb, "artist", artist)
 		}
-
-		var name, spiffType string
-		var list []music.Station
-		if len(stream) > 0 {
-			name = stream
-			spiffType = spiff.TypeStream
-			list = append(list, result.Stream...)
-		} else {
-			name = radio
-			spiffType = spiff.TypeMusic
-			list = append(list, result.Artist...)
-			list = append(list, result.Genre...)
-			list = append(list, result.Other...)
-			list = append(list, result.Period...)
-			list = append(list, result.Series...)
-			list = append(list, result.Similar...)
+		if len(release) > 0 {
+			eq(&sb, "release", release)
 		}
-
-		for _, s := range list {
-			if strings.EqualFold(s.Name, name) {
-				ref := fmt.Sprintf("/music/radio/stations/%d", s.ID)
-				playlist, err = api.Replace(playout, ref,
-					spiffType, s.Creator, s.Name)
-				if err != nil {
-					return err
-				}
-				break
-			}
+		if len(title) > 0 {
+			eq(&sb, "title", title)
 		}
-		if playlist == nil {
-			return fmt.Errorf("radio/stream not found")
+		if len(genre) > 0 {
+			eq(&sb, "genre", genre)
 		}
+		if popular {
+			eq(&sb, "type", "popular")
+		}
+		if single {
+			eq(&sb, "type", "single")
+		}
+		if cover {
+			eq(&sb, "type", "cover")
+		}
+		if live {
+			eq(&sb, "type", "live")
+		}
+		if len(before) > 0 {
+			// before is inclusive
+			lte(&sb, "first_date", date.ParseDate(before))
+		}
+		if len(after) > 0 {
+			// after is inclusive
+			gte(&sb, "first_date", date.ParseDate(after))
+		}
+		options.Query = sb.String()
+	} else {
+		options.Query = query
 	}
 
-	if playlist == nil {
-		if len(query) == 0 {
-			var sb strings.Builder
-			if len(artist) > 0 {
-				eq(&sb, "artist", artist)
-			}
-			if len(release) > 0 {
-				eq(&sb, "release", release)
-			}
-			if len(title) > 0 {
-				eq(&sb, "title", title)
-			}
-			if len(genre) > 0 {
-				eq(&sb, "genre", genre)
-			}
-			if popular {
-				eq(&sb, "type", "popular")
-			}
-			if single {
-				eq(&sb, "type", "single")
-			}
-			if cover {
-				eq(&sb, "type", "cover")
-			}
-			if live {
-				eq(&sb, "type", "live")
-			}
-			if len(before) > 0 {
-				// before is inclusive
-				lte(&sb, "first_date", date.ParseDate(before))
-			}
-			if len(after) > 0 {
-				// after is inclusive
-				gte(&sb, "first_date", date.ParseDate(after))
-			}
-			query = sb.String()
-		}
-		if len(query) > 0 {
-			playlist, err = api.SearchReplace(playout, query, shuffle)
-		} else {
-			playlist, err = api.Playlist(playout)
-		}
-	}
-	if err != nil {
-		return err
-	}
+	options.Stream = stream
+	options.Radio = radio
+	options.Repeat = repeat
+	options.Shuffle = shuffle
+	options.Visual = visual
+	options.Simple = simple
 
-	for i, t := range playlist.Spiff.Entries {
-		fmt.Printf("%2d. %-37s %-s\n", i,
-			str.TrimLength(t.Creator, 37),
-			str.TrimLength(t.Title, 50))
-	}
-
-	onTrack := func(p *player.Player) {
-		if p.IsStream() == false {
-			go func() {
-				api.Position(playout, p.Index(), 0)
-			}()
-		}
-	}
-
-	options := &player.Options{Repeat: repeat, OnTrack: onTrack, OnError: onError}
-	player := player.NewPlayer(playout, playlist, options)
-	done := make(chan struct{})
-	go func() {
-		seconds := time.Tick(time.Second * 1)
-		for {
-			select {
-			case <-seconds:
-				update(player)
-			case <-done:
-				return
-			}
-		}
-	}()
-	player.Start()
-	done <- struct{}{}
-
-	return nil
-}
-
-func onError(p *player.Player, err error) {
-	fmt.Printf("Got err %v\n", err)
-	p.Next()
-}
-
-func mmss(d time.Duration) string {
-	m := int(d.Minutes())
-	s := int(d.Seconds()) - m*60
-	return fmt.Sprintf("%02d:%02d", m, s)
-}
-
-var maxLine int
-func update(p *player.Player) {
-	pos, length := p.Position()
-	line := fmt.Sprintf("[%s - %s] %s / %s", mmss(pos), mmss(length), p.Artist(), p.Title())
-	n := len(line)
-	if n > maxLine {
-		maxLine = n
-	}
-	fmt.Print(line, strings.Repeat(" ", maxLine - n), "\r")
+	return NewPlayout().Play(options)
 }
 
 func add(sb *strings.Builder, key, op, value string) {
@@ -221,22 +114,23 @@ func gte(sb *strings.Builder, key string, value time.Time) {
 	add(sb, key, ":>=", value.Format("2006-01-02"))
 }
 
-var query string
-var shuffle bool
-
-var genre string
-var artist string
-var release string
-var title string
-var single bool
-var popular bool
-var cover bool
-var live bool
-var before string
 var after string
-var repeat bool
-var stream string
+var artist string
+var before string
+var cover bool
+var genre string
+var live bool
+var popular bool
+var query string
 var radio string
+var release string
+var repeat bool
+var shuffle bool
+var simple bool
+var single bool
+var stream string
+var title string
+var visual bool
 
 func init() {
 	playCmd.Flags().StringVarP(&query, "query", "q", "", "search query")
@@ -255,6 +149,9 @@ func init() {
 	playCmd.Flags().StringVar(&before, "before", "", "released in/on or before")
 	playCmd.Flags().StringVar(&after, "after", "", "released in/on or after")
 	playCmd.Flags().BoolVar(&repeat, "repeat", false, "repeat playlist")
+
+	playCmd.Flags().BoolVar(&simple, "simple", false, "use simple text interface")
+	playCmd.Flags().BoolVar(&visual, "visual", false, "use visual text interface")
 
 	rootCmd.AddCommand(playCmd)
 }

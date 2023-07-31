@@ -66,5 +66,4 @@ Lastfm:
   Secret: "put shared secret here"
 
 Client:
-  UseCache: true
   CacheDir: /var/cache/takeout/httpcache

@@ -21,21 +21,24 @@ import (
 	"fmt"
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/keyword"
-	"github.com/takeoutfm/takeout/config"
 	"strings"
 )
 
 type FieldMap map[string]interface{}
 type IndexMap map[string]FieldMap
 
+type Config struct {
+	BleveDir string
+}
+
 type Search struct {
-	config   config.SearchConfig
+	config   Config
 	index    bleve.Index
 	Keywords []string
 }
 
-func NewSearch(config *config.Config) *Search {
-	return &Search{config: config.Search}
+func NewSearch(config Config) *Search {
+	return &Search{config: config}
 }
 
 func (s *Search) Open(name string) error {

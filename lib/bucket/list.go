@@ -28,11 +28,28 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/takeoutfm/takeout/config"
 )
 
+type RewriteRule struct {
+	Pattern string
+	Replace string
+}
+
+type Config struct {
+	Endpoint        string
+	Region          string
+	AccessKeyID     string
+	SecretAccessKey string
+	BucketName      string
+	ObjectPrefix    string
+	UseSSL          bool
+	URLExpiration   time.Duration
+	Media           string
+	RewriteRules    []RewriteRule
+}
+
 type Bucket struct {
-	config *config.BucketConfig
+	config Config
 	s3     *s3.S3
 }
 
@@ -44,7 +61,7 @@ type Object struct {
 	LastModified time.Time
 }
 
-func OpenAll(buckets []config.BucketConfig) ([]*Bucket, error) {
+func OpenAll(buckets []Config) ([]*Bucket, error) {
 	var list []*Bucket
 
 	for i := range buckets {
@@ -58,7 +75,7 @@ func OpenAll(buckets []config.BucketConfig) ([]*Bucket, error) {
 	return list, nil
 }
 
-func OpenMedia(buckets []config.BucketConfig, mediaType string) ([]Bucket, error) {
+func OpenMedia(buckets []Config, mediaType string) ([]Bucket, error) {
 	var list []Bucket
 
 	for i := range buckets {
@@ -77,7 +94,7 @@ func OpenMedia(buckets []config.BucketConfig, mediaType string) ([]Bucket, error
 
 // Connect to the configured S3 bucket.
 // Tested: Wasabi, Backblaze, Minio
-func Open(config config.BucketConfig) (*Bucket, error) {
+func Open(config Config) (*Bucket, error) {
 	creds := credentials.NewStaticCredentials(
 		config.AccessKeyID,
 		config.SecretAccessKey, "")
@@ -88,8 +105,8 @@ func Open(config config.BucketConfig) (*Bucket, error) {
 		S3ForcePathStyle: aws.Bool(true)}
 	session, err := session.NewSession(s3Config)
 	bucket := &Bucket{
+		config: config,
 		s3:     s3.New(session),
-		config: &config,
 	}
 	return bucket, err
 }
@@ -144,7 +161,6 @@ func (b *Bucket) Presign(key string) *url.URL {
 	url, _ := url.Parse(urlStr)
 	return url
 }
-
 
 func (b *Bucket) Rewrite(path string) string {
 	result := path
