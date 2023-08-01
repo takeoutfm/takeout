@@ -59,7 +59,7 @@ func sessionContext(ctx Context, session *auth.Session) RequestContext {
 }
 
 // imageContext creates a minimal context with the provided client.
-func imageContext(ctx Context, client client.Client) RequestContext {
+func imageContext(ctx Context, client client.Getter) RequestContext {
 	return makeImageContext(ctx, client)
 }
 
@@ -102,7 +102,7 @@ func linkHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // imageHandler handles unauthenticated image requests.
-func imageHandler(ctx RequestContext, handler http.HandlerFunc, client client.Client) http.Handler {
+func imageHandler(ctx RequestContext, handler http.HandlerFunc, client client.Getter) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		ctx := imageContext(ctx, client)
 		handler.ServeHTTP(w, withContext(r, ctx))
@@ -271,7 +271,7 @@ func Serve(config *config.Config) error {
 	mux.Post("/hook/", requestHandler(ctx, hookHandler))
 
 	// Images
-	client := client.NewCacheOnlyClient(config.Server.ImageClient)
+	client := client.NewCacheOnlyGetter(config.Server.ImageClient)
 	mux.Get("/img/mb/rg/:rgid", imageHandler(ctx, imgReleaseGroupFront, client))
 	mux.Get("/img/mb/rg/:rgid/:side", imageHandler(ctx, imgReleaseGroup, client))
 	mux.Get("/img/mb/re/:reid", imageHandler(ctx, imgReleaseFront, client))

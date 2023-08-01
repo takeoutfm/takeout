@@ -35,25 +35,6 @@ const (
 	Endpoint = "endpoint"
 )
 
-// func systemConfig() *viper.Viper {
-// 	cfg := viper.New()
-// 	cfg.SetConfigName("config")
-// 	cfg.SetConfigType("yaml")
-// 	cfg.AddConfigPath(".")
-// 	cfg.AddConfigPath("$HOME/.config/playout")
-// 	cfg.AddConfigPath("$HOME/.playout")
-// 	cfg.AddConfigPath("/etc/playout")
-// 	return cfg
-// }
-
-// func tokensConfig() *viper.Viper {
-// 	cfg := viper.New()
-// 	cfg.SetConfigName("tokens")
-// 	cfg.SetConfigType("yaml")
-// 	cfg.AddConfigPath("$HOME/.config/playout")
-// 	return cfg
-// }
-
 type Playout struct {
 	config *viper.Viper
 	tokens *viper.Viper

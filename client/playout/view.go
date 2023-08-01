@@ -22,7 +22,7 @@ import (
 	"github.com/takeoutfm/takeout/client/player"
 )
 
-type View interface {
+type Viewer interface {
 	OnStart(*player.Player)
 	OnTrack(*player.Player)
 	OnError(*player.Player, error)
@@ -32,7 +32,7 @@ type View interface {
 type SimpleView struct {
 }
 
-func NewSimpleView() View {
+func NewSimpleView() Viewer {
 	return &SimpleView{}
 }
 

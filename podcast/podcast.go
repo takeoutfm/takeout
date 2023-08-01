@@ -30,11 +30,11 @@ import (
 type Podcast struct {
 	config *config.Config
 	db     *gorm.DB
-	client client.Client
+	client client.Getter
 }
 
 func NewPodcast(config *config.Config) *Podcast {
-	client := config.NewClientWith(config.Podcast.Client)
+	client := config.NewGetterWith(config.Podcast.Client)
 	return &Podcast{
 		config: config,
 		client: client,

@@ -31,10 +31,10 @@ type Config struct {
 
 type Lastfm struct {
 	config Config
-	client client.Client
+	client client.Getter
 }
 
-func NewLastfm(config Config, client client.Client) *Lastfm {
+func NewLastfm(config Config, client client.Getter) *Lastfm {
 	return &Lastfm{
 		config: config,
 		client: client,

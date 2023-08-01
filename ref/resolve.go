@@ -266,7 +266,7 @@ func resolveRadioRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.Ent
 }
 
 func resolvePlsRef(ctx Context, url, creator, image string, entries []spiff.Entry) ([]spiff.Entry, error) {
-	client := ctx.Config().NewClient()
+	client := ctx.Config().NewGetter()
 	result, err := client.GetPLS(url)
 	if err != nil {
 		return entries, err

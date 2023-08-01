@@ -26,10 +26,10 @@ import (
 )
 
 type RSS struct {
-	client client.Client
+	client client.Getter
 }
 
-func NewRSS(client client.Client) *RSS {
+func NewRSS(client client.Getter) *RSS {
 	return &RSS{
 		client: client,
 	}

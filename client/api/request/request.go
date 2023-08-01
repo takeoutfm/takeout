@@ -60,11 +60,11 @@ var (
 )
 
 var (
-	ErrUnauthorized  = errors.New("Unauthorized")
-	ErrForbidden     = errors.New("Forbidden")
-	ErrClientError   = errors.New("Client Error")
-	ErrServerError   = errors.New("Server Error")
-	ErrNoRedirection = errors.New("No Redirection")
+	ErrUnauthorized  = errors.New("unauthorized")
+	ErrForbidden     = errors.New("forbidden")
+	ErrClientError   = errors.New("client error")
+	ErrServerError   = errors.New("server error")
+	ErrNoRedirection = errors.New("no redirection")
 )
 
 func Get(context Context, uri string, result interface{}) error {

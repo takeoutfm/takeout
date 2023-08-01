@@ -53,7 +53,7 @@ type Music struct {
 }
 
 func NewMusic(config *config.Config) *Music {
-	client := config.NewClient()
+	client := config.NewGetter()
 	return &Music{
 		config: config,
 		fanart: fanart.NewFanart(config.Fanart, client),

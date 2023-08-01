@@ -43,7 +43,7 @@ func hookHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(header.ContentType, ApplicationJson)
 
 	tokenString := r.Header.Get(actions.GoogleAssistantSignature)
-	err := token.ValidateGoogleToken(ctx.Config().NewClient(),
+	err := token.ValidateGoogleToken(ctx.Config().NewGetter(),
 		tokenString, ctx.Config().Assistant.ProjectID)
 	if err != nil {
 		serverErr(w, err)

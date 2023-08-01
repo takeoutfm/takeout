@@ -72,15 +72,6 @@ func NewPlayout() *playout.Playout {
 }
 
 func main() {
-	// viper.SetConfigType("yaml")
-	// viper.AddConfigPath(".")
-	// viper.AddConfigPath("$HOME/.config/playout")
-	// viper.AddConfigPath("$HOME/.playout")
-	// viper.AddConfigPath("/etc/playout")
-	// if err := viper.ReadInConfig(); err != nil {
-	// 	fmt.Println(err)
-	// 	os.Exit(1)
-	// }
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

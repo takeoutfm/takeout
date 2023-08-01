@@ -60,13 +60,13 @@ type Config struct {
 
 type TMDB struct {
 	config      Config
-	client      client.Client
+	client      client.Getter
 	configCache *apiConfig
 	movieGenres Genres
 	tvGenres    Genres
 }
 
-func NewTMDB(config Config, client client.Client) *TMDB {
+func NewTMDB(config Config, client client.Getter) *TMDB {
 	return &TMDB{
 		config: config,
 		client: client,

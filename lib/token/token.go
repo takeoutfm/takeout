@@ -84,19 +84,19 @@ type JWKS struct {
 
 // See https://ldapwiki.com/wiki/Openid-configuration
 // https://[base-server-url]/.well-known/openid-configuration
-func DiscoverConfiguration(c client.Client, url string) (OpenIDConfiguration, error) {
+func DiscoverConfiguration(c client.Getter, url string) (OpenIDConfiguration, error) {
 	var result OpenIDConfiguration
 	err := c.GetJson(url, &result)
 	return result, err
 }
 
-func GetJWKS(c client.Client, url string) (JWKS, error) {
+func GetJWKS(c client.Getter, url string) (JWKS, error) {
 	var result JWKS
 	err := c.GetJson(url, &result)
 	return result, err
 }
 
-func GoogleWebKey(client client.Client, kid string) (JSONWebKey, error) {
+func GoogleWebKey(client client.Getter, kid string) (JSONWebKey, error) {
 	var result JSONWebKey
 	cfg, err := DiscoverConfiguration(client, GoogleOpenIDConfigurationURI)
 	if err != nil {
@@ -144,7 +144,7 @@ func (k JSONWebKey) PublicKey() (*rsa.PublicKey, error) {
 // Google JWT request tokens to ensure they come from Google servers.
 var keyCache map[string]*rsa.PublicKey = make(map[string]*rsa.PublicKey)
 
-func ValidateGoogleToken(client client.Client, tokenString, audience string) error {
+func ValidateGoogleToken(client client.Getter, tokenString, audience string) error {
 	// first parse to find the public key
 	var claims jwt.StandardClaims
 	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, &claims)

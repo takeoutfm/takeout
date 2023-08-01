@@ -58,7 +58,7 @@ type Context interface {
 	User() *auth.User
 	Session() *auth.Session
 	Video() *video.Video
-	ImageClient() client.Client
+	ImageClient() client.Getter
 
 	LocateTrack(music.Track) string
 	LocateMovie(video.Movie) string
@@ -88,7 +88,7 @@ type RequestContext struct {
 	progress    *progress.Progress
 	session     *auth.Session
 	template    *template.Template
-	imageClient client.Client
+	imageClient client.Getter
 }
 
 func makeContext(ctx Context, u *auth.User, c *config.Config, m *Media) RequestContext {
@@ -109,7 +109,7 @@ func makeAuthOnlyContext(ctx Context, session *auth.Session) RequestContext {
 	}
 }
 
-func makeImageContext(ctx Context, client client.Client) RequestContext {
+func makeImageContext(ctx Context, client client.Getter) RequestContext {
 	return RequestContext{
 		imageClient: client,
 	}
@@ -215,7 +215,7 @@ func (ctx RequestContext) EpisodeImage(e podcast.Episode) string {
 	return ctx.Podcast().EpisodeImage(e)
 }
 
-func (ctx RequestContext) ImageClient() client.Client {
+func (ctx RequestContext) ImageClient() client.Getter {
 	return ctx.imageClient
 }
 

@@ -29,10 +29,10 @@ type Config struct {
 
 type Fanart struct {
 	config Config
-	client client.Client
+	client client.Getter
 }
 
-func NewFanart(config Config, client client.Client) *Fanart {
+func NewFanart(config Config, client client.Getter) *Fanart {
 	return &Fanart{
 		config: config,
 		client: client,

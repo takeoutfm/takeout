@@ -31,10 +31,10 @@ import (
 )
 
 type MusicBrainz struct {
-	client client.Client
+	client client.Getter
 }
 
-func NewMusicBrainz(client client.Client) *MusicBrainz {
+func NewMusicBrainz(client client.Getter) *MusicBrainz {
 	return &MusicBrainz{
 		client: client,
 	}

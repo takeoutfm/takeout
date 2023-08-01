@@ -92,7 +92,7 @@ func (v *Video) syncBucket(bucket bucket.Bucket, lastSync time.Time) error {
 		return err
 	}
 
-	client := tmdb.NewTMDB(v.config.TMDB.Config, v.config.NewClient())
+	client := tmdb.NewTMDB(v.config.TMDB.Config, v.config.NewGetter())
 
 	s, err := v.newSearch()
 	if err != nil {
@@ -467,7 +467,7 @@ func (v *Video) processCredits(tmid int64, client *tmdb.TMDB, credits *tmdb.Cred
 	return nil
 }
 
-func (v *Video) SyncPosters(client client.Client) {
+func (v *Video) SyncPosters(client client.Getter) {
 	for _, m := range v.Movies() {
 		// sync poster
 		img := v.TMDBMoviePoster(m)
@@ -485,7 +485,7 @@ func (v *Video) SyncPosters(client client.Client) {
 	}
 }
 
-func (v *Video) SyncBackdrops(client client.Client) {
+func (v *Video) SyncBackdrops(client client.Getter) {
 	for _, m := range v.Movies() {
 		// sync backdrop
 		img := v.TMDBMovieBackdrop(m)
@@ -496,7 +496,7 @@ func (v *Video) SyncBackdrops(client client.Client) {
 	}
 }
 
-func (v *Video) SyncProfileImages(client client.Client) {
+func (v *Video) SyncProfileImages(client client.Getter) {
 	for _, m := range v.Movies() {
 		// cast images
 		cast := v.Cast(m)

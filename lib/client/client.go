@@ -59,7 +59,7 @@ func (c *Config) Merge(o Config) {
 	}
 }
 
-type Client interface {
+type Getter interface {
 	Get(url string) (http.Header, []byte, error)
 	GetJson(url string, result interface{}) error
 	GetJsonWith(headers map[string]string, url string, result interface{}) error
@@ -76,7 +76,7 @@ type client struct {
 	onlyCached bool
 }
 
-func NewCacheOnlyClient(config Config) Client {
+func NewCacheOnlyGetter(config Config) Getter {
 	c := client{}
 	c.onlyCached = true
 	c.useCache = true
@@ -89,7 +89,7 @@ func NewCacheOnlyClient(config Config) Client {
 
 }
 
-func NewClient(config Config) Client {
+func NewGetter(config Config) Getter {
 	c := client{}
 	c.userAgent = config.UserAgent
 	c.useCache = len(config.CacheDir) > 0

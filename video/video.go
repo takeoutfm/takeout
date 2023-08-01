@@ -41,7 +41,7 @@ type Video struct {
 func NewVideo(config *config.Config) *Video {
 	return &Video{
 		config: config,
-		tmdb:   tmdb.NewTMDB(config.TMDB.Config, config.NewClient()),
+		tmdb:   tmdb.NewTMDB(config.TMDB.Config, config.NewGetter()),
 	}
 }
 

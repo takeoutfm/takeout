@@ -1141,11 +1141,11 @@ func doRelease(artist string, r musicbrainz.Release) Release {
 	}
 }
 
-func (m *Music) SyncCovers(c client.Client) error {
+func (m *Music) SyncCovers(c client.Getter) error {
 	return m.syncCoversFor(c, m.Artists())
 }
 
-func (m *Music) syncCoversFor(client client.Client, artists []Artist) error {
+func (m *Music) syncCoversFor(client client.Getter, artists []Artist) error {
 	for _, a := range artists {
 		releases := m.ArtistReleases(&a)
 		for _, r := range releases {
@@ -1159,11 +1159,11 @@ func (m *Music) syncCoversFor(client client.Client, artists []Artist) error {
 	return nil
 }
 
-func (m *Music) SyncFanArt(c client.Client) error {
+func (m *Music) SyncFanArt(c client.Getter) error {
 	return m.syncFanArtFor(c, m.Artists())
 }
 
-func (m *Music) syncFanArtFor(client client.Client, artists []Artist) error {
+func (m *Music) syncFanArtFor(client client.Getter, artists []Artist) error {
 	for _, a := range artists {
 		thumbs := m.artistImages(&a)
 		for _, img := range thumbs {

@@ -240,18 +240,18 @@ type Config struct {
 	Activity  ActivityConfig
 }
 
-func (c Config) NewClient() client.Client {
-	return client.NewClient(c.Client)
+func (c Config) NewGetter() client.Getter {
+	return client.NewGetter(c.Client)
 }
 
-func (c Config) NewClientWith(o client.Config) client.Client {
+func (c Config) NewGetterWith(o client.Config) client.Getter {
 	newConfig := c.Client
 	newConfig.Merge(o)
-	return client.NewClient(newConfig)
+	return client.NewGetter(newConfig)
 }
 
-func (c Config) NewCacheOnlyClient() client.Client {
-	return client.NewCacheOnlyClient(c.Client)
+func (c Config) NewCacheOnlyGetter() client.Getter {
+	return client.NewCacheOnlyGetter(c.Client)
 }
 
 func (mc *MusicConfig) UserArtistID(name string) (string, bool) {

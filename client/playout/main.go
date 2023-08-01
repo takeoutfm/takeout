@@ -43,7 +43,7 @@ type PlayOptions struct {
 }
 
 func (playout Playout) Play(options PlayOptions) error {
-	var view View
+	var view Viewer
 
 	if options.Visual {
 		view = NewVisualView()

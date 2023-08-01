@@ -33,7 +33,7 @@ type VisualView struct {
 	screen tcell.Screen
 }
 
-func NewVisualView() View {
+func NewVisualView() Viewer {
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
 	screen, err := tcell.NewScreen()
 	if err != nil {
