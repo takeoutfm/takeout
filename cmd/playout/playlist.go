@@ -19,7 +19,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/takeoutfm/takeout/client/api"
+	"github.com/takeoutfm/takeout/client"
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +34,7 @@ var playlistCmd = &cobra.Command{
 
 func playlist() error {
 	playout := NewPlayout()
-	playlist, err := api.Playlist(playout)
+	playlist, err := client.Playlist(playout)
 	if err != nil {
 		return err
 	}

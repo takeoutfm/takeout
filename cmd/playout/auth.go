@@ -21,7 +21,7 @@ package main
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/takeoutfm/takeout/client/api"
+	"github.com/takeoutfm/takeout/client"
 )
 
 var authCmd = &cobra.Command{
@@ -46,7 +46,7 @@ func auth() error {
 func doCodeGet() error {
 	playout := NewPlayout()
 
-	accessCode, err := api.Code(playout)
+	accessCode, err := client.Code(playout)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func doCodeGet() error {
 func doCodeCheck() error {
 	playout := NewPlayout()
 
-	tokens, err := api.CheckCode(playout)
+	tokens, err := client.CheckCode(playout)
 	if err != nil {
 		return err
 	}

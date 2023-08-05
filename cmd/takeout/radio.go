@@ -18,7 +18,7 @@
 package main
 
 import (
-	"github.com/takeoutfm/takeout/music"
+	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/spf13/cobra"
 )
 

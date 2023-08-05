@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/takeoutfm/takeout/client/playout"
+	"github.com/takeoutfm/takeout/internal/playout"
 	"github.com/takeoutfm/takeout/lib/date"
 )
 

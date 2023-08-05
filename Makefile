@@ -23,10 +23,13 @@ DOCKER_IMAGE ?= takeout
 
 GIT_VERSION ?= $(shell git log --format="%h" -n 1)
 
-SOURCES = $(wildcard *.go activity/*.go auth/*.go config/*.go lib/*/*.go \
-	music/*.go podcast/*.go progress/*.go ref/*.go server/*.go video/*.go view/*.go)
+SOURCES = $(wildcard *.go internal/*/*.go model/*.go spiff/*.go view/*.go)
 
-RES_DIR = server/res
+CLIENT_SOURCES = $(wildcard client/*.go model/*.go spiff/*.go view/*.go)
+
+PLAYER_SOURCES = $(wildcard player/*.go)
+
+RES_DIR = internal/server/res
 RES_STATIC = $(wildcard ${RES_DIR}/static/*.css ${RES_DIR}/static/*.html \
 	${RES_DIR}/static/*.js ${RES_DIR}/static/*.svg)
 RES_ROOT = $(wildcard ${RES_DIR}/template/*.html)
@@ -42,14 +45,14 @@ TAKEOUT_CMD_TARGET = ${TAKEOUT_CMD_DIR}/takeout
 TAKEOUT_CMD_SRC = $(wildcard ${TAKEOUT_CMD_DIR}/*.go)
 
 #
-TMDB_CMD_DIR = cmd/tmdb
-TMDB_CMD_TARGET = ${TAKEOUT_CMD_DIR}/tmdb
-TMDB_CMD_SRC = $(wildcard ${TMDB_CMD_DIR}/*.go)
+PLAYOUT_CMD_DIR = cmd/playout
+PLAYOUT_CMD_TARGET = ${PLAYOUT_CMD_DIR}/playout
+PLAYOUT_CMD_SRC = $(wildcard ${PLAYOUT_CMD_DIR}/*.go)
 
 #
-PLAYOUT_CMD_DIR = cmd/playout
-PLAYOUT_CMD_TARGET = ${TAKEOUT_CMD_DIR}/playout
-PLAYOUT_CMD_SRC = $(wildcard ${PLAYOUT_CMD_DIR}/*.go)
+TMDB_CMD_DIR = tools/cmd/tmdb
+TMDB_CMD_TARGET = ${TMDB_CMD_DIR}/tmdb
+TMDB_CMD_SRC = $(wildcard ${TMDB_CMD_DIR}/*.go)
 
 .PHONY: all install clean
 
@@ -57,21 +60,22 @@ all: takeout playout
 
 takeout: ${TAKEOUT_CMD_TARGET}
 
-tmdb: ${TMDB_CMD_TARGET}
-
 playout: ${PLAYOUT_CMD_TARGET}
+
+tmdb: ${TMDB_CMD_TARGET}
 
 ${TAKEOUT_CMD_TARGET}: ${TAKEOUT_CMD_SRC} ${SOURCES} ${RESOURCES}
 	@cd ${TAKEOUT_CMD_DIR} && ${GO} build
 
+${PLAYOUT_CMD_TARGET}: ${PLAYOUT_CMD_SRC} ${SOURCES} ${CLIENT_SOURCES} ${PLAYER_SOURCES}
+	@cd ${PLAYOUT_CMD_DIR} && ${GO} build
+
 ${TMDB_CMD_TARGET}: ${TMDB_CMD_SRC} ${SOURCES}
 	@cd ${TMDB_CMD_DIR} && ${GO} build
 
-${PLAYOUT_CMD_TARGET}: ${PLAYOUT_CMD_SRC} ${SOURCES}
-	@cd ${PLAYOUT_CMD_DIR} && ${GO} build
-
 install: all
 	@cd ${TAKEOUT_CMD_DIR} && ${GO} install
+	@cd ${PAYLOUT_CMD_DIR} && ${GO} install
 
 clean:
 	@cd ${TAKEOUT_CMD_DIR} && ${GO} clean

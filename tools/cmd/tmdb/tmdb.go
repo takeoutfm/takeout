@@ -21,54 +21,46 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/takeoutfm/takeout/internal/config"
+	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/takeoutfm/takeout/internal/playout"
 )
 
-func systemConfig() *viper.Viper {
-	cfg := viper.New()
-	cfg.SetConfigName("config")
-	cfg.SetConfigType("yaml")
-	cfg.AddConfigPath(".")
-	cfg.AddConfigPath("$HOME/.config/playout")
-	cfg.AddConfigPath("$HOME/.playout")
-	cfg.AddConfigPath("/etc/playout")
-	return cfg
-}
-
-func tokensConfig() *viper.Viper {
-	cfg := viper.New()
-	cfg.SetConfigName("tokens")
-	cfg.SetConfigType("yaml")
-	cfg.AddConfigPath("$HOME/.config/playout")
-	return cfg
-}
-
 var rootCmd = &cobra.Command{
-	Use:   "playout",
-	Short: "playout",
+	Use:   "tmdb",
+	Short: "",
 	Long:  `https://takeout.fm/`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO
 	},
 }
 
-func NewPlayout() *playout.Playout {
-	config := systemConfig()
-	err := config.ReadInConfig()
-	if err != nil {
-		panic(err)
-	}
+var configFile string
+var configPath string
+var configName string
 
-	tokens := tokensConfig()
-	err = tokens.ReadInConfig()
-	if err != nil {
-		// TODO err is ok sometimes
-		fmt.Printf("tokens %s\n", err)
+func getConfig() *config.Config {
+	if configPath == "" {
+		configPath = os.Getenv("TAKEOUT_HOME")
 	}
-
-	return playout.NewPlayout(config, tokens)
+	if configName == "" {
+		configName = os.Getenv("TMDB_CONFIG")
+	}
+	if configFile != "" {
+		config.SetConfigFile(configFile)
+	} else {
+		if configPath == "" {
+			configPath = "."
+		}
+		if configName == "" {
+			configName = "tmdb"
+		}
+		config.AddConfigPath(configPath)
+		config.SetConfigName(configName)
+	}
+	config, err := config.GetConfig()
+	log.CheckError(err)
+	return config
 }
 
 func main() {

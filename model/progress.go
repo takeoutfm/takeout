@@ -15,38 +15,35 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
-package main
+package model
 
 import (
-	"errors"
-	"github.com/spf13/cobra"
-	"github.com/takeoutfm/takeout/internal/server"
+	"time"
+
+	"github.com/takeoutfm/takeout/lib/gorm"
 )
 
-var jobCmd = &cobra.Command{
-	Use:   "job",
-	Short: "takeout job",
-	Long:  `TODO`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return job()
-	},
+type Offset struct {
+	gorm.Model
+	User     string    `gorm:"index:idx_offset_user" json:"-"`
+	ETag     string    `gorm:"uniqueIndex:idx_offset_etag;uniqueIndex:idx_offset_date"`
+	Offset   int       `gorm:"default:0"`
+	Duration int       `gorm:"default:0"`
+	Date     time.Time `gorm:"uniqueIndex:idx_offset_date"`
 }
 
-var jobName string
-
-func job() error {
-	cfg, err := getConfig()
-	if err != nil {
-		return err
-	}
-	if jobName == "" {
-		return errors.New("no job")
-	}
-	return server.Job(cfg, jobName)
+type Offsets struct {
+	Offsets []Offset
 }
 
-func init() {
-	jobCmd.Flags().StringVarP(&configFile, "config", "c", "", "config file")
-	jobCmd.Flags().StringVarP(&jobName, "name", "n", "", "name of job")
-	rootCmd.AddCommand(jobCmd)
+func (o Offset) Valid() bool {
+	if len(o.User) == 0 || len(o.ETag) == 0 || o.Offset < 0 || o.Date.IsZero() {
+		return false
+	}
+	// duration can be unknown (0) but if known, offset must be within
+	// duration
+	if o.Duration > 0 && o.Offset > o.Duration {
+		return false
+	}
+	return true
 }

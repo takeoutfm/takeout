@@ -18,7 +18,7 @@
 package main
 
 import (
-	"github.com/takeoutfm/takeout/server"
+	"github.com/takeoutfm/takeout/internal/server"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

@@ -18,8 +18,8 @@
 package main
 
 import (
-	"github.com/takeoutfm/takeout/auth"
 	"github.com/spf13/cobra"
+	"github.com/takeoutfm/takeout/internal/auth"
 )
 
 var userCmd = &cobra.Command{

@@ -15,38 +15,40 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
-package main
+package model
 
 import (
-	"errors"
-	"github.com/spf13/cobra"
-	"github.com/takeoutfm/takeout/internal/server"
+	"github.com/takeoutfm/takeout/lib/gorm"
+	"time"
 )
 
-var jobCmd = &cobra.Command{
-	Use:   "job",
-	Short: "takeout job",
-	Long:  `TODO`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return job()
-	},
+type Series struct {
+	gorm.Model
+	SID         string `gorm:"uniqueIndex:idx_series"` // hash of link
+	Title       string
+	Description string
+	Author      string
+	Link        string
+	Image       string
+	Copyright   string
+	Date        time.Time // last build date
+	TTL         int
 }
 
-var jobName string
-
-func job() error {
-	cfg, err := getConfig()
-	if err != nil {
-		return err
-	}
-	if jobName == "" {
-		return errors.New("no job")
-	}
-	return server.Job(cfg, jobName)
+func (Series) TableName() string {
+	return "series" // series is zero plural
 }
 
-func init() {
-	jobCmd.Flags().StringVarP(&configFile, "config", "c", "", "config file")
-	jobCmd.Flags().StringVarP(&jobName, "name", "n", "", "name of job")
-	rootCmd.AddCommand(jobCmd)
+type Episode struct {
+	gorm.Model
+	SID         string // series ID
+	EID         string `gorm:"uniqueIndex:idx_episode"` // GUID
+	Title       string
+	Author      string
+	Link        string
+	Description string
+	ContentType string
+	Size        int64
+	URL         string
+	Date        time.Time // publish time
 }
