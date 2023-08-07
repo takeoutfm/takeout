@@ -52,7 +52,7 @@ func fixColon(name string) string {
 func doit() {
 	var query string
 	config := getConfig()
-	m := tmdb.NewTMDB(config)
+	m := tmdb.NewTMDB(config.TMDB.Config, config.NewGetter())
 	if optFile != "" {
 		fileRegexp := regexp.MustCompile(`([^\/]+)_t\d+(\.mkv)$`)
 		matches := fileRegexp.FindStringSubmatch(optFile)

@@ -24,6 +24,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/faiface/beep"
@@ -46,9 +47,9 @@ type playing struct {
 type playerAction int32
 
 const (
-	ActionPlay playerAction = iota
-	ActionNext
-	ActionPrevious
+	ActionNext playerAction = iota
+	ActionSkipForward
+	ActionSkipBackward
 	ActionPause
 	ActionStop
 )
@@ -56,7 +57,6 @@ const (
 type Config struct {
 	Repeat  bool
 	Buffer  time.Duration
-	onStart func(*Player)
 	OnTrack func(*Player)
 	OnPause func(*Player)
 	OnError func(*Player, error)
@@ -74,22 +74,36 @@ type Player struct {
 	control  chan playerAction
 	errors   chan error
 	done     chan struct{}
+	skipTo   int
+	mu       sync.Mutex
 }
 
 func NewPlayer(context client.Context, playlist *spiff.Playlist, config *Config) *Player {
-	return &Player{context: context, playlist: playlist, config: config}
+	return &Player{context: context, playlist: playlist, config: config, skipTo: -1}
+}
+
+func (p *Player) lock() {
+	p.mu.Lock()
+}
+
+func (p *Player) unlock() {
+	p.mu.Unlock()
 }
 
 func (p *Player) Context() client.Context {
 	return p.context
 }
 
-func (p *Player) Next() {
-	p.control <- ActionNext
+func (p *Player) SkipForward() {
+	p.control <- ActionSkipForward
 }
 
-func (p *Player) Previous() {
-	p.control <- ActionPrevious
+func (p *Player) SkipBackward() {
+	p.control <- ActionSkipBackward
+}
+
+func (p *Player) Next() {
+	p.control <- ActionNext
 }
 
 func (p *Player) Stop() {
@@ -142,23 +156,24 @@ func (p *Player) Track() (string, string, string, string) {
 }
 
 func (p *Player) Start() {
-	p.control = make(chan playerAction, 1)
+	p.control = make(chan playerAction)
 	p.done = make(chan struct{}, 1)
 	p.play()
 
 	for {
 		select {
 		case action := <-p.control:
-			//fmt.Printf("got action %v\n", action)
 			switch action {
-			case ActionNext:
-				p.next()
-			case ActionPrevious:
-				p.prev()
+			case ActionSkipForward:
+				p.skipForward()
+			case ActionSkipBackward:
+				p.skipBackward()
 			case ActionStop:
 				p.stop()
 			case ActionPause:
 				p.pause()
+			case ActionNext:
+				p.next()
 			}
 		case err := <-p.errors:
 			p.handle(err)
@@ -212,7 +227,6 @@ func (p *Player) clear() {
 		p.playing.streamer.Close()
 		p.playing = nil
 	}
-	speaker.Clear()
 }
 
 func (p *Player) IsStream() bool {
@@ -228,12 +242,14 @@ func (p *Player) IsMusic() bool {
 }
 
 func (p *Player) play() {
-	p.clear()
+	p.playIndex(p.playlist.Index)
+}
 
-	index := p.playlist.Index
+func (p *Player) playIndex(index int) {
 	if index < 0 || index >= p.Length() {
 		index = 0
 	}
+	p.playlist.Index = index
 
 	track := p.current()
 
@@ -309,7 +325,7 @@ func (p *Player) play() {
 	bufferSize := format.SampleRate.N(p.optionBuffer())
 	speaker.Init(format.SampleRate, bufferSize)
 	speaker.Play(beep.Seq(p.playing.streamer, beep.Callback(func() {
-		if p.hasNext() || p.optionRepeat() {
+		if p.skipTo != -1 || p.hasNext() || p.optionRepeat() {
 			p.Next()
 		} else {
 			p.Stop()
@@ -321,7 +337,7 @@ func (p *Player) play() {
 func atoi(s string) int {
 	i, err := strconv.Atoi(s)
 	if err != nil {
-		return 0
+		i = 0
 	}
 	return i
 }
@@ -363,24 +379,48 @@ func (p *Player) onIcyMetadata(data IcyMetadata) {
 }
 
 func (p *Player) hasNext() bool {
+	p.lock()
+	defer p.unlock()
 	return (p.playlist.Index + 1) < p.Length()
 }
 
-func (p *Player) next() {
+func (p *Player) forwardIndex() int {
+	p.lock()
+	defer p.unlock()
 	index := p.playlist.Index + 1
 	if index >= p.Length() {
-		// repeat is checked elsewhere
 		index = 0
 	}
-	p.playlist.Index = index
-	p.play()
+	return index
 }
 
-func (p *Player) prev() {
+func (p *Player) backwardIndex() int {
+	p.lock()
+	defer p.unlock()
 	index := p.playlist.Index - 1
 	if index < 0 {
 		index = 0
 	}
-	p.playlist.Index = index
-	p.play()
+	return index
+}
+
+func (p *Player) skipForward() {
+	p.skipTo = p.forwardIndex()
+	p.clear()
+}
+
+func (p *Player) skipBackward() {
+	p.skipTo = p.backwardIndex()
+	p.clear()
+}
+
+func (p *Player) next() {
+	var index int
+	if p.skipTo != -1 {
+		index = p.skipTo
+		p.skipTo = -1
+	} else {
+		index = p.forwardIndex()
+	}
+	p.playIndex(index)
 }

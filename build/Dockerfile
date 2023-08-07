@@ -28,7 +28,7 @@ WORKDIR $src/
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 COPY . .
-RUN make install
+RUN make install-takeout
 
 # final stage
 FROM debian:bullseye-slim

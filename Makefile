@@ -73,9 +73,13 @@ ${PLAYOUT_CMD_TARGET}: ${PLAYOUT_CMD_SRC} ${SOURCES} ${CLIENT_SOURCES} ${PLAYER_
 ${TMDB_CMD_TARGET}: ${TMDB_CMD_SRC} ${SOURCES}
 	@cd ${TMDB_CMD_DIR} && ${GO} build
 
-install: all
+install: install-takeout install-playout
+
+install-takeout: takeout
 	@cd ${TAKEOUT_CMD_DIR} && ${GO} install
-	@cd ${PAYLOUT_CMD_DIR} && ${GO} install
+
+install-playout: playout
+	@cd ${PLAYOUT_CMD_DIR} && ${GO} install
 
 clean:
 	@cd ${TAKEOUT_CMD_DIR} && ${GO} clean
@@ -86,7 +90,7 @@ clean:
 	rm -f ${PLAYOUT_CMD_TARGET}
 
 docker docker-build: clean
-	${DOCKER} build --rm -t ${DOCKER_IMAGE} .
+	${DOCKER} build --rm -t ${DOCKER_IMAGE} build
 
 docker-push:
 	${DOCKER} tag ${DOCKER_IMAGE} ${DOCKER_USER}/${DOCKER_IMAGE}:latest

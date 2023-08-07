@@ -74,9 +74,9 @@ func (v VisualView) OnStart(p *player.Player) {
 					case 'q', 's':
 						break loop
 					case '<', ',', 'p':
-						p.Previous()
+						p.SkipBackward()
 					case '>', '.', 'n':
-						p.Next()
+						p.SkipForward()
 					case ' ':
 						p.Pause()
 					}

@@ -48,19 +48,15 @@ Download and build the Takeout server from Github. Precompiled versions may be
 available at a later time. Check the [Takeout Releases Page](https://github.com/takeoutfm/takeout/releases).
 
 ```console
-$ git clone https://github.com/takeoutfm/takeout.git
-$ cd takeout
-$ cd cmd/takeout
-$ go build
+$ go install github.com/takeoutfm/takeout/cmd/takeout@latest
 ```
 
-Install Takeout in ${GOPATH}/bin. Don't worry if you don't have a GOPATH
+This will build & install Takeout in ${GOPATH}/bin. Don't worry if you don't have a GOPATH
 environment variable defined, Go will default to your home directory
 (~/go/bin). Ensure that ${GOPATH}/bin is in your command path. You should see a
 Takeout version displayed.
 
 ```console
-$ go install
 $ takeout version
 ```
 
