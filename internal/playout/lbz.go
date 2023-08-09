@@ -34,8 +34,7 @@ func lbzTrack(p *player.Player) lbz.Track {
 
 func (playout Playout) lbzNowPlaying(p *player.Player) {
 	if p.IsMusic() {
-		lbzToken := playout.ListenBrainzToken()
-		if len(lbzToken) > 0 {
+		if lbzToken := playout.ListenBrainzToken(); len(lbzToken) > 0 {
 			go func() {
 				lbz.SubmitPlayingNow(lbzTrack(p), lbzToken)
 			}()
@@ -45,8 +44,7 @@ func (playout Playout) lbzNowPlaying(p *player.Player) {
 
 func (playout Playout) lbzListened(p *player.Player) {
 	if p.IsMusic() {
-		lbzToken := playout.ListenBrainzToken()
-		if len(lbzToken) > 0 {
+		if lbzToken := playout.ListenBrainzToken(); len(lbzToken) > 0 {
 			go func() {
 				lbz.SubmitSingle(lbzTrack(p), lbzToken, time.Now().Unix())
 			}()

@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
+// Package config collects all configuration for the server with a single model
+// which allows for easy viper-based configuration files.
 package config
 
 import (

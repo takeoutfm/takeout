@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
+// Package gorm provides an alternative gorm.Model that excludes the time
+// fields from serialization, reducing some API bandwidth usage. There's also a
+// logger with adjusted timing/configuration.
 package gorm
 
 import (
@@ -22,9 +25,8 @@ import (
 	"time"
 )
 
-// gorm model to exclude fields during json seralization
-//
-// note that gorm uses reflection so fields can be added or removed as needed.
+// gorm model to exclude fields during json seralization. note that gorm uses
+// reflection so fields can be added or removed as needed.
 type Model struct {
 	ID        uint        `gorm:"primarykey"`
 	CreatedAt time.Time   `json:"-"`

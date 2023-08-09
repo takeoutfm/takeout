@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
+// Package playout is a command line music/podcast/radio player with a text and
+// visual view. There's support for ListenBrainz and ASCII art covers. See the
+// player package for supported platforms, media and formats.
 package playout
 
 import (

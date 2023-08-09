@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
+// Package bucket provides support for listing S3 bucket contents and creating
+// presigned URLs for fetching media. The AWS SDK is used to provide S3
+// functionality, however, any S3 compatible backend service is supported.
 package bucket
 
 import (

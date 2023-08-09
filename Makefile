@@ -60,34 +60,34 @@ all: takeout playout
 
 takeout: ${TAKEOUT_CMD_TARGET}
 
-playout: ${PLAYOUT_CMD_TARGET}
-
-tmdb: ${TMDB_CMD_TARGET}
-
 ${TAKEOUT_CMD_TARGET}: ${TAKEOUT_CMD_SRC} ${SOURCES} ${RESOURCES}
 	@cd ${TAKEOUT_CMD_DIR} && ${GO} build
 
+install-takeout: takeout
+	@cd ${TAKEOUT_CMD_DIR} && ${GO} install
+
+playout: ${PLAYOUT_CMD_TARGET}
+
 ${PLAYOUT_CMD_TARGET}: ${PLAYOUT_CMD_SRC} ${SOURCES} ${CLIENT_SOURCES} ${PLAYER_SOURCES}
 	@cd ${PLAYOUT_CMD_DIR} && ${GO} build
+
+install-playout: playout
+	@cd ${PLAYOUT_CMD_DIR} && ${GO} install
+
+tmdb: ${TMDB_CMD_TARGET}
 
 ${TMDB_CMD_TARGET}: ${TMDB_CMD_SRC} ${SOURCES}
 	@cd ${TMDB_CMD_DIR} && ${GO} build
 
 install: install-takeout install-playout
 
-install-takeout: takeout
-	@cd ${TAKEOUT_CMD_DIR} && ${GO} install
-
-install-playout: playout
-	@cd ${PLAYOUT_CMD_DIR} && ${GO} install
-
 clean:
 	@cd ${TAKEOUT_CMD_DIR} && ${GO} clean
 	rm -f ${TAKEOUT_CMD_TARGET}
-	@cd ${TMDB_CMD_DIR} && ${GO} clean
-	rm -f ${TMDB_CMD_TARGET}
 	@cd ${PLAYOUT_CMD_DIR} && ${GO} clean
 	rm -f ${PLAYOUT_CMD_TARGET}
+	@cd ${TMDB_CMD_DIR} && ${GO} clean
+	rm -f ${TMDB_CMD_TARGET}
 
 docker docker-build: clean
 	${DOCKER} build --rm -t ${DOCKER_IMAGE} build

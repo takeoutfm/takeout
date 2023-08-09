@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
-package actions
-
 // This package works with Google Assistant Actions SDK and provides bindings
 // to support json encoding and decoding for some data types. Enough
 // functionality to get a webhook and fulfillment working with Takeout is
@@ -24,6 +22,7 @@ package actions
 //
 // https://developers.google.com/assistant/conversational/overview
 // https://developers.google.com/assistant/conversational/prompts
+package actions
 
 import (
 	"encoding/json"

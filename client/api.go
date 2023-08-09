@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
+// Package client provides an (partial) implementation of Takeout API with
+// support for authentication and tokens.
 package client
 
 import (

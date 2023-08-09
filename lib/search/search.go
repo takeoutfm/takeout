@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
+// Package search provides a wrapper for bleve search, building a search
+// database for an index of fields.
 package search
 
 import (

@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
+// Package musicbrainz provides fairly good support for the MusicBrainz API
+// with focus on the Takeout needs for media syncing and building search
+// metadata.
 package musicbrainz
 
 import (

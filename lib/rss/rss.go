@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
+// Package rss provide support for parsing RSS files as used in podcast feeds.
 package rss
 
 import (

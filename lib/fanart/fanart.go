@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
+// Package fanart provides an interface to obtain artist artwork from
+// Fanart.tv.
 package fanart
 
 import (

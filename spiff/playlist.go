@@ -15,6 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
+// Package spiff provides the model for all playlists used within Takeout. A
+// spiff is a container for one or more media tracks with basic media metadata.
+// Takeout also uses json patch to manipulate spiffs for remote playlist
+// management.
 package spiff
 
 import (

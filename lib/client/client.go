@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
+// Package client provides an http client used extensively by Takeout for
+// syncing media. There's support for local file-based caching and cache-only
+// usage.
 package client
 
 import (

@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
+// Package tmdb provides a good coverage for the TMDB API, supporting movies,
+// shows, people and images.
 package tmdb
 
 import (

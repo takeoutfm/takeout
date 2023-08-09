@@ -15,6 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
+// Package player provides a simple audio player based on Takeout server-based
+// playlists. There's support for FLAC, OGG, MP3 and WAV audio decoding, along
+// with Internet radio and ICY metadata. Internally Beep and Oto are used which
+// are known to work on Linux, BSDs, macOS, Windows, and more.
 package player
 
 import (
