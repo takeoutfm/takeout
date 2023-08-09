@@ -117,6 +117,7 @@ func (playout Playout) Play(options PlayOptions) error {
 				client.Position(playout, p.Index(), 0)
 			}()
 		}
+		playout.lbzNowPlaying(p)
 	}
 
 	onPause := func(p *player.Player) {
@@ -133,11 +134,14 @@ func (playout Playout) Play(options PlayOptions) error {
 		p.Next()
 	}
 
+	onListen := func(p *player.Player) { playout.lbzListened(p) }
+
 	config := &player.Config{
-		Repeat:  options.Repeat,
-		OnTrack: onTrack,
-		OnPause: onPause,
-		OnError: onError,
+		OnError:  onError,
+		OnListen: onListen,
+		OnPause:  onPause,
+		OnTrack:  onTrack,
+		Repeat:   options.Repeat,
 	}
 	player := player.NewPlayer(playout, playlist, config)
 

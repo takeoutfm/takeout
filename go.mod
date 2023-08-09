@@ -22,6 +22,7 @@ require (
 	github.com/hajimehoshi/go-mp3 v0.3.4 // indirect
 	github.com/hajimehoshi/oto v1.0.1 // indirect
 	github.com/jfreymuth/oggvorbis v1.0.5 // indirect
+	github.com/kori/go-listenbrainz v0.0.0-20230128070347-cd5ea1ae2e9f // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-runewidth v0.0.14

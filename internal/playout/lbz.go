@@ -18,46 +18,38 @@
 package playout
 
 import (
-	"fmt"
-	"strings"
+	"time"
 
+	lbz "github.com/kori/go-listenbrainz"
 	"github.com/takeoutfm/takeout/player"
 )
 
-type Viewer interface {
-	OnStart(*player.Player)
-	OnTrack(*player.Player)
-	OnError(*player.Player, error)
-	OnStop()
-}
-
-type SimpleView struct {
-}
-
-func NewSimpleView() Viewer {
-	return &SimpleView{}
-}
-
-func (SimpleView) OnStart(p *player.Player) {
-}
-
-func (SimpleView) OnTrack(p *player.Player) {
-	var a []string
-	if len(p.Artist()) > 0 {
-		a = append(a, p.Artist())
+func lbzTrack(p *player.Player) lbz.Track {
+	return lbz.Track{
+		Artist: p.Artist(),
+		Album:  p.Album(),
+		Title:  p.Title(),
 	}
-	if len(p.Album()) > 0 {
-		a = append(a, p.Album())
-	}
-	if len(p.Title()) > 0 {
-		a = append(a, p.Title())
-	}
-	fmt.Println(strings.Join(a, " / "))
 }
 
-func (SimpleView) OnError(p *player.Player, err error) {
-	fmt.Printf("Error %v\n", err)
+func (playout Playout) lbzNowPlaying(p *player.Player) {
+	if p.IsMusic() {
+		lbzToken := playout.ListenBrainzToken()
+		if len(lbzToken) > 0 {
+			go func() {
+				lbz.SubmitPlayingNow(lbzTrack(p), lbzToken)
+			}()
+		}
+	}
 }
 
-func (SimpleView) OnStop() {
+func (playout Playout) lbzListened(p *player.Player) {
+	if p.IsMusic() {
+		lbzToken := playout.ListenBrainzToken()
+		if len(lbzToken) > 0 {
+			go func() {
+				lbz.SubmitSingle(lbzTrack(p), lbzToken, time.Now().Unix())
+			}()
+		}
+	}
 }

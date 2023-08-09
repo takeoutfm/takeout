@@ -55,11 +55,12 @@ const (
 )
 
 type Config struct {
-	Repeat  bool
-	Buffer  time.Duration
-	OnTrack func(*Player)
-	OnPause func(*Player)
-	OnError func(*Player, error)
+	Repeat   bool
+	Buffer   time.Duration
+	OnTrack  func(*Player)
+	OnListen func(*Player)
+	OnPause  func(*Player)
+	OnError  func(*Player, error)
 }
 
 func NewConfig() *Config {
@@ -317,6 +318,10 @@ func (p *Player) playIndex(index int) {
 	//TODO use ctrl to simulate pause
 	//ctrl := &beep.Ctrl{Streamer: streamer}
 
+	if p.config != nil && p.config.OnListen != nil {
+		streamer = Notify(streamer, func() { p.config.OnListen(p) })
+	}
+
 	p.playing = &playing{streamer: streamer, format: format}
 	if headers != nil {
 		p.playing.headers = *headers
@@ -325,7 +330,7 @@ func (p *Player) playIndex(index int) {
 	bufferSize := format.SampleRate.N(p.optionBuffer())
 	speaker.Init(format.SampleRate, bufferSize)
 	speaker.Play(beep.Seq(p.playing.streamer, beep.Callback(func() {
-		if p.skipTo != -1 || p.hasNext() || p.optionRepeat() {
+		if p.hasNext() || p.optionRepeat() {
 			p.Next()
 		} else {
 			p.Stop()
@@ -381,7 +386,7 @@ func (p *Player) onIcyMetadata(data IcyMetadata) {
 func (p *Player) hasNext() bool {
 	p.lock()
 	defer p.unlock()
-	return (p.playlist.Index + 1) < p.Length()
+	return p.skipTo != -1 || (p.playlist.Index+1) < p.Length()
 }
 
 func (p *Player) forwardIndex() int {

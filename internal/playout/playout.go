@@ -26,10 +26,11 @@ import (
 const (
 	UserAgent = "Playout/" + takeout.Version + " (" + takeout.Contact + ")"
 
-	TokenAccess  = "accesstoken"
-	TokenRefresh = "refreshtoken"
-	TokenMedia   = "mediatoken"
-	TokenCode    = "codetoken"
+	TokenAccess       = "accesstoken"
+	TokenRefresh      = "refreshtoken"
+	TokenMedia        = "mediatoken"
+	TokenCode         = "codetoken"
+	TokenListenBrainz = "lbztoken"
 
 	Code     = "code"
 	Endpoint = "endpoint"
@@ -63,6 +64,11 @@ func (p Playout) UpdateAccessToken(value string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (p Playout) UpdateListenBrainzToken(value string) error {
+	p.tokens.Set(TokenListenBrainz, value)
+	return p.writeTokens()
 }
 
 func (p Playout) writeTokens() error {
@@ -99,4 +105,8 @@ func (p Playout) RefreshToken() string {
 
 func (p Playout) MediaToken() string {
 	return p.tokens.GetString(TokenMedia)
+}
+
+func (p Playout) ListenBrainzToken() string {
+	return p.tokens.GetString(TokenListenBrainz)
 }
