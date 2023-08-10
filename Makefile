@@ -23,12 +23,17 @@ DOCKER_IMAGE ?= takeout
 
 GIT_VERSION ?= $(shell git log --format="%h" -n 1)
 
-SOURCES = $(wildcard *.go internal/*/*.go model/*.go spiff/*.go view/*.go)
+TAKEOUT_VERSION = $(shell sed -n -e 's/\s*Version = "\(.*\)"\s*/\1/p' takeout.go)
 
-CLIENT_SOURCES = $(wildcard client/*.go model/*.go spiff/*.go view/*.go)
+COMMON_SOURCES = $(wildcard *.go lib/*/*.go model/*.go spiff/*.go view/*.go)
 
-PLAYER_SOURCES = $(wildcard player/*.go)
+INTERNAL_SOURCES = $(wildcard internal/*/*.go)
 
+SERVER_SOURCES = ${INTERNAL_SOURCES} ${COMMON_SOURCES}
+
+PLAYOUT_SOURCES = $(wildcard client/*.go player/*.go) ${INTERNAL_SOURCES} ${COMMON_SOURCES}
+
+# server embedded resources
 RES_DIR = internal/server/res
 RES_STATIC = $(wildcard ${RES_DIR}/static/*.css ${RES_DIR}/static/*.html \
 	${RES_DIR}/static/*.js ${RES_DIR}/static/*.svg)
@@ -37,53 +42,56 @@ RES_MUSIC = $(wildcard ${RES_DIR}/template/music/*.html)
 RES_PODCAST = $(wildcard ${RES_DIR}/template/podcast/*.html)
 RES_VIDEO = $(wildcard ${RES_DIR}/template/video/*.html)
 RES_TEMPLATE = ${RES_ROOT} ${RES_MUSIC} ${RES_PODCAST} ${RES_VIDEO}
-RESOURCES = ${RES_STATIC} ${RES_TEMPLATE}
+SERVER_RESOURCES = ${RES_STATIC} ${RES_TEMPLATE}
 
-#
-TAKEOUT_CMD_DIR = cmd/takeout
-TAKEOUT_CMD_TARGET = ${TAKEOUT_CMD_DIR}/takeout
-TAKEOUT_CMD_SRC = $(wildcard ${TAKEOUT_CMD_DIR}/*.go)
+# server
+SERVER_CMD_DIR = cmd/takeout
+SERVER_CMD_TARGET = ${SERVER_CMD_DIR}/takeout
+SERVER_CMD_SRC = $(wildcard ${SERVER_CMD_DIR}/*.go)
 
-#
+# playout
 PLAYOUT_CMD_DIR = cmd/playout
 PLAYOUT_CMD_TARGET = ${PLAYOUT_CMD_DIR}/playout
 PLAYOUT_CMD_SRC = $(wildcard ${PLAYOUT_CMD_DIR}/*.go)
 
-#
+# tmdb
 TMDB_CMD_DIR = tools/cmd/tmdb
 TMDB_CMD_TARGET = ${TMDB_CMD_DIR}/tmdb
 TMDB_CMD_SRC = $(wildcard ${TMDB_CMD_DIR}/*.go)
 
 .PHONY: all install clean
 
-all: takeout playout
+all: server playout
 
-takeout: ${TAKEOUT_CMD_TARGET}
+#
+server: ${SERVER_CMD_TARGET}
 
-${TAKEOUT_CMD_TARGET}: ${TAKEOUT_CMD_SRC} ${SOURCES} ${RESOURCES}
-	@cd ${TAKEOUT_CMD_DIR} && ${GO} build
+${SERVER_CMD_TARGET}: ${SERVER_CMD_SRC} ${SERVER_SOURCES} ${SERVER_RESOURCES}
+	@cd ${SERVER_CMD_DIR} && ${GO} build
 
-install-takeout: takeout
-	@cd ${TAKEOUT_CMD_DIR} && ${GO} install
+install-server: server
+	@cd ${SERVER_CMD_DIR} && ${GO} install
 
+#
 playout: ${PLAYOUT_CMD_TARGET}
 
-${PLAYOUT_CMD_TARGET}: ${PLAYOUT_CMD_SRC} ${SOURCES} ${CLIENT_SOURCES} ${PLAYER_SOURCES}
+${PLAYOUT_CMD_TARGET}: ${PLAYOUT_CMD_SRC} ${PLAYOUT_SOURCES}
 	@cd ${PLAYOUT_CMD_DIR} && ${GO} build
 
 install-playout: playout
 	@cd ${PLAYOUT_CMD_DIR} && ${GO} install
 
+#
 tmdb: ${TMDB_CMD_TARGET}
 
-${TMDB_CMD_TARGET}: ${TMDB_CMD_SRC} ${SOURCES}
+${TMDB_CMD_TARGET}: ${TMDB_CMD_SRC} ${COMMON_SOURCES}
 	@cd ${TMDB_CMD_DIR} && ${GO} build
 
-install: install-takeout install-playout
+install: install-server install-playout
 
 clean:
-	@cd ${TAKEOUT_CMD_DIR} && ${GO} clean
-	rm -f ${TAKEOUT_CMD_TARGET}
+	@cd ${SERVER_CMD_DIR} && ${GO} clean
+	rm -f ${SERVER_CMD_TARGET}
 	@cd ${PLAYOUT_CMD_DIR} && ${GO} clean
 	rm -f ${PLAYOUT_CMD_TARGET}
 	@cd ${TMDB_CMD_DIR} && ${GO} clean
@@ -97,3 +105,11 @@ docker-push:
 	${DOCKER} tag ${DOCKER_IMAGE} ${DOCKER_USER}/${DOCKER_IMAGE}:${GIT_VERSION}
 	${DOCKER} push ${DOCKER_USER}/${DOCKER_IMAGE}:latest
 	${DOCKER} push ${DOCKER_USER}/${DOCKER_IMAGE}:${GIT_VERSION}
+
+# manually update version in takeout.go
+# manually git commit -a
+# push will add git version tag as needed, push origin, push tag
+push:
+	@git tag --list | grep -q v${TAKEOUT_VERSION} || git tag v${TAKEOUT_VERSION}
+	@git push origin
+	@git push origin v${TAKEOUT_VERSION}
