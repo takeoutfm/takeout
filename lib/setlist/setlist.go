@@ -19,20 +19,28 @@ package setlist
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/takeoutfm/takeout/lib/client"
 )
 
-type Setlist struct {
-	client client.Client
+type Config struct {
+	ApiKey string
 }
 
-func NewSetlist(client client.Client) *Setlist {
-	return &Setlist{
+type Client struct {
+	config Config
+	client client.Getter
+}
+
+func NewClient(config Config, client client.Getter) *Client {
+	return &Client{
+		config: config,
 		client: client,
 	}
 }
 
-type setlistArtist struct {
+type Artist struct {
 	Mbid           string `json:"mbid"`
 	Tmid           int    `json:"tmid"`
 	Name           string `json:"name"`
@@ -41,80 +49,88 @@ type setlistArtist struct {
 	Url            string `json:"url"`
 }
 
-type setlistCountry struct {
+type Country struct {
 	Name string `json:"name"`
 	Code string `json:"code"`
 }
 
-type setlistCity struct {
-	Id        string         `json:"id"`
-	Name      string         `json:"name"`
-	State     string         `json:"state"`
-	StateCode string         `json:"stateCode"`
-	Country   setlistCountry `json:"country"`
+type City struct {
+	Id        string  `json:"id"`
+	Name      string  `json:"name"`
+	State     string  `json:"state"`
+	StateCode string  `json:"stateCode"`
+	Country   Country `json:"country"`
 }
 
-type setlistVenue struct {
-	Id   string      `json:"id"`
-	Name string      `json:"name"`
-	Url  string      `json:"url"`
-	City setlistCity `json:"city"`
+type Venue struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+	Url  string `json:"url"`
+	City City   `json:"city"`
 }
 
-type setlistTour struct {
+type Tour struct {
 	Name string `json:"name"`
 }
 
-type setlistSong struct {
+type Song struct {
 	Name string `json:"name"`
 	Info string `json:"info"`
 	Tape bool   `json:"tape"`
 }
 
-type setlistSet struct {
-	Encore int           `json:"encore"`
-	Name   string        `json:"name"`
-	Songs  []setlistSong `json:"song"`
+type Set struct {
+	Encore int    `json:"encore"`
+	Name   string `json:"name"`
+	Songs  []Song `json:"song"`
 }
 
-type setlistSets struct {
-	Set []setlistSet `json:"set"`
+type Sets struct {
+	Set []Set `json:"set"`
 }
 
-type setlist struct {
-	Id          string        `json:"id"`
-	VersionId   string        `json:"versionId"`
-	EventDate   string        `json:"eventDate"`
-	LastUpdated string        `json:"lastUpdated"`
-	Artist      setlistArtist `json:"artist"`
-	Venue       setlistVenue  `json:"venue"`
-	Tour        setlistTour   `json:"tour"`
-	Sets        setlistSets   `json:"sets"`
-	Info        string        `json:"info"`
-	Url         string        `json:"url"`
+type Setlist struct {
+	Id          string `json:"id"`
+	VersionId   string `json:"versionId"`
+	EventDate   string `json:"eventDate"`
+	LastUpdated string `json:"lastUpdated"`
+	Artist      Artist `json:"artist"`
+	Venue       Venue  `json:"venue"`
+	Tour        Tour   `json:"tour"`
+	Sets        Sets   `json:"sets"`
+	Info        string `json:"info"`
+	Url         string `json:"url"`
 }
 
-type setlistResponse struct {
+func (s Setlist) EventTime() time.Time {
+	t, err := time.Parse("2-1-2006", s.EventDate)
+	if err != nil {
+		return time.Time{}
+	}
+	return t
+}
+
+type SetlistPage struct {
 	Type         string    `json:"type"`
 	ItemsPerPage int       `json:"itemsPerPage"`
 	Page         int       `json:"page"`
 	Total        int       `json:"total"`
-	Setlist      []setlist `json:"setlist"`
+	Setlist      []Setlist `json:"setlist"`
 }
 
-func (s *Setlist) ArtistYear(arid string, year int) []setlist {
+func (s *Client) ArtistYear(arid string, year int) []Setlist {
 	format := fmt.Sprintf("https://api.setlist.fm/rest/1.0/search/setlists?artistMbid=%s&year=%d",
 		arid, year)
-	return s.setlistFetch(format + "&page=%d")
+	return s.fetchAll(format + "&p=%d")
 }
 
-func (s *Setlist) setlistFetch(format string) []setlist {
-	var list []setlist
+func (s *Client) fetchAll(format string) []Setlist {
+	var list []Setlist
 	total := 0
 
 	for page := 1; ; page++ {
 		url := fmt.Sprintf(format, page)
-		result := s.setlistPage(url)
+		result := s.fetchPage(url)
 		fmt.Printf("page %d, items per page %d, total %d\n",
 			result.Page, result.ItemsPerPage, result.Total)
 		list = append(list, result.Setlist...)
@@ -123,17 +139,21 @@ func (s *Setlist) setlistFetch(format string) []setlist {
 			break
 		}
 	}
-
 	return list
 }
 
-func (s *Setlist) setlistPage(url string) *setlistResponse {
+func (s *Client) fetchPage(url string) *SetlistPage {
+	time.Sleep(time.Second)
+
 	fmt.Printf("url %s\n", url)
 	headers := map[string]string{
 		"Accept":    "application/json",
-		"x-api-key": "TGRHYagNV144XhA74sNfNPqoa443ClIjUabD",
+		"x-api-key": s.config.ApiKey,
 	}
-	var result setlistResponse
-	s.client.GetJsonWith(headers, url, &result)
+	var result SetlistPage
+	err := s.client.GetJsonWith(headers, url, &result)
+	if err != nil {
+		fmt.Println(err)
+	}
 	return &result
 }

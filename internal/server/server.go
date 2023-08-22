@@ -27,7 +27,6 @@ import (
 	"github.com/takeoutfm/takeout/internal/config"
 	"github.com/takeoutfm/takeout/internal/progress"
 	"github.com/takeoutfm/takeout/lib/client"
-	"github.com/takeoutfm/takeout/lib/hub"
 	"github.com/takeoutfm/takeout/lib/log"
 )
 
@@ -118,15 +117,6 @@ func requestHandler(ctx RequestContext, handler http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-// hubHandler handles hub requests.
-func hubHandler(ctx RequestContext, h *hub.Hub) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		r = withContext(r, ctx)
-		h.Handle(ctx.Auth(), w, r)
-	}
-	return http.HandlerFunc(fn)
-}
-
 func makeAuth(config *config.Config) (*auth.Auth, error) {
 	a := auth.NewAuth(config)
 	err := a.Open()
@@ -145,12 +135,6 @@ func makeProgress(config *config.Config) (*progress.Progress, error) {
 	return p, err
 }
 
-func makeHub(config *config.Config) (*hub.Hub, error) {
-	h := hub.NewHub()
-	go h.Run()
-	return h, nil
-}
-
 // Serve configures and starts the Takeout web, websocket, and API services.
 func Serve(config *config.Config) error {
 	auth, err := makeAuth(config)
@@ -160,9 +144,6 @@ func Serve(config *config.Config) error {
 	log.CheckError(err)
 
 	progress, err := makeProgress(config)
-	log.CheckError(err)
-
-	hub, err := makeHub(config)
 	log.CheckError(err)
 
 	schedule(config)
@@ -263,9 +244,6 @@ func Serve(config *config.Config) error {
 	mux.Get("/api/activity/movies", accessTokenAuthHandler(ctx, apiActivityMoviesGet))
 	mux.Get("/api/activity/releases", accessTokenAuthHandler(ctx, apiActivityReleasesGet))
 	// /activity/radio - ?
-
-	// Hub
-	mux.Get("/live", hubHandler(ctx, hub))
 
 	// Hook
 	mux.Post("/hook/", requestHandler(ctx, hookHandler))

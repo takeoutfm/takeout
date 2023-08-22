@@ -193,7 +193,7 @@ type DateRecommend struct {
 }
 
 type TMDBAPIConfig struct {
-	tmdb.Config
+	tmdb.Config  `mapstructure:",squash"`
 	FileTemplate Template
 }
 

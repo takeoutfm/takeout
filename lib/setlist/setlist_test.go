@@ -18,36 +18,41 @@
 package setlist
 
 import (
-	"github.com/takeoutfm/takeout/config"
 	"github.com/takeoutfm/takeout/lib/client"
 	"testing"
 	"fmt"
 )
 
 func TestSetlist(t *testing.T) {
+	//"TGRHYagNV144XhA74sNfNPqoa443ClIjUabD",
+
 	// radiohead
 	//arid := "a74b1b7f-71a5-4011-9441-d0b5e4122711"
 	// iron maiden
 	//arid := "ca891d65-d9b0-4258-89f7-e6ba29d83767"
 	// numan
+	//arid := "6cb79cb2-9087-44d4-828b-5c6fdff2c957"
+
+	config := Config{ApiKey: ""}
+	s := NewClient(config, client.NewGetter(client.Config{}))
+
 	arid := "6cb79cb2-9087-44d4-828b-5c6fdff2c957"
-
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-
-	s := NewSetlist(config, client.NewClient(&config.Client))
-	result := s.ArtistYear(arid, 2001)
+	result := s.ArtistYear(arid, 2022)
 
 	for _, sl := range result {
-		fmt.Printf("%s %s @ %s, %s, %s\n", sl.Tour.Name, sl.EventDate,
+		fmt.Printf("%s %s @ %s, %s, %s\n", sl.Tour.Name, sl.EventTime().Format("Mon, Jan 2, 2006"),
 			sl.Venue.Name, sl.Venue.City.Name, sl.Venue.City.Country.Name)
 		for _, v := range sl.Sets.Set {
 			if v.Encore == 0 {
-				fmt.Printf("set %d\n", len(v.Songs))
+				fmt.Printf("set %s - %d\n", v.Name, len(v.Songs))
+				// for i, t := range v.Songs {
+				// 	fmt.Printf("%d. %s (%s)\n", i, t.Name, t.Info)
+			// }
 			} else {
-				fmt.Printf("encore %d\n", len(v.Songs))
+				fmt.Printf("encore %s - %d\n", v.Name, len(v.Songs))
+				// for i, t := range v.Songs {
+				// 	fmt.Printf("%d. %s (%s)\n", i, t.Name, t.Info)
+				// }
 			}
 		}
 	}
