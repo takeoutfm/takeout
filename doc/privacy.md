@@ -133,7 +133,7 @@ stable. It's possible, with access to the _activity_ database, to reconstruct
 media consumption information by mapping third-party identifiers to actual
 metadata.
 
-Activity APIs are still a working in progress.
+Activity APIs are still a work in progress.
 
 ## Information Disclosure
 

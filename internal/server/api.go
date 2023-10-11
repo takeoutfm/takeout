@@ -606,6 +606,11 @@ func apiPodcasts(w http.ResponseWriter, r *http.Request) {
 	apiView(w, r, PodcastsView(ctx))
 }
 
+func apiPodcastsSubscribed(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	apiView(w, r, PodcastsSubscribedView(ctx))
+}
+
 func apiPodcastSeriesGet(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	id := r.URL.Query().Get(ParamID)
@@ -614,6 +619,38 @@ func apiPodcastSeriesGet(w http.ResponseWriter, r *http.Request) {
 		notFoundErr(w)
 	} else {
 		apiView(w, r, SeriesView(ctx, series))
+	}
+}
+
+func apiPodcastSeriesSubscribe(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	id := r.URL.Query().Get(ParamID)
+	series, err := ctx.Podcast().FindSeries(id)
+	if err != nil {
+		notFoundErr(w)
+	} else {
+		err := ctx.Podcast().Subscribe(series.SID, ctx.User().Name)
+		if err != nil {
+			serverErr(w, err)
+		} else {
+			w.WriteHeader(http.StatusNoContent)
+		}
+	}
+}
+
+func apiPodcastSeriesUnsubscribe(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	id := r.URL.Query().Get(ParamID)
+	series, err := ctx.Podcast().FindSeries(id)
+	if err != nil {
+		notFoundErr(w)
+	} else {
+		err := ctx.Podcast().Unsubscribe(series.SID, ctx.User().Name)
+		if err != nil {
+			serverErr(w, err)
+		} else {
+			w.WriteHeader(http.StatusNoContent)
+		}
 	}
 }
 

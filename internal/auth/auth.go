@@ -81,7 +81,7 @@ func (s *Session) Expired() bool {
 	return now.After(s.Expires)
 }
 
-// Expires returns whether or not the session is not expired.
+// Valid returns whether or not the session is not expired.
 func (s *Session) Valid() bool {
 	return !s.Expired()
 }

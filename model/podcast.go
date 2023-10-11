@@ -52,3 +52,9 @@ type Episode struct {
 	URL         string
 	Date        time.Time // publish time
 }
+
+type Subscription struct {
+	gorm.Model
+	SID  string `gorm:"primaryKey"`
+	User string `gorm:"primaryKey"`
+}

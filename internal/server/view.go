@@ -318,6 +318,14 @@ func PodcastsView(ctx Context) *Podcasts {
 	return view
 }
 
+func PodcastsSubscribedView(ctx Context) *Podcasts {
+	p := ctx.Podcast()
+	view := &Podcasts{}
+	view.Series = p.SeriesFor(ctx.User().Name)
+	view.SeriesImage = p.SeriesImage
+	return view
+}
+
 func SeriesView(ctx Context, s model.Series) *Series {
 	p := ctx.Podcast()
 	view := &Series{}

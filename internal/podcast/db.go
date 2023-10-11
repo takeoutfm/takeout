@@ -38,7 +38,7 @@ func (p *Podcast) openDB() (err error) {
 		return
 	}
 
-	p.db.AutoMigrate(&Series{}, &Episode{})
+	p.db.AutoMigrate(&Series{}, &Episode{}, &Subscription{})
 	return
 }
 
@@ -72,10 +72,28 @@ func (p *Podcast) RecentEpisodes() []Episode {
 	return episodes
 }
 
+func (p *Podcast) RecentEpisodesFor(userid string) []Episode {
+	var episodes []Episode
+	ids := p.sidsFor(userid)
+	p.db.Where("episodes.s_id in (?)", ids).
+		Order("date desc").
+		Find(&episodes)
+	return episodes
+}
+
 func (p *Podcast) RecentSeries() []Series {
 	var series []Series
 	p.db.Order("date desc").
 		Limit(p.config.Podcast.RecentLimit).
+		Find(&series)
+	return series
+}
+
+func (p *Podcast) RecentSeriesFor(userid string) []Series {
+	var series []Series
+	ids := p.sidsFor(userid)
+	p.db.Where("s_id in (?)", ids).
+		Order("date desc").
 		Find(&series)
 	return series
 }
@@ -203,4 +221,40 @@ func (p *Podcast) seriesFor(keys []string) []Series {
 	var series []Series
 	p.db.Where("s_id in (?)", keys).Find(&series)
 	return series
+}
+
+func (p *Podcast) HasSubscriptions(userid string) bool {
+	list := p.SubscriptionsFor(userid)
+	return len(list) > 0
+}
+
+func (p *Podcast) Subscribe(sid, userid string) error {
+	s := Subscription{
+		SID:  sid,
+		User: userid,
+	}
+	return p.db.Create(&s).Error
+}
+
+func (p *Podcast) Unsubscribe(sid, userid string) error {
+	return p.db.Unscoped().Delete(Subscription{}, "s_id = ? and user = ?", sid, userid).Error
+}
+
+func (p *Podcast) SubscriptionsFor(userid string) []Subscription {
+	var subs []Subscription
+	p.db.Where("user = ?", userid).Find(&subs)
+	return subs
+}
+
+func (p *Podcast) sidsFor(userid string) []string {
+	subs := p.SubscriptionsFor(userid)
+	var ids []string
+	for _, s := range subs {
+		ids = append(ids, s.SID)
+	}
+	return ids
+}
+
+func (p *Podcast) SeriesFor(userid string) []Series {
+	return p.seriesFor(p.sidsFor(userid))
 }

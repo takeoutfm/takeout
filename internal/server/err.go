@@ -37,6 +37,8 @@ var (
 	ErrMissingMediaToken  = errors.New("missing media token")
 	ErrMissingCcookie     = errors.New("missing cookie")
 	ErrInvalidSession     = errors.New("invalid session")
+	ErrInvalidUUID        = errors.New("invalid uuid")
+	ErrInvalidContent     = errors.New("invalid content")
 )
 
 func serverErr(w http.ResponseWriter, err error) {

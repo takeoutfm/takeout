@@ -219,7 +219,10 @@ func Serve(config *config.Config) error {
 
 	// podcast
 	mux.Get("/api/podcasts", accessTokenAuthHandler(ctx, apiPodcasts))
+	mux.Get("/api/podcasts/subscribed", accessTokenAuthHandler(ctx, apiPodcastsSubscribed))
 	mux.Get("/api/series/:id", accessTokenAuthHandler(ctx, apiPodcastSeriesGet))
+	mux.Put("/api/series/:id/subscribed", accessTokenAuthHandler(ctx, apiPodcastSeriesSubscribe))
+	mux.Del("/api/series/:id/subscribed", accessTokenAuthHandler(ctx, apiPodcastSeriesUnsubscribe))
 	mux.Get("/api/series/:id/playlist", accessTokenAuthHandler(ctx, apiPodcastSeriesGetPlaylist))
 	mux.Get("/api/series/:id/playlist.xspf", accessTokenAuthHandler(ctx, apiPodcastSeriesGetPlaylist))
 	mux.Get("/api/episodes/:id", accessTokenAuthHandler(ctx, apiPodcastEpisodeGet))
@@ -242,11 +245,17 @@ func Serve(config *config.Config) error {
 	mux.Get("/api/activity/tracks/:res", accessTokenAuthHandler(ctx, apiActivityTracksGetResource))
 	mux.Get("/api/activity/tracks/:res/playlist", accessTokenAuthHandler(ctx, apiActivityTracksGetPlaylist))
 	mux.Get("/api/activity/movies", accessTokenAuthHandler(ctx, apiActivityMoviesGet))
-	mux.Get("/api/activity/releases", accessTokenAuthHandler(ctx, apiActivityReleasesGet))
 	// /activity/radio - ?
+	mux.Get("/api/activity/releases", accessTokenAuthHandler(ctx, apiActivityReleasesGet))
+
+	// TODO - disable for now, work in progress
+	// settings
+	// mux.Put("/api/objects/:uuid", accessTokenAuthHandler(ctx, apiObjectPut));
+	// mux.Get("/api/objects", accessTokenAuthHandler(ctx, apiObjectsList));
+	// mux.Get("/api/objects/:uuid", accessTokenAuthHandler(ctx, apiObjectGet));
 
 	// Hook
-	mux.Post("/hook/", requestHandler(ctx, hookHandler))
+	//mux.Post("/hook/", requestHandler(ctx, hookHandler))
 
 	// Images
 	client := client.NewCacheOnlyGetter(config.Server.ImageClient)

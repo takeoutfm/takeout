@@ -38,6 +38,7 @@ type notify struct {
 
 func (p notify) Stream(samples [][2]float64) (int, bool) {
 	if p.f.midpoint != nil {
+		// FIXME Len() may return zero
 		if p.s.Position() > (p.s.Len() / 2) {
 			p.f.midpoint()
 			p.f.midpoint = nil
