@@ -219,7 +219,9 @@ func (p *Podcast) episodesFor(keys []string) []Episode {
 
 func (p *Podcast) seriesFor(keys []string) []Series {
 	var series []Series
-	p.db.Where("s_id in (?)", keys).Find(&series)
+	p.db.Where("s_id in (?)", keys).
+		Order("date desc").
+		Find(&series)
 	return series
 }
 

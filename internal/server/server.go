@@ -31,9 +31,12 @@ import (
 )
 
 const (
+	LoginPage = "/static/login.html"
+	LinkPage  = "/static/link.html"
+
 	SuccessRedirect = "/"
-	LinkRedirect    = "/static/link.html"
-	LoginRedirect   = "/static/login.html"
+	LinkRedirect    = LoginPage
+	LoginRedirect   = LinkPage
 )
 
 // doLogin creates a login session for the provided user or returns an error
@@ -163,6 +166,21 @@ func Serve(config *config.Config) error {
 	}
 
 	mux := pat.New()
+
+	aliasHandler := func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/link":
+		case "/link.htm":
+		case "/link.html":
+			r.URL.Path = LinkPage
+		case "/login":
+		case "/login.htm":
+		case "/login.html":
+			r.URL.Path = LoginPage
+		}
+		mux.ServeHTTP(w, r)
+	}
+
 	mux.Get("/static/", http.HandlerFunc(staticHandler))
 	mux.Get("/", accessTokenAuthHandler(ctx, viewHandler))
 	mux.Get("/v", accessTokenAuthHandler(ctx, viewHandler))
@@ -170,7 +188,13 @@ func Serve(config *config.Config) error {
 	// cookie auth
 	mux.Post("/api/login", requestHandler(ctx, apiLogin))
 	mux.Post("/login", requestHandler(ctx, loginHandler))
+	mux.Get("/login", http.HandlerFunc(aliasHandler))
+	mux.Get("/login.htm", http.HandlerFunc(aliasHandler))
+	mux.Get("/login.html", http.HandlerFunc(aliasHandler))
 	mux.Post("/link", requestHandler(ctx, linkHandler))
+	mux.Get("/link", http.HandlerFunc(aliasHandler))
+	mux.Get("/link.htm", http.HandlerFunc(aliasHandler))
+	mux.Get("/link.html", http.HandlerFunc(aliasHandler))
 
 	// token auth
 	mux.Post("/api/token", requestHandler(ctx, apiTokenLogin))
