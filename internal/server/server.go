@@ -35,8 +35,8 @@ const (
 	LinkPage  = "/static/link.html"
 
 	SuccessRedirect = "/"
-	LinkRedirect    = LoginPage
-	LoginRedirect   = LinkPage
+	LinkRedirect    = LinkPage
+	LoginRedirect   = LoginPage
 )
 
 // doLogin creates a login session for the provided user or returns an error
@@ -168,17 +168,20 @@ func Serve(config *config.Config) error {
 	mux := pat.New()
 
 	aliasHandler := func(w http.ResponseWriter, r *http.Request) {
-		switch r.URL.Path {
-		case "/link":
-		case "/link.htm":
-		case "/link.html":
-			r.URL.Path = LinkPage
-		case "/login":
-		case "/login.htm":
-		case "/login.html":
-			r.URL.Path = LoginPage
+		if r.Method == http.MethodGet {
+			switch r.URL.Path {
+			case "/link", "/link.htm", "/link.html":
+				r.URL.Path = LinkPage
+				mux.ServeHTTP(w, r)
+			case "/login", "/login.htm", "/login.html":
+				r.URL.Path = LoginPage
+				mux.ServeHTTP(w, r)
+			default:
+				serverErr(w, ErrNotFound)
+			}
+		} else {
+			serverErr(w, ErrNotFound)
 		}
-		mux.ServeHTTP(w, r)
 	}
 
 	mux.Get("/static/", http.HandlerFunc(staticHandler))
