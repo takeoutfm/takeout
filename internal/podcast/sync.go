@@ -120,12 +120,18 @@ func (p *Podcast) syncPodcast(url string) error {
 	var episodes []string
 	for _, i := range channel.Items {
 		var eid string
-		if strings.Contains(i.GUID, "://") {
+		if strings.Contains(i.GUID.Value, "://") {
 			// some GUIDs are URLs, hash them
-			eid = hash.MD5Hex(i.GUID)
+			eid = hash.MD5Hex(i.GUID.Value)
 		} else {
-			eid = i.GUID
+			eid = i.GUID.Value
 		}
+
+		img := i.ItemImage()
+		if img == "" {
+			img = series.Image
+		}
+
 		episode := p.findEpisode(eid)
 		if episode == nil {
 			episode = &Episode{
@@ -139,6 +145,7 @@ func (p *Podcast) syncPodcast(url string) error {
 				Size:        i.Size(),
 				URL:         i.URL(),
 				Date:        i.PublishTime(),
+				Image:       img,
 			}
 			err = p.createEpisode(episode)
 			if err != nil {
@@ -154,6 +161,7 @@ func (p *Podcast) syncPodcast(url string) error {
 			episode.Size = i.Size()
 			episode.URL = i.URL()
 			episode.Date = i.PublishTime()
+			episode.Image = img
 			err := p.db.Save(episode).Error
 			if err != nil {
 				return err

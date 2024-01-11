@@ -19,6 +19,7 @@
 package music
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -331,13 +332,19 @@ func (m *Music) CreateStations() {
 	}
 
 	for _, v := range m.config.Music.RadioStreams {
+		src, err := json.Marshal(v.Source)
+		if err != nil {
+			fmt.Printf("json err %v\n", err)
+			continue
+		}
+		ref := string(src)
 		station := Station{
 			User:    TakeoutUser,
 			Shared:  true,
 			Type:    TypeStream,
 			Name:    v.Title,
 			Creator: v.Creator,
-			Ref:     v.Location,
+			Ref:     ref,
 			Image:   v.Image,
 		}
 		m.CreateStation(&station)

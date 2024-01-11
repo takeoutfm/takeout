@@ -51,6 +51,7 @@ type Episode struct {
 	Size        int64
 	URL         string
 	Date        time.Time // publish time
+	Image       string
 }
 
 type Subscription struct {

@@ -22,6 +22,7 @@
 package player
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -261,12 +262,30 @@ func (p *Player) playIndex(index int) {
 	var url *url.URL
 	var err error
 	if p.IsStream() {
-		url, err = url.Parse(track.Location[0])
+		var location string
+		for _, l := range track.Location {
+			// radio streams may have multiple formats so pick
+			// first one that's supported
+			if strings.HasSuffix(l, ".flac") ||
+				strings.HasSuffix(l, ".mp3") ||
+				strings.HasSuffix(l, ".ogg") ||
+				strings.HasSuffix(l, ".wav") {
+				location = l
+				break
+			}
+		}
+		if location == "" {
+			p.errors <- errors.New("unsupported stream")
+			return
+		}
+		url, err = url.Parse(location)
 		if err != nil {
 			p.errors <- err
 			return
 		}
 	} else {
+		// assuming for now the format is supported, will fail below if
+		// unsupported
 		url, err = client.Locate(p.context, track.Location[0])
 		if err != nil {
 			p.errors <- err

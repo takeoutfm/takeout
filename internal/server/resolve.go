@@ -18,6 +18,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -25,9 +26,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/takeoutfm/takeout/internal/config"
 	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/lib/log"
+	"github.com/takeoutfm/takeout/lib/pls"
 	"github.com/takeoutfm/takeout/model"
 	"github.com/takeoutfm/takeout/spiff"
 	"github.com/takeoutfm/takeout/view"
@@ -264,6 +267,72 @@ func resolveRadioRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.Ent
 	return entries, nil
 }
 
+// ref is a json encoded array of ContentDescription records. The result of
+// this is intended to be a list of locations to the same stream encoded in
+// different formats and allow the client to chose the best source.
+//
+// TODO - ideally the entries should include the source ContentType but
+// currently there's no field for this in spiff. Clients can use the extension
+// (aac, mp3, etc.) to determine ContentType for now.
+func resolveSourceRef(ctx Context, ref string, s *model.Station, entries []spiff.Entry) ([]spiff.Entry, error) {
+	var locations []string
+	var sizes []int64
+	var sources []config.ContentDescription
+	json.Unmarshal([]byte(ref), &sources)
+
+	queue := make(chan string, len(sources))
+	for _, src := range sources {
+		if strings.HasSuffix(src.URL, ".pls") {
+			queue <- src.URL
+		} else {
+			locations = append(locations, src.URL)
+			sizes = append(sizes, -1)
+		}
+	}
+
+	count := len(queue)
+	if count > 0 {
+		// fetch many playlists concurrently and collect results and
+		// errors
+		results := make(chan pls.Playlist)
+		errors := make(chan error)
+		client := ctx.Config().NewGetter()
+		for i := 0; i < count; i++ {
+			go func(url string) {
+				result, err := client.GetPLS(url)
+				if err != nil {
+					errors <- err
+				} else {
+					results <- result
+				}
+			}(<-queue)
+		}
+		for i := 0; i < count; i++ {
+			select {
+			case result := <-results:
+				// TODO use the first pls entry for now
+				locations = append(locations, result.Entries[0].File)
+				sizes = append(sizes, int64(result.Entries[0].Length))
+			case err := <-errors:
+				fmt.Printf("src err %v\n", err)
+			}
+		}
+	}
+
+	entries = append(entries, spiff.Entry{
+		Creator:    s.Creator,
+		Album:      s.Name,
+		Title:      s.Name,
+		Image:      s.Image,
+		Location:   locations,
+		Size:       sizes,
+		Identifier: []string{},
+		Date:       date.FormatJson(time.Now()),
+	})
+
+	return entries, nil
+}
+
 func resolvePlsRef(ctx Context, url, creator, image string, entries []spiff.Entry) ([]spiff.Entry, error) {
 	client := ctx.Config().NewGetter()
 	result, err := client.GetPLS(url)
@@ -328,6 +397,14 @@ func RefreshStation(ctx Context, s *model.Station) *spiff.Playlist {
 			entries, err := resolvePlsRef(ctx, s.Ref, s.Creator, s.Image, entries)
 			if err != nil {
 				log.Printf("pls error %s\n", err)
+				return nil
+			}
+			plist.Spiff.Entries = entries
+		} else if strings.HasPrefix(s.Ref, "[{") {
+			var entries []spiff.Entry
+			entries, err := resolveSourceRef(ctx, s.Ref, s, entries)
+			if err != nil {
+				log.Printf("src error %s\n", err)
 				return nil
 			}
 			plist.Spiff.Entries = entries

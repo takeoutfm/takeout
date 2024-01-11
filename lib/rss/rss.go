@@ -20,10 +20,12 @@ package rss
 
 import (
 	"encoding/xml"
+	"strings"
 	"time"
 
 	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/takeoutfm/takeout/lib/date"
+	"github.com/takeoutfm/takeout/lib/hash"
 )
 
 type RSS struct {
@@ -64,6 +66,8 @@ func (rss RSS) FetchPodcast(url string) (*Podcast, error) {
 			Size:        i.Size(),
 			URL:         i.URL(),
 			PublishTime: i.PublishTime(),
+			GUID:        i.ItemGUID(),
+			Image:       i.ItemImage(),
 		}
 		podcast.Episodes = append(podcast.Episodes, episode)
 	}
@@ -91,14 +95,17 @@ type Episode struct {
 	Size        int64
 	URL         string
 	PublishTime time.Time
+	GUID        string
+	Image       string
 }
 
 type Image struct {
-	Title  string `xml:"title"`
-	URL    string `xml:"url"`
-	Link   string `xml:"link"`
-	Width  int    `xml:"width"`
-	Height int    `xml:"height"`
+	Title     string `xml:"title"`
+	URL       string `xml:"url"`
+	Link      string `xml:"link"`
+	Width     int    `xml:"width"`
+	Height    int    `xml:"height"`
+	Reference string `xml:"href,attr"`
 }
 
 type Content struct {
@@ -117,6 +124,11 @@ type Enclosure struct {
 	URL    string `xml:"url,attr"`
 }
 
+type GUID struct {
+	PermaLink bool   `xml:"isPermaLink,attr"`
+	Value     string `xml:",chardata"`
+}
+
 type Item struct {
 	XMLName     xml.Name  `xml:"item"`
 	Title       string    `xml:"title"`
@@ -124,11 +136,14 @@ type Item struct {
 	PubDate     string    `xml:"pubDate"`
 	Description string    `xml:"description"`
 	Categories  []string  `xml:"category"`
-	GUID        string    `xml:"guid"`
+	GUID        GUID      `xml:"guid"`
 	Author      string    `xml:"author,itunes"`
 	Episode     string    `xml:"episode,itunes"`
+	Image       Image     `xml:"image,itunes"`
+	Duration    string    `xml:"duration,itunes"`
 	Content     Content   `xml:"content,media"`
 	Enclosure   Enclosure `xml:"enclosure"`
+	Comments    string    `xml:"comments"`
 }
 
 func (i Item) ItemTitle() string {
@@ -161,6 +176,20 @@ func (i Item) URL() string {
 		return i.Content.URL
 	}
 	return i.Enclosure.URL
+}
+
+func (i Item) ItemGUID() string {
+	guid := i.GUID.Value
+	if guid == "" {
+		guid = hash.MD5Hex(i.Link)
+	} else if i.GUID.PermaLink || strings.Contains(guid, "://") {
+		guid = hash.MD5Hex(guid)
+	}
+	return guid
+}
+
+func (i Item) ItemImage() string {
+	return i.Image.Reference
 }
 
 type Channel struct {

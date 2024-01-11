@@ -107,11 +107,17 @@ type AssistantConfig struct {
 	MediaObjectDesc Template
 }
 
+type ContentDescription struct {
+	ContentType string `json:"contentType"`
+	URL         string `json:"url"`
+}
+
 type RadioStream struct {
-	Creator  string
-	Title    string
-	Image    string
-	Location string
+	Creator     string
+	Title       string
+	Image       string
+	Description string
+	Source      []ContentDescription
 }
 
 type MusicConfig struct {
@@ -336,68 +342,19 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Music.PopularLimit", "50")
 	v.SetDefault("Music.RadioLimit", "25")
 	v.SetDefault("Music.RadioSearchLimit", "1000")
-	v.SetDefault("Music.RadioStreams", []RadioStream{
-		{
-			Creator:  "Ted Leibowitz",
-			Title:    "BAGeL Radio (aac)",
-			Image:    "https://cdn-profiles.tunein.com/s187420/images/logod.jpg",
-			Location: "https://www.bagelradio.com/s/bagelradio.pls",
-		},
-		{
-			Creator:  "Ted Leibowitz",
-			Title:    "BAGeL Radio (mp3)",
-			Image:    "https://cdn-profiles.tunein.com/s187420/images/logod.jpg",
-			Location: "http://ais-sa3.cdnstream1.com/2606_128.mp3",
-		},
-		{
-			Creator:  "SomaFM",
-			Title:    "Groove Salad (aac)",
-			Image:    "https://somafm.com/img3/groovesalad-400.jpg",
-			Location: "https://somafm.com/groovesalad130.pls",
-		},
-		{
-			Creator:  "SomaFM",
-			Title:    "Groove Salad (mp3)",
-			Image:    "https://somafm.com/img3/groovesalad-400.jpg",
-			Location: "https://somafm.com/groovesalad256.pls",
-		},
-		{
-			Creator:  "SomaFM",
-			Title:    "Drone Zone (aac)",
-			Image:    "https://somafm.com/img3/dronezone-400.jpg",
-			Location: "https://somafm.com/dronezone130.pls",
-		},
-		{
-			Creator:  "SomaFM",
-			Title:    "Drone Zone (mp3)",
-			Image:    "https://somafm.com/img3/dronezone-400.jpg",
-			Location: "https://somafm.com/dronezone256.pls",
-		},
-		{
-			Creator:  "SomaFM",
-			Title:    "Indie Pop Rocks (aac)",
-			Image:    "https://somafm.com/img3/indiepop-400.jpg",
-			Location: "https://somafm.com/indiepop130.pls",
-		},
-		{
-			Creator:  "SomaFM",
-			Title:    "Indie Pop Rocks (mp3)",
-			Image:    "https://somafm.com/img3/indiepop-400.jpg",
-			Location: "https://somafm.com/indiepop.pls",
-		},
-		{
-			Creator:  "SomaFM",
-			Title:    "Underground 80s (aac)",
-			Image:    "https://somafm.com/img3/u80s-400.png",
-			Location: "https://somafm.com/u80s130.pls",
-		},
-		{
-			Creator:  "SomaFM",
-			Title:    "Underground 80s (mp3)",
-			Image:    "https://somafm.com/img3/u80s-400.png",
-			Location: "https://somafm.com/u80s256.pls",
-		},
-	})
+
+	radioStreams := []RadioStream{{
+		Creator:     "Ted Leibowitz",
+		Title:       "BAGeL Radio",
+		Image:       "https://cdn-profiles.tunein.com/s187420/images/logod.jpg",
+		Description: "",
+		Source: []ContentDescription{
+			{ContentType: "audio/mpeg", URL: "https://www.bagelradio.com/s/bagelradio.pls"},
+			{ContentType: "audio/aac", URL: "http://ais-sa3.cdnstream1.com/2606_128.mp3"},
+		}}}
+	radioStreams = append(radioStreams, somafmStreams...)
+	v.SetDefault("Music.RadioStreams", radioStreams)
+
 	v.SetDefault("Music.Recent", "8760h") // 1 year
 	v.SetDefault("Music.RecentLimit", "50")
 	v.SetDefault("Music.SearchLimit", "100")
@@ -465,7 +422,7 @@ func configDefaults(v *viper.Viper) {
 		{Match: "May 02", Layout: "Jan 02", Name: "Harry Potter Movies", Query: `+title:"harry potter"`},
 		{Match: "May 04", Layout: "Jan 02", Name: "Star Wars Movies", Query: `+title:"star wars"`},
 		{Match: "May 11", Layout: "Jan 02", Name: "Twilight Zone Movies", Query: `+title:"twilight zone"`},
-		{Match: "Jul 04", Layout: "Jan 02", Name: "July 4th Movies", Query: `+keyword:patriotism,patriotic,independence`},
+		{Match: "Jul 04", Layout: "Jan 02", Name: "July 4th Movies", Query: `keyword:patriotism keyword:patriotic keyword:independence`},
 		{Match: "Jul 04", Layout: "Jan 02", Name: "Alice in Wonderland",
 			Query: `character:"Alice Kingsleigh" character:"Mad Hatter" character:"Red Queen"`},
 		{Match: "Aug 11", Layout: "Jan 02", Name: "Spider-man Movies", Query: `+title:"spider-man"`},
@@ -475,7 +432,7 @@ func configDefaults(v *viper.Viper) {
 		{Match: "Dec 23", Layout: "Jan 02", Name: "It's Festivus", Query: `+keyword:festivus`},
 		// months
 		{Match: "Oct", Layout: "Jan", Name: "Halloween Movies", Query: `+keyword:halloween`},
-		{Match: "Dec", Layout: "Jan", Name: "Christmas Movies", Query: `+keyword:christmas`},
+		{Match: "Dec", Layout: "Jan", Name: "Christmas Movies", Query: `+keyword:christmas +keyword:holiday`},
 	})
 
 	// see https://musicbrainz.org/search (series)

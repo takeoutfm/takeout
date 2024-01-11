@@ -70,20 +70,8 @@ func (p *Podcast) SeriesImage(series Series) string {
 	return series.Image
 }
 
-// TODO expire cache
-var seriesImageCache = make(map[string]string)
-
 func (p *Podcast) EpisodeImage(episode Episode) string {
-	if v, ok := seriesImageCache[episode.SID]; ok {
-		return v
-	}
-	series := p.findSeries(episode.SID)
-	img := ""
-	if series != nil {
-		img = p.SeriesImage(*series)
-	}
-	seriesImageCache[episode.SID] = img
-	return img
+	return episode.Image
 }
 
 func (p *Podcast) HasPodcasts() bool {
