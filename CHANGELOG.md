@@ -1,3 +1,7 @@
+## 0.12.2
+
+- fix playout radio stream selection
+
 ## 0.12.0, 0.12.1
 
 - support multiple radio stream formats and enable client to choose

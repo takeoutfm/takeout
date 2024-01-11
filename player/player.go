@@ -164,6 +164,7 @@ func (p *Player) Track() (string, string, string, string) {
 func (p *Player) Start() {
 	p.control = make(chan playerAction)
 	p.done = make(chan struct{}, 1)
+	p.errors = make(chan error, 1)
 	p.play()
 
 	for {
@@ -266,10 +267,14 @@ func (p *Player) playIndex(index int) {
 		for _, l := range track.Location {
 			// radio streams may have multiple formats so pick
 			// first one that's supported
-			if strings.HasSuffix(l, ".flac") ||
-				strings.HasSuffix(l, ".mp3") ||
-				strings.HasSuffix(l, ".ogg") ||
-				strings.HasSuffix(l, ".wav") {
+			//
+			// allow for .ext and -ext (with ext only)
+			// https://ice6.somafm.com/brfm-128-aac
+			// http://ais-sa3.cdnstream1.com/2606_128.mp3
+			if strings.HasSuffix(l, "flac") ||
+				strings.HasSuffix(l, "mp3") ||
+				strings.HasSuffix(l, "ogg") ||
+				strings.HasSuffix(l, "wav") {
 				location = l
 				break
 			}
