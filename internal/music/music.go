@@ -185,6 +185,12 @@ func (m *Music) FindRelease(identifier string) (Release, error) {
 func (m *Music) FindStation(identifier string) (Station, error) {
 	id, err := strconv.Atoi(identifier)
 	if err != nil {
+		if strings.HasPrefix(identifier, "name:") {
+			stations := m.StationsLike("%" + identifier[5:] + "%")
+			if len(stations) > 0 {
+				return stations[0], nil
+			}
+		}
 		return Station{}, errors.New("station not found")
 	} else {
 		return m.LookupStation(id)

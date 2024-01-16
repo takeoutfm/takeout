@@ -35,6 +35,9 @@ const (
 	TokenCode         = "codetoken"
 	TokenListenBrainz = "lbztoken"
 
+	EnableListenBrainz  = "enableListenBrainz"
+	EnableTrackActivity = "enableTrackActivity"
+
 	Code     = "code"
 	Endpoint = "endpoint"
 )
@@ -84,6 +87,14 @@ func (p Playout) writeTokens() error {
 
 func (p Playout) Endpoint() string {
 	return p.config.GetString(Endpoint)
+}
+
+func (p Playout) UseListenBrainz() bool {
+	return p.config.GetBool(EnableListenBrainz)
+}
+
+func (p Playout) UseTrackActivity() bool {
+	return p.config.GetBool(EnableTrackActivity)
 }
 
 func (p Playout) UserAgent() string {

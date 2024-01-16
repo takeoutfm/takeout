@@ -369,6 +369,28 @@ func apiPlaylistPatch(w http.ResponseWriter, r *http.Request) {
 	if plist.Spiff.Entries == nil {
 		plist.Spiff.Entries = []spiff.Entry{}
 	}
+
+	if plist.Type != spiff.TypeStream {
+		// TODO check if spiff entries have changed to stream; need
+		// better way to handle this but for now, any entry without
+		// identifiers or sizes is a radio stream so fix spiff
+		// accordingly
+		for _, e := range plist.Spiff.Entries {
+			if len(e.Identifier) == 0 {
+				plist.Type = spiff.TypeStream
+				break
+			}
+			if len(e.Size) == 0 {
+				plist.Type = spiff.TypeStream
+				break
+			}
+			if e.Size[0] == -1 {
+				plist.Type = spiff.TypeStream
+				break
+			}
+		}
+	}
+
 	p.Playlist, _ = plist.Marshal()
 	m.UpdatePlaylist(p)
 

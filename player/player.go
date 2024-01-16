@@ -161,6 +161,14 @@ func (p *Player) Track() (string, string, string, string) {
 	return track.Title, track.Album, track.Creator, track.Image
 }
 
+func (p *Player) ETag() string {
+	id := p.current().Identifier
+	if len(id) == 0 {
+		return ""
+	}
+	return id[0]
+}
+
 func (p *Player) Start() {
 	p.control = make(chan playerAction)
 	p.done = make(chan struct{}, 1)

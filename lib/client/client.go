@@ -28,6 +28,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/gregjones/httpcache"
@@ -107,7 +108,9 @@ func NewGetter(config Config) Getter {
 	return c
 }
 
-var lastRequest map[string]time.Time = map[string]time.Time{}
+var (
+	lastRequest sync.Map
+)
 
 func RateLimit(host string) {
 	// TODO no support for concurrency
@@ -119,7 +122,7 @@ func RateLimit(host string) {
 	// 	}
 	// }
 	time.Sleep(time.Second)
-	lastRequest[host] = t
+	lastRequest.Store(host, t)
 }
 
 func (c client) doGet(headers map[string]string, urlStr string) (*http.Response, error) {

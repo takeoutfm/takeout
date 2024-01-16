@@ -31,33 +31,11 @@ import (
 	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/takeoutfm/takeout/lib/pls"
+	"github.com/takeoutfm/takeout/lib/str"
 	"github.com/takeoutfm/takeout/model"
 	"github.com/takeoutfm/takeout/spiff"
 	"github.com/takeoutfm/takeout/view"
 )
-
-// type Locator interface {
-// 	LocateTrack(model.Track) string
-// 	LocateMovie(model.Movie) string
-// 	LocateEpisode(model.Episode) string
-
-// 	FindArtist(string) (model.Artist, error)
-// 	FindRelease(string) (model.Release, error)
-// 	FindTrack(string) (model.Track, error)
-// 	FindStation(string) (model.Station, error)
-// 	FindMovie(string) (model.Movie, error)
-// 	FindSeries(string) (model.Series, error)
-// 	FindEpisode(string) (model.Episode, error)
-
-// 	TrackImage(model.Track) string
-// 	MovieImage(model.Movie) string
-// 	EpisodeImage(model.Episode) string
-// }
-
-// type Context interface {
-// 	view.Context
-// 	Locator
-// }
 
 func trackEntry(ctx Context, t model.Track) spiff.Entry {
 	return spiff.Entry{
@@ -121,6 +99,12 @@ func addEpisodeEntries(ctx Context, series model.Series, episodes []model.Episod
 	for _, e := range episodes {
 		entries = append(entries, episodeEntry(ctx, series, e))
 	}
+	return entries
+}
+
+func addStationEntries(ctx Context, station model.Station, entries []spiff.Entry) []spiff.Entry {
+	plist := RefreshStation(ctx, &station)
+	entries = append(entries, plist.Spiff.Entries...)
 	return entries
 }
 
@@ -217,7 +201,7 @@ func resolveEpisodeRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.E
 	return entries, nil
 }
 
-// /music/search?q={q}[&radio=1]
+// /music/search?q={q}[&radio=1][&m={match}]
 func resolveSearchRef(ctx Context, uri string, entries []spiff.Entry) ([]spiff.Entry, error) {
 	u, err := url.Parse(uri)
 	if err != nil {
@@ -225,16 +209,104 @@ func resolveSearchRef(ctx Context, uri string, entries []spiff.Entry) ([]spiff.E
 		return entries, err
 	}
 
+	tracks := searchTracks(ctx, u)
+	if len(tracks) > 0 {
+		// prefer tracks
+		entries = addTrackEntries(ctx, tracks, entries)
+	} else {
+		// and next stations
+		stations := searchStations(ctx, u)
+		if len(stations) > 0 {
+			entries = addStationEntries(ctx, stations[0], entries)
+		}
+	}
+
+	return entries, nil
+}
+
+func searchStations(ctx Context, u *url.URL) []model.Station {
+	var stations []model.Station
+	q := u.Query().Get("q")
+	match := u.Query().Get("m")
+	if q == "" {
+		return stations
+	}
+
+	list := ctx.Music().StationsLike("%" + q + "%")
+	for _, s := range list {
+		if s.Visible(ctx.User().Name) {
+			stations = append(stations, s)
+		}
+	}
+
+	if match != "" {
+		var best []model.Station
+		n := str.Atoi(match)
+		for _, s := range stations {
+			if strings.EqualFold(s.Name, q) ||
+				strings.EqualFold(s.Creator, q) {
+				best = append(best, s)
+				if len(best) == n {
+					break
+				}
+			}
+		}
+		stations = best
+	}
+
+	return stations
+}
+
+func searchTracks(ctx Context, u *url.URL) []model.Track {
+	var tracks []model.Track
 	q := u.Query().Get("q")
 	radio := u.Query().Get("radio") != ""
+	match := u.Query().Get("m")
+	if q == "" {
+		return tracks
+	}
+	limit := ctx.Config().Music.SearchLimit
+	if radio {
+		limit = ctx.Config().Music.RadioSearchLimit
+	}
+	tracks = ctx.Music().Search(q, limit)
 
-	var tracks []model.Track
-	if q != "" {
-		limit := ctx.Config().Music.SearchLimit
-		if radio {
-			limit = ctx.Config().Music.RadioSearchLimit
+	if match != "" {
+		var best []model.Track
+		n := str.Atoi(match)
+		for _, t := range tracks {
+			// prefer exact track title hits
+			if strings.EqualFold(t.Title, q) {
+				best = append(best, t)
+				if len(best) == n {
+					break
+				}
+			}
 		}
-		tracks = ctx.Music().Search(q, limit)
+		if len(best) == 0 {
+			// next prefer exact release title hits
+			for _, t := range tracks {
+				if strings.EqualFold(t.ReleaseTitle, q) ||
+					strings.EqualFold(t.Release, q) {
+					best = append(best, t)
+					if len(best) == n {
+						break
+					}
+				}
+			}
+		}
+		if len(best) == 0 {
+			// next prefer exact track artist hits
+			for _, t := range tracks {
+				if strings.EqualFold(t.TrackArtist, q) {
+					best = append(best, t)
+					if len(best) == n {
+						break
+					}
+				}
+			}
+		}
+		tracks = best
 	}
 
 	if radio {
@@ -245,25 +317,22 @@ func resolveSearchRef(ctx Context, uri string, entries []spiff.Entry) ([]spiff.E
 		}
 	}
 
-	entries = addTrackEntries(ctx, tracks, entries)
-	return entries, nil
+	return tracks
 }
 
-// /music/radio/{id}
+// /music/radio/{id,name}
 func resolveRadioRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.Entry, error) {
 	s, err := ctx.FindStation(id)
 	if err != nil {
-		return entries, err
+		s, err = ctx.FindStation("name:" + id)
+		if err != nil {
+			return entries, err
+		}
 	}
 	if !s.Visible(ctx.User().Name) {
 		return entries, err
 	}
-
-	// rerun the station ref to get new tracks
-	plist := RefreshStation(ctx, &s)
-
-	entries = append(entries, plist.Spiff.Entries...)
-
+	entries = addStationEntries(ctx, s, entries)
 	return entries, nil
 }
 
@@ -314,7 +383,7 @@ func resolveSourceRef(ctx Context, ref string, s *model.Station, entries []spiff
 				locations = append(locations, result.Entries[0].File)
 				sizes = append(sizes, int64(result.Entries[0].Length))
 			case err := <-errors:
-				fmt.Printf("src err %v\n", err)
+				log.Printf("GetPLS err %s\n", err)
 			}
 		}
 	}
@@ -446,7 +515,7 @@ var (
 	releasesRegexp     = regexp.MustCompile(`^/music/releases/([0-9a-zA-Z-]+)/tracks$`)
 	tracksRegexp       = regexp.MustCompile(`^/music/tracks/([\d]+)$`)
 	searchRegexp       = regexp.MustCompile(`^/music/search.*`)
-	radioRegexp        = regexp.MustCompile(`^/music/radio/stations/([\d]+)$`)
+	radioRegexp        = regexp.MustCompile(`^/music/radio/stations/([\w]+)$`)
 	moviesRegexp       = regexp.MustCompile(`^/movies/([\d]+)$`)
 	seriesRegexp       = regexp.MustCompile(`^/podcasts/series/([\d]+)$`)
 	episodesRegexp     = regexp.MustCompile(`^/podcasts/episodes/([\d]+)$`)

@@ -38,6 +38,7 @@ type PlayOptions struct {
 	Simple  bool
 	Stream  string
 	Visual  bool
+	Best    bool
 }
 
 func (playout Playout) Play(options PlayOptions) error {
@@ -101,13 +102,17 @@ func (playout Playout) Play(options PlayOptions) error {
 
 	if playlist == nil {
 		if len(options.Query) > 0 {
-			playlist, err = client.SearchReplace(playout, options.Query, options.Shuffle)
+			playlist, err = client.SearchReplace(playout, options.Query, options.Shuffle, options.Best)
 		} else {
 			playlist, err = client.Playlist(playout)
 		}
 	}
 	if err != nil {
 		return err
+	}
+
+	if len(playlist.Spiff.Entries) == 0 {
+		return fmt.Errorf("playlist empty")
 	}
 
 	onTrack := func(p *player.Player) {
@@ -134,7 +139,14 @@ func (playout Playout) Play(options PlayOptions) error {
 		p.Next()
 	}
 
-	onListen := func(p *player.Player) { playout.lbzListened(p) }
+	onListen := func(p *player.Player) {
+		if playout.UseTrackActivity() {
+			playout.activityTrackListen(p)
+		}
+		if playout.UseListenBrainz() {
+			playout.lbzListened(p)
+		}
+	}
 
 	config := &player.Config{
 		OnError:  onError,

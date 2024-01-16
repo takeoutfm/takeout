@@ -3,7 +3,7 @@
   <div style="display: flex; text-align: center; width: 100%; justify-content: left; flex-wrap: wrap;">
     {{ range .Series }}
     <div style="margin: 1em; flex: 0; min-width: 154px;">
-      <div><a data-link="{{.|link}}"><img width="144" height="144" src="{{call $.SeriesImage .}}"></a></div>
+      <div><a data-link="{{.|link}}"><img height="144" src="{{call $.SeriesImage .}}"></a></div>
       <div><span style="max-width: 154px; text-overflow: ellipsis;" class="series-title">{{ .Title }}</span></div>
       <div class="series-detail">{{ .Date | ymd }}</div>
     </div>

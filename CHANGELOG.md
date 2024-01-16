@@ -1,3 +1,11 @@
+## 0.13.0
+
+- support best match (&m=1) in search refs
+- support radio stations in search refs
+- playout: support track activity; config enableTrackActivity=true (default false)
+- playout: added config enableListenBrainz=true (default false)
+- fix client with sync.Map for concurrent writes
+
 ## 0.12.2
 
 - fix playout radio stream selection

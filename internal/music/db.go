@@ -821,6 +821,13 @@ func (m *Music) Stations(user *auth.User) []Station {
 	return stations
 }
 
+// Stations by name
+func (m *Music) StationsLike(name string) []Station {
+	var stations []Station
+	m.db.Where("name like ? or creator like ?", name, name).Find(&stations)
+	return stations
+}
+
 func (m *Music) clearStationPlaylists() {
 	m.db.Exec(`update stations set playlist = ""`)
 }

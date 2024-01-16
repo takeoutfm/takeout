@@ -23,6 +23,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/takeoutfm/takeout/model"
 	"github.com/takeoutfm/takeout/spiff"
 	"github.com/takeoutfm/takeout/view"
 )
@@ -148,14 +149,18 @@ func Progress(context Context) (*view.Progress, error) {
 	return &result, nil
 }
 
-func SearchReplace(context Context, query string, shuffle bool) (*spiff.Playlist, error) {
+func SearchReplace(context Context, query string, shuffle, best bool) (*spiff.Playlist, error) {
 	var result spiff.Playlist
 	var radio string
+	var match string
 	if shuffle {
 		radio = "&radio=1"
 	}
+	if best {
+		match = "&m=1"
+	}
 	data := patchReplace(
-		strings.Join([]string{"/music/search?q=", url.QueryEscape(query), radio}, ""),
+		strings.Join([]string{"/music/search?q=", url.QueryEscape(query), radio, match}, ""),
 		spiff.TypeMusic, "", "")
 	err := patch(context, "/api/playlist", data, &result)
 	if err != nil {
@@ -181,9 +186,30 @@ func Position(context Context, index int, position float64) error {
 	return err
 }
 
+func Activity(context Context, activity model.Events) error {
+	// TODO need to check/use result
+	var result map[string]string
+	err := post(context, "/api/activity", activity, &result)
+	return err
+}
+
 func get(context Context, uri string, result interface{}) error {
 	call := func() error {
 		return Get(with(context, bearerAccess), uri, result)
+	}
+	err := call()
+	if err == ErrUnauthorized {
+		err = refresh(context)
+		if err == nil {
+			err = call()
+		}
+	}
+	return err
+}
+
+func post(context Context, uri string, data, result interface{}) error {
+	call := func() error {
+		return Post(with(context, bearerAccess), uri, data, result)
 	}
 	err := call()
 	if err == ErrUnauthorized {

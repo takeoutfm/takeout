@@ -86,6 +86,12 @@ func doPlay() error {
 	options.Shuffle = shuffle
 	options.Visual = visual
 	options.Simple = simple
+	options.Best = best
+
+	if strings.Contains(options.Query, ":") == false {
+		// assume best match with simple queries
+		options.Best = true
+	}
 
 	return NewPlayout().Play(options)
 }
@@ -131,6 +137,7 @@ var single bool
 var stream string
 var title string
 var visual bool
+var best bool
 
 func init() {
 	playCmd.Flags().StringVarP(&query, "query", "q", "", "search query")
@@ -142,6 +149,7 @@ func init() {
 	playCmd.Flags().StringVarP(&release, "release", "r", "", "release/album name")
 	playCmd.Flags().StringVarP(&title, "title", "t", "", "song title")
 	playCmd.Flags().BoolVarP(&shuffle, "shuffle", "x", false, "radio shuffle")
+	playCmd.Flags().BoolVarP(&best, "best", "b", false, "best match")
 	playCmd.Flags().BoolVarP(&single, "singles", "s", false, "songs released as singles")
 	playCmd.Flags().BoolVarP(&popular, "popular", "p", false, "popular songs")
 	playCmd.Flags().BoolVarP(&cover, "cover", "c", false, "cover songs")

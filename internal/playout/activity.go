@@ -1,4 +1,4 @@
-// Copyright 2023 defsub
+// Copyright 2024 defsub
 //
 // This file is part of Takeout.
 //
@@ -15,10 +15,34 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
-package takeout
+package playout
 
-const (
-	AppName = "Takeout"
-	Version = "0.13.0"
-	Contact = "takeoutfm.com"
+import (
+	"time"
+
+	"github.com/takeoutfm/takeout/client"
+	"github.com/takeoutfm/takeout/model"
+	"github.com/takeoutfm/takeout/player"
 )
+
+func (playout Playout) activityTrackListen(p *player.Player) {
+	if p.IsMusic() == false {
+		return
+	}
+
+	etag := p.ETag()
+	if etag == "" {
+		return
+	}
+
+	events := model.Events{
+		TrackEvents: []model.TrackEvent{{
+			Date: time.Now(),
+			ETag: etag,
+		}},
+	}
+
+	go func() {
+		client.Activity(p.Context(), events)
+	}()
+}
