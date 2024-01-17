@@ -18,8 +18,8 @@
 package model
 
 import (
-	"github.com/takeoutfm/takeout/lib/gorm"
 	"github.com/google/uuid"
+	"github.com/takeoutfm/takeout/lib/gorm"
 	g "gorm.io/gorm"
 	"time"
 )
@@ -170,19 +170,21 @@ type Playlist struct {
 
 type Station struct {
 	gorm.Model
-	User     string `gorm:"uniqueIndex:idx_station" json:"-"`
-	Name     string `gorm:"uniqueIndex:idx_station"`
-	Creator  string
-	Ref      string `json:"-"`
-	Shared   bool   `json:"-"`
-	Type     string
-	Image    string
-	Playlist []byte `json:"-"`
+	User        string `gorm:"uniqueIndex:idx_station" json:"-"`
+	Name        string `gorm:"uniqueIndex:idx_station"`
+	Creator     string
+	Ref         string `json:"-"`
+	Shared      bool   `json:"-"`
+	Type        string
+	Image       string
+	Description string
+	Playlist    []byte `json:"-"`
 }
 
-func (s *Station) Visible(user string)  bool {
+func (s *Station) Visible(user string) bool {
 	return s.User == user || s.Shared
 }
+
 type ArtistImage struct {
 	gorm.Model
 	Artist string `gorm:"uniqueIndex:idx_artist_img"`

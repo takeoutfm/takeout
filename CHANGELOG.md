@@ -1,3 +1,8 @@
+## 0.31.1
+
+- fix for spaces in station name ref
+- add description to station model
+
 ## 0.13.0
 
 - support best match (&m=1) in search refs

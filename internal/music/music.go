@@ -345,13 +345,14 @@ func (m *Music) CreateStations() {
 		}
 		ref := string(src)
 		station := Station{
-			User:    TakeoutUser,
-			Shared:  true,
-			Type:    TypeStream,
-			Name:    v.Title,
-			Creator: v.Creator,
-			Ref:     ref,
-			Image:   v.Image,
+			User:        TakeoutUser,
+			Shared:      true,
+			Type:        TypeStream,
+			Name:        v.Title,
+			Creator:     v.Creator,
+			Ref:         ref,
+			Image:       v.Image,
+			Description: v.Description,
 		}
 		m.CreateStation(&station)
 	}

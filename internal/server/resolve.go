@@ -515,7 +515,7 @@ var (
 	releasesRegexp     = regexp.MustCompile(`^/music/releases/([0-9a-zA-Z-]+)/tracks$`)
 	tracksRegexp       = regexp.MustCompile(`^/music/tracks/([\d]+)$`)
 	searchRegexp       = regexp.MustCompile(`^/music/search.*`)
-	radioRegexp        = regexp.MustCompile(`^/music/radio/stations/([\w]+)$`)
+	radioRegexp        = regexp.MustCompile(`^/music/radio/stations/([\w ]+)$`)
 	moviesRegexp       = regexp.MustCompile(`^/movies/([\d]+)$`)
 	seriesRegexp       = regexp.MustCompile(`^/podcasts/series/([\d]+)$`)
 	episodesRegexp     = regexp.MustCompile(`^/podcasts/episodes/([\d]+)$`)
