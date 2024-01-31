@@ -19,4 +19,4 @@
 *.db
 takeout.ini
 *.bleve
-*.json
+#*.json

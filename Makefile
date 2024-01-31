@@ -87,6 +87,9 @@ tmdb: ${TMDB_CMD_TARGET}
 ${TMDB_CMD_TARGET}: ${TMDB_CMD_SRC} ${COMMON_SOURCES}
 	@cd ${TMDB_CMD_DIR} && ${GO} build
 
+test:
+	${GO} test ./...
+
 install: install-server install-playout
 
 clean:

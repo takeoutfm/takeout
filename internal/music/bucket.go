@@ -20,10 +20,10 @@ package music
 import (
 	"net/url"
 	"regexp"
-	"strconv"
 	"time"
 
 	"github.com/takeoutfm/takeout/lib/bucket"
+	"github.com/takeoutfm/takeout/lib/str"
 	. "github.com/takeoutfm/takeout/model"
 )
 
@@ -114,8 +114,8 @@ func matchRelease(release string) (string, string) {
 	return name, date
 }
 
-var trackRegexp = regexp.MustCompile(`(?:([1-9]+[0-9]?)-)?([\d]+)-(.*)\.(mp3|flac|ogg|m4a)$`)
-var singleDiscRegexp = regexp.MustCompile(`([\d]+)-(.*)\.(mp3|flac|ogg|m4a)$`)
+var trackRegexp = regexp.MustCompile(`(?:([1-9]+[0-9]?)-)?([\d]+)-(.+)\.(mp3|flac|ogg|m4a)$`)
+var singleDiscRegexp = regexp.MustCompile(`([\d]+)-([^+]+)\.(mp3|flac|ogg|m4a)$`)
 var numericRegexp = regexp.MustCompile(`^[\d\s-]+$`)
 
 func matchTrack(file string, t *Track) bool {
@@ -123,8 +123,8 @@ func matchTrack(file string, t *Track) bool {
 	if matches == nil {
 		return false
 	}
-	disc, _ := strconv.Atoi(matches[1])
-	track, _ := strconv.Atoi(matches[2])
+	disc := str.Atoi(matches[1])
+	track := str.Atoi(matches[2])
 	t.DiscNum = disc
 	t.TrackNum = track
 	t.Title = matches[3]
@@ -144,20 +144,21 @@ func matchTrack(file string, t *Track) bool {
 			return false
 		}
 		t.DiscNum = 1
-		t.TrackNum, _ = strconv.Atoi(matches[1])
+		t.TrackNum = str.Atoi(matches[1])
 		t.Title = matches[2]
 	}
 
 	// all numeric assume is single disc since most are single
 	// eg: 11-19-2000.flac
 	// eg: 4-36-22-36.flac
+	// but 2-02-1993.flac is not a single disc track
 	if numericRegexp.MatchString(t.Title) {
 		matches := singleDiscRegexp.FindStringSubmatch(file)
 		if matches == nil {
 			return false
 		}
 		t.DiscNum = 1
-		t.TrackNum, _ = strconv.Atoi(matches[1])
+		t.TrackNum = str.Atoi(matches[1])
 		t.Title = matches[2]
 	}
 

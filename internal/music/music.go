@@ -293,7 +293,7 @@ func (m *Music) CreateStations() {
 			Shared:  true,
 			Type:    TypeGenre,
 			Name:    strings.Title(g),
-			Creator: "Radio",
+			Creator: "Takeout",
 			Ref: fmt.Sprintf(`/music/search?q=%s&radio=1`,
 				url.QueryEscape(fmt.Sprintf(`+genre:"%s" +type:single +popularity:<11 -artist:"Various Artists"`, g)))}
 		m.CreateStation(&station)
@@ -306,7 +306,7 @@ func (m *Music) CreateStations() {
 			Shared:  true,
 			Type:    TypePeriod,
 			Name:    fmt.Sprintf("%ds Top Tracks", d),
-			Creator: "Radio",
+			Creator: "Takeout",
 			Ref: fmt.Sprintf(`/music/search?q=%s&radio=1`,
 				url.QueryEscape(fmt.Sprintf(
 					`+first_date:>="%d-01-01" +first_date:<="%d-12-31" +type:single +popularity:<11`, d, d+9)))}
@@ -319,7 +319,7 @@ func (m *Music) CreateStations() {
 			Shared:  true,
 			Type:    TypeSeries,
 			Name:    s,
-			Creator: "Radio",
+			Creator: "Takeout",
 			Ref: fmt.Sprintf(`/music/search?q=%s&radio=1`,
 				url.QueryEscape(fmt.Sprintf(`+series:"%s"`, s)))}
 		m.CreateStation(&station)
@@ -331,7 +331,7 @@ func (m *Music) CreateStations() {
 			Shared:  true,
 			Type:    TypeOther,
 			Name:    k,
-			Creator: "Radio",
+			Creator: "Takeout",
 			Ref: fmt.Sprintf(`/music/search?q=%s&radio=1`,
 				url.QueryEscape(v))}
 		m.CreateStation(&station)

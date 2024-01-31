@@ -19,16 +19,34 @@ package music
 
 import (
 	"fmt"
-	"regexp"
-	"strconv"
 	"testing"
+
+	"github.com/takeoutfm/takeout/model"
 )
 
-func TestPattern(t *testing.T) {
-	var trackRegexp = regexp.MustCompile(`.*/(?:([1-9]+[0-9]?)-)?([\d]+)-(.*)\.(mp3|flac|ogg|m4a)$`)
-	var singleDiscRegexp = regexp.MustCompile(`([\d]+)-(.*)\.(mp3|flac|ogg|m4a)$`)
-	var numericRegexp = regexp.MustCompile(`^[\d\s-]+$`)
+func TestMatchRelease(t *testing.T) {
+	patterns := []string{
+		"The Pleasure Principle",
+		"The Pleasure Principle (2000)",
+		"The Pleasure Principle (Live)",
+		"The Pleasure Principle (Live) (2000)",
+	}
+	expect := []string{
+		"The Pleasure Principle / ",
+		"The Pleasure Principle / 2000",
+		"The Pleasure Principle (Live) / ",
+		"The Pleasure Principle (Live) / 2000",
+	}
+	for i, v := range patterns {
+		name, date := matchRelease(v)
+		result := fmt.Sprintf("%s / %s", name, date)
+		if expect[i] != result {
+			t.Errorf("expect [%s] got [%s]\n", expect[i], result)
+		}
+	}
+}
 
+func TestMatchTrack(t *testing.T) {
 	patterns := []string{
 		"Music/Abc/Def/1-Sub.flac",
 		"Music/Abc/Def/01-Sub.flac",
@@ -65,6 +83,7 @@ func TestPattern(t *testing.T) {
 		"Music/Iron Maiden/Live After Death (2020)/1-03-2 Minutes to Midnight.flac",
 		"Music/ZZ Top/The Complete Studio Albums 1970-1990 (2013)/10-01-Concrete and Steel.flac",
 		"Music/ZZ Top/The Complete Studio Albums 1970-1990 (2013)/10-08-2000 Blues.flac",
+		"Music/Boz Scaggs/My Time_ A Boz Scaggs Anthology (1969-1997) (1997)/2-02-1993.flac", // FAIL
 	}
 
 	expect := []string{
@@ -89,7 +108,7 @@ func TestPattern(t *testing.T) {
 		"1 / 1 / 2020",
 		"1 / 1 / 02-2020",
 		"1 / 1 / 02-2020",
-		"1 / 2 / 2020",
+		"1 / 2 / 2020", // fail
 		"1 / 11 / 12 2020",
 		"1 / 11 / 12 Twenty",
 		"1 / 11 / 12-2020",
@@ -103,56 +122,27 @@ func TestPattern(t *testing.T) {
 		"1 / 3 / 2 Minutes to Midnight",
 		"10 / 1 / Concrete and Steel",
 		"10 / 8 / 2000 Blues",
+		"2 / 2 / 1993",
 	}
 
 	for i, v := range patterns {
-		matches := trackRegexp.FindStringSubmatch(v)
+		matches := pathRegexp.FindStringSubmatch(v)
 		if matches == nil {
-			t.Errorf("bummer\n")
-			break
-		}
-		disc, _ := strconv.Atoi(matches[1])
-		track, _ := strconv.Atoi(matches[2])
-		title := matches[3]
-		if disc == 0 {
-			disc = 1
-		}
-		if disc > 13 { // hack
-			matches := singleDiscRegexp.FindStringSubmatch(v)
-			if matches == nil {
-				t.Errorf("bummer\n")
-				break
-			}
-			disc = 1
-			track, _ = strconv.Atoi(matches[1])
-			title = matches[2]
+			t.Error("path match failed")
+			continue
 		}
 
-		if numericRegexp.MatchString(title) {
-			matches = singleDiscRegexp.FindStringSubmatch(v)
-			// TODO assuming these are single disc for now
-			disc = 1
-			track, _ = strconv.Atoi(matches[1])
-			title = matches[2]
+		trackTitle := matches[3]
+		track := model.Track{}
+
+		if matchTrack(trackTitle, &track) == false {
+			t.Errorf("match failed")
 		}
 
-		result := fmt.Sprintf("%d / %d / %s", disc, track, title)
+		result := fmt.Sprintf("%d / %d / %s", track.DiscNum, track.TrackNum, track.Title)
 		t.Logf("%s\n", result)
 		if result != expect[i] {
-			t.Logf("Expected: %s ~ %s\n", expect[i], v)
-
-			// matches := track2Regexp.FindStringSubmatch(v)
-			// if matches == nil {
-			// 	t.Errorf("bummer\n")
-			// 	break
-			// }
-			// disc = 1
-			// track, _ = strconv.Atoi(matches[1])
-			// title = matches[2]
-
-			// result = fmt.Sprintf("%d / %d / %s", disc, track, title)
-			// t.Logf("now: %s\n", result)
+			t.Errorf("expect %s got %s\n", expect[i], result)
 		}
-
 	}
 }
