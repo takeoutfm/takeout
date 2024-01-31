@@ -18,24 +18,68 @@
 package fanart
 
 import (
-	"github.com/takeoutfm/takeout/config"
+	"bytes"
+	"embed"
+	"io/ioutil"
+	"net/http"
+	"strings"
 	"testing"
-	"fmt"
+
+	"github.com/takeoutfm/takeout/lib/client"
 )
 
-func TestFanart(t *testing.T) {
-	// radiohead
-	artist := Artist{ARID: "a74b1b7f-71a5-4011-9441-d0b5e4122711"}
+//go:embed test/*.json
+var jsonFiles embed.FS
 
-	config, err := config.TestConfig()
+func jsonFile(name string) string {
+	d, err := jsonFiles.ReadFile(name)
 	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
+		return ""
 	}
+	return string(d)
+}
 
-	m := NewMusic(config)
-	m.Open()
-	defer m.Close()
+type fanartServer struct {
+	t *testing.T
+}
 
-	result := m.fanartArtistArt(&artist)
-	fmt.Printf("%+v\n", result)
+func (s fanartServer) RoundTrip(r *http.Request) (*http.Response, error) {
+	var body string
+	//s.t.Logf("got %s\n", r.URL.String())
+	if strings.HasPrefix(r.URL.Path, "/v3/music/a74b1b7f-71a5-4011-9441-d0b5e4122711") {
+		body = jsonFile("test/music_a74b1b7f-71a5-4011-9441-d0b5e4122711.json")
+	}
+	return &http.Response{
+		StatusCode: 200,
+		Body:       ioutil.NopCloser(bytes.NewBufferString(body)),
+		Header:     make(http.Header),
+	}, nil
+}
+
+func TestFanart(t *testing.T) {
+	c := client.NewTransportGetter(client.Config{UserAgent: "test/1.0"}, fanartServer{t: t})
+	f := NewFanart(Config{ProjectKey: "93ede276ba6208318031727060b697c8"}, c)
+	a := f.ArtistArt("a74b1b7f-71a5-4011-9441-d0b5e4122711")
+	if a == nil {
+		t.Fatal("expect art")
+	}
+	if len(a.ArtistBackgrounds) == 0 {
+		t.Error("expect backgrounds")
+	}
+	if len(a.ArtistThumbs) == 0 {
+		t.Error("expect thumbs")
+	}
+	if a.MBID != "a74b1b7f-71a5-4011-9441-d0b5e4122711" {
+		t.Errorf("expect mbid got %s", a.MBID)
+	}
+	for _, img := range a.ArtistBackgrounds {
+		if strings.HasPrefix(img.URL, "http") == false {
+			t.Error("expect bg url")
+		}
+	}
+	for _, img := range a.ArtistThumbs {
+		if strings.HasPrefix(img.URL, "http") == false {
+			t.Error("expect thumb url")
+		}
+	}
 }

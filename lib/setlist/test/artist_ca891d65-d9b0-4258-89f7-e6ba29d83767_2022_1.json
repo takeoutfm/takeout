@@ -1,0 +1,2017 @@
+{
+   "type" : "setlists",
+   "itemsPerPage" : 20,
+   "page" : 1,
+   "total" : 57,
+   "setlist" : [ {
+      "id" : "23be88f3",
+      "versionId" : "g23e6d46f",
+      "eventDate" : "27-10-2022",
+      "lastUpdated" : "2022-10-28T23:59:47.441+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "3bd40404",
+         "name" : "Amalie Arena",
+         "city" : {
+            "id" : "4174757",
+            "name" : "Tampa",
+            "state" : "Florida",
+            "stateCode" : "FL",
+            "coords" : {
+               "lat" : 27.9475216,
+               "long" : -82.4584279
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/amalie-arena-tampa-fl-usa-3bd40404.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "info" : "Final show of the Legacy of the Beast World Tour that lasted from 2018 to 2022.",
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/amalie-arena-tampa-fl-23be88f3.html"
+   }, {
+      "id" : "33be9c0d",
+      "versionId" : "g63e68a93",
+      "eventDate" : "25-10-2022",
+      "lastUpdated" : "2022-10-26T23:44:36.161+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "4bd6cfb6",
+         "name" : "Greensboro Coliseum",
+         "city" : {
+            "id" : "4469146",
+            "name" : "Greensboro",
+            "state" : "North Carolina",
+            "stateCode" : "NC",
+            "coords" : {
+               "lat" : 36.0726355,
+               "long" : -79.7919754
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/greensboro-coliseum-greensboro-nc-usa-4bd6cfb6.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/greensboro-coliseum-greensboro-nc-33be9c0d.html"
+   }, {
+      "id" : "2bbeb026",
+      "versionId" : "g3bf95430",
+      "eventDate" : "23-10-2022",
+      "lastUpdated" : "2022-10-24T03:13:15.497+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "3bd2b05c",
+         "name" : "Capital One Arena",
+         "city" : {
+            "id" : "4140963",
+            "name" : "Washington",
+            "state" : "Washington, D.C.",
+            "stateCode" : "DC",
+            "coords" : {
+               "lat" : 38.895,
+               "long" : -77.036
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/capital-one-arena-washington-dc-usa-3bd2b05c.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "f19854df-0603-4120-aeec-765b39d415b0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "Latvian DJ",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acf3.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/capital-one-arena-washington-dc-2bbeb026.html"
+   }, {
+      "id" : "bb145a2",
+      "versionId" : "g2bf90066",
+      "eventDate" : "21-10-2022",
+      "lastUpdated" : "2022-10-22T16:11:41.580+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "23d63823",
+         "name" : "Prudential Center",
+         "city" : {
+            "id" : "5101798",
+            "name" : "Newark",
+            "state" : "New Jersey",
+            "stateCode" : "NJ",
+            "coords" : {
+               "lat" : 40.735657,
+               "long" : -74.1723667
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/prudential-center-newark-nj-usa-23d63823.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "f19854df-0603-4120-aeec-765b39d415b0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "Latvian DJ",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acf3.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/prudential-center-newark-nj-bb145a2.html"
+   }, {
+      "id" : "4bb15b96",
+      "versionId" : "g73f9323d",
+      "eventDate" : "19-10-2022",
+      "lastUpdated" : "2022-10-21T00:36:31.859+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "7bd0da88",
+         "name" : "UBS Arena",
+         "city" : {
+            "id" : "5116508",
+            "name" : "Elmont",
+            "state" : "New York",
+            "stateCode" : "NY",
+            "coords" : {
+               "lat" : 40.700936,
+               "long" : -73.712909
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/ubs-arena-elmont-ny-usa-7bd0da88.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               },
+               "info" : ""
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/ubs-arena-elmont-ny-4bb15b96.html"
+   }, {
+      "id" : "4bb16fae",
+      "versionId" : "g6bf9eeb2",
+      "eventDate" : "17-10-2022",
+      "lastUpdated" : "2022-10-18T14:18:26.227+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "13d63961",
+         "name" : "DCU Center",
+         "city" : {
+            "id" : "4956184",
+            "name" : "Worcester",
+            "state" : "Massachusetts",
+            "stateCode" : "MA",
+            "coords" : {
+               "lat" : 42.2625932,
+               "long" : -71.8022934
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/dcu-center-worcester-ma-usa-13d63961.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High",
+               "info" : "Plane malfunction"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/dcu-center-worcester-ma-4bb16fae.html"
+   }, {
+      "id" : "63b102ab",
+      "versionId" : "g33f9808d",
+      "eventDate" : "15-10-2022",
+      "lastUpdated" : "2022-10-17T23:47:36.262+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "33d37431",
+         "name" : "Canadian Tire Centre",
+         "city" : {
+            "id" : "6094817",
+            "name" : "Ottawa",
+            "state" : "Ontario",
+            "stateCode" : "ON",
+            "coords" : {
+               "lat" : 45.4209405046496,
+               "long" : -75.6902861595154
+            },
+            "country" : {
+               "code" : "CA",
+               "name" : "Canada"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/canadian-tire-centre-ottawa-on-canada-33d37431.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/canadian-tire-centre-ottawa-on-canada-63b102ab.html"
+   }, {
+      "id" : "5bb11b6c",
+      "versionId" : "g43f86fab",
+      "eventDate" : "12-10-2022",
+      "lastUpdated" : "2022-10-13T15:39:01.379+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "5bd4cbd4",
+         "name" : "FirstOntario Centre",
+         "city" : {
+            "id" : "5969785",
+            "name" : "Hamilton",
+            "state" : "Ontario",
+            "stateCode" : "ON",
+            "coords" : {
+               "lat" : 43.233408354,
+               "long" : -79.949639869
+            },
+            "country" : {
+               "code" : "CA",
+               "name" : "Canada"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/firstontario-centre-hamilton-on-canada-5bd4cbd4.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true,
+               "info" : "Legacy of the Beast videogame promo on screen"
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "f19854df-0603-4120-aeec-765b39d415b0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "Latvian DJ",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acf3.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/firstontario-centre-hamilton-on-canada-5bb11b6c.html"
+   }, {
+      "id" : "13b12105",
+      "versionId" : "g538993e1",
+      "eventDate" : "11-10-2022",
+      "lastUpdated" : "2024-01-19T02:19:52.634+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "2bd230ca",
+         "name" : "Scotiabank Arena",
+         "city" : {
+            "id" : "6167865",
+            "name" : "Toronto",
+            "state" : "Ontario",
+            "stateCode" : "ON",
+            "coords" : {
+               "lat" : 43.700113788,
+               "long" : -79.416304194
+            },
+            "country" : {
+               "code" : "CA",
+               "name" : "Canada"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/scotiabank-arena-toronto-on-canada-2bd230ca.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true,
+               "info" : "Legacy of the Beast videogame promo on screen"
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus",
+               "info" : "Bruce Missed Part of the Lyrics While Trying to fix is Flamethrower"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/scotiabank-arena-toronto-on-canada-13b12105.html"
+   }, {
+      "id" : "63b13aef",
+      "versionId" : "gbf8354a",
+      "eventDate" : "09-10-2022",
+      "lastUpdated" : "2022-10-10T17:58:25.180+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "13d55569",
+         "name" : "Little Caesars Arena",
+         "city" : {
+            "id" : "4990729",
+            "name" : "Detroit",
+            "state" : "Michigan",
+            "stateCode" : "MI",
+            "coords" : {
+               "lat" : 42.331427,
+               "long" : -83.0457538
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/little-caesars-arena-detroit-mi-usa-13d55569.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "info" : "",
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/little-caesars-arena-detroit-mi-63b13aef.html"
+   }, {
+      "id" : "3bb1c838",
+      "versionId" : "g73f882d9",
+      "eventDate" : "07-10-2022",
+      "lastUpdated" : "2022-10-08T04:00:34.709+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "1bd63994",
+         "name" : "Nationwide Arena",
+         "city" : {
+            "id" : "4509177",
+            "name" : "Columbus",
+            "state" : "Ohio",
+            "stateCode" : "OH",
+            "coords" : {
+               "lat" : 39.9611755,
+               "long" : -82.9987942
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/nationwide-arena-columbus-oh-usa-1bd63994.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               },
+               "info" : ""
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/nationwide-arena-columbus-oh-3bb1c838.html"
+   }, {
+      "id" : "3b1dde3",
+      "versionId" : "g7bf8b2e4",
+      "eventDate" : "05-10-2022",
+      "lastUpdated" : "2022-10-06T12:16:43.893+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "63d0f2d3",
+         "name" : "United Center",
+         "city" : {
+            "id" : "4887398",
+            "name" : "Chicago",
+            "state" : "Illinois",
+            "stateCode" : "IL",
+            "coords" : {
+               "lat" : 41.850033,
+               "long" : -87.6500523
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/united-center-chicago-il-usa-63d0f2d3.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/united-center-chicago-il-3b1dde3.html"
+   }, {
+      "id" : "53b1f301",
+      "versionId" : "g2bfb503e",
+      "eventDate" : "03-10-2022",
+      "lastUpdated" : "2022-10-05T00:51:37.586+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "73d406f1",
+         "name" : "Denny Sanford Premier Center",
+         "city" : {
+            "id" : "5231851",
+            "name" : "Sioux Falls",
+            "state" : "South Dakota",
+            "stateCode" : "SD",
+            "coords" : {
+               "lat" : 43.5499749,
+               "long" : -96.700327
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/denny-sanford-premier-center-sioux-falls-sd-usa-73d406f1.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/denny-sanford-premier-center-sioux-falls-sd-53b1f301.html"
+   }, {
+      "id" : "43b18bd7",
+      "versionId" : "gbfb2dce",
+      "eventDate" : "30-09-2022",
+      "lastUpdated" : "2022-10-01T18:52:33.461+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "4bd6c37a",
+         "name" : "Spokane Arena",
+         "city" : {
+            "id" : "5811696",
+            "name" : "Spokane",
+            "state" : "Washington",
+            "stateCode" : "WA",
+            "coords" : {
+               "lat" : 47.6587803,
+               "long" : -117.4260466
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/spokane-arena-spokane-wa-usa-4bd6c37a.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/spokane-arena-spokane-wa-43b18bd7.html"
+   }, {
+      "id" : "5bb197e0",
+      "versionId" : "g23fb5043",
+      "eventDate" : "29-09-2022",
+      "lastUpdated" : "2022-10-05T00:49:49.619+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "63d0ea07",
+         "name" : "Climate Pledge Arena",
+         "city" : {
+            "id" : "5809844",
+            "name" : "Seattle",
+            "state" : "Washington",
+            "stateCode" : "WA",
+            "coords" : {
+               "lat" : 47.6062095,
+               "long" : -122.3320708
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/climate-pledge-arena-seattle-wa-usa-63d0ea07.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/climate-pledge-arena-seattle-wa-5bb197e0.html"
+   }, {
+      "id" : "53b1b351",
+      "versionId" : "gbfbf956",
+      "eventDate" : "27-09-2022",
+      "lastUpdated" : "2022-09-28T20:50:58.464+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "23d62007",
+         "name" : "Concord Pavilion",
+         "city" : {
+            "id" : "5339111",
+            "name" : "Concord",
+            "state" : "California",
+            "stateCode" : "CA",
+            "coords" : {
+               "lat" : 37.9779777,
+               "long" : -122.0310733
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/concord-pavilion-concord-ca-usa-23d62007.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "info" : "",
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/concord-pavilion-concord-ca-53b1b351.html"
+   }, {
+      "id" : "63b04a87",
+      "versionId" : "g13fbf951",
+      "eventDate" : "25-09-2022",
+      "lastUpdated" : "2022-09-28T20:50:09.052+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "23d3a4fb",
+         "name" : "North Island Credit Union Amphitheatre",
+         "city" : {
+            "id" : "5336899",
+            "name" : "Chula Vista",
+            "state" : "California",
+            "stateCode" : "CA",
+            "coords" : {
+               "lat" : 32.6400541,
+               "long" : -117.0841955
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/north-island-credit-union-amphitheatre-chula-vista-ca-usa-23d3a4fb.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/north-island-credit-union-amphitheatre-chula-vista-ca-63b04a87.html"
+   }, {
+      "id" : "7bb06ef0",
+      "versionId" : "g53fba3ad",
+      "eventDate" : "22-09-2022",
+      "lastUpdated" : "2022-09-27T03:13:02.812+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "5bd637a8",
+         "name" : "Honda Center",
+         "city" : {
+            "id" : "5323810",
+            "name" : "Anaheim",
+            "state" : "California",
+            "stateCode" : "CA",
+            "coords" : {
+               "lat" : 33.8352932,
+               "long" : -117.9145036
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/honda-center-anaheim-ca-usa-5bd637a8.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High",
+               "info" : "Fan jumps on stage"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/honda-center-anaheim-ca-7bb06ef0.html"
+   }, {
+      "id" : "4bb077fa",
+      "versionId" : "g5bfba3a0",
+      "eventDate" : "21-09-2022",
+      "lastUpdated" : "2022-09-27T03:13:34.404+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "5bd637a8",
+         "name" : "Honda Center",
+         "city" : {
+            "id" : "5323810",
+            "name" : "Anaheim",
+            "state" : "California",
+            "stateCode" : "CA",
+            "coords" : {
+               "lat" : 33.8352932,
+               "long" : -117.9145036
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/honda-center-anaheim-ca-usa-5bd637a8.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Churchill's Speech",
+               "tape" : true
+            }, {
+               "name" : "Aces High"
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/honda-center-anaheim-ca-4bb077fa.html"
+   }, {
+      "id" : "43b00783",
+      "versionId" : "g23fac4ff",
+      "eventDate" : "19-09-2022",
+      "lastUpdated" : "2022-09-21T03:35:11.632+0000",
+      "artist" : {
+         "mbid" : "ca891d65-d9b0-4258-89f7-e6ba29d83767",
+         "name" : "Iron Maiden",
+         "sortName" : "Iron Maiden",
+         "disambiguation" : "English heavy metal band",
+         "url" : "https://www.setlist.fm/setlists/iron-maiden-3bd6803c.html"
+      },
+      "venue" : {
+         "id" : "53d62719",
+         "name" : "USANA Amphitheatre",
+         "city" : {
+            "id" : "5784607",
+            "name" : "West Valley City",
+            "state" : "Utah",
+            "stateCode" : "UT",
+            "coords" : {
+               "lat" : 40.692,
+               "long" : -112.001
+            },
+            "country" : {
+               "code" : "US",
+               "name" : "United States"
+            }
+         },
+         "url" : "https://www.setlist.fm/venue/usana-amphitheatre-west-valley-city-ut-usa-53d62719.html"
+      },
+      "tour" : {
+         "name" : "Legacy of the Beast"
+      },
+      "sets" : {
+         "set" : [ {
+            "song" : [ {
+               "name" : "Transylvania",
+               "tape" : true
+            }, {
+               "name" : "Doctor Doctor",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "c0bf9e20-2872-4897-ad1f-0882b83272a0",
+                  "name" : "UFO",
+                  "sortName" : "UFO",
+                  "disambiguation" : "British space rock/hard rock band",
+                  "url" : "https://www.setlist.fm/setlists/ufo-23d6acff.html"
+               }
+            }, {
+               "name" : "Senjutsu"
+            }, {
+               "name" : "Stratego"
+            }, {
+               "name" : "The Writing on the Wall"
+            }, {
+               "name" : "Revelations"
+            }, {
+               "name" : "Blood Brothers"
+            }, {
+               "name" : "Sign of the Cross"
+            }, {
+               "name" : "Flight of Icarus"
+            }, {
+               "name" : "Fear of the Dark"
+            }, {
+               "name" : "Hallowed Be Thy Name"
+            }, {
+               "name" : "The Number of the Beast"
+            }, {
+               "name" : "Iron Maiden"
+            } ]
+         }, {
+            "encore" : 1,
+            "song" : [ {
+               "name" : "The Trooper"
+            }, {
+               "name" : "The Clansman"
+            }, {
+               "name" : "Run to the Hills"
+            } ]
+         }, {
+            "encore" : 2,
+            "song" : [ {
+               "name" : "Aces High"
+            }, {
+               "name" : "Always Look on the Bright Side of Life",
+               "tape" : true,
+               "cover" : {
+                  "mbid" : "4a5c8526-f8ec-43f1-97af-49722ad88394",
+                  "name" : "Monty Python",
+                  "sortName" : "Monty Python",
+                  "disambiguation" : "British surreal comedy group",
+                  "url" : "https://www.setlist.fm/setlists/monty-python-13d6c1c9.html"
+               }
+            } ]
+         } ]
+      },
+      "url" : "https://www.setlist.fm/setlist/iron-maiden/2022/usana-amphitheatre-west-valley-city-ut-43b00783.html"
+   } ]
+}

@@ -47,6 +47,10 @@ var (
 	ErrCacheMiss = errors.New("cache miss")
 )
 
+type RateLimiter interface {
+	RateLimit(host string)
+}
+
 type Config struct {
 	UserAgent string
 	CacheDir  string
@@ -72,12 +76,13 @@ type Getter interface {
 }
 
 type client struct {
-	client     *http.Client
-	useCache   bool
-	userAgent  string
-	cache      httpcache.Cache
-	maxAge     time.Duration
-	onlyCached bool
+	client      *http.Client
+	useCache    bool
+	userAgent   string
+	cache       httpcache.Cache
+	maxAge      time.Duration
+	onlyCached  bool
+	rateLimiter RateLimiter
 }
 
 func NewCacheOnlyGetter(config Config) Getter {
@@ -89,6 +94,7 @@ func NewCacheOnlyGetter(config Config) Getter {
 	c.cache = diskcache.New(config.CacheDir)
 	transport := httpcache.NewTransport(c.cache)
 	c.client = transport.Client()
+	c.rateLimiter = DefaultLimiter
 	return c
 
 }
@@ -105,24 +111,35 @@ func NewGetter(config Config) Getter {
 	} else {
 		c.client = &http.Client{}
 	}
+	c.rateLimiter = DefaultLimiter
 	return c
 }
 
-var (
-	lastRequest sync.Map
-)
+func NewTransportGetter(config Config, transport http.RoundTripper) Getter {
+	c := client{}
+	c.userAgent = config.UserAgent
+	c.useCache = false
+	c.client = &http.Client{Transport: transport}
+	c.rateLimiter = UnlimitedLimiter
+	return c
+}
 
-func RateLimit(host string) {
-	// TODO no support for concurrency
+var DefaultLimiter RateLimiter = &timeLimiter{}
+var UnlimitedLimiter RateLimiter = unlimitedLimiter(0)
+
+type timeLimiter struct {
+	lastRequest sync.Map
+}
+
+func (l *timeLimiter) RateLimit(host string) {
 	t := time.Now()
-	// if v, ok := lastRequest[host]; ok {
-	// 	d := t.Sub(v)
-	// 	if d < time.Second {
-	// 		time.Sleep(d)
-	// 	}
-	// }
 	time.Sleep(time.Second)
-	lastRequest.Store(host, t)
+	l.lastRequest.Store(host, t)
+}
+
+type unlimitedLimiter int
+
+func (unlimitedLimiter) RateLimit(host string) {
 }
 
 func (c client) doGet(headers map[string]string, urlStr string) (*http.Response, error) {
@@ -159,8 +176,7 @@ func (c client) doGet(headers map[string]string, urlStr string) (*http.Response,
 		}
 	}
 	if throttle {
-		//log.Printf("rate limit\n")
-		RateLimit(url.Hostname())
+		c.rateLimiter.RateLimit(url.Hostname())
 	}
 
 	//log.Printf("get %s\n", req.URL.String())

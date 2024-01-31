@@ -31,6 +31,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/takeoutfm/takeout/lib/log"
 )
 
 type RewriteRule struct {
@@ -178,7 +179,7 @@ func (b *Bucket) Rewrite(path string) string {
 		}
 	}
 	if result != path {
-		fmt.Printf("rewrite %s -> %s\n", path, result)
+		log.Printf("rewrite %s -> %s\n", path, result)
 	}
 	return result
 }

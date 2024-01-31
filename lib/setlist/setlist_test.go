@@ -18,41 +18,75 @@
 package setlist
 
 import (
-	"github.com/takeoutfm/takeout/lib/client"
-	"testing"
+	"bytes"
+	"embed"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
+	"testing"
+
+	"github.com/takeoutfm/takeout/lib/client"
 )
 
+//go:embed test/*.json
+var jsonFiles embed.FS
+
+func jsonFile(name string) string {
+	d, err := jsonFiles.ReadFile(name)
+	if err != nil {
+		return ""
+	}
+	return string(d)
+}
+
+type setlistServer struct {
+	t *testing.T
+}
+
+func (s setlistServer) RoundTrip(r *http.Request) (*http.Response, error) {
+	var body string
+	s.t.Logf("got %s\n", r.URL.String())
+	if strings.HasPrefix(r.URL.Path, "/rest/1.0/search/setlists") {
+		if r.URL.Query().Get("artistMbid") == "ca891d65-d9b0-4258-89f7-e6ba29d83767" &&
+			r.URL.Query().Get("year") == "2022" {
+			page := r.URL.Query().Get("p")
+			file := fmt.Sprintf("test/artist_ca891d65-d9b0-4258-89f7-e6ba29d83767_2022_%s.json", page)
+			body = jsonFile(file)
+		}
+	}
+	return &http.Response{
+		StatusCode: 200,
+		Body:       ioutil.NopCloser(bytes.NewBufferString(body)),
+		Header:     make(http.Header),
+	}, nil
+}
+
+const apiKey = ""
+
+func makeClient(t *testing.T) *Client {
+	c := client.NewTransportGetter(client.Config{UserAgent: "test/1.0"}, setlistServer{t: t})
+	return NewClient(Config{ApiKey: apiKey}, c)
+}
+
 func TestSetlist(t *testing.T) {
-	//"TGRHYagNV144XhA74sNfNPqoa443ClIjUabD",
-
-	// radiohead
-	//arid := "a74b1b7f-71a5-4011-9441-d0b5e4122711"
-	// iron maiden
-	//arid := "ca891d65-d9b0-4258-89f7-e6ba29d83767"
-	// numan
-	//arid := "6cb79cb2-9087-44d4-828b-5c6fdff2c957"
-
-	config := Config{ApiKey: ""}
-	s := NewClient(config, client.NewGetter(client.Config{}))
-
-	arid := "6cb79cb2-9087-44d4-828b-5c6fdff2c957"
+	s := makeClient(t)
+	arid := "ca891d65-d9b0-4258-89f7-e6ba29d83767" // iron maiden
 	result := s.ArtistYear(arid, 2022)
-
 	for _, sl := range result {
-		fmt.Printf("%s %s @ %s, %s, %s\n", sl.Tour.Name, sl.EventTime().Format("Mon, Jan 2, 2006"),
+		t.Logf("%s %s @ %s, %s, %s\n", sl.Tour.Name, sl.EventTime().Format("Mon, Jan 2, 2006"),
 			sl.Venue.Name, sl.Venue.City.Name, sl.Venue.City.Country.Name)
 		for _, v := range sl.Sets.Set {
 			if v.Encore == 0 {
-				fmt.Printf("set %s - %d\n", v.Name, len(v.Songs))
-				// for i, t := range v.Songs {
-				// 	fmt.Printf("%d. %s (%s)\n", i, t.Name, t.Info)
-			// }
+				t.Logf("set %s - %d\n", v.Name, len(v.Songs))
+				for i, t := range v.Songs {
+					fmt.Printf("%d. %s (%s)\n", i, t.Name, t.Info)
+				}
 			} else {
-				fmt.Printf("encore %s - %d\n", v.Name, len(v.Songs))
-				// for i, t := range v.Songs {
-				// 	fmt.Printf("%d. %s (%s)\n", i, t.Name, t.Info)
-				// }
+				t.Logf("encore %s - %d\n", v.Name, len(v.Songs))
+				for i, t := range v.Songs {
+					fmt.Printf("%d. %s (%s)\n", i, t.Name, t.Info)
+				}
 			}
 		}
 	}

@@ -143,7 +143,7 @@ func encode(e Encoder, track interface{}) error {
 				case "title":
 					trackTag.Title = StringTag{valueField.String()}
 				case "tracknum":
-					trackTag.TrackNum = IntTag{int(valueField.Int())}
+					trackTag.TrackNum = IntTag{int(valueField.Uint())}
 				case "location":
 					trackTag.Location = StringTag{valueField.Index(0).String()}
 				case "image":

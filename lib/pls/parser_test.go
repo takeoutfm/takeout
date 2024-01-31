@@ -41,7 +41,53 @@ Version=2
 	if err != nil {
 		t.Error(err)
 	}
-	for _, v := range playlist.Entries {
-		t.Logf("%d. %s %s (%d)\n", v.Index, v.File, v.Title, v.Length)
+
+	if len(playlist.Entries) != 3 {
+		t.Error("expect 3")
+	}
+
+	// 1
+	if playlist.Entries[0].Index != 1 {
+		t.Error("expect index = 1")
+	}
+	if playlist.Entries[0].File != "https://ice2.somafm.com/dronezone-128-aac" {
+		t.Error("expect ice2")
+	}
+	if playlist.Entries[0].Title !=
+		"SomaFM: Drone Zone (#1): Served best chilled, safe with most medications. Atmospheric textures with minimal beats." {
+		t.Error("expect drone zone #1")
+	}
+	if playlist.Entries[0].Length != -1 {
+		t.Error("expect length -1")
+	}
+
+	// 2
+	if playlist.Entries[1].Index != 2 {
+		t.Error("expect index = 2")
+	}
+	if playlist.Entries[1].File != "https://ice1.somafm.com/dronezone-128-aac" {
+		t.Error("expect ice1")
+	}
+	if playlist.Entries[1].Title !=
+		"SomaFM: Drone Zone (#2): Served best chilled, safe with most medications. Atmospheric textures with minimal beats." {
+		t.Error("expect drone zone #1")
+	}
+	if playlist.Entries[1].Length != -1 {
+		t.Error("expect length -1")
+	}
+
+	// 3
+	if playlist.Entries[2].Index != 3 {
+		t.Error("expect index = 3")
+	}
+	if playlist.Entries[2].File != "https://ice4.somafm.com/dronezone-128-aac" {
+		t.Error("expect ice4")
+	}
+	if playlist.Entries[2].Title !=
+		"SomaFM: Drone Zone (#3): Served best chilled, safe with most medications. Atmospheric textures with minimal beats." {
+		t.Error("expect drone zone #1")
+	}
+	if playlist.Entries[2].Length != -1 {
+		t.Error("expect length -1")
 	}
 }

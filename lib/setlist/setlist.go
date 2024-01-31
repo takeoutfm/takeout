@@ -131,8 +131,6 @@ func (s *Client) fetchAll(format string) []Setlist {
 	for page := 1; ; page++ {
 		url := fmt.Sprintf(format, page)
 		result := s.fetchPage(url)
-		fmt.Printf("page %d, items per page %d, total %d\n",
-			result.Page, result.ItemsPerPage, result.Total)
 		list = append(list, result.Setlist...)
 		total += len(result.Setlist)
 		if total >= result.Total {
@@ -145,7 +143,6 @@ func (s *Client) fetchAll(format string) []Setlist {
 func (s *Client) fetchPage(url string) *SetlistPage {
 	time.Sleep(time.Second)
 
-	fmt.Printf("url %s\n", url)
 	headers := map[string]string{
 		"Accept":    "application/json",
 		"x-api-key": s.config.ApiKey,

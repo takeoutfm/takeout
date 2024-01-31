@@ -19,21 +19,10 @@ package lastfm
 
 import (
 	"testing"
-	lfm "github.com/shkh/lastfm-go/lastfm"
-	"github.com/takeoutfm/takeout/config"
 )
 
 func TestLast(t *testing.T) {
 }
 
 func TestScrobble(t *testing.T) {
-	_, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-
-	//lfm.Api.
-
-	//api := lfm.New(config.LastFM.Key, config.LastFM.Secret)
-	//api.Track.Scrobble()
 }

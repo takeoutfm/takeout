@@ -19,9 +19,10 @@ package lastfm
 
 import (
 	lfm "github.com/shkh/lastfm-go/lastfm"
-	"github.com/takeoutfm/takeout/lib/client"
 	"sort"
 	"strconv"
+
+	"github.com/takeoutfm/takeout/lib/client"
 )
 
 type Config struct {
@@ -56,9 +57,8 @@ func (m *Lastfm) ArtistTopTracks(arid string) []TopTrack {
 		return make([]TopTrack, 0)
 	}
 
-	client.RateLimit("last.fm")
+	client.DefaultLimiter.RateLimit("last.fm")
 	api := lfm.New(m.config.Key, m.config.Secret)
-
 	result, _ := api.Artist.GetTopTracks(lfm.P{"mbid": arid})
 	sort.Slice(result.Tracks, func(i, j int) bool {
 		a, _ := strconv.Atoi(result.Tracks[i].PlayCount)
@@ -80,7 +80,7 @@ func (m *Lastfm) SimilarArtists(arid string) map[string]float64 {
 		return make(map[string]float64)
 	}
 
-	client.RateLimit("last.fm")
+	client.DefaultLimiter.RateLimit("last.fm")
 	api := lfm.New(m.config.Key, m.config.Secret)
 	result, _ := api.Artist.GetSimilar(lfm.P{"mbid": arid})
 
@@ -110,7 +110,7 @@ func (m *Lastfm) ArtistSearch(name string) (string, string) {
 		return "", ""
 	}
 
-	client.RateLimit("last.fm")
+	client.DefaultLimiter.RateLimit("last.fm")
 	api := lfm.New(m.config.Key, m.config.Secret)
 	result, _ := api.Artist.Search(lfm.P{"artist": name})
 

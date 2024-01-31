@@ -18,42 +18,142 @@
 package client
 
 import (
+	"bytes"
+	"io/ioutil"
+	"net/http"
 	"testing"
 )
 
-type mbzTag struct {
-	Name  string `json:"name"`
-	Count int    `json:"count"`
+type errorServer struct {
+	t *testing.T
 }
 
-type mbzGenre struct {
-	Name  string `json:"name"`
-	Count int    `json:"count"`
+func (s errorServer) RoundTrip(r *http.Request) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: 500,
+		Body:       ioutil.NopCloser(bytes.NewBufferString(`error`)),
+		Header:     make(http.Header),
+	}, nil
 }
 
-type mbzArtist struct {
-	Name           string     `json:"name"`
-	SortName       string     `json:"sort-name"`
-	Disambiguation string     `json:"disambiguation"`
-	Type           string     `json:"type"`
-	Genres         []mbzGenre `json:"genres"`
-	Tags           []mbzTag   `json:"tags"`
-}
-
-func TestClient(t *testing.T) {
-	urls := []string{
-		"http://musicbrainz.org/ws/2/artist/5b11f4ce-a62d-471e-81fc-a69a8278c7da?inc=aliases&fmt=json",
-		"http://musicbrainz.org/ws/2/artist/5b11f4ce-a62d-471e-81fc-a69a8278c7da?inc=aliases&fmt=json",
-		"http://musicbrainz.org/ws/2/artist/5b11f4ce-a62d-471e-81fc-a69a8278c7da?inc=aliases&fmt=json",
-		"http://musicbrainz.org/ws/2/artist/ba0d6274-db14-4ef5-b28d-657ebde1a396?inc=aliases&fmt=json",
-		"http://musicbrainz.org/ws/2/artist/ba0d6274-db14-4ef5-b28d-657ebde1a396?inc=aliases&fmt=json",
-		"http://musicbrainz.org/ws/2/artist/ba0d6274-db14-4ef5-b28d-657ebde1a396?inc=aliases&fmt=json",
+func TestError(t *testing.T) {
+	var result jsonResult
+	c := NewTransportGetter(Config{UserAgent: "test/1.0"}, errorServer{t: t})
+	err := c.GetJson("https://host/path", &result)
+	// expect retry backoff attempts
+	if err == nil {
+		t.Error("expect error")
 	}
+}
 
-	for i := 0; i < len(urls); i++ {
-		url := urls[i]
-		var artist mbzArtist
-		GetJson(url, &artist)
-		t.Logf("%v\n", artist)
+type jsonServer struct {
+	t *testing.T
+}
+
+type jsonResult struct {
+	A string `json:"a"`
+}
+
+func (s jsonServer) RoundTrip(r *http.Request) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: 200,
+		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"a":"b"}`)),
+		Header:     make(http.Header),
+	}, nil
+}
+
+func TestGetJson(t *testing.T) {
+	// urls := []string{
+	// 	"http://musicbrainz.org/ws/2/artist/5b11f4ce-a62d-471e-81fc-a69a8278c7da?inc=aliases&fmt=json",
+	// 	"http://musicbrainz.org/ws/2/artist/5b11f4ce-a62d-471e-81fc-a69a8278c7da?inc=aliases&fmt=json",
+	// 	"http://musicbrainz.org/ws/2/artist/5b11f4ce-a62d-471e-81fc-a69a8278c7da?inc=aliases&fmt=json",
+	// 	"http://musicbrainz.org/ws/2/artist/ba0d6274-db14-4ef5-b28d-657ebde1a396?inc=aliases&fmt=json",
+	// 	"http://musicbrainz.org/ws/2/artist/ba0d6274-db14-4ef5-b28d-657ebde1a396?inc=aliases&fmt=json",
+	// 	"http://musicbrainz.org/ws/2/artist/ba0d6274-db14-4ef5-b28d-657ebde1a396?inc=aliases&fmt=json",
+	// }
+
+	var result jsonResult
+	c := NewTransportGetter(Config{UserAgent: "test/1.0"}, jsonServer{t: t})
+	err := c.GetJson("https://host/path", &result)
+	if err != nil {
+		t.Error(err)
+	}
+	if result.A != "b" {
+		t.Errorf("expect 'b' got '%s'", result.A)
+	}
+}
+
+type xmlServer struct {
+	t *testing.T
+}
+
+type xmlResult struct {
+	Flag  bool   `xml:"flag,attr"`
+	Value string `xml:",chardata"`
+}
+
+func (s xmlServer) RoundTrip(r *http.Request) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: 200,
+		Body:       ioutil.NopCloser(bytes.NewBufferString(`<a flag="true">b</a>`)),
+		Header:     make(http.Header),
+	}, nil
+}
+
+func TestGetXML(t *testing.T) {
+	var result xmlResult
+	c := NewTransportGetter(Config{UserAgent: "test/1.0"}, xmlServer{t: t})
+	err := c.GetXML("https://host/path", &result)
+	if err != nil {
+		t.Error(err)
+	}
+	if result.Flag != true {
+		t.Errorf("expect flag true")
+	}
+	if result.Value != "b" {
+		t.Errorf("expect 'b' got '%s'", result.Value)
+	}
+}
+
+type plsServer struct {
+	t *testing.T
+}
+
+func (s plsServer) RoundTrip(r *http.Request) (*http.Response, error) {
+	body := `
+[playlist]
+numberofentries=1
+File1=https://ice6.somafm.com/brfm-128-mp3
+Title1=SomaFM: Black Rock FM (#1): From the Playa to the world, for the annual Burning Man festival.
+Length1=-1
+`
+	return &http.Response{
+		StatusCode: 200,
+		Body:       ioutil.NopCloser(bytes.NewBufferString(body)),
+		Header:     make(http.Header),
+	}, nil
+}
+
+func TestGetPLS(t *testing.T) {
+	c := NewTransportGetter(Config{UserAgent: "test/1.0"}, plsServer{t: t})
+	result, err := c.GetPLS("https://host/path")
+	if err != nil {
+		t.Error(err)
+	}
+	if result.NumberOfEntries != 1 {
+		t.Error("expect 1 entry")
+	}
+	if len(result.Entries) != 1 {
+		t.Error("expect len 1")
+	}
+	if result.Entries[0].File != "https://ice6.somafm.com/brfm-128-mp3" {
+		t.Error("expect mp3")
+	}
+	if result.Entries[0].Title !=
+		"SomaFM: Black Rock FM (#1): From the Playa to the world, for the annual Burning Man festival." {
+		t.Error("expect black rock fm")
+	}
+	if result.Entries[0].Length != -1 {
+		t.Error("expect length -1")
 	}
 }

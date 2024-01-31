@@ -1,4 +1,4 @@
-// Copyright 2023 defsub
+// Copyright 2024 defsub
 //
 // This file is part of Takeout.
 //
@@ -15,29 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
-package date
+package hash
 
 import (
 	"testing"
-	"time"
 )
 
-func TestParse1123(t *testing.T) {
-	list := []string{
-		"Fri, 6 Nov 2020 19:32:35 +0000",
-		"Fri,  6 Nov 2020 19:32:35 +0000",
-		"Fri, 06 Nov 2020 19:32:35 +0000",
-	}
-	for _, s := range list {
-		d := ParseRFC1123(s)
-		if d.Day() != 6 {
-			t.Errorf("wrong day got %d\n", d.Day())
-		}
-		if d.Month() != time.November {
-			t.Errorf("wrong month got %s\n", d.Month())
-		}
-		if d.Year() != 2020 {
-			t.Errorf("wrong year got %d\n", d.Year())
-		}
+func TestHash(t *testing.T) {
+	v := MD5Hex("takeout")
+	if v != "709667f94f75abd8e5ddf63e3630ce36" {
+		t.Error("wrong hash")
 	}
 }

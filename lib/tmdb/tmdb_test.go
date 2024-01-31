@@ -18,221 +18,300 @@
 package tmdb
 
 import (
-	"github.com/takeoutfm/takeout/config"
-	"github.com/takeoutfm/takeout/lib/date"
+	"bytes"
+	"embed"
+	"io/ioutil"
+	"net/http"
+	"strings"
 	"testing"
-	"fmt"
+
+	"github.com/takeoutfm/takeout/lib/client"
 )
 
+//go:embed test/*.json
+var jsonFiles embed.FS
+
+func jsonFile(name string) string {
+	d, err := jsonFiles.ReadFile(name)
+	if err != nil {
+		return ""
+	}
+	return string(d)
+}
+
+type tmdbServer struct {
+	t *testing.T
+}
+
+func (s tmdbServer) RoundTrip(r *http.Request) (*http.Response, error) {
+	var body string
+	//s.t.Logf("got %s\n", r.URL.String())
+	if strings.HasPrefix(r.URL.Path, "/3/configuration") {
+		body = jsonFile("test/configuration.json")
+	} else if strings.HasPrefix(r.URL.Path, "/3/search/movie") {
+		body = jsonFile("test/search_movie.json")
+	} else if strings.HasPrefix(r.URL.Path, "/3/movie/550/release_dates") {
+		body = jsonFile("test/movie_550_releasedates.json")
+	} else if strings.HasPrefix(r.URL.Path, "/3/movie/580/keywords") {
+		body = jsonFile("test/movie_580_keywords.json")
+	} else if strings.HasPrefix(r.URL.Path, "/3/movie/49849/credits") {
+		body = jsonFile("test/movie_49849_credits.json")
+	} else if strings.HasPrefix(r.URL.Path, "/3/movie/49849") {
+		body = jsonFile("test/movie_49849.json")
+	} else if strings.HasPrefix(r.URL.Path, "/3/person/11357") {
+		body = jsonFile("test/person_11357.json")
+	}
+	return &http.Response{
+		StatusCode: 200,
+		Body:       ioutil.NopCloser(bytes.NewBufferString(body)),
+		Header:     make(http.Header),
+	}, nil
+}
+
+func makeClient(t *testing.T) *TMDB {
+	c := client.NewTransportGetter(client.Config{UserAgent: "test/1.0"}, tmdbServer{t: t})
+	return NewTMDB(Config{Language: "en-US", Key: "903a776b0638da68e9ade38ff538e1d3"}, c)
+}
+
 func TestConfiguration(t *testing.T) {
-	config, err := config.TestConfig()
+	tmdb := makeClient(t)
+	config, err := tmdb.configuration()
 	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
+		t.Fatal(err)
 	}
-	if config.TMDB.Key == "" {
-		t.Errorf("no key\n")
+	if config == nil {
+		t.Error("expect config")
 	}
-	m := NewTMDB(config)
-	result, err := m.configuration()
-	if err != nil {
-		t.Errorf("%s\n", err)
+	if config.Images.BaseURL == "" {
+		t.Error("expect baseurl")
 	}
-	fmt.Printf("%+v\n", result)
+	if config.Images.SecureBaseURL == "" {
+		t.Error("expect secure baseurl")
+	}
 }
 
 func TestMovieSearch(t *testing.T) {
-	config, err := config.TestConfig()
+	tmdb := makeClient(t)
+	result, err := tmdb.MovieSearch("cowboys and aliens")
 	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
+		t.Fatal(err)
 	}
-	if config.TMDB.Key == "" {
-		t.Errorf("no key\n")
+	if len(result) == 0 {
+		t.Error("expect results")
 	}
-	m := NewTMDB(config)
-	results, err := m.MovieSearch("cowboys and aliens")
-	if err != nil {
-		t.Errorf("%s\n", err)
+	movie := result[0]
+	if movie.ID != 49849 {
+		t.Error("expect id")
 	}
-	for _, r := range results {
-		d := date.ParseDate(r.ReleaseDate)
-		fmt.Printf("%d %s (%d)\n", r.ID, r.Title, d.Year())
-		fmt.Printf("  %s\n", m.OriginalPoster(r.PosterPath))
-		for _, g := range r.GenreIDs {
-			fmt.Printf("  %s\n", m.MovieGenre(g))
-		}
+	if movie.Title != "Cowboys & Aliens" {
+		t.Error("expect title")
+	}
+	if movie.OriginalTitle != "Cowboys & Aliens" {
+		t.Error("expect original title")
+	}
+	if movie.ReleaseDate != "2011-07-29" {
+		t.Error("expect date")
 	}
 }
 
 func TestMovieDetail(t *testing.T) {
-	config, err := config.TestConfig()
+	tmdb := makeClient(t)
+	movie, err := tmdb.MovieDetail(49849)
 	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
+		t.Fatal(err)
 	}
-	if config.TMDB.Key == "" {
-		t.Errorf("no key\n")
+	if movie == nil {
+		t.Error("expect movie")
 	}
-	m := NewTMDB(config)
-	movie, err := m.MovieDetail(503736) // arm of the dead
-	if err != nil {
-		t.Errorf("%s\n", err)
+	if movie.ID != 49849 {
+		t.Error("expect id")
 	}
-	fmt.Printf("%s (%s)\n", movie.Title, movie.ReleaseDate)
-	fmt.Printf("%+v\n", movie)
-}
-
-func TestMovieCredits(t *testing.T) {
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
+	if movie.Title != "Cowboys & Aliens" {
+		t.Error("expect title")
 	}
-	if config.TMDB.Key == "" {
-		t.Errorf("no key\n")
+	if movie.OriginalTitle != "Cowboys & Aliens" {
+		t.Error("expect original title")
 	}
-	m := NewTMDB(config)
-	credits, err := m.MovieCredits(503736) // arm of the dead
-	if err != nil {
-		t.Errorf("%s\n", err)
+	if movie.ReleaseDate != "2011-07-29" {
+		t.Error("expect date")
 	}
-	for _, c := range credits.Cast {
-		fmt.Printf("%s - %s\n", c.Name, c.Character)
+	if len(movie.Genres) == 0 {
+		t.Error("expect genres")
 	}
-	for _, c := range credits.Crew {
-		fmt.Printf("%s - %s\n", c.Name, c.Job)
-	}
-}
-
-func TestMovieReleases(t *testing.T) {
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-	if config.TMDB.Key == "" {
-		t.Errorf("no key\n")
-	}
-	m := NewTMDB(config)
-	releases, err := m.MovieReleases(503736) // arm of the dead
-	if err != nil {
-		t.Errorf("%s\n", err)
-	}
-	for k, v := range releases {
-		fmt.Printf("%s - %+v\n", k, v)
-	}
-}
-
-func TestMovieReleaseType(t *testing.T) {
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-
-	if config.TMDB.Key == "" {
-		t.Errorf("no key\n")
-	}
-	m := NewTMDB(config)
-	r, err := m.MovieReleaseType(503736, "US", TypeDigital) // arm of the dead
-	if err != nil {
-		t.Errorf("%s\n", err)
-	}
-	fmt.Printf("%s - %s\n", r.Certification, r.Date)
-}
-
-func TestPerson(t *testing.T) {
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-
-	if config.TMDB.Key == "" {
-		t.Errorf("no key\n")
-	}
-	m := NewTMDB(config)
-	p, err := m.PersonDetail(287) // brad pitt
-	if err != nil {
-		t.Errorf("%s\n", err)
-	}
-	fmt.Printf("%s - %s\n", p.Name, p.Birthday)
-	fmt.Printf("%s\n", p.Biography)
-}
-
-func TestTVSearch(t *testing.T) {
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-
-	if config.TMDB.Key == "" {
-		t.Errorf("no key\n")
-	}
-	m := NewTMDB(config)
-	results, err := m.TVSearch("the shining")
-	if err != nil {
-		t.Errorf("%s\n", err)
-	}
-	for _, r := range results {
-		d := date.ParseDate(r.FirstAirDate)
-		fmt.Printf("%d %s (%d)\n", r.ID, r.Name, d.Year())
-		fmt.Printf("  %s\n", m.OriginalPoster(r.PosterPath))
-		for _, g := range r.GenreIDs {
-			fmt.Printf("  %s\n", m.TVGenre(g))
+	for _, g := range movie.Genres {
+		if g.Name == "" {
+			t.Error("expect genre")
 		}
 	}
 }
 
-func TestTVDetail(t *testing.T) {
-	config, err := config.TestConfig()
+func TestMovieCredits(t *testing.T) {
+	tmdb := makeClient(t)
+	credits, err := tmdb.MovieCredits(49849)
 	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
+		t.Fatal(err)
 	}
-
-	if config.TMDB.Key == "" {
-		t.Errorf("no key\n")
+	if credits == nil {
+		t.Error("expect credits")
 	}
-	m := NewTMDB(config)
-	tv, err := m.TVDetail(1867) // game of thrones
-	if err != nil {
-		t.Errorf("%s\n", err)
-	}
-	fmt.Printf("%s (%s)\n", tv.Name, tv.FirstAirDate)
-	fmt.Printf("%+v\n", tv)
-}
-
-func TestEpisodeDetail(t *testing.T) {
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-	if config.TMDB.Key == "" {
-		t.Errorf("no key\n")
-	}
-	m := NewTMDB(config)
-	episode, err := m.EpisodeDetail(1399, 1, 1) // game of thrones
-	if err != nil {
-		t.Errorf("%s\n", err)
-	}
-	fmt.Printf("%d %s (%s)\n", episode.ID, episode.Name, episode.AirDate)
-	fmt.Printf("%+v\n", episode)
-}
-
-func TestEpisodeCredits(t *testing.T) {
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-	if config.TMDB.Key == "" {
-		t.Errorf("no key\n")
-	}
-	m := NewTMDB(config)
-	credits, err := m.EpisodeCredits(1399, 1, 1) // game of thrones
-	if err != nil {
-		t.Errorf("%s\n", err)
-	}
+	found := 0
 	for _, c := range credits.Cast {
-		fmt.Printf("cast: %s - %s\n", c.Name, c.Character)
+		if c.Name == "" {
+			t.Error("expect cast name")
+		}
+		if c.Character == "" {
+			t.Error("expect cast character")
+		}
+		if c.Name == "Daniel Craig" && c.Character == "Jake Lonergan" {
+			found++
+		}
+	}
+	if found != 1 {
+		t.Error("expect actor")
 	}
 	for _, c := range credits.Crew {
-		fmt.Printf("crew: %s - %s\n", c.Name, c.Job)
-	}
-	for _, c := range credits.Guests {
-		fmt.Printf("guest: %s - %s\n", c.Name, c.Character)
+		if c.Department == "" {
+			t.Error("expect dept")
+		}
+		if c.Job == "" {
+			t.Error("expect job")
+		}
+		if c.Name == "" {
+			t.Error("expect name")
+		}
 	}
 }
+
+func TestMovieReleaseType(t *testing.T) {
+	tmdb := makeClient(t)
+	release, err := tmdb.MovieReleaseType(550, "US", TypeTheatrical) // fight club
+	if err != nil {
+		t.Fatal(err)
+	}
+	if release == nil {
+		t.Error("expect release")
+	}
+	if release.Certification != "R" {
+		t.Error("expect R rating")
+	}
+}
+
+func TestMovieKeywordNames(t *testing.T) {
+	tmdb := makeClient(t)
+	keywords, err := tmdb.MovieKeywordNames(580) // jaws the revenge
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(keywords) == 0 {
+		t.Error("expect keywords")
+	}
+	found := 0
+	for _, v := range keywords {
+		if v == "shark" {
+			found++
+		}
+	}
+	if found != 1 {
+		t.Error("expect shark")
+	}
+}
+
+func TestPersonDetail(t *testing.T) {
+	tmdb := makeClient(t)
+	person, err := tmdb.PersonDetail(11357) // bruce campbell
+	if err != nil {
+		t.Fatal(err)
+	}
+	if person == nil {
+		t.Error("expect person")
+	}
+	if person.Name != "Bruce Campbell" {
+		t.Error("expect bruce")
+	}
+	if person.Birthplace != "Birmingham, Michigan, USA" {
+		t.Error("expect birmingham")
+	}
+}
+
+// func TestTVSearch(t *testing.T) {
+// 	config, err := config.TestConfig()
+// 	if err != nil {
+// 		t.Errorf("GetConfig %s\n", err)
+// 	}
+
+// 	if config.TMDB.Key == "" {
+// 		t.Errorf("no key\n")
+// 	}
+// 	m := NewTMDB(config)
+// 	results, err := m.TVSearch("the shining")
+// 	if err != nil {
+// 		t.Errorf("%s\n", err)
+// 	}
+// 	for _, r := range results {
+// 		d := date.ParseDate(r.FirstAirDate)
+// 		fmt.Printf("%d %s (%d)\n", r.ID, r.Name, d.Year())
+// 		fmt.Printf("  %s\n", m.OriginalPoster(r.PosterPath))
+// 		for _, g := range r.GenreIDs {
+// 			fmt.Printf("  %s\n", m.TVGenre(g))
+// 		}
+// 	}
+// }
+
+// func TestTVDetail(t *testing.T) {
+// 	config, err := config.TestConfig()
+// 	if err != nil {
+// 		t.Errorf("GetConfig %s\n", err)
+// 	}
+
+// 	if config.TMDB.Key == "" {
+// 		t.Errorf("no key\n")
+// 	}
+// 	m := NewTMDB(config)
+// 	tv, err := m.TVDetail(1867) // game of thrones
+// 	if err != nil {
+// 		t.Errorf("%s\n", err)
+// 	}
+// 	fmt.Printf("%s (%s)\n", tv.Name, tv.FirstAirDate)
+// 	fmt.Printf("%+v\n", tv)
+// }
+
+// func TestEpisodeDetail(t *testing.T) {
+// 	config, err := config.TestConfig()
+// 	if err != nil {
+// 		t.Errorf("GetConfig %s\n", err)
+// 	}
+// 	if config.TMDB.Key == "" {
+// 		t.Errorf("no key\n")
+// 	}
+// 	m := NewTMDB(config)
+// 	episode, err := m.EpisodeDetail(1399, 1, 1) // game of thrones
+// 	if err != nil {
+// 		t.Errorf("%s\n", err)
+// 	}
+// 	fmt.Printf("%d %s (%s)\n", episode.ID, episode.Name, episode.AirDate)
+// 	fmt.Printf("%+v\n", episode)
+// }
+
+// func TestEpisodeCredits(t *testing.T) {
+// 	config, err := config.TestConfig()
+// 	if err != nil {
+// 		t.Errorf("GetConfig %s\n", err)
+// 	}
+// 	if config.TMDB.Key == "" {
+// 		t.Errorf("no key\n")
+// 	}
+// 	m := NewTMDB(config)
+// 	credits, err := m.EpisodeCredits(1399, 1, 1) // game of thrones
+// 	if err != nil {
+// 		t.Errorf("%s\n", err)
+// 	}
+// 	for _, c := range credits.Cast {
+// 		fmt.Printf("cast: %s - %s\n", c.Name, c.Character)
+// 	}
+// 	for _, c := range credits.Crew {
+// 		fmt.Printf("crew: %s - %s\n", c.Name, c.Job)
+// 	}
+// 	for _, c := range credits.Guests {
+// 		fmt.Printf("guest: %s - %s\n", c.Name, c.Character)
+// 	}
+// }
