@@ -1,0 +1,1145 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:googleplay="http://www.google.com/schemas/play-podcasts/1.0" xmlns:creativeCommons="http://backend.userland.com/creativeCommonsRssModule" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" xmlns:rawvoice="http://www.rawvoice.com/rawvoiceRssModule/" version="2.0">
+	<channel>
+		<title>This Week in Tech (Audio)</title>
+		<itunes:author>TWiT</itunes:author>
+		<link>https://twit.tv/shows/this-week-in-tech</link>
+		<generator>TWiT Feed Generator v4.5</generator>
+		<docs>http://blogs.law.harvard.edu/tech/rss</docs>
+		<language>en-US</language>
+		<copyright>This work is licensed under a Creative Commons License - Attribution-NonCommercial-NoDerivatives 4.0 International - http://creativecommons.org/licenses/by-nc-nd/4.0/</copyright>
+		<creativeCommons:license>http://creativecommons.org/licenses/by-nc-nd/4.0/</creativeCommons:license>
+		<managingEditor>distro@twit.tv (TWiT Editors)</managingEditor>
+		<webMaster>distro@twit.tv (TWiT Engineering)</webMaster>
+		<ttl>720</ttl>
+		<sy:updatePeriod>weekly</sy:updatePeriod>
+		<sy:updateFrequency>1</sy:updateFrequency>
+		<lastBuildDate>Sun, 28 Jan 2024 21:45:03 PST</lastBuildDate>
+		<pubDate>Sun, 28 Jan 2024 21:45:03 PST</pubDate>
+		<rawvoice:frequency>weekly</rawvoice:frequency>
+		<rawvoice:location>Petaluma, CA</rawvoice:location>
+		<itunes:type>episodic</itunes:type>
+		<itunes:subtitle>Join Leo Laporte and an ever-changing panel of experts as they discuss the who, what, and why of tech news.</itunes:subtitle>
+		<itunes:summary>Your first podcast of the week is the last word in tech news. Join the top tech journalists and pundits in a roundtable discussion of the latest trends in tech.
+
+Records live every Sunday at 5:15pm Eastern / 2:15pm Pacific / 22:15 UTC.</itunes:summary>
+		<description>Your first podcast of the week is the last word in tech news. Join the top tech journalists and pundits in a roundtable discussion of the latest trends in tech.
+
+Records live every Sunday at 5:15pm Eastern / 2:15pm Pacific / 22:15 UTC.</description>
+		<itunes:keywords>TWiT, Technology, Leo Laporte, TechTV, This Week in Technology</itunes:keywords>
+		<rawvoice:rating tv="tv-g">tv-g</rawvoice:rating>
+		<itunes:explicit>no</itunes:explicit>
+		<itunes:block>no</itunes:block>
+		<googleplay:block>No</googleplay:block>
+		<itunes:owner>
+			<itunes:name>Leo Laporte</itunes:name>
+			<itunes:email>distro@twit.tv</itunes:email>
+		</itunes:owner>
+		<itunes:category text="Technology" />
+		<category>Tech News</category>
+		<image>
+			<title>This Week in Tech (Audio)</title>
+			<url>https://elroy.twit.tv/sites/default/files/styles/twit_album_art_2048x2048/public/images/shows/this_week_in_tech/album_art/audio/twit_2022albumart_standard_2048.jpg</url>
+			<link>https://twit.tv/shows/this-week-in-tech</link>
+		</image>
+		<itunes:image href="https://elroy.twit.tv/sites/default/files/styles/twit_album_art_2048x2048/public/images/shows/this_week_in_tech/album_art/audio/twit_2022albumart_standard_2048.jpg" />
+		<itunes:new-feed-url>https://feeds.twit.tv/twit.xml</itunes:new-feed-url>
+		<rawvoice:subscribe feed="https://feeds.twit.tv/twit.xml" itunes="https://podcasts.apple.com/us/podcast/this-week-in-tech-mp3/id73329404?uo=10" tunein="http://tun.in/peN2d" html="https://twit.tv/shows/this-week-in-tech"></rawvoice:subscribe>
+		<atom:link href="https://feeds.twit.tv/twit.xml" type="application/rss+xml" rel="self"/>
+		<item>
+			<title>TWiT 964: No One Talks to the Faucet Anymore - AI Investing Trends, Taylor Swift Deepfakes</title>
+			<itunes:title>No One Talks to the Faucet Anymore - AI Investing Trends, Taylor Swift Deepfakes</itunes:title>
+			<itunes:episodeType>full</itunes:episodeType>
+			<itunes:author>TWiT</itunes:author>
+			<pubDate>Sun, 28 Jan 2024 17:27:00 PST</pubDate>
+			<itunes:episode>964</itunes:episode>
+			<link>https://twit.tv/shows/this-week-in-tech/episodes/964</link>
+			<comments>https://twit.tv/shows/this-week-in-tech/episodes/964</comments>
+			<category>News</category>
+			<category>Tech News</category>
+			<itunes:explicit>no</itunes:explicit>
+			<itunes:subtitle>AI Investing Trends, Taylor Swift Deepfakes</itunes:subtitle>
+			<itunes:keywords>Technology, TWiT, This Week in Tech, Leo Laporte, Ben Parr, Stacey Higginbotham, allyn malventano, ai, Apple, Apple vision pro, investing trends, george carlin, deepfake, nightshade, Taylor Swift, tim sweeny, EU, digital markets act, iPhone, NSA, spying, </itunes:keywords>
+			<description><![CDATA[
+<p>AI Investing Trends, Taylor Swift Deepfakes</p><ul> 
+<li>160-180k Apple Vision Pros sold</li> 
+<li>Ben Parr's 110+ Page Slide report I came out with on AI investing trends + predictions in 2023/2024</li> 
+<li>George Carlin AI Lawsuit: Estate Sues Creators Over Comedy Special</li> 
+<li>Nightshade, the tool that 'poisons' data, gives artists a fighting chance against AI</li> 
+<li>Google News Is Boosting Garbage AI-Generated Articles</li> 
+<li>Taylor Swift explicit AI finally blocked on X after days</li> 
+<li>Tim Sweeney on Europe's new Digital Markets Act</li> 
+<li>iPhone Apps Secretly Harvest Data When They Send You Notifications, Researchers Find</li> 
+<li>N.S.A. Buys Americans' Internet Data Without Warrants, Letter Says</li> 
+<li>Pokemon-like game has gone viral, 5m+ downloads in a week, lots of questions on copyright</li> 
+<li>Beeper's push for iMessage on Android is really over</li> 
+<li>Police Arrest Teen Said to Be Linked to Hundreds of Swatting Attacks</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://twit.tv/people/stacey-higginbotham">Stacey Higginbotham</a>, <a href="https://twitter.com/benparr" target="_blank">Ben Parr</a>, and <a href="https://twitter.com/malventano" target="_blank">Allyn Malventano</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://gusto.com/tech" target="_blank" rel="sponsored">gusto.com/tech</a></li>
+<li><a href="http://NetSuite.com/TWIT" target="_blank" rel="sponsored">NetSuite.com/TWIT</a></li>
+<li><a href="http://ecamm.com/twit" target="_blank" rel="sponsored">ecamm.com/twit or use Promo Code TWIT</a></li>
+<li><a href="http://expressvpn.com/twit" target="_blank" rel="sponsored">expressvpn.com/twit</a></li>
+<li><a href="http://panoptica.app" target="_blank" rel="sponsored">panoptica.app</a></li>
+</ul></p>
+]]></description>
+			<itunes:summary><![CDATA[
+<p>AI Investing Trends, Taylor Swift Deepfakes</p><ul> 
+<li>160-180k Apple Vision Pros sold</li> 
+<li>Ben Parr's 110+ Page Slide report I came out with on AI investing trends + predictions in 2023/2024</li> 
+<li>George Carlin AI Lawsuit: Estate Sues Creators Over Comedy Special</li> 
+<li>Nightshade, the tool that 'poisons' data, gives artists a fighting chance against AI</li> 
+<li>Google News Is Boosting Garbage AI-Generated Articles</li> 
+<li>Taylor Swift explicit AI finally blocked on X after days</li> 
+<li>Tim Sweeney on Europe's new Digital Markets Act</li> 
+<li>iPhone Apps Secretly Harvest Data When They Send You Notifications, Researchers Find</li> 
+<li>N.S.A. Buys Americans' Internet Data Without Warrants, Letter Says</li> 
+<li>Pokemon-like game has gone viral, 5m+ downloads in a week, lots of questions on copyright</li> 
+<li>Beeper's push for iMessage on Android is really over</li> 
+<li>Police Arrest Teen Said to Be Linked to Hundreds of Swatting Attacks</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://twit.tv/people/stacey-higginbotham">Stacey Higginbotham</a>, <a href="https://twitter.com/benparr" target="_blank">Ben Parr</a>, and <a href="https://twitter.com/malventano" target="_blank">Allyn Malventano</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://gusto.com/tech" target="_blank" rel="sponsored">gusto.com/tech</a></li>
+<li><a href="http://NetSuite.com/TWIT" target="_blank" rel="sponsored">NetSuite.com/TWIT</a></li>
+<li><a href="http://ecamm.com/twit" target="_blank" rel="sponsored">ecamm.com/twit or use Promo Code TWIT</a></li>
+<li><a href="http://expressvpn.com/twit" target="_blank" rel="sponsored">expressvpn.com/twit</a></li>
+<li><a href="http://panoptica.app" target="_blank" rel="sponsored">panoptica.app</a></li>
+</ul></p>
+]]></itunes:summary>
+			<content:encoded><![CDATA[
+<p>AI Investing Trends, Taylor Swift Deepfakes</p><ul> 
+<li>160-180k Apple Vision Pros sold</li> 
+<li>Ben Parr's 110+ Page Slide report I came out with on AI investing trends + predictions in 2023/2024</li> 
+<li>George Carlin AI Lawsuit: Estate Sues Creators Over Comedy Special</li> 
+<li>Nightshade, the tool that 'poisons' data, gives artists a fighting chance against AI</li> 
+<li>Google News Is Boosting Garbage AI-Generated Articles</li> 
+<li>Taylor Swift explicit AI finally blocked on X after days</li> 
+<li>Tim Sweeney on Europe's new Digital Markets Act</li> 
+<li>iPhone Apps Secretly Harvest Data When They Send You Notifications, Researchers Find</li> 
+<li>N.S.A. Buys Americans' Internet Data Without Warrants, Letter Says</li> 
+<li>Pokemon-like game has gone viral, 5m+ downloads in a week, lots of questions on copyright</li> 
+<li>Beeper's push for iMessage on Android is really over</li> 
+<li>Police Arrest Teen Said to Be Linked to Hundreds of Swatting Attacks</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://twit.tv/people/stacey-higginbotham">Stacey Higginbotham</a>, <a href="https://twitter.com/benparr" target="_blank">Ben Parr</a>, and <a href="https://twitter.com/malventano" target="_blank">Allyn Malventano</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://gusto.com/tech" target="_blank" rel="sponsored">gusto.com/tech</a></li>
+<li><a href="http://NetSuite.com/TWIT" target="_blank" rel="sponsored">NetSuite.com/TWIT</a></li>
+<li><a href="http://ecamm.com/twit" target="_blank" rel="sponsored">ecamm.com/twit or use Promo Code TWIT</a></li>
+<li><a href="http://expressvpn.com/twit" target="_blank" rel="sponsored">expressvpn.com/twit</a></li>
+<li><a href="http://panoptica.app" target="_blank" rel="sponsored">panoptica.app</a></li>
+</ul></p>
+]]></content:encoded>
+			<itunes:image href="https://elroy.twit.tv/sites/default/files/styles/twit_thumb_720x405/public/images/episodes/2024/01/850206/hero/twit0964_thumbnail.jpg"/>
+			<guid isPermaLink="false">https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/audio/twit/twit0964/twit0964.mp3</guid>
+			<itunes:duration>2:35:48</itunes:duration>
+			<enclosure url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_964/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0964.mp3" length="74923433" type="audio/mpeg"/>
+			<media:content url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_964/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0964.mp3" fileSize="74923433" type="audio/mpeg" medium="audio">
+				<media:title type="plain">TWiT 964: No One Talks to the Faucet Anymore - AI Investing Trends, Taylor Swift Deepfakes</media:title>
+				<media:description type="plain">AI Investing Trends, Taylor Swift Deepfakes</media:description>
+				<media:keywords>Technology, TWiT, This Week in Tech, Leo Laporte, Ben Parr, Stacey Higginbotham, allyn malventano, ai, Apple, Apple vision pro, investing trends, george carlin, deepfake, nightshade, Taylor Swift, tim sweeny, EU, digital markets act, iPhone, NSA, spying, </media:keywords>
+				<media:thumbnail url="https://elroy.twit.tv/sites/default/files/styles/twit_slideshow_400x300/public/images/episodes/2024/01/850206/hero/twit0964_thumbnail.jpg" width="400" height="225" />
+				<media:rating scheme="urn:simple">nonadult</media:rating>
+				<media:rating scheme="urn:v-chip">tv-g</media:rating>
+				<media:category scheme="urn:iab:categories" label="Technology &amp; Computing">IAB19</media:category>
+				<media:credit role="host">Leo Laporte</media:credit>
+				<media:credit role="guest">Stacey Higginbotham</media:credit>
+				<media:credit role="guest">Ben Parr</media:credit>
+				<media:credit role="guest">Allyn Malventano</media:credit>
+			</media:content>
+		</item>
+		<item>
+			<title>TWiT 963: Low-Key Clippy - Verizon Fees, AI Translations, Microsoft Hack</title>
+			<itunes:title>Low-Key Clippy - Verizon Fees, AI Translations, Microsoft Hack</itunes:title>
+			<itunes:episodeType>full</itunes:episodeType>
+			<itunes:author>TWiT</itunes:author>
+			<pubDate>Sun, 21 Jan 2024 18:29:06 PST</pubDate>
+			<itunes:episode>963</itunes:episode>
+			<link>https://twit.tv/shows/this-week-in-tech/episodes/963</link>
+			<comments>https://twit.tv/shows/this-week-in-tech/episodes/963</comments>
+			<category>News</category>
+			<category>Tech News</category>
+			<itunes:explicit>no</itunes:explicit>
+			<itunes:subtitle>Verizon Fees, AI Translations, Microsoft Hack</itunes:subtitle>
+			<itunes:keywords>TWiT, This Week in Tech, Leo Laporte, Cory Doctorow, Alex Lindsay, Apple, app store, Apple vision pro, Google, duopoly, verizon, settlement, javier milei, ai, deepfake, sam altman, chatgpt, sports illustrated, layoffs, enshittification, beeper, imessage, </itunes:keywords>
+			<description><![CDATA[
+<p>Verizon Fees, AI Translations, Microsoft Hack</p><ul> 
+<li>The panel talks about the Apple Vision pro</li> 
+<li>The Apple Google Duopoly</li> 
+<li>Verizon To Keep Charging Controversial Fee Despite $100 Million Settlement</li> 
+<li>Javier Milei Special Address WITH AI</li> 
+<li>Sam Altman says ChatGPT will evolve in "uncomfortable" ways</li> 
+<li>Sports Illustrated Thrown Into Chaos With Mass Layoffs</li> 
+<li>Origins and definition of "Ensh*ttification"</li> 
+<li>Beeper users say Apple is now blocking their Macs from using iMessage entirely</li> 
+<li>The Quiet Death of Ello's Big Dreams</li> 
+<li>Microsoft 'senior leadership' emails accessed by Russian SolarWinds hackers</li> 
+<li>Amazon's Dark Secret: It Has Failed to Protect Your Data</li> 
+<li>Among Linguists, the Word of the Year Is More of a Vibe</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="http://craphound.com/" target="_blank">Cory Doctorow</a>, <a href="http://twitter.com/iainthomson" target="_blank">Iain Thomson</a>, and <a href="https://twit.tv/people/alex-lindsay">Alex Lindsay</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://meraki.cisco.com/twit" target="_blank" rel="sponsored">meraki.cisco.com/twit</a></li>
+<li><a href="http://stamps.com/twit" target="_blank" rel="sponsored">www.stamps.com - promo code: TWIT</a></li>
+<li><a href="http://mintmobile.com/twit" target="_blank" rel="sponsored">mintmobile.com/twit</a></li>
+<li><a href="https://www.paloaltonetworks.com/ot-security-tco" target="_blank" rel="sponsored">paloaltonetworks.com/ot-security-tco</a></li>
+<li><a href="http://drata.com/twit" target="_blank" rel="sponsored">drata.com/twit</a></li>
+<li><a href="http://www.ziprecruiter.com/twit" target="_blank" rel="sponsored">ziprecruiter.com/twit</a></li>
+</ul></p>
+]]></description>
+			<itunes:summary><![CDATA[
+<p>Verizon Fees, AI Translations, Microsoft Hack</p><ul> 
+<li>The panel talks about the Apple Vision pro</li> 
+<li>The Apple Google Duopoly</li> 
+<li>Verizon To Keep Charging Controversial Fee Despite $100 Million Settlement</li> 
+<li>Javier Milei Special Address WITH AI</li> 
+<li>Sam Altman says ChatGPT will evolve in "uncomfortable" ways</li> 
+<li>Sports Illustrated Thrown Into Chaos With Mass Layoffs</li> 
+<li>Origins and definition of "Ensh*ttification"</li> 
+<li>Beeper users say Apple is now blocking their Macs from using iMessage entirely</li> 
+<li>The Quiet Death of Ello's Big Dreams</li> 
+<li>Microsoft 'senior leadership' emails accessed by Russian SolarWinds hackers</li> 
+<li>Amazon's Dark Secret: It Has Failed to Protect Your Data</li> 
+<li>Among Linguists, the Word of the Year Is More of a Vibe</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="http://craphound.com/" target="_blank">Cory Doctorow</a>, <a href="http://twitter.com/iainthomson" target="_blank">Iain Thomson</a>, and <a href="https://twit.tv/people/alex-lindsay">Alex Lindsay</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://meraki.cisco.com/twit" target="_blank" rel="sponsored">meraki.cisco.com/twit</a></li>
+<li><a href="http://stamps.com/twit" target="_blank" rel="sponsored">www.stamps.com - promo code: TWIT</a></li>
+<li><a href="http://mintmobile.com/twit" target="_blank" rel="sponsored">mintmobile.com/twit</a></li>
+<li><a href="https://www.paloaltonetworks.com/ot-security-tco" target="_blank" rel="sponsored">paloaltonetworks.com/ot-security-tco</a></li>
+<li><a href="http://drata.com/twit" target="_blank" rel="sponsored">drata.com/twit</a></li>
+<li><a href="http://www.ziprecruiter.com/twit" target="_blank" rel="sponsored">ziprecruiter.com/twit</a></li>
+</ul></p>
+]]></itunes:summary>
+			<content:encoded><![CDATA[
+<p>Verizon Fees, AI Translations, Microsoft Hack</p><ul> 
+<li>The panel talks about the Apple Vision pro</li> 
+<li>The Apple Google Duopoly</li> 
+<li>Verizon To Keep Charging Controversial Fee Despite $100 Million Settlement</li> 
+<li>Javier Milei Special Address WITH AI</li> 
+<li>Sam Altman says ChatGPT will evolve in "uncomfortable" ways</li> 
+<li>Sports Illustrated Thrown Into Chaos With Mass Layoffs</li> 
+<li>Origins and definition of "Ensh*ttification"</li> 
+<li>Beeper users say Apple is now blocking their Macs from using iMessage entirely</li> 
+<li>The Quiet Death of Ello's Big Dreams</li> 
+<li>Microsoft 'senior leadership' emails accessed by Russian SolarWinds hackers</li> 
+<li>Amazon's Dark Secret: It Has Failed to Protect Your Data</li> 
+<li>Among Linguists, the Word of the Year Is More of a Vibe</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="http://craphound.com/" target="_blank">Cory Doctorow</a>, <a href="http://twitter.com/iainthomson" target="_blank">Iain Thomson</a>, and <a href="https://twit.tv/people/alex-lindsay">Alex Lindsay</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://meraki.cisco.com/twit" target="_blank" rel="sponsored">meraki.cisco.com/twit</a></li>
+<li><a href="http://stamps.com/twit" target="_blank" rel="sponsored">www.stamps.com - promo code: TWIT</a></li>
+<li><a href="http://mintmobile.com/twit" target="_blank" rel="sponsored">mintmobile.com/twit</a></li>
+<li><a href="https://www.paloaltonetworks.com/ot-security-tco" target="_blank" rel="sponsored">paloaltonetworks.com/ot-security-tco</a></li>
+<li><a href="http://drata.com/twit" target="_blank" rel="sponsored">drata.com/twit</a></li>
+<li><a href="http://www.ziprecruiter.com/twit" target="_blank" rel="sponsored">ziprecruiter.com/twit</a></li>
+</ul></p>
+]]></content:encoded>
+			<itunes:image href="https://elroy.twit.tv/sites/default/files/styles/twit_thumb_720x405/public/images/episodes/2024/01/850049/hero/twit0963_thumbnail.jpg"/>
+			<guid isPermaLink="false">https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/audio/twit/twit0963/twit0963.mp3</guid>
+			<itunes:duration>2:47:42</itunes:duration>
+			<enclosure url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_963/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0963.mp3" length="80692476" type="audio/mpeg"/>
+			<media:content url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_963/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0963.mp3" fileSize="80692476" type="audio/mpeg" medium="audio">
+				<media:title type="plain">TWiT 963: Low-Key Clippy - Verizon Fees, AI Translations, Microsoft Hack</media:title>
+				<media:description type="plain">Verizon Fees, AI Translations, Microsoft Hack</media:description>
+				<media:keywords>TWiT, This Week in Tech, Leo Laporte, Cory Doctorow, Alex Lindsay, Apple, app store, Apple vision pro, Google, duopoly, verizon, settlement, javier milei, ai, deepfake, sam altman, chatgpt, sports illustrated, layoffs, enshittification, beeper, imessage, </media:keywords>
+				<media:thumbnail url="https://elroy.twit.tv/sites/default/files/styles/twit_slideshow_400x300/public/images/episodes/2024/01/850049/hero/twit0963_thumbnail.jpg" width="400" height="225" />
+				<media:rating scheme="urn:simple">nonadult</media:rating>
+				<media:rating scheme="urn:v-chip">tv-g</media:rating>
+				<media:category scheme="urn:iab:categories" label="Technology &amp; Computing">IAB19</media:category>
+				<media:credit role="host">Leo Laporte</media:credit>
+				<media:credit role="guest">Cory Doctorow</media:credit>
+				<media:credit role="guest">Iain Thomson</media:credit>
+				<media:credit role="guest">Alex Lindsay</media:credit>
+			</media:content>
+		</item>
+		<item>
+			<title>TWiT 962: CES Recap - Padre&#039;s CES Haul, Google Layoffs, AI Battery</title>
+			<itunes:title>CES Recap - Padre&#039;s CES Haul, Google Layoffs, AI Battery</itunes:title>
+			<itunes:episodeType>full</itunes:episodeType>
+			<itunes:author>TWiT</itunes:author>
+			<pubDate>Sun, 14 Jan 2024 17:04:43 PST</pubDate>
+			<itunes:episode>962</itunes:episode>
+			<link>https://twit.tv/shows/this-week-in-tech/episodes/962</link>
+			<comments>https://twit.tv/shows/this-week-in-tech/episodes/962</comments>
+			<category>News</category>
+			<category>Tech News</category>
+			<itunes:explicit>no</itunes:explicit>
+			<itunes:subtitle>Padre&#039;s CES Haul, Google Layoffs, AI Battery</itunes:subtitle>
+			<itunes:keywords>Technology, TWiT, This Week in Tech, Leo Laporte, ces 2024, Daniel Rubino, david pierce, Robert Ballecer, Padre, gadgets, consumer electronics show, ai, george carlin, sag-aftra, Google, Microsoft, batteries, battery, augmented reality, ar, vr</itunes:keywords>
+			<description><![CDATA[
+<p>Padre's CES Haul, Google Layoffs, AI Battery</p><ul> 
+<li>The panel discusses what they saw at CES</li> 
+<li>Padre shows off some toys from CES</li> 
+<li>Volkswagen says it's putting ChatGPT in its cars for 'enriching conversations'</li> 
+<li>Mercedes-Benz's best-in-class voice assistant is getting an AI boost</li> 
+<li>AI-Generated 'George Carlin' Comedy Blasted by Comedian's Daughter</li> 
+<li>SAG-AFTRA strikes deal for AI voice acting licensing in video games at CES 2024</li> 
+<li>Google Is Laying Off Hundreds of Workers in Its Voice Assistant, AR Teams</li> 
+<li>Microsoft's new battery is a test of AI-infused scientific discovery</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://twitter.com/padresj" target="_blank">Fr. Robert Ballecer, SJ</a>, <a href="https://twitter.com/pierce" target="_blank">David Pierce</a>, and <a href="https://twitter.com/Daniel_Rubino" target="_blank">Daniel Rubino</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://canary.tools/twit" target="_blank" rel="sponsored">canary.tools/twit - use code: TWIT</a></li>
+<li><a href="http://lookout.com" target="_blank" rel="sponsored">lookout.com</a></li>
+<li><a href="http://Miro.com/podcast" target="_blank" rel="sponsored">Miro.com/podcast</a></li>
+<li><a href="https://kolide.com/twit" target="_blank" rel="sponsored">kolide.com/twit</a></li>
+<li><a href="http://bitwarden.com/twit" target="_blank" rel="sponsored">bitwarden.com/twit</a></li>
+</ul></p>
+]]></description>
+			<itunes:summary><![CDATA[
+<p>Padre's CES Haul, Google Layoffs, AI Battery</p><ul> 
+<li>The panel discusses what they saw at CES</li> 
+<li>Padre shows off some toys from CES</li> 
+<li>Volkswagen says it's putting ChatGPT in its cars for 'enriching conversations'</li> 
+<li>Mercedes-Benz's best-in-class voice assistant is getting an AI boost</li> 
+<li>AI-Generated 'George Carlin' Comedy Blasted by Comedian's Daughter</li> 
+<li>SAG-AFTRA strikes deal for AI voice acting licensing in video games at CES 2024</li> 
+<li>Google Is Laying Off Hundreds of Workers in Its Voice Assistant, AR Teams</li> 
+<li>Microsoft's new battery is a test of AI-infused scientific discovery</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://twitter.com/padresj" target="_blank">Fr. Robert Ballecer, SJ</a>, <a href="https://twitter.com/pierce" target="_blank">David Pierce</a>, and <a href="https://twitter.com/Daniel_Rubino" target="_blank">Daniel Rubino</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://canary.tools/twit" target="_blank" rel="sponsored">canary.tools/twit - use code: TWIT</a></li>
+<li><a href="http://lookout.com" target="_blank" rel="sponsored">lookout.com</a></li>
+<li><a href="http://Miro.com/podcast" target="_blank" rel="sponsored">Miro.com/podcast</a></li>
+<li><a href="https://kolide.com/twit" target="_blank" rel="sponsored">kolide.com/twit</a></li>
+<li><a href="http://bitwarden.com/twit" target="_blank" rel="sponsored">bitwarden.com/twit</a></li>
+</ul></p>
+]]></itunes:summary>
+			<content:encoded><![CDATA[
+<p>Padre's CES Haul, Google Layoffs, AI Battery</p><ul> 
+<li>The panel discusses what they saw at CES</li> 
+<li>Padre shows off some toys from CES</li> 
+<li>Volkswagen says it's putting ChatGPT in its cars for 'enriching conversations'</li> 
+<li>Mercedes-Benz's best-in-class voice assistant is getting an AI boost</li> 
+<li>AI-Generated 'George Carlin' Comedy Blasted by Comedian's Daughter</li> 
+<li>SAG-AFTRA strikes deal for AI voice acting licensing in video games at CES 2024</li> 
+<li>Google Is Laying Off Hundreds of Workers in Its Voice Assistant, AR Teams</li> 
+<li>Microsoft's new battery is a test of AI-infused scientific discovery</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://twitter.com/padresj" target="_blank">Fr. Robert Ballecer, SJ</a>, <a href="https://twitter.com/pierce" target="_blank">David Pierce</a>, and <a href="https://twitter.com/Daniel_Rubino" target="_blank">Daniel Rubino</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://canary.tools/twit" target="_blank" rel="sponsored">canary.tools/twit - use code: TWIT</a></li>
+<li><a href="http://lookout.com" target="_blank" rel="sponsored">lookout.com</a></li>
+<li><a href="http://Miro.com/podcast" target="_blank" rel="sponsored">Miro.com/podcast</a></li>
+<li><a href="https://kolide.com/twit" target="_blank" rel="sponsored">kolide.com/twit</a></li>
+<li><a href="http://bitwarden.com/twit" target="_blank" rel="sponsored">bitwarden.com/twit</a></li>
+</ul></p>
+]]></content:encoded>
+			<itunes:image href="https://elroy.twit.tv/sites/default/files/styles/twit_thumb_720x405/public/images/episodes/2024/01/849964/hero/twit0962_thumbnail.jpg"/>
+			<guid isPermaLink="false">https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/audio/twit/twit0962/twit0962.mp3</guid>
+			<itunes:duration>2:45:55</itunes:duration>
+			<enclosure url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_962/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0962.mp3" length="79797706" type="audio/mpeg"/>
+			<media:content url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_962/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0962.mp3" fileSize="79797706" type="audio/mpeg" medium="audio">
+				<media:title type="plain">TWiT 962: CES Recap - Padre&#039;s CES Haul, Google Layoffs, AI Battery</media:title>
+				<media:description type="plain">Padre&#039;s CES Haul, Google Layoffs, AI Battery</media:description>
+				<media:keywords>Technology, TWiT, This Week in Tech, Leo Laporte, ces 2024, Daniel Rubino, david pierce, Robert Ballecer, Padre, gadgets, consumer electronics show, ai, george carlin, sag-aftra, Google, Microsoft, batteries, battery, augmented reality, ar, vr</media:keywords>
+				<media:thumbnail url="https://elroy.twit.tv/sites/default/files/styles/twit_slideshow_400x300/public/images/episodes/2024/01/849964/hero/twit0962_thumbnail.jpg" width="400" height="225" />
+				<media:rating scheme="urn:simple">nonadult</media:rating>
+				<media:rating scheme="urn:v-chip">tv-g</media:rating>
+				<media:category scheme="urn:iab:categories" label="Technology &amp; Computing">IAB19</media:category>
+				<media:credit role="host">Leo Laporte</media:credit>
+				<media:credit role="guest">Fr. Robert Ballecer, SJ</media:credit>
+				<media:credit role="guest">David Pierce</media:credit>
+				<media:credit role="guest">Daniel Rubino</media:credit>
+			</media:content>
+		</item>
+		<item>
+			<title>TWiT 961: A Nation of Nerds - CES Preview, NYT vs. OpenAI</title>
+			<itunes:title>A Nation of Nerds - CES Preview, NYT vs. OpenAI</itunes:title>
+			<itunes:episodeType>full</itunes:episodeType>
+			<itunes:author>TWiT</itunes:author>
+			<pubDate>Sun, 07 Jan 2024 19:45:00 PST</pubDate>
+			<itunes:episode>961</itunes:episode>
+			<link>https://twit.tv/shows/this-week-in-tech/episodes/961</link>
+			<comments>https://twit.tv/shows/this-week-in-tech/episodes/961</comments>
+			<category>News</category>
+			<category>Tech News</category>
+			<itunes:explicit>no</itunes:explicit>
+			<itunes:subtitle>CES Preview, NYT vs. OpenAI</itunes:subtitle>
+			<itunes:keywords>TWiT, This Week in Tech, Leo Laporte, CES, ai, NPU, elon musk, tesla, spacex, Microsoft, keyboard, mouse, peripherals, iPhone, physical keyboard, NYT, New York Times, openAI, consumer tech, Strategic Foresight, open-source, nintendo, kodak, Blackberry</itunes:keywords>
+			<description><![CDATA[
+<ul> 
+<li>CES preview</li> 
+<li>The NY Times Lawsuit Against OpenAI</li> 
+<li>A New Kind of AI Copy Can Fully Replicate Famous People. The Law Is Powerless.</li> 
+<li>Elon Musk Has Used Illegal Drugs, Worrying Leaders at Tesla and SpaceX</li> 
+<li>Microsoft's keyboards and mice will live on under a unique new partnership</li> 
+<li>A physical keyboard for your iPhone</li> 
+<li>RIP: Software design pioneer Niklaus Wirth</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://amywebb.io/" target="_blank">Amy Webb</a>, <a href="https://twitter.com/film_girl" target="_blank">Christina Warren</a>, and <a href="https://twitter.com/Devindra" target="_blank">Devindra Hardawar</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://lookout.com" target="_blank" rel="sponsored">lookout.com</a></li>
+<li><a href="http://drata.com/twit" target="_blank" rel="sponsored">drata.com/twit</a></li>
+<li><a href="http://NetSuite.com/TWIT" target="_blank" rel="sponsored">NetSuite.com/TWIT</a></li>
+<li><a href="http://bitwarden.com/twit" target="_blank" rel="sponsored">bitwarden.com/twit</a></li>
+</ul></p>
+]]></description>
+			<itunes:summary><![CDATA[
+<ul> 
+<li>CES preview</li> 
+<li>The NY Times Lawsuit Against OpenAI</li> 
+<li>A New Kind of AI Copy Can Fully Replicate Famous People. The Law Is Powerless.</li> 
+<li>Elon Musk Has Used Illegal Drugs, Worrying Leaders at Tesla and SpaceX</li> 
+<li>Microsoft's keyboards and mice will live on under a unique new partnership</li> 
+<li>A physical keyboard for your iPhone</li> 
+<li>RIP: Software design pioneer Niklaus Wirth</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://amywebb.io/" target="_blank">Amy Webb</a>, <a href="https://twitter.com/film_girl" target="_blank">Christina Warren</a>, and <a href="https://twitter.com/Devindra" target="_blank">Devindra Hardawar</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://lookout.com" target="_blank" rel="sponsored">lookout.com</a></li>
+<li><a href="http://drata.com/twit" target="_blank" rel="sponsored">drata.com/twit</a></li>
+<li><a href="http://NetSuite.com/TWIT" target="_blank" rel="sponsored">NetSuite.com/TWIT</a></li>
+<li><a href="http://bitwarden.com/twit" target="_blank" rel="sponsored">bitwarden.com/twit</a></li>
+</ul></p>
+]]></itunes:summary>
+			<content:encoded><![CDATA[
+<ul> 
+<li>CES preview</li> 
+<li>The NY Times Lawsuit Against OpenAI</li> 
+<li>A New Kind of AI Copy Can Fully Replicate Famous People. The Law Is Powerless.</li> 
+<li>Elon Musk Has Used Illegal Drugs, Worrying Leaders at Tesla and SpaceX</li> 
+<li>Microsoft's keyboards and mice will live on under a unique new partnership</li> 
+<li>A physical keyboard for your iPhone</li> 
+<li>RIP: Software design pioneer Niklaus Wirth</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://amywebb.io/" target="_blank">Amy Webb</a>, <a href="https://twitter.com/film_girl" target="_blank">Christina Warren</a>, and <a href="https://twitter.com/Devindra" target="_blank">Devindra Hardawar</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://lookout.com" target="_blank" rel="sponsored">lookout.com</a></li>
+<li><a href="http://drata.com/twit" target="_blank" rel="sponsored">drata.com/twit</a></li>
+<li><a href="http://NetSuite.com/TWIT" target="_blank" rel="sponsored">NetSuite.com/TWIT</a></li>
+<li><a href="http://bitwarden.com/twit" target="_blank" rel="sponsored">bitwarden.com/twit</a></li>
+</ul></p>
+]]></content:encoded>
+			<itunes:image href="https://elroy.twit.tv/sites/default/files/styles/twit_thumb_720x405/public/images/episodes/2024/01/849874/hero/twit0961_thumbnail.jpg"/>
+			<guid isPermaLink="false">https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/audio/twit/twit0961/twit0961.mp3</guid>
+			<itunes:duration>2:29:32</itunes:duration>
+			<enclosure url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_961/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0961.mp3" length="72037737" type="audio/mpeg"/>
+			<media:content url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_961/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0961.mp3" fileSize="72037737" type="audio/mpeg" medium="audio">
+				<media:title type="plain">TWiT 961: A Nation of Nerds - CES Preview, NYT vs. OpenAI</media:title>
+				<media:description type="plain">CES Preview, NYT vs. OpenAI</media:description>
+				<media:keywords>TWiT, This Week in Tech, Leo Laporte, CES, ai, NPU, elon musk, tesla, spacex, Microsoft, keyboard, mouse, peripherals, iPhone, physical keyboard, NYT, New York Times, openAI, consumer tech, Strategic Foresight, open-source, nintendo, kodak, Blackberry</media:keywords>
+				<media:thumbnail url="https://elroy.twit.tv/sites/default/files/styles/twit_slideshow_400x300/public/images/episodes/2024/01/849874/hero/twit0961_thumbnail.jpg" width="400" height="225" />
+				<media:rating scheme="urn:simple">nonadult</media:rating>
+				<media:rating scheme="urn:v-chip">tv-g</media:rating>
+				<media:category scheme="urn:iab:categories" label="Technology &amp; Computing">IAB19</media:category>
+				<media:credit role="host">Leo Laporte</media:credit>
+				<media:credit role="guest">Amy Webb</media:credit>
+				<media:credit role="guest">Christina Warren</media:credit>
+				<media:credit role="guest">Devindra Hardawar</media:credit>
+			</media:content>
+		</item>
+		<item>
+			<title>TWiT 960: Best of 2023 - This Week in Tech&#039;s Best Moments in 2023</title>
+			<itunes:title>Best of 2023 - This Week in Tech&#039;s Best Moments in 2023</itunes:title>
+			<itunes:episodeType>full</itunes:episodeType>
+			<itunes:author>TWiT</itunes:author>
+			<pubDate>Sun, 31 Dec 2023 09:00:00 PST</pubDate>
+			<itunes:episode>960</itunes:episode>
+			<link>https://twit.tv/shows/this-week-in-tech/episodes/960</link>
+			<comments>https://twit.tv/shows/this-week-in-tech/episodes/960</comments>
+			<category>News</category>
+			<category>Tech News</category>
+			<itunes:explicit>no</itunes:explicit>
+			<itunes:subtitle>This Week in Tech&#039;s Best Moments in 2023</itunes:subtitle>
+			<itunes:keywords>Technology, Leo Laporte, twit best of 2023, this week in tech best of 2023, best of 2023</itunes:keywords>
+			<description><![CDATA[
+<p>Looking back at some of This Week in Tech's best moments from 2023:</p><ul> 
+<li>Rating Google's AI Music Tool MusicLM</li> 
+<li>What is Plaguing Google?</li> 
+<li>Xerox Alto: 50 Year Later</li> 
+<li>Lessons Learned By the SVB Collapse</li> 
+<li>Is Copyright Good For Authors?</li> 
+<li>What's Your (Microsoft) Copilot?</li> 
+<li>Goodbye, Computer Magazines</li> 
+<li>UK Emergency Alert Test</li> 
+<li>A Look At WiFi Pineapple and Flipper Zero</li> 
+<li>Ten Years Since Snowden's Revelations Were Revealed</li> 
+<li>The Seven Deadly Sins and Tech</li> 
+<li>Blind: Anonymous Workplace Gossip</li> 
+<li>Earthquake!</li> 
+<li>Why Apple Ended Its CSAM-Scanning Tool</li> 
+<li>Meta's Uncanny New AI Avatars</li> 
+<li>MIke Elgan's Meta Ray-Ban Smartglasses</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://gusto.com/tech" target="_blank" rel="sponsored">gusto.com/tech</a></li>
+<li><a href="http://discourse.org/twit" target="_blank" rel="sponsored">discourse.org/twit</a></li>
+<li><a href="http://hid.link/twitdemo" target="_blank" rel="sponsored">hid.link/twitdemo</a></li>
+<li><a href="http://rocketmoney.com/twit" target="_blank" rel="sponsored">rocketmoney.com/twit</a></li>
+</ul></p>
+]]></description>
+			<itunes:summary><![CDATA[
+<p>Looking back at some of This Week in Tech's best moments from 2023:</p><ul> 
+<li>Rating Google's AI Music Tool MusicLM</li> 
+<li>What is Plaguing Google?</li> 
+<li>Xerox Alto: 50 Year Later</li> 
+<li>Lessons Learned By the SVB Collapse</li> 
+<li>Is Copyright Good For Authors?</li> 
+<li>What's Your (Microsoft) Copilot?</li> 
+<li>Goodbye, Computer Magazines</li> 
+<li>UK Emergency Alert Test</li> 
+<li>A Look At WiFi Pineapple and Flipper Zero</li> 
+<li>Ten Years Since Snowden's Revelations Were Revealed</li> 
+<li>The Seven Deadly Sins and Tech</li> 
+<li>Blind: Anonymous Workplace Gossip</li> 
+<li>Earthquake!</li> 
+<li>Why Apple Ended Its CSAM-Scanning Tool</li> 
+<li>Meta's Uncanny New AI Avatars</li> 
+<li>MIke Elgan's Meta Ray-Ban Smartglasses</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://gusto.com/tech" target="_blank" rel="sponsored">gusto.com/tech</a></li>
+<li><a href="http://discourse.org/twit" target="_blank" rel="sponsored">discourse.org/twit</a></li>
+<li><a href="http://hid.link/twitdemo" target="_blank" rel="sponsored">hid.link/twitdemo</a></li>
+<li><a href="http://rocketmoney.com/twit" target="_blank" rel="sponsored">rocketmoney.com/twit</a></li>
+</ul></p>
+]]></itunes:summary>
+			<content:encoded><![CDATA[
+<p>Looking back at some of This Week in Tech's best moments from 2023:</p><ul> 
+<li>Rating Google's AI Music Tool MusicLM</li> 
+<li>What is Plaguing Google?</li> 
+<li>Xerox Alto: 50 Year Later</li> 
+<li>Lessons Learned By the SVB Collapse</li> 
+<li>Is Copyright Good For Authors?</li> 
+<li>What's Your (Microsoft) Copilot?</li> 
+<li>Goodbye, Computer Magazines</li> 
+<li>UK Emergency Alert Test</li> 
+<li>A Look At WiFi Pineapple and Flipper Zero</li> 
+<li>Ten Years Since Snowden's Revelations Were Revealed</li> 
+<li>The Seven Deadly Sins and Tech</li> 
+<li>Blind: Anonymous Workplace Gossip</li> 
+<li>Earthquake!</li> 
+<li>Why Apple Ended Its CSAM-Scanning Tool</li> 
+<li>Meta's Uncanny New AI Avatars</li> 
+<li>MIke Elgan's Meta Ray-Ban Smartglasses</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://gusto.com/tech" target="_blank" rel="sponsored">gusto.com/tech</a></li>
+<li><a href="http://discourse.org/twit" target="_blank" rel="sponsored">discourse.org/twit</a></li>
+<li><a href="http://hid.link/twitdemo" target="_blank" rel="sponsored">hid.link/twitdemo</a></li>
+<li><a href="http://rocketmoney.com/twit" target="_blank" rel="sponsored">rocketmoney.com/twit</a></li>
+</ul></p>
+]]></content:encoded>
+			<itunes:image href="https://elroy.twit.tv/sites/default/files/styles/twit_thumb_720x405/public/images/episodes/2023/12/849739/hero/twit0960_thumbnail.jpg"/>
+			<guid isPermaLink="false">https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/audio/twit/twit0960/twit0960.mp3</guid>
+			<itunes:duration>2:46:24</itunes:duration>
+			<enclosure url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_960/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0960.mp3" length="80457478" type="audio/mpeg"/>
+			<media:content url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_960/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0960.mp3" fileSize="80457478" type="audio/mpeg" medium="audio">
+				<media:title type="plain">TWiT 960: Best of 2023 - This Week in Tech&#039;s Best Moments in 2023</media:title>
+				<media:description type="plain">This Week in Tech&#039;s Best Moments in 2023</media:description>
+				<media:keywords>Technology, Leo Laporte, twit best of 2023, this week in tech best of 2023, best of 2023</media:keywords>
+				<media:thumbnail url="https://elroy.twit.tv/sites/default/files/styles/twit_slideshow_400x300/public/images/episodes/2023/12/849739/hero/twit0960_thumbnail.jpg" width="400" height="225" />
+				<media:rating scheme="urn:simple">nonadult</media:rating>
+				<media:rating scheme="urn:v-chip">tv-g</media:rating>
+				<media:category scheme="urn:iab:categories" label="Technology &amp; Computing">IAB19</media:category>
+				<media:credit role="host">Leo Laporte</media:credit>
+			</media:content>
+		</item>
+		<item>
+			<title>TWiT 959: The Old Farts Gather - A Retrospective Journey through 2023 and Beyond</title>
+			<itunes:title>The Old Farts Gather - A Retrospective Journey through 2023 and Beyond</itunes:title>
+			<itunes:episodeType>full</itunes:episodeType>
+			<itunes:author>TWiT</itunes:author>
+			<pubDate>Sun, 24 Dec 2023 09:00:00 PST</pubDate>
+			<itunes:episode>959</itunes:episode>
+			<link>https://twit.tv/shows/this-week-in-tech/episodes/959</link>
+			<comments>https://twit.tv/shows/this-week-in-tech/episodes/959</comments>
+			<category>News</category>
+			<category>Tech News</category>
+			<itunes:explicit>no</itunes:explicit>
+			<itunes:subtitle>A Retrospective Journey through 2023 and Beyond</itunes:subtitle>
+			<itunes:keywords>TWiT, This Week in Tech, Leo Laporte, ai, Artificial Intelligence, chatgpt, AGI, Twitter, elon musk, spacex, starlink, Facebook, Meta, netflix, streaming, enshitification, corey doctorow, open source, Linux, internet, web, artificial general intelligence,</itunes:keywords>
+			<description><![CDATA[
+<p>In this festive end-of-year episode, Leo gathers some of the veteran hosts of the TWiT network, dubbed "old farts," to reflect on the major tech stories and trends of 2023 while looking ahead to 2024. They debate AI and tech's impact on society, discuss the ups and downs of companies like Twitter, Apple, and SpaceX, reminisce about the early days of computing and the Internet, and more, all with good humor and insight gained from decades in tech.<br /> 
+<br /> 
+Topics Discussed:</p><ul> 
+<li>The explosion of AI in 2023, from chatbots like ChatGPT to powerful new AI demonstrations. Debate on whether we're nearing AGI (artificial general intelligence) and the societal impacts.</li> 
+<li>The rise and struggles of companies like Facebook/Meta, Netflix, Twitter, Alibaba. Patterns of tech success, failure, and Corey Doctorow's concept of "ensh*tification."</li> 
+<li>Elon Musk: The good (SpaceX, Starlink), bad (Twitter), and unpredictable. Is he still an innovator or has wealth and power corrupted him?</li> 
+<li>Open source, Linux, and big tech's relationship to open ecosystems. Concerns about commercialization diluting open ideals.</li> 
+<li>Looking back on early tech days. How the history of tech contextualizes what's happening today. Nostalgia and optimism for the early Internet days.</li> 
+<li>The revival of space exploration, privatized today by SpaceX and others. What can we expect as we (hopefully) return to the Moon in 2024?</li> 
+<li>Chaos, unpredictability, and the feeling of societal flux as we head into 2024. An uncertain but interesting future awaits.</li></ul> 
+<p><br /> 
+Memorable Quotes:</p><ul> 
+<li>"AI is only dangerous to humans if you give it physical agency in the real world. Combine AI with a robotic dog, and now you got something." - Leo</li> 
+<li>"When are you getting your stupid thing that you wear that has the laser on your hand?" - Jeff to Leo</li> 
+<li>"It's time to hand it over. We're effing up the world. We've done it for centuries. It's time to hand it over." - Jeff on tech leadership</li> 
+<li>"So has anybody played with the Apple ones that have the weird eyeballs?" - Doc on Apple's augmented reality efforts</li> 
+<li>"Chaos is a weird thing. You could have your faucet dripping slowly and almost all of the drips go down and land and that's it, but somehow about a yard off to the one side is a drip" - Steve on increasing chaos</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://twit.tv/people/jeff-jarvis">Jeff Jarvis</a>, <a href="https://twit.tv/people/doc-searls">Doc Searls</a>, <a href="https://twit.tv/people/steve-gibson">Steve Gibson</a>, and <a href="https://twit.tv/people/rod-pyle">Rod Pyle</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://rocketmoney.com/twit" target="_blank" rel="sponsored">rocketmoney.com/twit</a></li>
+<li><a href="http://gusto.com/tech" target="_blank" rel="sponsored">gusto.com/tech</a></li>
+<li><a href="http://stamps.com/twit" target="_blank" rel="sponsored">Stamps.com promo code TWiT</a></li>
+<li><a href="http://hid.link/twitdemo" target="_blank" rel="sponsored">hid.link/twitdemo</a></li>
+</ul></p>
+]]></description>
+			<itunes:summary><![CDATA[
+<p>In this festive end-of-year episode, Leo gathers some of the veteran hosts of the TWiT network, dubbed "old farts," to reflect on the major tech stories and trends of 2023 while looking ahead to 2024. They debate AI and tech's impact on society, discuss the ups and downs of companies like Twitter, Apple, and SpaceX, reminisce about the early days of computing and the Internet, and more, all with good humor and insight gained from decades in tech.<br /> 
+<br /> 
+Topics Discussed:</p><ul> 
+<li>The explosion of AI in 2023, from chatbots like ChatGPT to powerful new AI demonstrations. Debate on whether we're nearing AGI (artificial general intelligence) and the societal impacts.</li> 
+<li>The rise and struggles of companies like Facebook/Meta, Netflix, Twitter, Alibaba. Patterns of tech success, failure, and Corey Doctorow's concept of "ensh*tification."</li> 
+<li>Elon Musk: The good (SpaceX, Starlink), bad (Twitter), and unpredictable. Is he still an innovator or has wealth and power corrupted him?</li> 
+<li>Open source, Linux, and big tech's relationship to open ecosystems. Concerns about commercialization diluting open ideals.</li> 
+<li>Looking back on early tech days. How the history of tech contextualizes what's happening today. Nostalgia and optimism for the early Internet days.</li> 
+<li>The revival of space exploration, privatized today by SpaceX and others. What can we expect as we (hopefully) return to the Moon in 2024?</li> 
+<li>Chaos, unpredictability, and the feeling of societal flux as we head into 2024. An uncertain but interesting future awaits.</li></ul> 
+<p><br /> 
+Memorable Quotes:</p><ul> 
+<li>"AI is only dangerous to humans if you give it physical agency in the real world. Combine AI with a robotic dog, and now you got something." - Leo</li> 
+<li>"When are you getting your stupid thing that you wear that has the laser on your hand?" - Jeff to Leo</li> 
+<li>"It's time to hand it over. We're effing up the world. We've done it for centuries. It's time to hand it over." - Jeff on tech leadership</li> 
+<li>"So has anybody played with the Apple ones that have the weird eyeballs?" - Doc on Apple's augmented reality efforts</li> 
+<li>"Chaos is a weird thing. You could have your faucet dripping slowly and almost all of the drips go down and land and that's it, but somehow about a yard off to the one side is a drip" - Steve on increasing chaos</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://twit.tv/people/jeff-jarvis">Jeff Jarvis</a>, <a href="https://twit.tv/people/doc-searls">Doc Searls</a>, <a href="https://twit.tv/people/steve-gibson">Steve Gibson</a>, and <a href="https://twit.tv/people/rod-pyle">Rod Pyle</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://rocketmoney.com/twit" target="_blank" rel="sponsored">rocketmoney.com/twit</a></li>
+<li><a href="http://gusto.com/tech" target="_blank" rel="sponsored">gusto.com/tech</a></li>
+<li><a href="http://stamps.com/twit" target="_blank" rel="sponsored">Stamps.com promo code TWiT</a></li>
+<li><a href="http://hid.link/twitdemo" target="_blank" rel="sponsored">hid.link/twitdemo</a></li>
+</ul></p>
+]]></itunes:summary>
+			<content:encoded><![CDATA[
+<p>In this festive end-of-year episode, Leo gathers some of the veteran hosts of the TWiT network, dubbed "old farts," to reflect on the major tech stories and trends of 2023 while looking ahead to 2024. They debate AI and tech's impact on society, discuss the ups and downs of companies like Twitter, Apple, and SpaceX, reminisce about the early days of computing and the Internet, and more, all with good humor and insight gained from decades in tech.<br /> 
+<br /> 
+Topics Discussed:</p><ul> 
+<li>The explosion of AI in 2023, from chatbots like ChatGPT to powerful new AI demonstrations. Debate on whether we're nearing AGI (artificial general intelligence) and the societal impacts.</li> 
+<li>The rise and struggles of companies like Facebook/Meta, Netflix, Twitter, Alibaba. Patterns of tech success, failure, and Corey Doctorow's concept of "ensh*tification."</li> 
+<li>Elon Musk: The good (SpaceX, Starlink), bad (Twitter), and unpredictable. Is he still an innovator or has wealth and power corrupted him?</li> 
+<li>Open source, Linux, and big tech's relationship to open ecosystems. Concerns about commercialization diluting open ideals.</li> 
+<li>Looking back on early tech days. How the history of tech contextualizes what's happening today. Nostalgia and optimism for the early Internet days.</li> 
+<li>The revival of space exploration, privatized today by SpaceX and others. What can we expect as we (hopefully) return to the Moon in 2024?</li> 
+<li>Chaos, unpredictability, and the feeling of societal flux as we head into 2024. An uncertain but interesting future awaits.</li></ul> 
+<p><br /> 
+Memorable Quotes:</p><ul> 
+<li>"AI is only dangerous to humans if you give it physical agency in the real world. Combine AI with a robotic dog, and now you got something." - Leo</li> 
+<li>"When are you getting your stupid thing that you wear that has the laser on your hand?" - Jeff to Leo</li> 
+<li>"It's time to hand it over. We're effing up the world. We've done it for centuries. It's time to hand it over." - Jeff on tech leadership</li> 
+<li>"So has anybody played with the Apple ones that have the weird eyeballs?" - Doc on Apple's augmented reality efforts</li> 
+<li>"Chaos is a weird thing. You could have your faucet dripping slowly and almost all of the drips go down and land and that's it, but somehow about a yard off to the one side is a drip" - Steve on increasing chaos</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://twit.tv/people/jeff-jarvis">Jeff Jarvis</a>, <a href="https://twit.tv/people/doc-searls">Doc Searls</a>, <a href="https://twit.tv/people/steve-gibson">Steve Gibson</a>, and <a href="https://twit.tv/people/rod-pyle">Rod Pyle</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://rocketmoney.com/twit" target="_blank" rel="sponsored">rocketmoney.com/twit</a></li>
+<li><a href="http://gusto.com/tech" target="_blank" rel="sponsored">gusto.com/tech</a></li>
+<li><a href="http://stamps.com/twit" target="_blank" rel="sponsored">Stamps.com promo code TWiT</a></li>
+<li><a href="http://hid.link/twitdemo" target="_blank" rel="sponsored">hid.link/twitdemo</a></li>
+</ul></p>
+]]></content:encoded>
+			<itunes:image href="https://elroy.twit.tv/sites/default/files/styles/twit_thumb_720x405/public/images/episodes/2023/12/849682/hero/twit0959_thumbnail_0.jpg"/>
+			<guid isPermaLink="false">https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/audio/twit/twit0959/twit0959.mp3</guid>
+			<itunes:duration>2:17:18</itunes:duration>
+			<enclosure url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_959/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0959.mp3" length="66044762" type="audio/mpeg"/>
+			<media:content url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_959/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0959.mp3" fileSize="66044762" type="audio/mpeg" medium="audio">
+				<media:title type="plain">TWiT 959: The Old Farts Gather - A Retrospective Journey through 2023 and Beyond</media:title>
+				<media:description type="plain">A Retrospective Journey through 2023 and Beyond</media:description>
+				<media:keywords>TWiT, This Week in Tech, Leo Laporte, ai, Artificial Intelligence, chatgpt, AGI, Twitter, elon musk, spacex, starlink, Facebook, Meta, netflix, streaming, enshitification, corey doctorow, open source, Linux, internet, web, artificial general intelligence,</media:keywords>
+				<media:thumbnail url="https://elroy.twit.tv/sites/default/files/styles/twit_slideshow_400x300/public/images/episodes/2023/12/849682/hero/twit0959_thumbnail_0.jpg" width="400" height="225" />
+				<media:rating scheme="urn:simple">nonadult</media:rating>
+				<media:rating scheme="urn:v-chip">tv-g</media:rating>
+				<media:category scheme="urn:iab:categories" label="Technology &amp; Computing">IAB19</media:category>
+				<media:credit role="host">Leo Laporte</media:credit>
+				<media:credit role="guest">Jeff Jarvis</media:credit>
+				<media:credit role="guest">Doc Searls</media:credit>
+				<media:credit role="guest">Steve Gibson</media:credit>
+				<media:credit role="guest">Rod Pyle</media:credit>
+			</media:content>
+		</item>
+		<item>
+			<title>TWiT 958: Never Look a Gift Mouse in the Horse - AI Math, Zuck&#039;s Lair, E3&#039;s Demise</title>
+			<itunes:title>Never Look a Gift Mouse in the Horse - AI Math, Zuck&#039;s Lair, E3&#039;s Demise</itunes:title>
+			<itunes:episodeType>full</itunes:episodeType>
+			<itunes:author>TWiT</itunes:author>
+			<pubDate>Sun, 17 Dec 2023 17:26:22 PST</pubDate>
+			<itunes:episode>958</itunes:episode>
+			<link>https://twit.tv/shows/this-week-in-tech/episodes/958</link>
+			<comments>https://twit.tv/shows/this-week-in-tech/episodes/958</comments>
+			<category>News</category>
+			<category>Tech News</category>
+			<itunes:explicit>no</itunes:explicit>
+			<itunes:subtitle>AI Math, Zuck&#039;s Lair, E3&#039;s Demise</itunes:subtitle>
+			<itunes:keywords>Technology, TWiT, This Week in Tech, Leo Laporte, pinball, Mark Zuckerberg, hawaii, cox, phone, privacy, Google Maps, Location history, Apple, push notification data, epic games, Google, monopoly, beeper mini, signal, SMS, imessage, messaging apps, fcc</itunes:keywords>
+			<description><![CDATA[
+<p>AI Math, Zuck's Lair, E3's Demise</p><ul> 
+<li>The panel talks about pinball machines</li> 
+<li>Mark Zuckerberg's underground lair</li> 
+<li>Cox admits to invading your privacy</li> 
+<li>Google Maps gets an update to stop authorities from accessing location history data</li> 
+<li>Apple now requires a judge's consent to hand over push notification data</li> 
+<li>Epic Games wins it's lawsuit, Google ruled as an illegal monopoly</li> 
+<li>Beeper Mini is back, but for how long?</li> 
+<li>Running Signal Will Soon Cost $50 Million a Year</li> 
+<li>Tesla recalls 2 million cars</li> 
+<li>FCC denies Starlink of $885M subsidy</li> 
+<li>Netflix finally releases viewership data</li> 
+<li>E3 is over</li> 
+<li>How do you wordle?</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://twitter.com/BriannaWu" target="_blank">Brianna Wu</a>, <a href="https://twitter.com/NateLanxon" target="_blank">Nate Lanxon</a>, and <a href="https://cisoseries.com/" target="_blank">David Spark</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="HTTP://GO.ACILEARNING.COM/TWIT" target="_blank" rel="sponsored">GO.ACILEARNING.COM/TWIT</a></li>
+<li><a href="http://joindeleteme.com/twit" target="_blank" rel="sponsored">joindeleteme.com/twit promo code TWIT</a></li>
+<li><a href="http://mintmobile.com/twit" target="_blank" rel="sponsored">mintmobile.com/twit</a></li>
+<li><a href="https://www.paloaltonetworks.com/ot-security-tco" target="_blank" rel="sponsored">paloaltonetworks.com/ot-security-tco</a></li>
+</ul></p>
+]]></description>
+			<itunes:summary><![CDATA[
+<p>AI Math, Zuck's Lair, E3's Demise</p><ul> 
+<li>The panel talks about pinball machines</li> 
+<li>Mark Zuckerberg's underground lair</li> 
+<li>Cox admits to invading your privacy</li> 
+<li>Google Maps gets an update to stop authorities from accessing location history data</li> 
+<li>Apple now requires a judge's consent to hand over push notification data</li> 
+<li>Epic Games wins it's lawsuit, Google ruled as an illegal monopoly</li> 
+<li>Beeper Mini is back, but for how long?</li> 
+<li>Running Signal Will Soon Cost $50 Million a Year</li> 
+<li>Tesla recalls 2 million cars</li> 
+<li>FCC denies Starlink of $885M subsidy</li> 
+<li>Netflix finally releases viewership data</li> 
+<li>E3 is over</li> 
+<li>How do you wordle?</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://twitter.com/BriannaWu" target="_blank">Brianna Wu</a>, <a href="https://twitter.com/NateLanxon" target="_blank">Nate Lanxon</a>, and <a href="https://cisoseries.com/" target="_blank">David Spark</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="HTTP://GO.ACILEARNING.COM/TWIT" target="_blank" rel="sponsored">GO.ACILEARNING.COM/TWIT</a></li>
+<li><a href="http://joindeleteme.com/twit" target="_blank" rel="sponsored">joindeleteme.com/twit promo code TWIT</a></li>
+<li><a href="http://mintmobile.com/twit" target="_blank" rel="sponsored">mintmobile.com/twit</a></li>
+<li><a href="https://www.paloaltonetworks.com/ot-security-tco" target="_blank" rel="sponsored">paloaltonetworks.com/ot-security-tco</a></li>
+</ul></p>
+]]></itunes:summary>
+			<content:encoded><![CDATA[
+<p>AI Math, Zuck's Lair, E3's Demise</p><ul> 
+<li>The panel talks about pinball machines</li> 
+<li>Mark Zuckerberg's underground lair</li> 
+<li>Cox admits to invading your privacy</li> 
+<li>Google Maps gets an update to stop authorities from accessing location history data</li> 
+<li>Apple now requires a judge's consent to hand over push notification data</li> 
+<li>Epic Games wins it's lawsuit, Google ruled as an illegal monopoly</li> 
+<li>Beeper Mini is back, but for how long?</li> 
+<li>Running Signal Will Soon Cost $50 Million a Year</li> 
+<li>Tesla recalls 2 million cars</li> 
+<li>FCC denies Starlink of $885M subsidy</li> 
+<li>Netflix finally releases viewership data</li> 
+<li>E3 is over</li> 
+<li>How do you wordle?</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="https://twitter.com/BriannaWu" target="_blank">Brianna Wu</a>, <a href="https://twitter.com/NateLanxon" target="_blank">Nate Lanxon</a>, and <a href="https://cisoseries.com/" target="_blank">David Spark</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="HTTP://GO.ACILEARNING.COM/TWIT" target="_blank" rel="sponsored">GO.ACILEARNING.COM/TWIT</a></li>
+<li><a href="http://joindeleteme.com/twit" target="_blank" rel="sponsored">joindeleteme.com/twit promo code TWIT</a></li>
+<li><a href="http://mintmobile.com/twit" target="_blank" rel="sponsored">mintmobile.com/twit</a></li>
+<li><a href="https://www.paloaltonetworks.com/ot-security-tco" target="_blank" rel="sponsored">paloaltonetworks.com/ot-security-tco</a></li>
+</ul></p>
+]]></content:encoded>
+			<itunes:image href="https://elroy.twit.tv/sites/default/files/styles/twit_thumb_720x405/public/images/episodes/2023/12/849611/hero/twit0958_thumbnail.jpg"/>
+			<guid isPermaLink="false">https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/audio/twit/twit0958/twit0958.mp3</guid>
+			<itunes:duration>2:36:57</itunes:duration>
+			<enclosure url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_958/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0958.mp3" length="75522225" type="audio/mpeg"/>
+			<media:content url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_958/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0958.mp3" fileSize="75522225" type="audio/mpeg" medium="audio">
+				<media:title type="plain">TWiT 958: Never Look a Gift Mouse in the Horse - AI Math, Zuck&#039;s Lair, E3&#039;s Demise</media:title>
+				<media:description type="plain">AI Math, Zuck&#039;s Lair, E3&#039;s Demise</media:description>
+				<media:keywords>Technology, TWiT, This Week in Tech, Leo Laporte, pinball, Mark Zuckerberg, hawaii, cox, phone, privacy, Google Maps, Location history, Apple, push notification data, epic games, Google, monopoly, beeper mini, signal, SMS, imessage, messaging apps, fcc</media:keywords>
+				<media:thumbnail url="https://elroy.twit.tv/sites/default/files/styles/twit_slideshow_400x300/public/images/episodes/2023/12/849611/hero/twit0958_thumbnail.jpg" width="400" height="225" />
+				<media:rating scheme="urn:simple">nonadult</media:rating>
+				<media:rating scheme="urn:v-chip">tv-g</media:rating>
+				<media:category scheme="urn:iab:categories" label="Technology &amp; Computing">IAB19</media:category>
+				<media:credit role="host">Leo Laporte</media:credit>
+				<media:credit role="guest">Brianna Wu</media:credit>
+				<media:credit role="guest">Nate Lanxon</media:credit>
+				<media:credit role="guest">David Spark</media:credit>
+			</media:content>
+		</item>
+		<item>
+			<title>TWiT 957: Put It In a Red Envelope - EU AI Act, 23andMe Hack, Woke Grok</title>
+			<itunes:title>Put It In a Red Envelope - EU AI Act, 23andMe Hack, Woke Grok</itunes:title>
+			<itunes:episodeType>full</itunes:episodeType>
+			<itunes:author>TWiT</itunes:author>
+			<pubDate>Sun, 10 Dec 2023 18:05:45 PST</pubDate>
+			<itunes:episode>957</itunes:episode>
+			<link>https://twit.tv/shows/this-week-in-tech/episodes/957</link>
+			<comments>https://twit.tv/shows/this-week-in-tech/episodes/957</comments>
+			<category>News</category>
+			<category>Tech News</category>
+			<itunes:explicit>no</itunes:explicit>
+			<itunes:subtitle>EU AI Act, 23andMe Hack, Woke Grok</itunes:subtitle>
+			<itunes:keywords>Technology, TWiT, This Week in Tech, Leo Laporte, denise howell, glenn fleishman, owen thomas, Google, gemini, ai, beeper, imessage, Android, 23andme, genome, dna, vladimir, cameo, Alex Jones, elon musk, tesla, Grok, 1000 van ness movies, chatgpt</itunes:keywords>
+			<description><![CDATA[
+<p>EU AI Act, 23andMe Hack, Woke Grok</p><ul> 
+<li>Financial Difficulties and Layoffs at Twit</li> 
+<li>AI's Potential and Misleading Demonstrations</li> 
+<li>Regulating Artificial Intelligence and Self-Driving Vehicles</li> 
+<li>Debate on AI Augmentation and Regulation</li> 
+<li>Beeper's Impersonation of Apple's Server'</li> 
+<li>Privacy Risks and Public Benefits</li> 
+<li>Technology Misuse, Cameo Scandal, Criticism</li> 
+<li>AI, Grock, and Free Money Impact</li> 
+<li>The Potential of AI in Advertising</li> 
+<li>Memories of 1000 Van Ness Theater</li> 
+<li>Discussion on Podcasts and Potluck Etiquette</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="http://denisehowell.info/" target="_blank">Denise Howell</a>, <a href="https://twitter.com/owenthomas" target="_blank">Owen Thomas</a>, and <a href="https://glennf.com/" target="_blank">Glenn Fleishman</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://Miro.com/podcast" target="_blank" rel="sponsored">Miro.com/podcast</a></li>
+<li><a href="http://Nuts.com/twit" target="_blank" rel="sponsored">Nuts.com/twit</a></li>
+<li><a href="http://GO.ACILEARNING.COM/TWIT" target="_blank" rel="sponsored">GO.ACILEARNING.COM/TWIT</a></li>
+<li><a href="http://www.wix.com/studio?utm_campaign=pa_podcast_studio_10/23_TWiT%5Esponsors_cta" target="_blank" rel="sponsored">wix.com/studio?utm_campaign=pa_podcast_studio_10/ 23_TWiT%5Esponsors_cta</a></li>
+</ul></p>
+]]></description>
+			<itunes:summary><![CDATA[
+<p>EU AI Act, 23andMe Hack, Woke Grok</p><ul> 
+<li>Financial Difficulties and Layoffs at Twit</li> 
+<li>AI's Potential and Misleading Demonstrations</li> 
+<li>Regulating Artificial Intelligence and Self-Driving Vehicles</li> 
+<li>Debate on AI Augmentation and Regulation</li> 
+<li>Beeper's Impersonation of Apple's Server'</li> 
+<li>Privacy Risks and Public Benefits</li> 
+<li>Technology Misuse, Cameo Scandal, Criticism</li> 
+<li>AI, Grock, and Free Money Impact</li> 
+<li>The Potential of AI in Advertising</li> 
+<li>Memories of 1000 Van Ness Theater</li> 
+<li>Discussion on Podcasts and Potluck Etiquette</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="http://denisehowell.info/" target="_blank">Denise Howell</a>, <a href="https://twitter.com/owenthomas" target="_blank">Owen Thomas</a>, and <a href="https://glennf.com/" target="_blank">Glenn Fleishman</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://Miro.com/podcast" target="_blank" rel="sponsored">Miro.com/podcast</a></li>
+<li><a href="http://Nuts.com/twit" target="_blank" rel="sponsored">Nuts.com/twit</a></li>
+<li><a href="http://GO.ACILEARNING.COM/TWIT" target="_blank" rel="sponsored">GO.ACILEARNING.COM/TWIT</a></li>
+<li><a href="http://www.wix.com/studio?utm_campaign=pa_podcast_studio_10/23_TWiT%5Esponsors_cta" target="_blank" rel="sponsored">wix.com/studio?utm_campaign=pa_podcast_studio_10/ 23_TWiT%5Esponsors_cta</a></li>
+</ul></p>
+]]></itunes:summary>
+			<content:encoded><![CDATA[
+<p>EU AI Act, 23andMe Hack, Woke Grok</p><ul> 
+<li>Financial Difficulties and Layoffs at Twit</li> 
+<li>AI's Potential and Misleading Demonstrations</li> 
+<li>Regulating Artificial Intelligence and Self-Driving Vehicles</li> 
+<li>Debate on AI Augmentation and Regulation</li> 
+<li>Beeper's Impersonation of Apple's Server'</li> 
+<li>Privacy Risks and Public Benefits</li> 
+<li>Technology Misuse, Cameo Scandal, Criticism</li> 
+<li>AI, Grock, and Free Money Impact</li> 
+<li>The Potential of AI in Advertising</li> 
+<li>Memories of 1000 Van Ness Theater</li> 
+<li>Discussion on Podcasts and Potluck Etiquette</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/leo-laporte">Leo Laporte</a></p> 
+<p><strong>Guests:</strong> <a href="http://denisehowell.info/" target="_blank">Denise Howell</a>, <a href="https://twitter.com/owenthomas" target="_blank">Owen Thomas</a>, and <a href="https://glennf.com/" target="_blank">Glenn Fleishman</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://Miro.com/podcast" target="_blank" rel="sponsored">Miro.com/podcast</a></li>
+<li><a href="http://Nuts.com/twit" target="_blank" rel="sponsored">Nuts.com/twit</a></li>
+<li><a href="http://GO.ACILEARNING.COM/TWIT" target="_blank" rel="sponsored">GO.ACILEARNING.COM/TWIT</a></li>
+<li><a href="http://www.wix.com/studio?utm_campaign=pa_podcast_studio_10/23_TWiT%5Esponsors_cta" target="_blank" rel="sponsored">wix.com/studio?utm_campaign=pa_podcast_studio_10/ 23_TWiT%5Esponsors_cta</a></li>
+</ul></p>
+]]></content:encoded>
+			<itunes:image href="https://elroy.twit.tv/sites/default/files/styles/twit_thumb_720x405/public/images/episodes/2023/12/849488/hero/twit0957_thumbnail.jpg"/>
+			<guid isPermaLink="false">https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/audio/twit/twit0957/twit0957.mp3</guid>
+			<itunes:duration>2:29:29</itunes:duration>
+			<enclosure url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_957/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0957.mp3" length="71867942" type="audio/mpeg"/>
+			<media:content url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_957/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0957.mp3" fileSize="71867942" type="audio/mpeg" medium="audio">
+				<media:title type="plain">TWiT 957: Put It In a Red Envelope - EU AI Act, 23andMe Hack, Woke Grok</media:title>
+				<media:description type="plain">EU AI Act, 23andMe Hack, Woke Grok</media:description>
+				<media:keywords>Technology, TWiT, This Week in Tech, Leo Laporte, denise howell, glenn fleishman, owen thomas, Google, gemini, ai, beeper, imessage, Android, 23andme, genome, dna, vladimir, cameo, Alex Jones, elon musk, tesla, Grok, 1000 van ness movies, chatgpt</media:keywords>
+				<media:thumbnail url="https://elroy.twit.tv/sites/default/files/styles/twit_slideshow_400x300/public/images/episodes/2023/12/849488/hero/twit0957_thumbnail.jpg" width="400" height="225" />
+				<media:rating scheme="urn:simple">nonadult</media:rating>
+				<media:rating scheme="urn:v-chip">tv-g</media:rating>
+				<media:category scheme="urn:iab:categories" label="Technology &amp; Computing">IAB19</media:category>
+				<media:credit role="host">Leo Laporte</media:credit>
+				<media:credit role="guest">Denise Howell</media:credit>
+				<media:credit role="guest">Owen Thomas</media:credit>
+				<media:credit role="guest">Glenn Fleishman</media:credit>
+			</media:content>
+		</item>
+		<item>
+			<title>TWiT 956: A Giant Rolling Brick - Cybertruck is out, ChatGPT turns 1, Black Friday &amp; Cyber Monday, NameDrop</title>
+			<itunes:title>A Giant Rolling Brick - Cybertruck is out, ChatGPT turns 1, Black Friday &amp; Cyber Monday, NameDrop</itunes:title>
+			<itunes:episodeType>full</itunes:episodeType>
+			<itunes:author>TWiT</itunes:author>
+			<pubDate>Sun, 03 Dec 2023 19:46:46 PST</pubDate>
+			<itunes:episode>956</itunes:episode>
+			<link>https://twit.tv/shows/this-week-in-tech/episodes/956</link>
+			<comments>https://twit.tv/shows/this-week-in-tech/episodes/956</comments>
+			<category>News</category>
+			<category>Tech News</category>
+			<itunes:explicit>no</itunes:explicit>
+			<itunes:subtitle>Cybertruck is out, ChatGPT turns 1, Black Friday &amp; Cyber Monday, NameDrop</itunes:subtitle>
+			<itunes:keywords>TWiT, This Week in Tech, Jason Howell, abrar al-heeti, tim stevens, rich demuro, chatgpt, openAI, Microsoft, ai ethics, Pika, video editing, amazon q, chatbots, Tesla Cybertruck, social media privacy, Android vs iPhone, rcs messaging, green bubbles</itunes:keywords>
+			<description><![CDATA[
+<p>Cybertruck is out, ChatGPT turns 1, Black Friday &amp; Cyber Monday, NameDrop</p><ul> 
+<li>ChatGPT's 1st birthday and mainstream AI adoption</li> 
+<li>Microsoft joins OpenAI's board as a non-voting observer</li> 
+<li>Pika raises $55 million for AI video generation tool</li> 
+<li>Amazon launches Q chatbot service for companies</li> 
+<li>Concerns over Q hallucinating responses and leaking data</li> 
+<li>Rethinking reactions to Tesla's Cybertruck design</li> 
+<li>Police warn about issues with NameDrop social media app</li> 
+<li>Why Apple adding RCS may not resolve green vs blue bubbles</li> 
+<li>Apple dropping Goldman Sachs as Apple Card issuer</li> 
+<li>Inside Spotify Wrapped's annual personalized listening stats</li> 
+<li>Fears over Plex exposing users' viewing habits</li> 
+<li>Black Friday online sales hit record $9.8 billion in US</li> 
+<li>Cyber Monday sales beat estimates at $12.4 billion</li> 
+<li>Extreme complexity in rebuilding an ultimate car pinball machine</li> 
+<li>Kiss launches digital avatars for virtual concerts</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/jason-howell">Jason Howell</a></p> 
+<p><strong>Guests:</strong> <a href="https://twitter.com/richontech" target="_blank">Rich DeMuro</a>, <a href="https://twitter.com/tim_stevens" target="_blank">Tim Stevens</a>, and <a href="https://twitter.com/alheeti_3" target="_blank">Abrar Al-Heeti</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://www.ziprecruiter.com/twit" target="_blank" rel="sponsored">ziprecruiter.com/twit</a></li>
+<li><a href="http://stamps.com" target="_blank" rel="sponsored">www.stamps.com promo code TWIT</a></li>
+<li><a href="http://expressvpn.com/twit" target="_blank" rel="sponsored">expressvpn.com/twit</a></li>
+<li><a href="http://lookout.com" target="_blank" rel="sponsored">lookout.com</a></li>
+</ul></p>
+]]></description>
+			<itunes:summary><![CDATA[
+<p>Cybertruck is out, ChatGPT turns 1, Black Friday &amp; Cyber Monday, NameDrop</p><ul> 
+<li>ChatGPT's 1st birthday and mainstream AI adoption</li> 
+<li>Microsoft joins OpenAI's board as a non-voting observer</li> 
+<li>Pika raises $55 million for AI video generation tool</li> 
+<li>Amazon launches Q chatbot service for companies</li> 
+<li>Concerns over Q hallucinating responses and leaking data</li> 
+<li>Rethinking reactions to Tesla's Cybertruck design</li> 
+<li>Police warn about issues with NameDrop social media app</li> 
+<li>Why Apple adding RCS may not resolve green vs blue bubbles</li> 
+<li>Apple dropping Goldman Sachs as Apple Card issuer</li> 
+<li>Inside Spotify Wrapped's annual personalized listening stats</li> 
+<li>Fears over Plex exposing users' viewing habits</li> 
+<li>Black Friday online sales hit record $9.8 billion in US</li> 
+<li>Cyber Monday sales beat estimates at $12.4 billion</li> 
+<li>Extreme complexity in rebuilding an ultimate car pinball machine</li> 
+<li>Kiss launches digital avatars for virtual concerts</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/jason-howell">Jason Howell</a></p> 
+<p><strong>Guests:</strong> <a href="https://twitter.com/richontech" target="_blank">Rich DeMuro</a>, <a href="https://twitter.com/tim_stevens" target="_blank">Tim Stevens</a>, and <a href="https://twitter.com/alheeti_3" target="_blank">Abrar Al-Heeti</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://www.ziprecruiter.com/twit" target="_blank" rel="sponsored">ziprecruiter.com/twit</a></li>
+<li><a href="http://stamps.com" target="_blank" rel="sponsored">www.stamps.com promo code TWIT</a></li>
+<li><a href="http://expressvpn.com/twit" target="_blank" rel="sponsored">expressvpn.com/twit</a></li>
+<li><a href="http://lookout.com" target="_blank" rel="sponsored">lookout.com</a></li>
+</ul></p>
+]]></itunes:summary>
+			<content:encoded><![CDATA[
+<p>Cybertruck is out, ChatGPT turns 1, Black Friday &amp; Cyber Monday, NameDrop</p><ul> 
+<li>ChatGPT's 1st birthday and mainstream AI adoption</li> 
+<li>Microsoft joins OpenAI's board as a non-voting observer</li> 
+<li>Pika raises $55 million for AI video generation tool</li> 
+<li>Amazon launches Q chatbot service for companies</li> 
+<li>Concerns over Q hallucinating responses and leaking data</li> 
+<li>Rethinking reactions to Tesla's Cybertruck design</li> 
+<li>Police warn about issues with NameDrop social media app</li> 
+<li>Why Apple adding RCS may not resolve green vs blue bubbles</li> 
+<li>Apple dropping Goldman Sachs as Apple Card issuer</li> 
+<li>Inside Spotify Wrapped's annual personalized listening stats</li> 
+<li>Fears over Plex exposing users' viewing habits</li> 
+<li>Black Friday online sales hit record $9.8 billion in US</li> 
+<li>Cyber Monday sales beat estimates at $12.4 billion</li> 
+<li>Extreme complexity in rebuilding an ultimate car pinball machine</li> 
+<li>Kiss launches digital avatars for virtual concerts</li></ul> 
+<p><strong>Host:</strong> <a href="https://twit.tv/people/jason-howell">Jason Howell</a></p> 
+<p><strong>Guests:</strong> <a href="https://twitter.com/richontech" target="_blank">Rich DeMuro</a>, <a href="https://twitter.com/tim_stevens" target="_blank">Tim Stevens</a>, and <a href="https://twitter.com/alheeti_3" target="_blank">Abrar Al-Heeti</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://www.ziprecruiter.com/twit" target="_blank" rel="sponsored">ziprecruiter.com/twit</a></li>
+<li><a href="http://stamps.com" target="_blank" rel="sponsored">www.stamps.com promo code TWIT</a></li>
+<li><a href="http://expressvpn.com/twit" target="_blank" rel="sponsored">expressvpn.com/twit</a></li>
+<li><a href="http://lookout.com" target="_blank" rel="sponsored">lookout.com</a></li>
+</ul></p>
+]]></content:encoded>
+			<itunes:image href="https://elroy.twit.tv/sites/default/files/styles/twit_thumb_720x405/public/images/episodes/2023/12/849373/hero/twit0956-thumb.jpg"/>
+			<guid isPermaLink="false">https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/audio/twit/twit0956/twit0956.mp3</guid>
+			<itunes:duration>2:25:13</itunes:duration>
+			<enclosure url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_956/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0956.mp3" length="69905398" type="audio/mpeg"/>
+			<media:content url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_956/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0956.mp3" fileSize="69905398" type="audio/mpeg" medium="audio">
+				<media:title type="plain">TWiT 956: A Giant Rolling Brick - Cybertruck is out, ChatGPT turns 1, Black Friday &amp; Cyber Monday, NameDrop</media:title>
+				<media:description type="plain">Cybertruck is out, ChatGPT turns 1, Black Friday &amp; Cyber Monday, NameDrop</media:description>
+				<media:keywords>TWiT, This Week in Tech, Jason Howell, abrar al-heeti, tim stevens, rich demuro, chatgpt, openAI, Microsoft, ai ethics, Pika, video editing, amazon q, chatbots, Tesla Cybertruck, social media privacy, Android vs iPhone, rcs messaging, green bubbles</media:keywords>
+				<media:thumbnail url="https://elroy.twit.tv/sites/default/files/styles/twit_slideshow_400x300/public/images/episodes/2023/12/849373/hero/twit0956-thumb.jpg" width="400" height="225" />
+				<media:rating scheme="urn:simple">nonadult</media:rating>
+				<media:rating scheme="urn:v-chip">tv-g</media:rating>
+				<media:category scheme="urn:iab:categories" label="Technology &amp; Computing">IAB19</media:category>
+				<media:credit role="host">Jason Howell</media:credit>
+				<media:credit role="guest">Rich DeMuro</media:credit>
+				<media:credit role="guest">Tim Stevens</media:credit>
+				<media:credit role="guest">Abrar Al-Heeti</media:credit>
+			</media:content>
+		</item>
+		<item>
+			<title>TWiT 955: Marmite or Nothing - Altman returns to OpenAI, X sues Media Matters, Church of AI, Manifest V3</title>
+			<itunes:title>Marmite or Nothing - Altman returns to OpenAI, X sues Media Matters, Church of AI, Manifest V3</itunes:title>
+			<itunes:episodeType>full</itunes:episodeType>
+			<itunes:author>TWiT</itunes:author>
+			<pubDate>Sun, 26 Nov 2023 19:05:04 PST</pubDate>
+			<itunes:episode>955</itunes:episode>
+			<link>https://twit.tv/shows/this-week-in-tech/episodes/955</link>
+			<comments>https://twit.tv/shows/this-week-in-tech/episodes/955</comments>
+			<category>News</category>
+			<category>Tech News</category>
+			<itunes:explicit>no</itunes:explicit>
+			<itunes:subtitle>Altman returns to OpenAI, X sues Media Matters, Church of AI, Manifest V3</itunes:subtitle>
+			<itunes:keywords>Technology, TWiT, This Week in Tech, Harry McCracken, Doc Rock, Fr. Robert Ballecer, open ai, sam altman, Microsoft, elon musk, twitter lawsuit, hate speech, anti-semitism, trump truth social, eu regulation big tech, apple safari market share</itunes:keywords>
+			<description><![CDATA[
+<ul> 
+<li>Sam Altman returns as CEO after staff threatened mass resignation</li> 
+<li>Microsoft's role and attempts to hire OpenAI staff</li> 
+<li>Concerns over OpenAI's technology and capabilities</li> 
+<li>Speculation over what caused the OpenAI board member revolt</li> 
+<li>Impact and future of OpenAI as a non-profit and for-profit entity</li> 
+<li>Musk sues Twitter shareholders, sued over ads next to hate speech</li> 
+<li>Musk's behavior on Twitter concerning hate speech and anti-Semitism</li> 
+<li>Truth Social finances and Trump lawsuit against media companies reporting losses</li> 
+<li>EU regulations and lawsuits against tech giants over gatekeeping and anti-competitive behavior</li> 
+<li>Tesla lawsuits over false Autopilot and battery claims</li> 
+<li>Gay furry hackers steal Idaho National Lab nuclear secrets</li> 
+<li>Levandosky launches Church of AI organization</li> 
+<li>Video game addiction lawsuits</li> 
+<li>Google to restrict ad blockers in Manifest V3 update</li> 
+<li>Advertiser boycotts of Twitter</li> 
+<li>Surveillance and the Hemisphere spying scheme</li></ul> 
+<p><strong>Host:</strong> <a href="http://twitter.com/iainthomson" target="_blank">Iain Thomson</a></p> 
+<p><strong>Guests:</strong> <a href="https://twitter.com/docrock" target="_blank">Doc Rock</a>, <a href="https://twitter.com/padresj" target="_blank">Fr. Robert Ballecer, SJ</a>, and <a href="http://twitter.com/harrymccracken" target="_blank">Harry McCracken</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://hid.link/twitdemo" target="_blank" rel="sponsored">hid.link/twitdemo</a></li>
+<li><a href="http://GO.ACILEARNING.COM/TWIT" target="_blank" rel="sponsored">GO.ACILEARNING.COM/TWIT</a></li>
+<li><a href="http://Miro.com/podcast" target="_blank" rel="sponsored">Miro.com/podcast</a></li>
+<li><a href="http://mintmobile.com/twit" target="_blank" rel="sponsored">mintmobile.com/twit</a></li>
+</ul></p>
+]]></description>
+			<itunes:summary><![CDATA[
+<ul> 
+<li>Sam Altman returns as CEO after staff threatened mass resignation</li> 
+<li>Microsoft's role and attempts to hire OpenAI staff</li> 
+<li>Concerns over OpenAI's technology and capabilities</li> 
+<li>Speculation over what caused the OpenAI board member revolt</li> 
+<li>Impact and future of OpenAI as a non-profit and for-profit entity</li> 
+<li>Musk sues Twitter shareholders, sued over ads next to hate speech</li> 
+<li>Musk's behavior on Twitter concerning hate speech and anti-Semitism</li> 
+<li>Truth Social finances and Trump lawsuit against media companies reporting losses</li> 
+<li>EU regulations and lawsuits against tech giants over gatekeeping and anti-competitive behavior</li> 
+<li>Tesla lawsuits over false Autopilot and battery claims</li> 
+<li>Gay furry hackers steal Idaho National Lab nuclear secrets</li> 
+<li>Levandosky launches Church of AI organization</li> 
+<li>Video game addiction lawsuits</li> 
+<li>Google to restrict ad blockers in Manifest V3 update</li> 
+<li>Advertiser boycotts of Twitter</li> 
+<li>Surveillance and the Hemisphere spying scheme</li></ul> 
+<p><strong>Host:</strong> <a href="http://twitter.com/iainthomson" target="_blank">Iain Thomson</a></p> 
+<p><strong>Guests:</strong> <a href="https://twitter.com/docrock" target="_blank">Doc Rock</a>, <a href="https://twitter.com/padresj" target="_blank">Fr. Robert Ballecer, SJ</a>, and <a href="http://twitter.com/harrymccracken" target="_blank">Harry McCracken</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://hid.link/twitdemo" target="_blank" rel="sponsored">hid.link/twitdemo</a></li>
+<li><a href="http://GO.ACILEARNING.COM/TWIT" target="_blank" rel="sponsored">GO.ACILEARNING.COM/TWIT</a></li>
+<li><a href="http://Miro.com/podcast" target="_blank" rel="sponsored">Miro.com/podcast</a></li>
+<li><a href="http://mintmobile.com/twit" target="_blank" rel="sponsored">mintmobile.com/twit</a></li>
+</ul></p>
+]]></itunes:summary>
+			<content:encoded><![CDATA[
+<ul> 
+<li>Sam Altman returns as CEO after staff threatened mass resignation</li> 
+<li>Microsoft's role and attempts to hire OpenAI staff</li> 
+<li>Concerns over OpenAI's technology and capabilities</li> 
+<li>Speculation over what caused the OpenAI board member revolt</li> 
+<li>Impact and future of OpenAI as a non-profit and for-profit entity</li> 
+<li>Musk sues Twitter shareholders, sued over ads next to hate speech</li> 
+<li>Musk's behavior on Twitter concerning hate speech and anti-Semitism</li> 
+<li>Truth Social finances and Trump lawsuit against media companies reporting losses</li> 
+<li>EU regulations and lawsuits against tech giants over gatekeeping and anti-competitive behavior</li> 
+<li>Tesla lawsuits over false Autopilot and battery claims</li> 
+<li>Gay furry hackers steal Idaho National Lab nuclear secrets</li> 
+<li>Levandosky launches Church of AI organization</li> 
+<li>Video game addiction lawsuits</li> 
+<li>Google to restrict ad blockers in Manifest V3 update</li> 
+<li>Advertiser boycotts of Twitter</li> 
+<li>Surveillance and the Hemisphere spying scheme</li></ul> 
+<p><strong>Host:</strong> <a href="http://twitter.com/iainthomson" target="_blank">Iain Thomson</a></p> 
+<p><strong>Guests:</strong> <a href="https://twitter.com/docrock" target="_blank">Doc Rock</a>, <a href="https://twitter.com/padresj" target="_blank">Fr. Robert Ballecer, SJ</a>, and <a href="http://twitter.com/harrymccracken" target="_blank">Harry McCracken</a></p> 
+<p>Download or subscribe to this show at <a href="https://twit.tv/shows/this-week-in-tech">https://twit.tv/shows/this-week-in-tech</a></p> 
+<p>Get episodes ad-free with Club TWiT at <a href="https://twit.tv/clubtwit" rel="payment">https://twit.tv/clubtwit</a></p>
+<p><strong>Sponsors:</strong><ul>
+<li><a href="http://hid.link/twitdemo" target="_blank" rel="sponsored">hid.link/twitdemo</a></li>
+<li><a href="http://GO.ACILEARNING.COM/TWIT" target="_blank" rel="sponsored">GO.ACILEARNING.COM/TWIT</a></li>
+<li><a href="http://Miro.com/podcast" target="_blank" rel="sponsored">Miro.com/podcast</a></li>
+<li><a href="http://mintmobile.com/twit" target="_blank" rel="sponsored">mintmobile.com/twit</a></li>
+</ul></p>
+]]></content:encoded>
+			<itunes:image href="https://elroy.twit.tv/sites/default/files/styles/twit_thumb_720x405/public/images/episodes/2023/11/849242/hero/twit0955_thumbnail.jpg"/>
+			<guid isPermaLink="false">https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/audio/twit/twit0955/twit0955.mp3</guid>
+			<itunes:duration>2:22:13</itunes:duration>
+			<enclosure url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_955/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0955.mp3" length="68475099" type="audio/mpeg"/>
+			<media:content url="https://pdst.fm/e/pscrb.fm/rss/p/cdn.twit.tv/libsyn/twit_955/b26992aa-b1b1-4f90-a2b7-efc6a7d4b42a/R1_twit0955.mp3" fileSize="68475099" type="audio/mpeg" medium="audio">
+				<media:title type="plain">TWiT 955: Marmite or Nothing - Altman returns to OpenAI, X sues Media Matters, Church of AI, Manifest V3</media:title>
+				<media:description type="plain">Altman returns to OpenAI, X sues Media Matters, Church of AI, Manifest V3</media:description>
+				<media:keywords>Technology, TWiT, This Week in Tech, Harry McCracken, Doc Rock, Fr. Robert Ballecer, open ai, sam altman, Microsoft, elon musk, twitter lawsuit, hate speech, anti-semitism, trump truth social, eu regulation big tech, apple safari market share</media:keywords>
+				<media:thumbnail url="https://elroy.twit.tv/sites/default/files/styles/twit_slideshow_400x300/public/images/episodes/2023/11/849242/hero/twit0955_thumbnail.jpg" width="400" height="225" />
+				<media:rating scheme="urn:simple">nonadult</media:rating>
+				<media:rating scheme="urn:v-chip">tv-g</media:rating>
+				<media:category scheme="urn:iab:categories" label="Technology &amp; Computing">IAB19</media:category>
+				<media:credit role="host">Iain Thomson</media:credit>
+				<media:credit role="guest">Doc Rock</media:credit>
+				<media:credit role="guest">Fr. Robert Ballecer, SJ</media:credit>
+				<media:credit role="guest">Harry McCracken</media:credit>
+			</media:content>
+		</item>
+	</channel>
+</rss>
