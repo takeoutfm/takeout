@@ -140,7 +140,7 @@ func TestMatchTrack(t *testing.T) {
 		}
 
 		result := fmt.Sprintf("%d / %d / %s", track.DiscNum, track.TrackNum, track.Title)
-		t.Logf("%s\n", result)
+		//t.Logf("%s\n", result)
 		if result != expect[i] {
 			t.Errorf("expect %s got %s\n", expect[i], result)
 		}

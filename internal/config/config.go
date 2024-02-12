@@ -533,7 +533,8 @@ func postProcessConfig(v *viper.Viper, rootDir string) (*Config, error) {
 			val := v.Get(k)
 			// resolve relative paths only
 			if strings.HasPrefix(val.(string), "/") == false &&
-				strings.Contains(val.(string), "@") == false {
+				strings.Contains(val.(string), "@") == false &&
+				strings.Contains(val.(string), "::") == false {
 				val = fmt.Sprintf("%s/%s", rootDir, val.(string))
 				v.Set(k, val)
 			}
@@ -555,6 +556,28 @@ func TestConfig() (*Config, error) {
 	v.SetDefault("Music.DB.Source", filepath.Join(testDir, "music.db"))
 	v.SetDefault("Auth.DB.Source", filepath.Join(testDir, "auth.db"))
 	return readConfig(v)
+}
+
+func TestingConfig() (*Config, error) {
+	v := viper.New()
+	configDefaults(v)
+	v.SetConfigFile("testing.yaml")
+
+	memory := "file::memory:?cache=shared"
+	v.SetDefault("Activity.DB.Source", memory)
+	v.SetDefault("Auth.DB.Source", "${Activity.DB.Source}")
+	v.SetDefault("Music.DB.Source", "${Activity.DB.Source}")
+
+	v.SetDefault("Auth.AccessToken.Issuer", "takeout.test")
+	v.SetDefault("Auth.AccessToken.Age", "5m")
+	v.SetDefault("Auth.AccessToken.Secret", "Wtex5hJ3vxZbkCSs")
+	v.SetDefault("Auth.MediaToken.Issuer", "takeout.test")
+	v.SetDefault("Auth.MediaToken.Age", "5m")
+	v.SetDefault("Auth.MediaToken.Secret", "H1ys/pP/iNiQUl4k")
+	v.SetDefault("Auth.CodeToken.Issuer", "takeout.test")
+	v.SetDefault("Auth.CodeToken.Age", "5m")
+	v.SetDefault("Auth.CodeToken.Secret", "Rg3ac20IPqyL7oAC")
+	return postProcessConfig(v, "/tmp")
 }
 
 var configFile, configPath, configName string

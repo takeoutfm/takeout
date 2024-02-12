@@ -18,6 +18,7 @@
 // Package bucket provides support for listing S3 bucket contents and creating
 // presigned URLs for fetching media. The AWS SDK is used to provide S3
 // functionality, however, any S3 compatible backend service is supported.
+
 package bucket
 
 import (

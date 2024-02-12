@@ -18,140 +18,206 @@
 package auth
 
 import (
-	"fmt"
-	"github.com/takeoutfm/takeout/config"
-	"net/http"
 	"testing"
-	"time"
-	"math"
+
+	"github.com/takeoutfm/takeout/internal/config"
 )
 
+func makeAuth(t *testing.T) *Auth {
+	config, err := config.TestingConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := NewAuth(config)
+	err = a.Open()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return a
+}
+
 func TestAddUser(t *testing.T) {
-	config, err := config.TestConfig()
+	user := "defsub@defsub.com"
+	pass := "test_Pa$$/1234,;&w0rd"
+
+	a := makeAuth(t)
+	err := a.AddUser(user, pass)
 	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
+		t.Fatal(err)
 	}
-	a := NewAuth(config)
-	err = a.Open()
+
+	session, err := a.Login(user, pass)
 	if err != nil {
-		t.Errorf("Open %s\n", err)
+		t.Fatal(err)
 	}
-	defer a.Close()
-	a.AddUser("defsub@defsub.com", "testpass")
+	if (session.User != user) {
+		t.Error("expect user")
+	}
+	if len(session.Token) == 0 {
+		t.Error("expect cookie")
+	}
 }
 
-func TestLogin(t *testing.T) {
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-	a := NewAuth(config)
-	err = a.Open()
-	if err != nil {
-		t.Errorf("Open %s\n", err)
-	}
-	defer a.Close()
+func TestChangePass(t *testing.T) {
+	user := "defsub@defsub.com"
+	pass1 := "test_Pa$$/1234,;&w0rd"
+	pass2 := "other&pass;test@_1234"
 
-	cookie, err := a.Login("defsub@defsub.com", "testpass")
+	a := makeAuth(t)
+	err := a.AddUser(user, pass1)
 	if err != nil {
-		t.Errorf("login should have worked: %s\n", err)
-	}
-	if len(cookie.Value) == 0 {
-		t.Errorf("no cookie")
-	}
-	if cookie.Name != CookieName {
-		t.Error("bad cookie name")
+		t.Fatal(err)
 	}
 
-	cookie, err = a.Login("defsub@defsub.com", "badpass")
+	_, err = a.Login(user, pass1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = a.ChangePass(user, pass2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = a.Login(user, pass1)
 	if err == nil {
-		t.Errorf("should be incorrect password")
+		t.Fatal("expect login err")
 	}
 
-	cookie, err = a.Login("bad@user.com", "testpass")
-	if err == nil {
-		t.Errorf("should be incorrect user")
+	_, err = a.Login(user, pass2)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
-func TestCookie(t *testing.T) {
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-	a := NewAuth(config)
-	err = a.Open()
-	if err != nil {
-		t.Errorf("Open %s\n", err)
-	}
-	defer a.Close()
+func TestNewAccessToken(t *testing.T) {
+	user := "defsub@defsub.com"
+	pass := "other&pass;test@_1234"
 
-	bad := http.Cookie{Name: CookieName, Value: "foo"}
-	if a.Valid(bad) == true {
-		t.Errorf("cookie should not exist")
+	a := makeAuth(t)
+	session, err := a.Login(user, pass)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	cookie, err := a.Login("defsub@defsub.com", "testpass")
-	if a.Valid(cookie) == false {
-		t.Errorf("cookie should be good")
+	token, err := a.NewAccessToken(session)
+	if err != nil {
+		t.Fatal(err)
 	}
+	if len(token) == 0 {
+		t.Error("expect token")
+	}
+
+	err = a.CheckAccessToken(token)
+	if err != nil {
+		t.Fatal("expect good token")
+	}
+
+	u, err := a.CheckAccessTokenUser(token)
+	if err != nil {
+		t.Fatal("expect good token")
+	}
+	if user != u.Name {
+		t.Error("expect same user")
+	}
+
 }
 
-func TestLogout(t *testing.T) {
-	config, err := config.TestConfig()
+func TestNewMediaToken(t *testing.T) {
+	user := "defsub@defsub.com"
+	pass := "other&pass;test@_1234"
+
+	a := makeAuth(t)
+	session, err := a.Login(user, pass)
 	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
+		t.Fatal(err)
 	}
-	a := NewAuth(config)
-	err = a.Open()
+
+	token, err := a.NewMediaToken(session)
 	if err != nil {
-		t.Errorf("Open %s\n", err)
+		t.Fatal(err)
 	}
-	defer a.Close()
-
-	cookie, err := a.Login("defsub@defsub.com", "testpass")
-	if a.Valid(cookie) == false {
-		t.Errorf("cookie should be good")
+	if len(token) == 0 {
+		t.Error("expect token")
 	}
 
-	a.Logout(cookie)
-
-	if a.Valid(cookie) == true {
-		t.Errorf("cookie should fail")
+	err = a.CheckMediaToken(token)
+	if err != nil {
+		t.Fatal("expect good token")
 	}
+
+	u, err := a.CheckMediaTokenUser(token)
+	if err != nil {
+		t.Fatal("expect good token")
+	}
+	if user != u.Name {
+		t.Error("expect same user")
+	}
+
 }
 
-func TestMaxAge(t *testing.T) {
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-	a := NewAuth(config)
-	err = a.Open()
-	if err != nil {
-		t.Errorf("Open %s\n", err)
-	}
-	defer a.Close()
+func TestNewCodeToken(t *testing.T) {
+	user := "defsub@defsub.com"
+	pass := "other&pass;test@_1234"
 
-	cookie, err := a.Login("defsub@defsub.com", "testpass")
-	if a.Valid(cookie) == false {
-		t.Errorf("cookie should be good")
+	a := makeAuth(t)
+
+	// get a code
+	code := a.GenerateCode()
+	if code == nil {
+		t.Fatal("expect code")
+	}
+	if len(code.Value) == 0 {
+		t.Fatal("expect code value")
 	}
 
-	cookie.MaxAge = 0
-	now := time.Now()
-	err = a.Refresh(&cookie)
+	// get a jwt token to check code
+	checkToken, err := a.NewCodeToken(code.Value)
 	if err != nil {
-		t.Errorf("refresh failed")
+		t.Fatal(err)
 	}
-	if cookie.MaxAge == 0 {
-		t.Errorf("no age change")
+	if len(checkToken) == 0 {
+		t.Error("expect code token")
 	}
-	d, _ := time.ParseDuration(fmt.Sprintf("%ds", cookie.MaxAge))
-	age1 := now.Add(d)
-	age2 := now.Add(config.Auth.MaxAge)
-	delta := int(math.Abs(age1.Sub(age2).Seconds()))
-	if delta > 1 {
-		t.Errorf("delta is %d\n", delta)
+
+	// check the token is valid
+	err = a.CheckCodeToken(checkToken)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// check the code isn't linked yet
+	c := a.LookupCode(code.Value)
+	if c == nil {
+		t.Error("expect lookup code")
+	}
+	if c.Linked() != false {
+		t.Error("expect unlinked")
+	}
+
+	// create a session to link code with user
+	session, err := a.Login(user, pass)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// link the code to the session
+	err = a.AuthorizeCode(code.Value, session.Token)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// check the code *is* linked now
+	c = a.LookupCode(code.Value)
+	if c == nil {
+		t.Error("expect lookup code")
+	}
+	if c.Linked() != true {
+		t.Fatal("expect linked")
+	}
+
+	// find the session for this token
+	s := a.TokenSession(c.Token)
+	if s == nil {
+		t.Fatal("expect session")
 	}
 }
