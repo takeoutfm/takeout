@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/takeoutfm/takeout/lib/header"
+	"github.com/takeoutfm/takeout/lib/str"
 )
 
 type object struct {
@@ -97,7 +98,7 @@ func apiObjectGet(w http.ResponseWriter, r *http.Request) {
 	o, ok := objects[user][uuid]
 	if ok {
 		w.Header().Set(header.ContentType, o.contentType)
-		w.Header().Set(header.ContentLength, string(len(o.data)))
+		w.Header().Set(header.ContentLength, str.Itoa(len(o.data)))
 		w.Write(o.data)
 	} else {
 		notFoundErr(w)

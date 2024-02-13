@@ -18,9 +18,7 @@
 package spiff
 
 import (
-	"encoding/json"
 	"testing"
-	"os"
 )
 
 func TestPlaylist(t *testing.T) {

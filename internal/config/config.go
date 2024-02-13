@@ -567,6 +567,9 @@ func TestingConfig() (*Config, error) {
 	v.SetDefault("Activity.DB.Source", memory)
 	v.SetDefault("Auth.DB.Source", "${Activity.DB.Source}")
 	v.SetDefault("Music.DB.Source", "${Activity.DB.Source}")
+	v.SetDefault("Podcast.DB.Source", "${Activity.DB.Source}")
+	v.SetDefault("Progress.DB.Source", "${Activity.DB.Source}")
+	v.SetDefault("Video.DB.Source", "${Activity.DB.Source}")
 
 	v.SetDefault("Auth.AccessToken.Issuer", "takeout.test")
 	v.SetDefault("Auth.AccessToken.Age", "5m")

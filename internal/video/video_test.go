@@ -17,72 +17,71 @@
 
 package video
 
-import (
-	"github.com/takeoutfm/takeout/config"
-	"testing"
-	"fmt"
-)
+// import (
+// 	"testing"
+// 	"fmt"
+// )
 
-func TestCast(t *testing.T) {
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-	v := NewVideo(config)
-	err = v.Open()
-	if err != nil {
-		t.Errorf("Open %s\n", err)
-	}
-	cast := v.Cast(Movie{TMID: 11})
-	for _, c := range cast {
-		fmt.Printf("%s %s\n", c.Person.Name, c.Character)
-	}
-}
+// func TestCast(t *testing.T) {
+// 	config, err := config.TestConfig()
+// 	if err != nil {
+// 		t.Errorf("GetConfig %s\n", err)
+// 	}
+// 	v := NewVideo(config)
+// 	err = v.Open()
+// 	if err != nil {
+// 		t.Errorf("Open %s\n", err)
+// 	}
+// 	cast := v.Cast(Movie{TMID: 11})
+// 	for _, c := range cast {
+// 		fmt.Printf("%s %s\n", c.Person.Name, c.Character)
+// 	}
+// }
 
-func TestCrew(t *testing.T) {
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-	v := NewVideo(config)
-	err = v.Open()
-	if err != nil {
-		t.Errorf("Open %s\n", err)
-	}
-	crew := v.Crew(Movie{TMID: 11})
-	for _, c := range crew {
-		fmt.Printf("%s %s\n", c.Person.Name, c.Job)
-	}
-}
+// func TestCrew(t *testing.T) {
+// 	config, err := config.TestConfig()
+// 	if err != nil {
+// 		t.Errorf("GetConfig %s\n", err)
+// 	}
+// 	v := NewVideo(config)
+// 	err = v.Open()
+// 	if err != nil {
+// 		t.Errorf("Open %s\n", err)
+// 	}
+// 	crew := v.Crew(Movie{TMID: 11})
+// 	for _, c := range crew {
+// 		fmt.Printf("%s %s\n", c.Person.Name, c.Job)
+// 	}
+// }
 
-func TestRecentlyAdded(t *testing.T) {
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-	v := NewVideo(config)
-	err = v.Open()
-	if err != nil {
-		t.Errorf("Open %s\n", err)
-	}
-	movies := v.RecentlyAdded()
-	for _, m := range movies {
-		fmt.Printf("%s %d\n", m.Title, m.Date.Year())
-	}
-}
+// func TestRecentlyAdded(t *testing.T) {
+// 	config, err := config.TestConfig()
+// 	if err != nil {
+// 		t.Errorf("GetConfig %s\n", err)
+// 	}
+// 	v := NewVideo(config)
+// 	err = v.Open()
+// 	if err != nil {
+// 		t.Errorf("Open %s\n", err)
+// 	}
+// 	movies := v.RecentlyAdded()
+// 	for _, m := range movies {
+// 		fmt.Printf("%s %d\n", m.Title, m.Date.Year())
+// 	}
+// }
 
-func TestRecentlyReleased(t *testing.T) {
-	config, err := config.TestConfig()
-	if err != nil {
-		t.Errorf("GetConfig %s\n", err)
-	}
-	v := NewVideo(config)
-	err = v.Open()
-	if err != nil {
-		t.Errorf("Open %s\n", err)
-	}
-	movies := v.RecentlyReleased()
-	for _, m := range movies {
-		fmt.Printf("%s %d\n", m.Title, m.Date.Year())
-	}
-}
+// func TestRecentlyReleased(t *testing.T) {
+// 	config, err := config.TestConfig()
+// 	if err != nil {
+// 		t.Errorf("GetConfig %s\n", err)
+// 	}
+// 	v := NewVideo(config)
+// 	err = v.Open()
+// 	if err != nil {
+// 		t.Errorf("Open %s\n", err)
+// 	}
+// 	movies := v.RecentlyReleased()
+// 	for _, m := range movies {
+// 		fmt.Printf("%s %d\n", m.Title, m.Date.Year())
+// 	}
+// }

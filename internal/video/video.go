@@ -65,9 +65,9 @@ func (v *Video) FindMovie(identifier string) (Movie, error) {
 		if strings.HasPrefix(identifier, "uuid:") {
 			return v.LookupUUID(identifier[5:])
 		} else if strings.HasPrefix(identifier, "imid:") {
-			return v.LookupIMID(identifier[4:])
+			return v.LookupIMID(identifier[5:])
 		} else if strings.HasPrefix(identifier, "tmid:") {
-			id, err := strconv.Atoi(identifier[4:])
+			id, err := strconv.Atoi(identifier[5:])
 			if err != nil {
 				return Movie{}, err
 			}
