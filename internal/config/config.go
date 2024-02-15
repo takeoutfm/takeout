@@ -136,6 +136,7 @@ type MusicConfig struct {
 	Recent               time.Duration
 	RecentLimit          int
 	ReleaseCountries     []string
+	SearchIndexName      string
 	SearchLimit          int
 	SimilarArtistsLimit  int
 	SimilarReleases      time.Duration
@@ -155,6 +156,7 @@ type VideoConfig struct {
 	CrewJobs             []string
 	Recent               time.Duration
 	RecentLimit          int
+	SearchIndexName      string
 	SearchLimit          int
 	Recommend            RecommendConfig
 	SyncInterval         time.Duration
@@ -163,13 +165,14 @@ type VideoConfig struct {
 }
 
 type PodcastConfig struct {
-	DB           DatabaseConfig
-	Series       []string
-	Client       client.Config
-	RecentLimit  int
-	EpisodeLimit int
-	SyncInterval time.Duration
-	SearchLimit  int
+	DB              DatabaseConfig
+	Series          []string
+	Client          client.Config
+	RecentLimit     int
+	EpisodeLimit    int
+	SyncInterval    time.Duration
+	SearchIndexName string
+	SearchLimit     int
 }
 
 type ProgressConfig struct {
@@ -260,6 +263,10 @@ func (c Config) NewGetterWith(o client.Config) client.Getter {
 
 func (c Config) NewCacheOnlyGetter() client.Getter {
 	return client.NewCacheOnlyGetter(c.Client)
+}
+
+func (c Config) NewSearcher() search.Searcher {
+	return search.NewSearcher(c.Search)
 }
 
 func (mc *MusicConfig) UserArtistID(name string) (string, bool) {
@@ -357,6 +364,7 @@ func configDefaults(v *viper.Viper) {
 
 	v.SetDefault("Music.Recent", "8760h") // 1 year
 	v.SetDefault("Music.RecentLimit", "50")
+	v.SetDefault("Music.SearchIndexName", "")
 	v.SetDefault("Music.SearchLimit", "100")
 	v.SetDefault("Music.SimilarArtistsLimit", "10")
 	v.SetDefault("Music.SimilarReleases", "8760h") // +/- 1 year
@@ -383,7 +391,7 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("TMDB.FileTemplate.Text",
 		"{{.Title}} ({{.Year}}){{if .Definition}} - {{.Definition}}{{end}}{{.Extension}}")
 
-	v.SetDefault("Search.BleveDir", ".")
+	v.SetDefault("Search.IndexDir", ".")
 
 	v.SetDefault("Video.DB.Driver", "sqlite3")
 	v.SetDefault("Video.DB.Source", "video.db")
@@ -402,6 +410,7 @@ func configDefaults(v *viper.Viper) {
 	})
 	v.SetDefault("Video.Recent", "8760h") // 1 year
 	v.SetDefault("Video.RecentLimit", "50")
+	v.SetDefault("Video.SearchIndexName", "video")
 	v.SetDefault("Video.SearchLimit", "100")
 	v.SetDefault("Video.SyncInterval", "1h")
 	v.SetDefault("Video.PosterSyncInterval", "24h")
@@ -480,6 +489,7 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Podcast.DB.Logger", "default")
 	v.SetDefault("Podcast.EpisodeLimit", "52")
 	v.SetDefault("Podcast.RecentLimit", "25")
+	v.SetDefault("Podcast.SearchIndexName", "podcast")
 	v.SetDefault("Podcast.SearchLimit", "100")
 	v.SetDefault("Podcast.SyncInterval", "1h")
 	v.SetDefault("Podcast.Series", []string{
@@ -580,6 +590,12 @@ func TestingConfig() (*Config, error) {
 	v.SetDefault("Auth.CodeToken.Issuer", "takeout.test")
 	v.SetDefault("Auth.CodeToken.Age", "5m")
 	v.SetDefault("Auth.CodeToken.Secret", "Rg3ac20IPqyL7oAC")
+
+	v.SetDefault("Search.IndexDir", "")
+	v.SetDefault("Music.SearchIndexName", "")
+	v.SetDefault("Podcast.SearchIndexName", "")
+	v.SetDefault("Video.SearchIndexName", "")
+
 	return postProcessConfig(v, "/tmp")
 }
 

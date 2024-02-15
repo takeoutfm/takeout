@@ -30,32 +30,45 @@ type FieldMap map[string]interface{}
 type IndexMap map[string]FieldMap
 
 type Config struct {
-	BleveDir string
+	IndexDir string
 }
 
-type Search struct {
-	config   Config
-	index    bleve.Index
-	Keywords []string
+type Searcher interface {
+	Open(name string, keywords []string) error
+	Index(m IndexMap)
+	Search(q string, limit int) ([]string, error)
+	Delete(keys []string) error
+	Close()
 }
 
-func NewSearch(config Config) *Search {
-	return &Search{config: config}
+type search struct {
+	config Config
+	index  bleve.Index
 }
 
-func (s *Search) Open(name string) error {
+func NewSearcher(config Config) Searcher {
+	return &search{config: config}
+}
+
+func (s *search) Open(name string, keywords []string) error {
 	mapping := bleve.NewIndexMapping()
 	// Note that keywords are fields where we want only exact matches.
 	// see https://blevesearch.com/docs/Analyzers/
 	keywordFieldMapping := bleve.NewTextFieldMapping()
 	keywordFieldMapping.Analyzer = keyword.Name
 	keywordMapping := bleve.NewDocumentMapping()
-	for _, v := range s.Keywords {
+	for _, v := range keywords {
 		keywordMapping.AddFieldMappingsAt(v, keywordFieldMapping)
 	}
 	mapping.AddDocumentMapping("_default", keywordMapping)
 
-	path := fmt.Sprintf("%s/%s.bleve", s.config.BleveDir, name)
+	path := "" // in memory
+	if s.config.IndexDir != "" && name != "" {
+		path = fmt.Sprintf("%s/%s.bleve", s.config.IndexDir, name)
+	} else if name != "" {
+		path = name
+	}
+
 	index, err := bleve.New(path, mapping)
 	if err == bleve.ErrorIndexPathExists {
 		index, err = bleve.Open(path)
@@ -72,7 +85,7 @@ func (s *Search) Open(name string) error {
 	return nil
 }
 
-func (s *Search) Close() {
+func (s *search) Close() {
 	if s.index != nil {
 		s.index.Close()
 		s.index = nil
@@ -80,7 +93,7 @@ func (s *Search) Close() {
 }
 
 // see https://blevesearch.com/docs/Query-String-Query/
-func (s *Search) Search(q string, limit int) ([]string, error) {
+func (s *search) Search(q string, limit int) ([]string, error) {
 	query := bleve.NewQueryStringQuery(q)
 	searchRequest := bleve.NewSearchRequest(query)
 	searchRequest.Size = limit
@@ -96,13 +109,13 @@ func (s *Search) Search(q string, limit int) ([]string, error) {
 	return keys, nil
 }
 
-func (s *Search) Index(m IndexMap) {
+func (s *search) Index(m IndexMap) {
 	for k, v := range m {
 		s.index.Index(k, v)
 	}
 }
 
-func (s *Search) Delete(keys []string) error {
+func (s *search) Delete(keys []string) error {
 	b := s.index.NewBatch()
 	for _, key := range keys {
 		b.Delete(key)

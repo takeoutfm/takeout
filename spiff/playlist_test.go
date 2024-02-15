@@ -22,12 +22,52 @@ import (
 )
 
 func TestPlaylist(t *testing.T) {
-	// p := Playlist{Title: "test"}
-	// p.Entries = append(p.Entries, Entry{
-	// 	Creator: "Gary Numan",
-	// 	Album: "Live",
-	// 	Title: "Films",
-	// 	Location: "https://foo.com/x"})
-	// enc := json.NewEncoder(os.Stdout)
-	// enc.Encode(p)
+	p := Playlist{
+		Spiff: Spiff{
+			Header: Header{
+				Title:    "test playlist",
+				Creator:  "test creator",
+				Image:    "https://img.com/img.png",
+				Location: "https://t.com/t.spiff",
+				Date:     "2024-1-1",
+			},
+			Entries: []Entry{
+				{
+					Creator:  "Gary Numan",
+					Album:    "Live",
+					Title:    "Films",
+					Location: []string{"https:/t./com/films.flac"},
+				},
+			},
+		},
+	}
+
+	data, err := p.Marshal()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	plist, err := Unmarshal(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if p.Spiff.Creator != plist.Spiff.Creator {
+		t.Error("expect same creator")
+	}
+
+	if len(p.Spiff.Entries) != len(plist.Spiff.Entries) {
+		t.Error("expect same entries")
+	}
+
+	if len(p.Spiff.Entries[0].Location) != len(plist.Spiff.Entries[0].Location) {
+		t.Error("expect same locations")
+	}
+}
+
+func TestNewPlaylist(t *testing.T) {
+	p := NewPlaylist(TypeMusic)
+	if p.Type != TypeMusic {
+		t.Error("expect type music")
+	}
 }

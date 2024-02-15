@@ -154,7 +154,10 @@ func ReleaseView(ctx Context, release model.Release) *Release {
 	m := ctx.Music()
 	view := &Release{}
 	view.Release = release
-	view.Artist = *m.Artist(release.Artist)
+	artist := m.Artist(release.Artist)
+	if artist != nil {
+		view.Artist = *artist
+	}
 	view.Tracks = m.ReleaseTracks(release)
 	view.Singles = m.ReleaseSingles(release)
 	view.Popular = m.ReleasePopular(release)

@@ -1,4 +1,4 @@
-// Copyright 2023 defsub
+// Copyright 2024 defsub
 //
 // This file is part of Takeout.
 //
@@ -18,37 +18,44 @@
 package search
 
 import (
-	"github.com/blevesearch/bleve/v2"
-	"github.com/blevesearch/bleve/v2/analysis/analyzer/keyword"
-	"github.com/blevesearch/bleve/v2/mapping"
 	"testing"
 )
 
-func buildMapping() mapping.IndexMapping {
-	keywordFieldMapping := bleve.NewTextFieldMapping()
-	keywordFieldMapping.Analyzer = keyword.Name
-
-	musicMapping := bleve.NewDocumentMapping()
-	musicMapping.AddFieldMappingsAt("tags", keywordFieldMapping)
-
-	indexMapping := bleve.NewIndexMapping()
-	indexMapping.AddDocumentMapping("_default", musicMapping)
-
-	return indexMapping
+type TestSearch struct {
+	t *testing.T
 }
 
-func TestIndex(t *testing.T) {
-	index, err := bleve.New("example.bleve", buildMapping())
-	if err == bleve.ErrorIndexPathExists {
-		index, err = bleve.Open("example.bleve")
-		if err != nil {
-			panic(err)
-		}
+func (t TestSearch) Open(name string, keywords []string) error {
+	return nil
+}
+
+func (t TestSearch) Index(m IndexMap) {
+}
+
+func (t TestSearch) Search(q string, limit int) ([]string, error) {
+	return []string{}, nil
+}
+
+func (t TestSearch) Delete(keys []string) error {
+	return nil
+}
+
+func (t TestSearch) Close() {
+}
+
+func NewTestSearch(t *testing.T) Searcher {
+	return TestSearch{t: t}
+}
+
+func TestSearchIndex(t *testing.T) {
+	c := Config{IndexDir: ""}
+	s := NewSearcher(c)
+	err := s.Open("", []string{})
+	if err != nil {
+		t.Fatal(err)
 	}
-	defer index.Close()
 
-	m := make(map[string]interface{})
-
+	m := make(FieldMap)
 	m["artist"] = "Gary Numan"
 	m["release"] = "The Pleasure Principle"
 	m["title"] = "Films"
@@ -61,89 +68,44 @@ func TestIndex(t *testing.T) {
 	m["mix"] = "jim smith, joe blow"
 	m["type"] = "music"
 
-	index.Index("Music/Gary Numan/The Pleasure Principle/01-Films.flac", m)
-}
+	index := make(IndexMap)
+	index["1234"] = m
 
-func TestTagsSearch(t *testing.T) {
-	index, _ := bleve.Open("example.bleve")
-	defer index.Close()
-	query := bleve.NewQueryStringQuery(`+tags:"pop rock" +tags:"indie"`)
-	searchRequest := bleve.NewSearchRequest(query)
-	searchResult, err := index.Search(searchRequest)
+	s.Index(index)
+
+	results, err := s.Search("numan", 100)
 	if err != nil {
 		t.Error(err)
 	}
-	if len(searchResult.Hits) == 0 {
-		t.Error("no hits")
+	if results[0] != "1234" {
+		t.Error("expect result")
 	}
-}
 
-func TestTagsSearch2(t *testing.T) {
-	index, _ := bleve.Open("example.bleve")
-	defer index.Close()
-	query := bleve.NewQueryStringQuery(`+tags:"pop"`)
-	searchRequest := bleve.NewSearchRequest(query)
-	searchResult, err := index.Search(searchRequest)
+	results, err = s.Search("radiohead", 100)
 	if err != nil {
 		t.Error(err)
 	}
-	if len(searchResult.Hits) != 0 {
-		t.Error("should be no hits")
+	if len(results) != 0 {
+		t.Error("expect no results")
 	}
-}
 
-func TestTagsSearch3(t *testing.T) {
-	index, _ := bleve.Open("example.bleve")
-	defer index.Close()
-	query := bleve.NewQueryStringQuery(`+tags:rock`)
-	searchRequest := bleve.NewSearchRequest(query)
-	searchResult, err := index.Search(searchRequest)
-	if err != nil {
-		t.Error(err)
+	results, err = s.Search(`+tags:"pop rock" +tags:"indie"`, 100)
+	if results[0] != "1234" {
+		t.Error("expect tags result")
 	}
-	if len(searchResult.Hits) != 0 {
-		t.Error("should be no hits")
-	}
-}
 
-func TestArtistSearch(t *testing.T) {
-	index, _ := bleve.Open("example.bleve")
-	defer index.Close()
-	query := bleve.NewQueryStringQuery(`+artist:"numan"`)
-	searchRequest := bleve.NewSearchRequest(query)
-	searchResult, err := index.Search(searchRequest)
-	if err != nil {
-		t.Error(err)
+	results, err = s.Search(`+title:"films"`, 100)
+	if results[0] != "1234" {
+		t.Error("expect title result")
 	}
-	if len(searchResult.Hits) == 0 {
-		t.Error("no hits")
-	}
-}
 
-func TestTitleSearch(t *testing.T) {
-	index, _ := bleve.Open("example.bleve")
-	defer index.Close()
-	query := bleve.NewQueryStringQuery(`+title:"films"`)
-	searchRequest := bleve.NewSearchRequest(query)
-	searchResult, err := index.Search(searchRequest)
-	if err != nil {
-		t.Error(err)
+	results, err = s.Search(`+artist:"numan"`, 100)
+	if results[0] != "1234" {
+		t.Error("expect artist result")
 	}
-	if len(searchResult.Hits) == 0 {
-		t.Error("no hits")
-	}
-}
 
-func TestQuery(t *testing.T) {
-	index, _ := bleve.Open("example.bleve")
-	defer index.Close()
-	query := bleve.NewQueryStringQuery(`+title:"films" +artist:numan +tags:"new wave" +piano:numan`)
-	searchRequest := bleve.NewSearchRequest(query)
-	searchResult, err := index.Search(searchRequest)
-	if err != nil {
-		t.Error(err)
-	}
-	if len(searchResult.Hits) == 0 {
-		t.Error("no hits")
+	results, err = s.Search(`+title:"films" +artist:numan +tags:"new wave" +piano:numan`, 100)
+	if results[0] != "1234" {
+		t.Error("expect mixed result")
 	}
 }

@@ -43,14 +43,14 @@ func NewPodcast(config *config.Config) *Podcast {
 	}
 }
 
-func (p *Podcast) newSearch() (*search.Search, error) {
-	s := search.NewSearch(p.config.Search)
-	s.Keywords = []string{
+func (p *Podcast) newSearch() (search.Searcher, error) {
+	keywords := []string{
 		FieldAuthor,
 		FieldDescription,
 		FieldTitle,
 	}
-	err := s.Open("podcast")
+	s := p.config.NewSearcher()
+	err := s.Open(p.config.Podcast.SearchIndexName, keywords)
 	if err != nil {
 		return nil, err
 	}

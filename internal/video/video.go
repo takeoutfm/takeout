@@ -84,13 +84,13 @@ func (v *Video) FindMovies(identifiers []string) []Movie {
 	return v.lookupIMIDs(identifiers)
 }
 
-func (v *Video) newSearch() (*search.Search, error) {
-	s := search.NewSearch(v.config.Search)
-	s.Keywords = []string{
+func (v *Video) newSearch() (search.Searcher, error) {
+	keywords := []string{
 		FieldGenre,
 		FieldKeyword,
 	}
-	err := s.Open("video")
+	s := v.config.NewSearcher()
+	err := s.Open(v.config.Video.SearchIndexName, keywords)
 	if err != nil {
 		return nil, err
 	}

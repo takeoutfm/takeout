@@ -217,15 +217,15 @@ func (m *Music) FindTracks(identifiers []string) []Track {
 	return m.tracksForRIDs(identifiers)
 }
 
-func (m *Music) newSearch() (*search.Search, error) {
-	s := search.NewSearch(m.config.Search)
-	s.Keywords = []string{
+func (m *Music) newSearch() (search.Searcher, error) {
+	keywords := []string{
 		FieldGenre,
 		FieldStatus,
 		FieldTag,
 		FieldType,
 	}
-	err := s.Open("music")
+	s := m.config.NewSearcher()
+	err := s.Open(m.config.Music.SearchIndexName, keywords)
 	if err != nil {
 		return nil, err
 	}

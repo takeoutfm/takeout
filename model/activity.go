@@ -87,7 +87,7 @@ type MovieEvent struct {
 type TrackEvent struct {
 	gorm.Model
 	User string    `gorm:"index:idx_track_user" json:"-"`
-	Date time.Time `gorm:"uniqueIndex:idx_track_date"`
+	Date time.Time `gorm:"uniqueIndex:idx_track_date"` // TODO dup index name w/ music
 	RID  string
 	RGID string
 	ETag string `gorm:"-"`
