@@ -88,7 +88,10 @@ ${TMDB_CMD_TARGET}: ${TMDB_CMD_SRC} ${COMMON_SOURCES}
 	@cd ${TMDB_CMD_DIR} && ${GO} build
 
 test:
-	${GO} test -coverprofile cover.out ./...
+	${GO} test ./...
+
+test-coverage:
+	-${GO} test -coverprofile cover.out ./...
 	${GO} tool cover -html=cover.out -o coverage.html
 
 install: install-server install-playout

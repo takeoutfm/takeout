@@ -18,16 +18,17 @@
 package xspf
 
 import (
-	"testing"
 	"os"
+	"testing"
 )
 
 type Track struct {
-	Artist       string `spiff:"creator"`
-	Release      string `spiff:"album"`
-	TrackNum     uint   `spiff:"tracknum"`
-	Title        string `spiff:"title"`
-	Location     string `spiff:"location"`
+	Artist   string `spiff:"creator"`
+	Release  string `spiff:"album"`
+	TrackNum uint   `spiff:"tracknum"`
+	Title    string `spiff:"title"`
+	Location string `spiff:"location"`
+	Image    string `spiff:"image"`
 }
 
 func TestXml(t *testing.T) {
@@ -39,6 +40,7 @@ func TestXml(t *testing.T) {
 	track.TrackNum = 1
 	track.Title = "My Title"
 	track.Location = "https://a/b/c"
+	track.Image = "https://a/b/c"
 	e.Encode(track)
 	track.TrackNum = 2
 	e.Encode(track)
@@ -56,6 +58,7 @@ func TestJson(t *testing.T) {
 	track.TrackNum = 1
 	track.Title = "My Title"
 	track.Location = "https://a/b/c"
+	track.Image = "https://a/b/c"
 	e.Encode(track)
 	track.TrackNum = 2
 	e.Encode(track)

@@ -158,7 +158,7 @@ func ReleaseView(ctx Context, release model.Release) *Release {
 	if artist != nil {
 		view.Artist = *artist
 	}
-	view.Tracks = m.ReleaseTracks(release)
+	view.Tracks = ctx.FindReleaseTracks(release)
 	view.Singles = m.ReleaseSingles(release)
 	view.Popular = m.ReleasePopular(release)
 	view.Similar = m.SimilarReleases(&view.Artist, release)
@@ -333,7 +333,7 @@ func SeriesView(ctx Context, s model.Series) *Series {
 	p := ctx.Podcast()
 	view := &Series{}
 	view.Series = s
-	view.Episodes = p.Episodes(s)
+	view.Episodes = ctx.FindSeriesEpisodes(s)
 	limit := ctx.Config().Podcast.EpisodeLimit
 	if len(view.Episodes) > limit {
 		view.Episodes = view.Episodes[:limit]
