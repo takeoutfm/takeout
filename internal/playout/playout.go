@@ -21,6 +21,8 @@
 package playout
 
 import (
+	"net/http"
+
 	"github.com/spf13/viper"
 
 	"github.com/takeoutfm/takeout"
@@ -123,4 +125,8 @@ func (p Playout) MediaToken() string {
 
 func (p Playout) ListenBrainzToken() string {
 	return p.tokens.GetString(TokenListenBrainz)
+}
+
+func (p Playout) Transport() http.RoundTripper {
+	return nil
 }

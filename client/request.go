@@ -51,6 +51,7 @@ func (h Headers) UserAgent(value string) Headers {
 type requestContext interface {
 	Endpoint() string
 	Headers() Headers
+	Transport() http.RoundTripper
 }
 
 var (
@@ -135,16 +136,17 @@ func doJson(context requestContext, req *http.Request, result interface{}) error
 	}
 	defer resp.Body.Close()
 
-	decoder := json.NewDecoder(resp.Body)
-	if err := decoder.Decode(result); err != nil {
-		return err
+	if resp.StatusCode == 200 {
+		decoder := json.NewDecoder(resp.Body)
+		if err := decoder.Decode(result); err != nil {
+			return err
+		}
 	}
-
 	return nil
 }
 
 func do(context requestContext, req *http.Request) (*http.Response, error) {
-	client := http.Client{}
+	client := http.Client{Transport: context.Transport()}
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}
@@ -171,5 +173,4 @@ func errorCheck(resp *http.Response) error {
 		return ErrServerError
 	}
 	return nil
-
 }

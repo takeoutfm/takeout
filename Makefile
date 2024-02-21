@@ -92,7 +92,7 @@ test:
 
 test-coverage:
 	-${GO} test -coverprofile cover.out ./...
-	${GO} tool cover -html=cover.out -o coverage.html
+	${GO} tool cover -func=cover.out
 
 install: install-server install-playout
 

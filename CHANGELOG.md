@@ -1,4 +1,9 @@
-## 0.31.1
+## 0.13.2
+
+- Added unit tests, currently 21.2% coverage
+- updated to go 1.22.0, updated all module dependencies
+
+## 0.13.1
 
 - fix for spaces in station name ref
 - add description to station model

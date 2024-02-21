@@ -20,6 +20,7 @@
 package client
 
 import (
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -39,6 +40,7 @@ const (
 type Context interface {
 	Endpoint() string
 	UserAgent() string
+	Transport() http.RoundTripper
 	Code() string
 	CodeToken() string
 	AccessToken() string
@@ -48,8 +50,8 @@ type Context interface {
 }
 
 type request struct {
-	context    Context
-	bearer int
+	context Context
+	bearer  int
 }
 
 func with(context Context, bearer int) requestContext {
@@ -58,6 +60,10 @@ func with(context Context, bearer int) requestContext {
 
 func (r request) Endpoint() string {
 	return r.context.Endpoint()
+}
+
+func (r request) Transport() http.RoundTripper {
+	return r.context.Transport()
 }
 
 func (r request) Headers() Headers {
