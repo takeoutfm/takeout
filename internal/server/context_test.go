@@ -20,6 +20,7 @@ package server
 import (
 	"errors"
 	"html/template"
+	"net/http"
 	"testing"
 	"time"
 
@@ -263,4 +264,21 @@ func (c *TextContext) MovieImage(model.Movie) string {
 
 func (c *TextContext) EpisodeImage(model.Episode) string {
 	return ""
+}
+
+//
+
+func TestWithContext(t *testing.T) {
+	r, _ := http.NewRequest("GET", "/", nil)
+	rr := withContext(r, NewTestContext(t))
+	if contextValue(rr) == nil {
+		t.Fatal("expect context")
+	}
+}
+
+func TestMakeContext(t *testing.T) {
+	ctx := NewTestContext(t)
+	u := auth.User{Name: "test user"}
+	m := makeMedia("test media", ctx.Config())
+	makeContext(ctx, &u, &config.Config{}, m)
 }

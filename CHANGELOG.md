@@ -1,6 +1,6 @@
 ## 0.13.2
 
-- Added unit tests, currently 21.2% coverage
+- Added unit tests, currently 23.9% coverage
 - updated to go 1.22.0, updated all module dependencies
 
 ## 0.13.1
