@@ -1,19 +1,19 @@
 // Copyright 2023 defsub
 //
-// This file is part of Takeout.
+// This file is part of TakeoutFM.
 //
-// Takeout is free software: you can redistribute it and/or modify it under the
+// TakeoutFM is free software: you can redistribute it and/or modify it under the
 // terms of the GNU Affero General Public License as published by the Free
 // Software Foundation, either version 3 of the License, or (at your option)
 // any later version.
 //
-// Takeout is distributed in the hope that it will be useful, but WITHOUT ANY
+// TakeoutFM is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for
 // more details.
 //
 // You should have received a copy of the GNU Affero General Public License
-// along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
+// along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
 // Package config collects all configuration for the server with a single model
 // which allows for easy viper-based configuration files.
@@ -232,6 +232,8 @@ type ServerConfig struct {
 	DataDir     string
 	MediaDir    string
 	ImageClient client.Config
+	IncludeDirs []string
+	ExcludeDirs []string
 }
 
 type Config struct {
@@ -295,6 +297,12 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Server.MediaDir", ".")
 	v.SetDefault("Server.ImageClient.CacheDir", "imagecache")
 	v.SetDefault("Server.ImageClient.UserAgent", userAgent())
+	// potential include could be /media, /mnt, /opt, /srv
+	v.SetDefault("Server.IncludeDirs", []string{})
+	// by default provide some reasonable excludes
+	v.SetDefault("Server.ExcludeDirs", []string{
+		"/bin/", "/boot/", "/dev/", "/etc/", "/lib/", "/proc/", "/run/", "/sbin/", "/root/", "/sys/",
+	})
 
 	v.SetDefault("Auth.DB.Driver", "sqlite3")
 	v.SetDefault("Auth.DB.Logger", "default")

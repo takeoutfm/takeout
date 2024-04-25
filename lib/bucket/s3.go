@@ -1,19 +1,19 @@
 // Copyright 2023 defsub
 //
-// This file is part of Takeout.
+// This file is part of TakeoutFM.
 //
-// Takeout is free software: you can redistribute it and/or modify it under the
+// TakeoutFM is free software: you can redistribute it and/or modify it under the
 // terms of the GNU Affero General Public License as published by the Free
 // Software Foundation, either version 3 of the License, or (at your option)
 // any later version.
 //
-// Takeout is distributed in the hope that it will be useful, but WITHOUT ANY
+// TakeoutFM is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for
 // more details.
 //
 // You should have received a copy of the GNU Affero General Public License
-// along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
+// along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
 // Package bucket provides support for listing S3 bucket contents and creating
 // presigned URLs for fetching media. The AWS SDK is used to provide S3
@@ -22,25 +22,16 @@
 package bucket
 
 import (
-	"fmt"
 	"net/url"
-	"regexp"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/takeoutfm/takeout/lib/log"
 )
 
-type RewriteRule struct {
-	Pattern string
-	Replace string
-}
-
-type Config struct {
+type S3Config struct {
 	Endpoint        string
 	Region          string
 	AccessKeyID     string
@@ -49,74 +40,34 @@ type Config struct {
 	ObjectPrefix    string
 	UseSSL          bool
 	URLExpiration   time.Duration
-	Media           string
-	RewriteRules    []RewriteRule
 }
 
-type Bucket struct {
+type s3bucket struct {
 	config Config
 	s3     *s3.S3
 }
 
-type Object struct {
-	Key          string
-	Path         string // Key modified by rewrite rules
-	ETag         string
-	Size         int64
-	LastModified time.Time
-}
-
-func OpenAll(buckets []Config) ([]*Bucket, error) {
-	var list []*Bucket
-
-	for i := range buckets {
-		b, err := Open(buckets[i])
-		if err == nil {
-			return list, err
-		}
-		list = append(list, b)
-	}
-
-	return list, nil
-}
-
-func OpenMedia(buckets []Config, mediaType string) ([]Bucket, error) {
-	var list []Bucket
-
-	for i := range buckets {
-		if buckets[i].Media != mediaType {
-			continue
-		}
-		b, err := Open(buckets[i])
-		if err != nil {
-			return list, err
-		}
-		list = append(list, *b)
-	}
-
-	return list, nil
-}
-
-// Connect to the configured S3 bucket.
-// Tested: Wasabi, Backblaze, Minio
-func Open(config Config) (*Bucket, error) {
+func newS3Bucket(config Config) (*s3bucket, error) {
 	creds := credentials.NewStaticCredentials(
-		config.AccessKeyID,
-		config.SecretAccessKey, "")
+		config.S3.AccessKeyID,
+		config.S3.SecretAccessKey, "")
 	s3Config := &aws.Config{
 		Credentials:      creds,
-		Endpoint:         aws.String(config.Endpoint),
-		Region:           aws.String(config.Region),
+		Endpoint:         aws.String(config.S3.Endpoint),
+		Region:           aws.String(config.S3.Region),
 		S3ForcePathStyle: aws.Bool(true)}
 	session, err := session.NewSession(s3Config)
-	bucket := &Bucket{
+	if err != nil {
+		return nil, err
+	}
+	bucket := &s3bucket{
 		config: config,
 		s3:     s3.New(session),
 	}
-	return bucket, err
+	return bucket, nil
 }
 
-func (b *Bucket) List(lastSync time.Time) (objectCh chan *Object, err error) {
+func (b *s3bucket) List(lastSync time.Time) (objectCh chan *Object, err error) {
 	objectCh = make(chan *Object)
 
 	go func() {
@@ -126,8 +77,8 @@ func (b *Bucket) List(lastSync time.Time) (objectCh chan *Object, err error) {
 		continuationToken = nil
 		for {
 			req := s3.ListObjectsV2Input{
-				Bucket: aws.String(b.config.BucketName),
-				Prefix: aws.String(b.config.ObjectPrefix)}
+				Bucket: aws.String(b.config.S3.BucketName),
+				Prefix: aws.String(b.config.S3.ObjectPrefix)}
 			if continuationToken != nil {
 				req.ContinuationToken = continuationToken
 			}
@@ -140,7 +91,7 @@ func (b *Bucket) List(lastSync time.Time) (objectCh chan *Object, err error) {
 					obj.LastModified.After(lastSync) {
 					objectCh <- &Object{
 						Key:          *obj.Key,
-						Path:         b.Rewrite(*obj.Key),
+						Path:         rewrite(b.config.RewriteRules, *obj.Key),
 						ETag:         *obj.ETag,
 						Size:         *obj.Size,
 						LastModified: *obj.LastModified,
@@ -158,29 +109,11 @@ func (b *Bucket) List(lastSync time.Time) (objectCh chan *Object, err error) {
 }
 
 // Generate a presigned url which expires based on config settings.
-func (b *Bucket) Presign(key string) *url.URL {
+func (b *s3bucket) ObjectURL(key string) *url.URL {
 	req, _ := b.s3.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String(b.config.BucketName),
+		Bucket: aws.String(b.config.S3.BucketName),
 		Key:    aws.String(key)})
-	urlStr, _ := req.Presign(b.config.URLExpiration)
+	urlStr, _ := req.Presign(b.config.S3.URLExpiration)
 	url, _ := url.Parse(urlStr)
 	return url
-}
-
-func (b *Bucket) Rewrite(path string) string {
-	result := path
-	for _, rule := range b.config.RewriteRules {
-		re := regexp.MustCompile(rule.Pattern)
-		matches := re.FindStringSubmatch(result)
-		if matches != nil {
-			result = rule.Replace
-			for i := range matches {
-				result = strings.ReplaceAll(result, fmt.Sprintf("$%d", i), matches[i])
-			}
-		}
-	}
-	if result != path {
-		log.Printf("rewrite %s -> %s\n", path, result)
-	}
-	return result
 }

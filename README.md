@@ -1,15 +1,15 @@
-# Takeout
+# TakeoutFM
 
-Takeout is a copyleft media service that indexes organized media files in S3
+TakeoutFM is a copyleft media service that indexes organized media files in S3
 buckets using MusicBrainz, Last.fm, Fanart.tv, and The Movie Database to make
 media available for streaming using a [mobile app](https://github.com/takeoutfm/takeout_app),
-TV app, web interface and VLC. Media is browsed using the Takeout server and
+TV app, web interface and VLC. Media is browsed using the TakeoutFM server and
 streamed directly from S3 using pre-signed time-based URLs.
 
-Takeout is primarily a music player that also supports radio, movies and
+TakeoutFM is primarily a music player that also supports radio, movies and
 podcasts. It's not intended to be a full replacement for more feature-rich
 systems like [Plex](https://plex.tv), [Jellyfin](https://jellyfin.org) and
-[Kodi](https://kodi.tv/). Instead, Takeout takes inspiration from these systems
+[Kodi](https://kodi.tv/). Instead, TakeoutFM takes inspiration from these systems
 and attempts to be a small yet capable system designed around media being
 stored in the cloud. You can take your personal media collection with you, on
 your own terms, create your own personal streaming service, and enjoy your
@@ -44,5 +44,5 @@ The [privacy policy](doc/privacy.md), [setup documentation](doc/setup.md), and
 more details on how to manage media in the [S3 bucket](doc/bucket.md), can be
 found in the doc directory.
 
-Please see how you can [contribute](doc/contribute.md) to Takeout and related
+Please see how you can [contribute](doc/contribute.md) to TakeoutFM and related
 projects and services.

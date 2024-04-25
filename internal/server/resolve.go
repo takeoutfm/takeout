@@ -1,19 +1,19 @@
 // Copyright 2023 defsub
 //
-// This file is part of Takeout.
+// This file is part of TakeoutFM.
 //
-// Takeout is free software: you can redistribute it and/or modify it under the
+// TakeoutFM is free software: you can redistribute it and/or modify it under the
 // terms of the GNU Affero General Public License as published by the Free
 // Software Foundation, either version 3 of the License, or (at your option)
 // any later version.
 //
-// Takeout is distributed in the hope that it will be useful, but WITHOUT ANY
+// TakeoutFM is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for
 // more details.
 //
 // You should have received a copy of the GNU Affero General Public License
-// along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
+// along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
 package server
 
@@ -452,7 +452,7 @@ func resolveActivityMoviesRef(ctx Context, entries []spiff.Entry) ([]spiff.Entry
 
 func RefreshStation(ctx Context, s *model.Station) *spiff.Playlist {
 	plist := spiff.NewPlaylist(spiff.TypeMusic)
-	plist.Spiff.Location = fmt.Sprintf("/api/radio/stations/%d", s.ID)
+	plist.Spiff.Location = fmt.Sprintf("/api/stations/%d", s.ID)
 	plist.Spiff.Title = s.Name
 	plist.Spiff.Image = s.Image
 	plist.Spiff.Creator = s.Creator
@@ -515,7 +515,7 @@ var (
 	releasesRegexp     = regexp.MustCompile(`^/music/releases/([0-9a-zA-Z-]+)/tracks$`)
 	tracksRegexp       = regexp.MustCompile(`^/music/tracks/([\d]+)$`)
 	searchRegexp       = regexp.MustCompile(`^/music/search.*`)
-	radioRegexp        = regexp.MustCompile(`^/music/radio/stations/([\w ]+)$`)
+	radioRegexp        = regexp.MustCompile(`^/music/stations/([\w ]+)$`)
 	moviesRegexp       = regexp.MustCompile(`^/movies/([\d]+)$`)
 	seriesRegexp       = regexp.MustCompile(`^/podcasts/series/([\d]+)$`)
 	episodesRegexp     = regexp.MustCompile(`^/podcasts/episodes/([\d]+)$`)

@@ -1,3 +1,15 @@
+## 0.14.x
+
+- use Go 1.22 routing enhancements (and remove pat)
+- breaking API changes:
+  * changed /api/radio/stations/{id} to /api/stations/{id}
+  * changed /api/movies/genres/{name} to /api/movie-genres/{name}
+  * changed /api/movies/keywords/{name} to /api/movie-keywords/{name}
+- updated to go 1.22.2
+- support local filesystem buckets
+- breaking config change buckets, s3 and fs have own configs now
+- added server config include & exclude dirs
+
 ## 0.13.2
 
 - Added unit tests, currently 23.9% coverage

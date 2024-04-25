@@ -1,19 +1,19 @@
 // Copyright 2023 defsub
 //
-// This file is part of Takeout.
+// This file is part of TakeoutFM.
 //
-// Takeout is free software: you can redistribute it and/or modify it under the
+// TakeoutFM is free software: you can redistribute it and/or modify it under the
 // terms of the GNU Affero General Public License as published by the Free
 // Software Foundation, either version 3 of the License, or (at your option)
 // any later version.
 //
-// Takeout is distributed in the hope that it will be useful, but WITHOUT ANY
+// TakeoutFM is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for
 // more details.
 //
 // You should have received a copy of the GNU Affero General Public License
-// along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
+// along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
 // Package server is the Takeout server.
 package server
@@ -21,7 +21,6 @@ package server
 import (
 	"net/http"
 
-	"github.com/bmizerany/pat"
 	"github.com/takeoutfm/takeout/internal/activity"
 	"github.com/takeoutfm/takeout/internal/auth"
 	"github.com/takeoutfm/takeout/internal/config"
@@ -37,6 +36,10 @@ const (
 	SuccessRedirect = "/"
 	LinkRedirect    = LinkPage
 	LoginRedirect   = LoginPage
+
+	FormUser = "user"
+	FormPass = "pass"
+	FormCode = "code"
 )
 
 // doLogin creates a login session for the provided user or returns an error
@@ -69,8 +72,8 @@ func imageContext(ctx Context, client client.Getter) RequestContext {
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	r.ParseForm()
-	user := r.Form.Get("user")
-	pass := r.Form.Get("pass")
+	user := r.Form.Get(FormUser)
+	pass := r.Form.Get(FormPass)
 	session, err := doLogin(ctx, user, pass)
 	if err != nil {
 		authErr(w, ErrUnauthorized)
@@ -89,9 +92,9 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 func linkHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	r.ParseForm()
-	user := r.Form.Get("user")
-	pass := r.Form.Get("pass")
-	value := r.Form.Get("code")
+	user := r.Form.Get(FormUser)
+	pass := r.Form.Get(FormPass)
+	value := r.Form.Get(FormCode)
 	err := doCodeAuth(ctx, user, pass, value)
 	if err == nil {
 		// success
@@ -165,7 +168,7 @@ func Serve(config *config.Config) error {
 		resFileServer.ServeHTTP(w, r)
 	}
 
-	mux := pat.New()
+	mux := http.NewServeMux()
 
 	aliasHandler := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
@@ -184,125 +187,126 @@ func Serve(config *config.Config) error {
 		}
 	}
 
-	mux.Get("/static/", http.HandlerFunc(staticHandler))
-	mux.Get("/", accessTokenAuthHandler(ctx, viewHandler))
-	mux.Get("/v", accessTokenAuthHandler(ctx, viewHandler))
+	mux.Handle("GET /static/", http.HandlerFunc(staticHandler))
+	mux.Handle("GET /", accessTokenAuthHandler(ctx, viewHandler))
+	mux.Handle("GET /v", accessTokenAuthHandler(ctx, viewHandler))
 
 	// cookie auth
-	mux.Post("/api/login", requestHandler(ctx, apiLogin))
-	mux.Post("/login", requestHandler(ctx, loginHandler))
-	mux.Get("/login", http.HandlerFunc(aliasHandler))
-	mux.Get("/login.htm", http.HandlerFunc(aliasHandler))
-	mux.Get("/login.html", http.HandlerFunc(aliasHandler))
-	mux.Post("/link", requestHandler(ctx, linkHandler))
-	mux.Get("/link", http.HandlerFunc(aliasHandler))
-	mux.Get("/link.htm", http.HandlerFunc(aliasHandler))
-	mux.Get("/link.html", http.HandlerFunc(aliasHandler))
+	mux.Handle("POST /api/login", requestHandler(ctx, apiLogin))
+	mux.Handle("POST /login", requestHandler(ctx, loginHandler))
+	mux.Handle("GET /login", http.HandlerFunc(aliasHandler))
+	mux.Handle("GET /login.htm", http.HandlerFunc(aliasHandler))
+	mux.Handle("GET /login.html", http.HandlerFunc(aliasHandler))
+	mux.Handle("POST /link", requestHandler(ctx, linkHandler))
+	mux.Handle("GET /link", http.HandlerFunc(aliasHandler))
+	mux.Handle("GET /link.htm", http.HandlerFunc(aliasHandler))
+	mux.Handle("GET /link.html", http.HandlerFunc(aliasHandler))
 
 	// token auth
-	mux.Post("/api/token", requestHandler(ctx, apiTokenLogin))
-	mux.Get("/api/token", refreshTokenAuthHandler(ctx, apiTokenRefresh))
+	mux.Handle("POST /api/token", requestHandler(ctx, apiTokenLogin))
+	mux.Handle("GET /api/token", refreshTokenAuthHandler(ctx, apiTokenRefresh))
 
 	// code auth
-	mux.Get("/api/code", requestHandler(ctx, apiCodeGet))
-	mux.Post("/api/code", codeTokenAuthHandler(ctx, apiCodeCheck))
+	mux.Handle("GET /api/code", requestHandler(ctx, apiCodeGet))
+	mux.Handle("POST /api/code", codeTokenAuthHandler(ctx, apiCodeCheck))
 
 	// misc
-	mux.Get("/api/home", accessTokenAuthHandler(ctx, apiHome))
-	mux.Get("/api/index", accessTokenAuthHandler(ctx, apiIndex))
-	mux.Get("/api/search", accessTokenAuthHandler(ctx, apiSearch))
+	mux.Handle("GET /api/home", accessTokenAuthHandler(ctx, apiHome))
+	mux.Handle("GET /api/index", accessTokenAuthHandler(ctx, apiIndex))
+	mux.Handle("GET /api/search", accessTokenAuthHandler(ctx, apiSearch))
 
 	// playlist
-	mux.Get("/api/playlist", accessTokenAuthHandler(ctx, apiPlaylistGet))
-	mux.Patch("/api/playlist", accessTokenAuthHandler(ctx, apiPlaylistPatch))
+	mux.Handle("GET /api/playlist", accessTokenAuthHandler(ctx, apiPlaylistGet))
+	mux.Handle("PATCH /api/playlist", accessTokenAuthHandler(ctx, apiPlaylistPatch))
 
 	// music
-	mux.Get("/api/artists", accessTokenAuthHandler(ctx, apiArtists))
-	mux.Get("/api/artists/:id", accessTokenAuthHandler(ctx, apiArtistGet))
-	mux.Get("/api/artists/:id/:res", accessTokenAuthHandler(ctx, apiArtistGetResource))
-	mux.Get("/api/artists/:id/:res/playlist", accessTokenAuthHandler(ctx, apiArtistGetPlaylist))
-	mux.Get("/api/artists/:id/:res/playlist.xspf", accessTokenAuthHandler(ctx, apiArtistGetPlaylist))
-	mux.Get("/api/radio", accessTokenAuthHandler(ctx, apiRadioGet))
-	mux.Get("/api/radio/:id", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))
-	mux.Get("/api/radio/:id/playlist", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))
-	mux.Get("/api/radio/:id/playlist.xspf", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))
-	mux.Get("/api/radio/stations/:id", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))
-	mux.Get("/api/radio/stations/:id/playlist", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))
-	mux.Get("/api/radio/stations/:id/playlist.xspf", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))
-	mux.Get("/api/releases/:id", accessTokenAuthHandler(ctx, apiReleaseGet))
-	mux.Get("/api/releases/:id/playlist", accessTokenAuthHandler(ctx, apiReleaseGetPlaylist))
-	mux.Get("/api/releases/:id/playlist.xspf", accessTokenAuthHandler(ctx, apiReleaseGetPlaylist))
+	mux.Handle("GET /api/artists", accessTokenAuthHandler(ctx, apiArtists))
+	mux.Handle("GET /api/artists/{id}", accessTokenAuthHandler(ctx, apiArtistGet))
+	mux.Handle("GET /api/artists/{id}/{res}", accessTokenAuthHandler(ctx, apiArtistGetResource))
+	mux.Handle("GET /api/artists/{id}/{res}/playlist", accessTokenAuthHandler(ctx, apiArtistGetPlaylist))
+	mux.Handle("GET /api/artists/{id}/{res}/playlist.xspf", accessTokenAuthHandler(ctx, apiArtistGetPlaylist))
+	mux.Handle("GET /api/radio", accessTokenAuthHandler(ctx, apiRadioGet))
+	mux.Handle("GET /api/radio/{id}", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))
+	mux.Handle("GET /api/radio/{id}/playlist", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))
+	mux.Handle("GET /api/radio/{id}/playlist.xspf", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))
+	mux.Handle("GET /api/stations/{id}", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))
+	mux.Handle("GET /api/stations/{id}/playlist", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))
+	mux.Handle("GET /api/stations/{id}/playlist.xspf", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))
+	mux.Handle("GET /api/releases/{id}", accessTokenAuthHandler(ctx, apiReleaseGet))
+	mux.Handle("GET /api/releases/{id}/playlist", accessTokenAuthHandler(ctx, apiReleaseGetPlaylist))
+	mux.Handle("GET /api/releases/{id}/playlist.xspf", accessTokenAuthHandler(ctx, apiReleaseGetPlaylist))
 
 	// video
-	mux.Get("/api/movies", accessTokenAuthHandler(ctx, apiMovies))
-	mux.Get("/api/movies/:id", accessTokenAuthHandler(ctx, apiMovieGet))
-	mux.Get("/api/movies/:id/playlist", accessTokenAuthHandler(ctx, apiMovieGetPlaylist))
-	mux.Get("/api/movies/genres/:name", accessTokenAuthHandler(ctx, apiMovieGenreGet))
-	mux.Get("/api/movies/keywords/:name", accessTokenAuthHandler(ctx, apiMovieKeywordGet))
-	mux.Get("/api/profiles/:id", accessTokenAuthHandler(ctx, apiMovieProfileGet))
-	// mux.Get("/api/tv", apiTVShows)
-	// mux.Get("/api/tv/:id", apiTVShowGet)
-	// mux.Get("/api/tv/:id/episodes/:eid", apiTVShowEpisodeGet)
+	mux.Handle("GET /api/movies", accessTokenAuthHandler(ctx, apiMovies))
+	mux.Handle("GET /api/movies/{id}", accessTokenAuthHandler(ctx, apiMovieGet))
+	mux.Handle("GET /api/movies/{id}/playlist", accessTokenAuthHandler(ctx, apiMovieGetPlaylist))
+	mux.Handle("GET /api/movie-genres/{name}", accessTokenAuthHandler(ctx, apiMovieGenreGet))
+	mux.Handle("GET /api/movie-keywords/{name}", accessTokenAuthHandler(ctx, apiMovieKeywordGet))
+	mux.Handle("GET /api/profiles/{id}", accessTokenAuthHandler(ctx, apiMovieProfileGet))
+	// mux.Handle("GET /api/tv", apiTVShows)
+	// mux.Handle("GET /api/tv/{id}", apiTVShowGet)
+	// mux.Handle("GET /api/tv/{id}/episodes/{eid}", apiTVShowEpisodeGet)
 
 	// podcast
-	mux.Get("/api/podcasts", accessTokenAuthHandler(ctx, apiPodcasts))
-	mux.Get("/api/podcasts/subscribed", accessTokenAuthHandler(ctx, apiPodcastsSubscribed))
-	mux.Get("/api/series/:id", accessTokenAuthHandler(ctx, apiPodcastSeriesGet))
-	mux.Put("/api/series/:id/subscribed", accessTokenAuthHandler(ctx, apiPodcastSeriesSubscribe))
-	mux.Del("/api/series/:id/subscribed", accessTokenAuthHandler(ctx, apiPodcastSeriesUnsubscribe))
-	mux.Get("/api/series/:id/playlist", accessTokenAuthHandler(ctx, apiPodcastSeriesGetPlaylist))
-	mux.Get("/api/series/:id/playlist.xspf", accessTokenAuthHandler(ctx, apiPodcastSeriesGetPlaylist))
-	mux.Get("/api/episodes/:id", accessTokenAuthHandler(ctx, apiPodcastEpisodeGet))
-	mux.Get("/api/episodes/:id/playlist", accessTokenAuthHandler(ctx, apiPodcastEpisodeGetPlaylist))
-	mux.Get("/api/episodes/:id/playlist.xspf", accessTokenAuthHandler(ctx, apiPodcastEpisodeGetPlaylist))
+	mux.Handle("GET /api/podcasts", accessTokenAuthHandler(ctx, apiPodcasts))
+	mux.Handle("GET /api/podcasts/subscribed", accessTokenAuthHandler(ctx, apiPodcastsSubscribed))
+	mux.Handle("GET /api/series/{id}", accessTokenAuthHandler(ctx, apiPodcastSeriesGet))
+	mux.Handle("PUT /api/series/{id}/subscribed", accessTokenAuthHandler(ctx, apiPodcastSeriesSubscribe))
+	mux.Handle("DELETE /api/series/{id}/subscribed", accessTokenAuthHandler(ctx, apiPodcastSeriesUnsubscribe))
+	mux.Handle("GET /api/series/{id}/playlist", accessTokenAuthHandler(ctx, apiPodcastSeriesGetPlaylist))
+	mux.Handle("GET /api/series/{id}/playlist.xspf", accessTokenAuthHandler(ctx, apiPodcastSeriesGetPlaylist))
+	mux.Handle("GET /api/episodes/{id}", accessTokenAuthHandler(ctx, apiPodcastEpisodeGet))
+	mux.Handle("GET /api/episodes/{id}/playlist", accessTokenAuthHandler(ctx, apiPodcastEpisodeGetPlaylist))
+	mux.Handle("GET /api/episodes/{id}/playlist.xspf", accessTokenAuthHandler(ctx, apiPodcastEpisodeGetPlaylist))
 
 	// location
-	mux.Get("/api/tracks/:uuid/location", mediaTokenAuthHandler(ctx, apiTrackLocation))
-	mux.Get("/api/movies/:uuid/location", mediaTokenAuthHandler(ctx, apiMovieLocation))
-	mux.Get("/api/episodes/:id/location", mediaTokenAuthHandler(ctx, apiEpisodeLocation))
+	mux.Handle("GET /api/tracks/{uuid}/location", mediaTokenAuthHandler(ctx, apiTrackLocation))
+	mux.Handle("GET /api/movies/{uuid}/location", mediaTokenAuthHandler(ctx, apiMovieLocation))
+	mux.Handle("GET /api/episodes/{id}/location", mediaTokenAuthHandler(ctx, apiEpisodeLocation))
+	mux.Handle("GET /d", mediaTokenAuthHandler(ctx, apiDownload))
 
 	// progress
-	mux.Get("/api/progress", accessTokenAuthHandler(ctx, apiProgressGet))
-	mux.Post("/api/progress", accessTokenAuthHandler(ctx, apiProgressPost))
+	mux.Handle("GET /api/progress", accessTokenAuthHandler(ctx, apiProgressGet))
+	mux.Handle("POST /api/progress", accessTokenAuthHandler(ctx, apiProgressPost))
 
 	// activity
-	mux.Get("/api/activity", accessTokenAuthHandler(ctx, apiActivityGet))
-	mux.Post("/api/activity", accessTokenAuthHandler(ctx, apiActivityPost))
-	mux.Get("/api/activity/tracks", accessTokenAuthHandler(ctx, apiActivityTracksGet))
-	mux.Get("/api/activity/tracks/:res", accessTokenAuthHandler(ctx, apiActivityTracksGetResource))
-	mux.Get("/api/activity/tracks/:res/playlist", accessTokenAuthHandler(ctx, apiActivityTracksGetPlaylist))
-	mux.Get("/api/activity/movies", accessTokenAuthHandler(ctx, apiActivityMoviesGet))
+	mux.Handle("GET /api/activity", accessTokenAuthHandler(ctx, apiActivityGet))
+	mux.Handle("POST /api/activity", accessTokenAuthHandler(ctx, apiActivityPost))
+	mux.Handle("GET /api/activity/tracks", accessTokenAuthHandler(ctx, apiActivityTracksGet))
+	mux.Handle("GET /api/activity/tracks/{res}", accessTokenAuthHandler(ctx, apiActivityTracksGetResource))
+	mux.Handle("GET /api/activity/tracks/{res}/playlist", accessTokenAuthHandler(ctx, apiActivityTracksGetPlaylist))
+	mux.Handle("GET /api/activity/movies", accessTokenAuthHandler(ctx, apiActivityMoviesGet))
 	// /activity/radio - ?
-	mux.Get("/api/activity/releases", accessTokenAuthHandler(ctx, apiActivityReleasesGet))
+	mux.Handle("GET /api/activity/releases", accessTokenAuthHandler(ctx, apiActivityReleasesGet))
 
 	// TODO - disable for now, work in progress
 	// settings
-	// mux.Put("/api/objects/:uuid", accessTokenAuthHandler(ctx, apiObjectPut));
-	// mux.Get("/api/objects", accessTokenAuthHandler(ctx, apiObjectsList));
-	// mux.Get("/api/objects/:uuid", accessTokenAuthHandler(ctx, apiObjectGet));
+	// mux.Handle("PUT /api/objects/{uuid}", accessTokenAuthHandler(ctx, apiObjectPut));
+	// mux.Handle("GET /api/objects", accessTokenAuthHandler(ctx, apiObjectsList));
+	// mux.Handle("GET /api/objects/{uuid}", accessTokenAuthHandler(ctx, apiObjectGet));
 
 	// Hook
 	//mux.Post("/hook/", requestHandler(ctx, hookHandler))
 
 	// Images
 	client := client.NewCacheOnlyGetter(config.Server.ImageClient)
-	mux.Get("/img/mb/rg/:rgid", imageHandler(ctx, imgReleaseGroupFront, client))
-	mux.Get("/img/mb/rg/:rgid/:side", imageHandler(ctx, imgReleaseGroup, client))
-	mux.Get("/img/mb/re/:reid", imageHandler(ctx, imgReleaseFront, client))
-	mux.Get("/img/mb/re/:reid/:side", imageHandler(ctx, imgRelease, client))
-	mux.Get("/img/tm/:size/:path", imageHandler(ctx, imgVideo, client))
-	mux.Get("/img/fa/:arid/t/:path", imageHandler(ctx, imgArtistThumb, client))
-	mux.Get("/img/fa/:arid/b/:path", imageHandler(ctx, imgArtistBackground, client))
+	mux.Handle("GET /img/mb/rg/{rgid}", imageHandler(ctx, imgReleaseGroupFront, client))
+	mux.Handle("GET /img/mb/rg/{rgid}/{side}", imageHandler(ctx, imgReleaseGroup, client))
+	mux.Handle("GET /img/mb/re/{reid}", imageHandler(ctx, imgReleaseFront, client))
+	mux.Handle("GET /img/mb/re/{reid}/{side}", imageHandler(ctx, imgRelease, client))
+	mux.Handle("GET /img/tm/{size}/{path}", imageHandler(ctx, imgVideo, client))
+	mux.Handle("GET /img/fa/{arid}/t/{path}", imageHandler(ctx, imgArtistThumb, client))
+	mux.Handle("GET /img/fa/{arid}/b/{path}", imageHandler(ctx, imgArtistBackground, client))
 
 	// pprof
-	// mux.Get("/debug/pprof", http.HandlerFunc(pprof.Index))
-	// mux.Get("/debug/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
-	// mux.Get("/debug/pprof/profile", http.HandlerFunc(pprof.Profile))
-	// mux.Get("/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
-	// mux.Get("/debug/pprof/heap", pprof.Handler("heap"))
-	// mux.Get("/debug/pprof/block", pprof.Handler("block"))
-	// mux.Get("/debug/pprof/goroutine", pprof.Handler("goroutine"))
-	// mux.Get("/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
+	// mux.Handle("GET /debug/pprof", http.HandlerFunc(pprof.Index))
+	// mux.Handle("GET /debug/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
+	// mux.Handle("GET /debug/pprof/profile", http.HandlerFunc(pprof.Profile))
+	// mux.Handle("GET /debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
+	// mux.Handle("GET /debug/pprof/heap", pprof.Handler("heap"))
+	// mux.Handle("GET /debug/pprof/block", pprof.Handler("block"))
+	// mux.Handle("GET /debug/pprof/goroutine", pprof.Handler("goroutine"))
+	// mux.Handle("GET /debug/pprof/threadcreate", pprof.Handler("threadcreate"))
 
 	// // swaggerHandler := func(w http.ResponseWriter, r *http.Request) {
 	// // 	http.Redirect(w, r, "/static/swagger.json", 302)
@@ -310,6 +314,7 @@ func Serve(config *config.Config) error {
 	// http.HandleFunc("/swagger.json", swaggerHandler)
 
 	log.Printf("listening on %s\n", config.Server.Listen)
-	http.Handle("/", mux)
-	return http.ListenAndServe(config.Server.Listen, nil)
+	//http.Handle("/", mux)
+
+	return http.ListenAndServe(config.Server.Listen, mux)
 }

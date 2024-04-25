@@ -1,19 +1,19 @@
 // Copyright 2023 defsub
 //
-// This file is part of Takeout.
+// This file is part of TakeoutFM.
 //
-// Takeout is free software: you can redistribute it and/or modify it under the
+// TakeoutFM is free software: you can redistribute it and/or modify it under the
 // terms of the GNU Affero General Public License as published by the Free
 // Software Foundation, either version 3 of the License, or (at your option)
 // any later version.
 //
-// Takeout is distributed in the hope that it will be useful, but WITHOUT ANY
+// TakeoutFM is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for
 // more details.
 //
 // You should have received a copy of the GNU Affero General Public License
-// along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
+// along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
 package music
 
@@ -21,6 +21,7 @@ import (
 	"net/url"
 	"regexp"
 	"time"
+	"fmt"
 
 	"github.com/takeoutfm/takeout/lib/bucket"
 	"github.com/takeoutfm/takeout/lib/str"
@@ -38,6 +39,7 @@ func (m *Music) syncFromBucket(bucket bucket.Bucket, lastSync time.Time) (trackC
 			return
 		}
 		for o := range objectCh {
+			fmt.Printf("got %+v\n", o)
 			checkObject(bucket, o, trackCh)
 		}
 	}()
@@ -168,5 +170,5 @@ func matchTrack(file string, t *Track) bool {
 // Generate a presigned url which expires based on config settings.
 func (m *Music) bucketURL(t *Track) *url.URL {
 	// TODO FIXME assume first bucket!!!
-	return m.buckets[0].Presign(t.Key)
+	return m.buckets[0].ObjectURL(t.Key)
 }

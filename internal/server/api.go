@@ -1,19 +1,19 @@
 // Copyright 2023 defsub
 //
-// This file is part of Takeout.
+// This file is part of TakeoutFM.
 //
-// Takeout is free software: you can redistribute it and/or modify it under the
+// TakeoutFM is free software: you can redistribute it and/or modify it under the
 // terms of the GNU Affero General Public License as published by the Free
 // Software Foundation, either version 3 of the License, or (at your option)
 // any later version.
 //
-// Takeout is distributed in the hope that it will be useful, but WITHOUT ANY
+// TakeoutFM is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for
 // more details.
 //
 // You should have received a copy of the GNU Affero General Public License
-// along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
+// along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
 package server
 
@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -40,11 +42,16 @@ import (
 const (
 	ApplicationJson = "application/json"
 
-	ParamID   = ":id"
-	ParamRes  = ":res"
-	ParamName = ":name"
-	ParamEID  = ":eid"
-	ParamUUID = ":uuid"
+	ParamID   = "id"
+	ParamRes  = "res"
+	ParamName = "name"
+	ParamEID  = "eid"
+	ParamUUID = "uuid"
+
+	QuerySearch = "q"
+	QueryStart  = "start"
+	QueryEnd    = "end"
+	QueryFile   = "f"
 )
 
 type credentials struct {
@@ -467,7 +474,7 @@ func apiIndex(w http.ResponseWriter, r *http.Request) {
 
 func apiSearch(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	if v := r.URL.Query().Get("q"); v != "" {
+	if v := r.URL.Query().Get(QuerySearch); v != "" {
 		// /api/search?q={pattern}
 		view := SearchView(ctx, strings.TrimSpace(v))
 		apiView(w, r, view)
@@ -483,7 +490,7 @@ func apiArtists(w http.ResponseWriter, r *http.Request) {
 
 func apiArtistGet(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
+	id := r.PathValue(ParamID)
 	artist, err := ctx.FindArtist(id)
 	if err != nil {
 		notFoundErr(w)
@@ -494,8 +501,8 @@ func apiArtistGet(w http.ResponseWriter, r *http.Request) {
 
 func apiArtistGetResource(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
-	res := r.URL.Query().Get(ParamRes)
+	id := r.PathValue(ParamID)
+	res := r.PathValue(ParamRes)
 	artist, err := ctx.FindArtist(id)
 	if err != nil {
 		notFoundErr(w)
@@ -517,8 +524,8 @@ func apiArtistGetResource(w http.ResponseWriter, r *http.Request) {
 
 func apiArtistGetPlaylist(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
-	res := r.URL.Query().Get(ParamRes)
+	id := r.PathValue(ParamID)
+	res := r.PathValue(ParamRes)
 	artist, err := ctx.FindArtist(id)
 	if err != nil {
 		notFoundErr(w)
@@ -555,7 +562,7 @@ func apiRadioPost(w http.ResponseWriter, r *http.Request) {
 
 func apiRadioStationGetPlaylist(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
+	id := r.PathValue(ParamID)
 	station, err := ctx.FindStation(id)
 	if err != nil {
 		notFoundErr(w)
@@ -576,7 +583,7 @@ func apiMovies(w http.ResponseWriter, r *http.Request) {
 
 func apiMovieGet(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
+	id := r.PathValue(ParamID)
 	movie, err := ctx.FindMovie(id)
 	if err != nil {
 		notFoundErr(w)
@@ -587,7 +594,7 @@ func apiMovieGet(w http.ResponseWriter, r *http.Request) {
 
 func apiMovieGetPlaylist(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
+	id := r.PathValue(ParamID)
 	movie, err := ctx.FindMovie(id)
 	if err != nil {
 		notFoundErr(w)
@@ -600,7 +607,7 @@ func apiMovieGetPlaylist(w http.ResponseWriter, r *http.Request) {
 
 func apiMovieProfileGet(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
+	id := r.PathValue(ParamID)
 	person, err := ctx.Video().LookupPerson(str.Atoi(id))
 	if err != nil {
 		notFoundErr(w)
@@ -611,14 +618,14 @@ func apiMovieProfileGet(w http.ResponseWriter, r *http.Request) {
 
 func apiMovieGenreGet(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	name := r.URL.Query().Get(ParamName)
+	name := r.PathValue(ParamName)
 	// TODO sanitize
 	apiView(w, r, GenreView(ctx, name))
 }
 
 func apiMovieKeywordGet(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	name := r.URL.Query().Get(ParamName)
+	name := r.PathValue(ParamName)
 	// TODO sanitize
 	apiView(w, r, KeywordView(ctx, name))
 }
@@ -635,7 +642,7 @@ func apiPodcastsSubscribed(w http.ResponseWriter, r *http.Request) {
 
 func apiPodcastSeriesGet(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
+	id := r.PathValue(ParamID)
 	series, err := ctx.Podcast().FindSeries(id)
 	if err != nil {
 		notFoundErr(w)
@@ -646,7 +653,7 @@ func apiPodcastSeriesGet(w http.ResponseWriter, r *http.Request) {
 
 func apiPodcastSeriesSubscribe(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
+	id := r.PathValue(ParamID)
 	series, err := ctx.Podcast().FindSeries(id)
 	if err != nil {
 		notFoundErr(w)
@@ -662,7 +669,7 @@ func apiPodcastSeriesSubscribe(w http.ResponseWriter, r *http.Request) {
 
 func apiPodcastSeriesUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
+	id := r.PathValue(ParamID)
 	series, err := ctx.Podcast().FindSeries(id)
 	if err != nil {
 		notFoundErr(w)
@@ -678,7 +685,7 @@ func apiPodcastSeriesUnsubscribe(w http.ResponseWriter, r *http.Request) {
 
 func apiPodcastSeriesGetPlaylist(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
+	id := r.PathValue(ParamID)
 	series, err := ctx.Podcast().FindSeries(id)
 	if err != nil {
 		notFoundErr(w)
@@ -691,7 +698,7 @@ func apiPodcastSeriesGetPlaylist(w http.ResponseWriter, r *http.Request) {
 
 func apiPodcastEpisodeGet(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
+	id := r.PathValue(ParamID)
 	episode, err := ctx.Podcast().FindEpisode(id)
 	if err != nil {
 		notFoundErr(w)
@@ -702,7 +709,7 @@ func apiPodcastEpisodeGet(w http.ResponseWriter, r *http.Request) {
 
 func apiPodcastEpisodeGetPlaylist(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
+	id := r.PathValue(ParamID)
 	episode, err := ctx.Podcast().FindEpisode(id)
 	if err != nil {
 		notFoundErr(w)
@@ -799,7 +806,7 @@ func apiStation(w http.ResponseWriter, r *http.Request, id int) {
 
 func apiReleaseGet(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
+	id := r.PathValue(ParamID)
 	release, err := ctx.FindRelease(id)
 	if err != nil {
 		notFoundErr(w)
@@ -810,7 +817,7 @@ func apiReleaseGet(w http.ResponseWriter, r *http.Request) {
 
 func apiReleaseGetPlaylist(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
+	id := r.PathValue(ParamID)
 	release, err := ctx.FindRelease(id)
 	if err != nil {
 		notFoundErr(w)
@@ -823,7 +830,7 @@ func apiReleaseGetPlaylist(w http.ResponseWriter, r *http.Request) {
 
 func apiTrackLocation(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	uuid := r.URL.Query().Get(ParamUUID)
+	uuid := r.PathValue(ParamUUID)
 	track, err := ctx.FindTrack("uuid:" + uuid)
 	if err != nil {
 		notFoundErr(w)
@@ -835,12 +842,12 @@ func apiTrackLocation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	url := ctx.Music().TrackURL(&track)
-	http.Redirect(w, r, url.String(), http.StatusTemporaryRedirect)
+	doRedirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
 func apiMovieLocation(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	uuid := r.URL.Query().Get(ParamUUID)
+	uuid := r.PathValue(ParamUUID)
 	movie, err := ctx.FindMovie("uuid:" + uuid)
 	if err != nil {
 		notFoundErr(w)
@@ -852,18 +859,18 @@ func apiMovieLocation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	url := ctx.Video().MovieURL(movie)
-	http.Redirect(w, r, url.String(), http.StatusTemporaryRedirect)
+	doRedirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
 func apiEpisodeLocation(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.URL.Query().Get(ParamID)
+	id := r.PathValue(ParamID)
 	episode, err := ctx.Podcast().FindEpisode(id)
 	if err != nil {
 		notFoundErr(w)
 	} else {
 		url := ctx.Podcast().EpisodeURL(episode)
-		http.Redirect(w, r, url.String(), http.StatusTemporaryRedirect)
+		doRedirect(w, r, url, http.StatusTemporaryRedirect)
 	}
 }
 
@@ -901,11 +908,11 @@ func startEnd(r *http.Request) (time.Time, time.Time) {
 	end := time.Now()
 	start := end.AddDate(-1, 0, 0)
 
-	s := r.URL.Query().Get("start")
+	s := r.URL.Query().Get(QueryStart)
 	if s != "" {
 		start = date.ParseDate(s)
 	}
-	e := r.URL.Query().Get("end")
+	e := r.URL.Query().Get(QueryEnd)
 	if e != "" {
 		end = date.ParseDate(e)
 	}
@@ -922,7 +929,7 @@ func apiActivityTracksGet(w http.ResponseWriter, r *http.Request) {
 func apiActivityTracksGetResource(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	start, end := startEnd(r)
-	res := r.URL.Query().Get(ParamRes)
+	res := r.PathValue(ParamRes)
 
 	switch res {
 	case "popular":
@@ -939,7 +946,7 @@ func apiActivityTracksGetResource(w http.ResponseWriter, r *http.Request) {
 func apiActivityTracksGetPlaylist(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	start, end := startEnd(r)
-	res := r.URL.Query().Get(ParamRes)
+	res := r.PathValue(ParamRes)
 	if res == "playlist" {
 		res = "recent"
 	}
@@ -968,4 +975,50 @@ func apiActivityReleasesGet(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	start, end := startEnd(r)
 	apiView(w, r, ActivityReleasesView(ctx, start, end))
+}
+
+func doRedirect(w http.ResponseWriter, r *http.Request, url *url.URL, code int) {
+	if url.Scheme == "file" {
+		path := strings.Join([]string{"/d?f=", url.Path}, "")
+		http.Redirect(w, r, path, http.StatusTemporaryRedirect)
+	} else {
+		http.Redirect(w, r, url.String(), http.StatusTemporaryRedirect)
+	}
+}
+
+// /d?f=/mnt/media/artist/album/file.flac
+func apiDownload(w http.ResponseWriter, r *http.Request) {
+	if v := r.URL.Query().Get(QueryFile); v != "" {
+		// check the file is included and/or not excluded
+		ctx := contextValue(r)
+
+		include := len(ctx.Config().Server.IncludeDirs) == 0
+		for _, d := range ctx.Config().Server.IncludeDirs {
+			if strings.HasPrefix(v, d) {
+				include = true
+			}
+		}
+
+		exclude := false
+		for _, d := range ctx.Config().Server.ExcludeDirs {
+			if strings.HasPrefix(v, d) {
+				exclude = true
+			}
+		}
+
+		fmt.Printf("%s %b %b\n", v, include, exclude)
+		if include && !exclude {
+			file, err := os.Open(v)
+			if err != nil {
+				serverErr(w, err)
+			}
+			defer file.Close()
+			http.ServeContent(w, r, v, time.Time{}, file)
+		} else {
+			notFoundErr(w)
+		}
+
+	} else {
+		notFoundErr(w)
+	}
 }

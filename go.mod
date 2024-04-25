@@ -3,7 +3,6 @@ module github.com/takeoutfm/takeout
 require (
 	github.com/aws/aws-sdk-go v1.50.20
 	github.com/blevesearch/bleve/v2 v2.3.10
-	github.com/bmizerany/pat v0.0.0-20210406213842-e4b6760bdd6f
 	github.com/evanphx/json-patch v5.9.0+incompatible
 	github.com/faiface/beep v1.1.0
 	github.com/gdamore/tcell/v2 v2.7.1
