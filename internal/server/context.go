@@ -97,6 +97,7 @@ type RequestContext struct {
 func makeContext(ctx Context, u *auth.User, c *config.Config, m *Media) RequestContext {
 	return RequestContext{
 		activity: ctx.Activity(),
+		auth:     ctx.Auth(),
 		config:   c,
 		media:    m,
 		progress: ctx.Progress(),

@@ -49,11 +49,14 @@ var (
 	ErrCodeExpired              = errors.New("code has expired")
 	ErrCodeAlreadyUsed          = errors.New("code already authorized")
 	ErrInvalidTokenSubject      = errors.New("invalid subject")
+	ErrInvalidTokenAudience     = errors.New("invalid audience")
 	ErrInvalidTokenMethod       = errors.New("invalid token method")
 	ErrInvalidTokenIssuer       = errors.New("invalid token issuer")
 	ErrInvalidTokenClaims       = errors.New("invalid token claims")
 	ErrInvalidAccessTokenSecret = errors.New("invalid access token secret")
 	ErrInvalidMediaTokenSecret  = errors.New("invalid media token secret")
+	ErrInvalidCodeTokenSecret   = errors.New("invalid code token secret")
+	ErrInvalidFileTokenSecret   = errors.New("invalid file token secret")
 	ErrInvalidTokenSecret       = errors.New("invalid token secret")
 	ErrTokenExpired             = errors.New("token expired")
 )
@@ -103,6 +106,14 @@ func NewAuth(config *config.Config) *Auth {
 	_, err = auth.readSecret(config.Auth.MediaToken)
 	if err != nil {
 		panic(ErrInvalidMediaTokenSecret)
+	}
+	_, err = auth.readSecret(config.Auth.CodeToken)
+	if err != nil {
+		panic(ErrInvalidCodeTokenSecret)
+	}
+	_, err = auth.readSecret(config.Auth.FileToken)
+	if err != nil {
+		panic(ErrInvalidCodeTokenSecret)
 	}
 
 	err = auth.fileCache.Start()
@@ -272,6 +283,22 @@ func (a *Auth) newSessionToken(s Session, cfg config.TokenConfig) (string, error
 	return a.newToken(s.User, cfg)
 }
 
+// newFileToken creates a new JWT token for a file path or uri
+func (a *Auth) newFileToken(file string, cfg config.TokenConfig) (string, error) {
+	age := int(cfg.Age.Seconds())
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		jwt.StandardClaims{
+			Issuer:    cfg.Issuer,
+			Audience:  file,
+			ExpiresAt: time.Now().Add(time.Second * time.Duration(age)).Unix(),
+		})
+	secret, err := a.readSecret(cfg)
+	if err != nil {
+		return "", err
+	}
+	return token.SignedString(secret)
+}
+
 // NewAccessToken creates a new JWT token associated with the provided session.
 func (a *Auth) NewAccessToken(s Session) (string, error) {
 	return a.newSessionToken(s, a.config.Auth.AccessToken)
@@ -285,6 +312,11 @@ func (a *Auth) NewMediaToken(s Session) (string, error) {
 // NewCodeToken creates a new JWT token for code-based authentication
 func (a *Auth) NewCodeToken(subject string) (string, error) {
 	return a.newToken(subject, a.config.Auth.CodeToken)
+}
+
+// NewFileToken creates a new JWT token for file auth
+func (a *Auth) NewFileToken(path string) (string, error) {
+	return a.newFileToken(path, a.config.Auth.FileToken)
 }
 
 // NewCookie creates a new cookie associated with the provided session.
@@ -361,13 +393,22 @@ func (a *Auth) CheckCodeToken(signedToken string) error {
 	if err != nil {
 		return err
 	}
-
 	code := a.ValidCode(claims.Subject)
 	if code == nil {
 		return ErrInvalidTokenSubject
 	}
-
 	return nil
+}
+
+func (a *Auth) CheckFileToken(signedToken string, path string) error {
+	_, claims, err := a.processToken(signedToken, a.config.Auth.FileToken)
+	if err != nil {
+		return err
+	}
+	if claims.Audience != path {
+		return ErrInvalidTokenAudience
+	}
+	return err
 }
 
 // processToken parses and verfies the signed token is valid.
@@ -395,9 +436,9 @@ func (a *Auth) processToken(signedToken string, cfg config.TokenConfig) (*jwt.To
 	if claims.ExpiresAt < time.Now().Unix() {
 		return nil, nil, ErrTokenExpired
 	}
-	if claims.Subject == "" {
-		// XXX FIX code no subject
-		return nil, nil, ErrInvalidTokenSubject
+	if claims.Subject == "" && claims.Audience == "" {
+		// need subject or audience
+		return nil, nil, ErrInvalidTokenClaims
 	}
 	return token, claims, nil
 }

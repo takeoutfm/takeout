@@ -9,6 +9,8 @@
 - support local filesystem buckets
 - breaking config change buckets, s3 and fs have own configs now
 - added server config include & exclude dirs
+- support config ${include}
+- removed SomaFM streams from default config
 
 ## 0.13.2
 

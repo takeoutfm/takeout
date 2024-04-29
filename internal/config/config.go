@@ -225,6 +225,7 @@ type AuthConfig struct {
 	AccessToken   TokenConfig
 	MediaToken    TokenConfig
 	CodeToken     TokenConfig
+	FileToken     TokenConfig
 }
 
 type ServerConfig struct {
@@ -322,6 +323,10 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Auth.CodeToken.Issuer", "takeout")
 	v.SetDefault("Auth.CodeToken.Secret", "")     // must be assigned in config file
 	v.SetDefault("Auth.CodeToken.SecretFile", "") // must be assigned in config file
+	v.SetDefault("Auth.FileToken.Age", "1h")
+	v.SetDefault("Auth.FileToken.Issuer", "takeout")
+	v.SetDefault("Auth.FileToken.Secret", "")     // must be assigned in config file
+	v.SetDefault("Auth.FileToken.SecretFile", "") // must be assigned in config file
 
 	v.SetDefault("Progress.DB.Driver", "sqlite3")
 	v.SetDefault("Progress.DB.Source", "${Server.DataDir}/progress.db")
@@ -357,18 +362,6 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Music.PopularLimit", "50")
 	v.SetDefault("Music.RadioLimit", "25")
 	v.SetDefault("Music.RadioSearchLimit", "1000")
-
-	radioStreams := []RadioStream{{
-		Creator:     "Ted Leibowitz",
-		Title:       "BAGeL Radio",
-		Image:       "https://cdn-profiles.tunein.com/s187420/images/logod.jpg",
-		Description: "",
-		Source: []ContentDescription{
-			{ContentType: "audio/mpeg", URL: "https://www.bagelradio.com/s/bagelradio.pls"},
-			{ContentType: "audio/aac", URL: "http://ais-sa3.cdnstream1.com/2606_128.mp3"},
-		}}}
-	radioStreams = append(radioStreams, somafmStreams...)
-	v.SetDefault("Music.RadioStreams", radioStreams)
 
 	v.SetDefault("Music.Recent", "8760h") // 1 year
 	v.SetDefault("Music.RecentLimit", "50")
@@ -534,7 +527,29 @@ func postProcessConfig(v *viper.Viper, rootDir string) (*Config, error) {
 		if _, ok := val.(string); ok {
 			// expand $var or ${var} on any string values
 			sval := val.(string)
-			if strings.Contains(sval, "$") {
+			if strings.HasPrefix(sval, "${include") {
+				s := os.Expand(sval, func(s string) string {
+					return s
+				})
+				path := strings.TrimPrefix(s, "include ")
+				log.Printf("including '%s'\n", path)
+				body, err := client.Get(path)
+				if err != nil {
+					log.Panicf("include '%s': %s", path, err)
+				}
+				// need extesion for reading
+				ext := strings.TrimPrefix(filepath.Ext(path), ".")
+				// load include config
+				vv := viper.New()
+				vv.SetConfigType(ext)
+				err = vv.ReadConfig(bytes.NewReader(body))
+				if err != nil {
+					log.Panicf("include '%s': %s", path, err)
+				}
+				// use include config to (re)set this value in
+				// current config
+				v.Set(k, vv.Get(k))
+			} else if strings.Contains(sval, "$") {
 				v.Set(k, os.Expand(sval, func(s string) string {
 					r := v.Get(s)
 					if r == nil {
@@ -598,6 +613,9 @@ func TestingConfig() (*Config, error) {
 	v.SetDefault("Auth.CodeToken.Issuer", "takeout.test")
 	v.SetDefault("Auth.CodeToken.Age", "5m")
 	v.SetDefault("Auth.CodeToken.Secret", "Rg3ac20IPqyL7oAC")
+	v.SetDefault("Auth.FileToken.Issuer", "takeout.test")
+	v.SetDefault("Auth.FileToken.Age", "5m")
+	v.SetDefault("Auth.FileToken.Secret", "38614926l1LxpUUW")
 
 	v.SetDefault("Search.IndexDir", "")
 	v.SetDefault("Music.SearchIndexName", "")

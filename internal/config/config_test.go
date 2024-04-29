@@ -55,4 +55,7 @@ func TestDefaultConfig(t *testing.T) {
 	if config.Auth.CodeToken.Secret == "" {
 		t.Error("expect code token secret")
 	}
+	if config.Auth.FileToken.Secret == "" {
+		t.Error("expect file token secret")
+	}
 }

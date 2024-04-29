@@ -23,7 +23,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -51,7 +50,7 @@ const (
 	QuerySearch = "q"
 	QueryStart  = "start"
 	QueryEnd    = "end"
-	QueryFile   = "f"
+	QueryToken  = "token"
 )
 
 type credentials struct {
@@ -977,48 +976,30 @@ func apiActivityReleasesGet(w http.ResponseWriter, r *http.Request) {
 	apiView(w, r, ActivityReleasesView(ctx, start, end))
 }
 
-func doRedirect(w http.ResponseWriter, r *http.Request, url *url.URL, code int) {
-	if url.Scheme == "file" {
-		path := strings.Join([]string{"/d?f=", url.Path}, "")
-		http.Redirect(w, r, path, http.StatusTemporaryRedirect)
+func doRedirect(w http.ResponseWriter, r *http.Request, u *url.URL, code int) {
+	if u.Scheme == "file" {
+		ctx := contextValue(r)
+		path := u.Path
+
+		// file URL from bucket is file://{/path/to some/file.ext}
+		// with path "/path/to some/file.ext"
+		// token signs local file path unescaped
+		token, err := ctx.Auth().NewFileToken(path)
+		if err != nil {
+			serverErr(w, err)
+			return
+		}
+
+		// /d/path/to%20some/file.ext?token=xyz
+		url := strings.Join([]string{"/d", u.EscapedPath(), "?", QueryToken, "=", url.QueryEscape(token)}, "")
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 	} else {
-		http.Redirect(w, r, url.String(), http.StatusTemporaryRedirect)
+		http.Redirect(w, r, u.String(), http.StatusTemporaryRedirect)
 	}
 }
 
-// /d?f=/mnt/media/artist/album/file.flac
 func apiDownload(w http.ResponseWriter, r *http.Request) {
-	if v := r.URL.Query().Get(QueryFile); v != "" {
-		// check the file is included and/or not excluded
-		ctx := contextValue(r)
-
-		include := len(ctx.Config().Server.IncludeDirs) == 0
-		for _, d := range ctx.Config().Server.IncludeDirs {
-			if strings.HasPrefix(v, d) {
-				include = true
-			}
-		}
-
-		exclude := false
-		for _, d := range ctx.Config().Server.ExcludeDirs {
-			if strings.HasPrefix(v, d) {
-				exclude = true
-			}
-		}
-
-		fmt.Printf("%s %b %b\n", v, include, exclude)
-		if include && !exclude {
-			file, err := os.Open(v)
-			if err != nil {
-				serverErr(w, err)
-			}
-			defer file.Close()
-			http.ServeContent(w, r, v, time.Time{}, file)
-		} else {
-			notFoundErr(w)
-		}
-
-	} else {
-		notFoundErr(w)
-	}
+	prefix := "/d"
+	path := strings.TrimPrefix(r.URL.Path, prefix)
+	http.ServeFile(w, r, path)
 }

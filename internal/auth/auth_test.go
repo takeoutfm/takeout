@@ -221,3 +221,22 @@ func TestNewCodeToken(t *testing.T) {
 		t.Fatal("expect session")
 	}
 }
+
+func TestNewFileToken(t *testing.T) {
+	path := "/path/to file/file.mp3"
+
+	a := makeAuth(t)
+
+	token, err := a.NewFileToken(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(token) == 0 {
+		t.Error("expect token")
+	}
+
+	err = a.CheckFileToken(token, path)
+	if err != nil {
+		t.Fatal("expect good token")
+	}
+}

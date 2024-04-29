@@ -263,7 +263,9 @@ func Serve(config *config.Config) error {
 	mux.Handle("GET /api/tracks/{uuid}/location", mediaTokenAuthHandler(ctx, apiTrackLocation))
 	mux.Handle("GET /api/movies/{uuid}/location", mediaTokenAuthHandler(ctx, apiMovieLocation))
 	mux.Handle("GET /api/episodes/{id}/location", mediaTokenAuthHandler(ctx, apiEpisodeLocation))
-	mux.Handle("GET /d", mediaTokenAuthHandler(ctx, apiDownload))
+
+	// download
+	mux.Handle("GET /d/", fileAuthHandler(ctx, apiDownload, "/d"))
 
 	// progress
 	mux.Handle("GET /api/progress", accessTokenAuthHandler(ctx, apiProgressGet))
@@ -314,7 +316,6 @@ func Serve(config *config.Config) error {
 	// http.HandleFunc("/swagger.json", swaggerHandler)
 
 	log.Printf("listening on %s\n", config.Server.Listen)
-	//http.Handle("/", mux)
 
 	return http.ListenAndServe(config.Server.Listen, mux)
 }

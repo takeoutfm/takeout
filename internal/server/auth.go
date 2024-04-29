@@ -117,6 +117,21 @@ func authorizeCodeToken(ctx Context, w http.ResponseWriter, r *http.Request) err
 	return err
 }
 
+// authorizeFileToken validates the provided JWT media token for file access.
+func authorizeFileToken(ctx Context, w http.ResponseWriter, r *http.Request, path string) error {
+	token := r.URL.Query().Get(QueryToken)
+	if token == "" {
+		return nil
+	}
+
+	err := ctx.Auth().CheckFileToken(token, path)
+	if err != nil {
+		authErr(w, err)
+		return err
+	}
+	return nil
+}
+
 // authorizeCookie validates the provided cookie for API or web view access.
 func authorizeCookie(ctx Context, w http.ResponseWriter, r *http.Request) (*auth.User, error) {
 	a := ctx.Auth()
@@ -267,6 +282,45 @@ func codeTokenAuthHandler(ctx RequestContext, handler http.HandlerFunc) http.Han
 		if err == nil {
 			handler.ServeHTTP(w, withContext(r, ctx))
 		}
+	}
+	return http.HandlerFunc(fn)
+}
+
+func fileAuthHandler(ctx RequestContext, handler http.HandlerFunc, prefix string) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		path := strings.TrimPrefix(r.URL.Path, prefix)
+
+		// check for bad paths
+		if len(path) == 0 || strings.Contains(path, "..") {
+			accessDenied(w)
+			return
+		}
+
+		// ensure file is included and/or not excluded
+		include := len(ctx.Config().Server.IncludeDirs) == 0
+		for _, d := range ctx.Config().Server.IncludeDirs {
+			if strings.HasPrefix(path, d) {
+				include = true
+				break
+			}
+		}
+		exclude := false
+		for _, d := range ctx.Config().Server.ExcludeDirs {
+			if strings.HasPrefix(path, d) {
+				exclude = true
+				break
+			}
+		}
+
+		if include && !exclude {
+			err := authorizeFileToken(ctx, w, r, path)
+			if err == nil {
+				handler.ServeHTTP(w, withContext(r, ctx))
+				return
+			}
+		}
+
+		accessDenied(w)
 	}
 	return http.HandlerFunc(fn)
 }

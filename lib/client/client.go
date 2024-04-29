@@ -26,8 +26,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -44,7 +46,8 @@ const (
 )
 
 var (
-	ErrCacheMiss = errors.New("cache miss")
+	ErrCacheMiss          = errors.New("cache miss")
+	ErrSchemeNotSupported = errors.New("scheme not supported")
 )
 
 type RateLimiter interface {
@@ -69,6 +72,7 @@ func (c *Config) Merge(o Config) {
 
 type Getter interface {
 	Get(url string) (http.Header, []byte, error)
+	GetBody(url string) ([]byte, error)
 	GetJson(url string, result interface{}) error
 	GetJsonWith(headers map[string]string, url string, result interface{}) error
 	GetXML(url string, result interface{}) error
@@ -85,6 +89,13 @@ type client struct {
 	rateLimiter RateLimiter
 }
 
+func NewDefaultGetter() Getter {
+	c := client{}
+	c.client = &http.Client{}
+	c.rateLimiter = DefaultLimiter
+	return c
+}
+
 func NewCacheOnlyGetter(config Config) Getter {
 	c := client{}
 	c.onlyCached = true
@@ -96,7 +107,6 @@ func NewCacheOnlyGetter(config Config) Getter {
 	c.client = transport.Client()
 	c.rateLimiter = DefaultLimiter
 	return c
-
 }
 
 func NewGetter(config Config) Getter {
@@ -143,8 +153,11 @@ func (unlimitedLimiter) RateLimit(host string) {
 }
 
 func (c client) doGet(headers map[string]string, urlStr string) (*http.Response, error) {
-	// log.Printf("doGet %s\n", urlStr)
-	url, _ := url.Parse(urlStr)
+	//log.Printf("doGet %s\n", urlStr)
+	url, err := url.Parse(urlStr)
+	if err != nil {
+		return nil, err
+	}
 	req, err := http.NewRequest(http.MethodGet, url.String(), nil)
 	if err != nil {
 		return nil, err
@@ -246,6 +259,11 @@ func (c client) Get(url string) (http.Header, []byte, error) {
 	return c.GetWith(nil, url)
 }
 
+func (c client) GetBody(url string) (body []byte, err error) {
+	_, body, err = c.GetWith(nil, url)
+	return
+}
+
 func (c client) GetJson(url string, result interface{}) error {
 	return c.GetJsonWith(nil, url, result)
 }
@@ -299,4 +317,21 @@ func (c client) GetPLS(urlString string) (pls.Playlist, error) {
 	}
 	defer resp.Body.Close()
 	return pls.Parse(resp.Body)
+
+}
+
+func Get(path string) ([]byte, error) {
+	if strings.HasPrefix(path, "http") {
+		c := NewDefaultGetter()
+		return c.GetBody(path)
+	} else if strings.HasPrefix(path, "file") {
+		u, err := url.Parse(path)
+		if err != nil {
+			return nil, err
+		}
+		return ioutil.ReadFile(u.Path)
+	} else {
+		return ioutil.ReadFile(path)
+	}
+	return nil, ErrSchemeNotSupported
 }
