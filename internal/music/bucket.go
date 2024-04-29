@@ -21,7 +21,6 @@ import (
 	"net/url"
 	"regexp"
 	"time"
-	"fmt"
 
 	"github.com/takeoutfm/takeout/lib/bucket"
 	"github.com/takeoutfm/takeout/lib/str"
@@ -39,7 +38,6 @@ func (m *Music) syncFromBucket(bucket bucket.Bucket, lastSync time.Time) (trackC
 			return
 		}
 		for o := range objectCh {
-			fmt.Printf("got %+v\n", o)
 			checkObject(bucket, o, trackCh)
 		}
 	}()

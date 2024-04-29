@@ -23,7 +23,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -532,21 +531,16 @@ func postProcessConfig(v *viper.Viper, rootDir string) (*Config, error) {
 					return s
 				})
 				path := strings.TrimPrefix(s, "include ")
-				log.Printf("including '%s'\n", path)
-				body, err := client.Get(path)
+				if strings.Contains(path, "://") == false &&
+					strings.HasPrefix(path, "/") == false {
+					// resolve relative paths
+					path = strings.Join([]string{rootDir, path}, "/")
+				}
+				vv, err := loadConfig(path)
 				if err != nil {
 					log.Panicf("include '%s': %s", path, err)
 				}
-				// need extesion for reading
-				ext := strings.TrimPrefix(filepath.Ext(path), ".")
-				// load include config
-				vv := viper.New()
-				vv.SetConfigType(ext)
-				err = vv.ReadConfig(bytes.NewReader(body))
-				if err != nil {
-					log.Panicf("include '%s': %s", path, err)
-				}
-				// use include config to (re)set this value in
+				// use included config to (re)set this value in
 				// current config
 				v.Set(k, vv.Get(k))
 			} else if strings.Contains(sval, "$") {
@@ -568,7 +562,7 @@ func postProcessConfig(v *viper.Viper, rootDir string) (*Config, error) {
 			if strings.HasPrefix(val.(string), "/") == false &&
 				strings.Contains(val.(string), "@") == false &&
 				strings.Contains(val.(string), "::") == false {
-				val = fmt.Sprintf("%s/%s", rootDir, val.(string))
+				val = strings.Join([]string{rootDir, val.(string)}, "/")
 				v.Set(k, val)
 			}
 		}
@@ -576,6 +570,24 @@ func postProcessConfig(v *viper.Viper, rootDir string) (*Config, error) {
 	err := v.Unmarshal(&config)
 	config.Music.readMaps()
 	return &config, err
+}
+
+func loadConfig(path string) (*viper.Viper, error) {
+	log.Printf("loading '%s'\n", path)
+	body, err := client.Get(path)
+	if err != nil {
+		return nil, err
+	}
+	// need extension for reading
+	ext := strings.TrimPrefix(filepath.Ext(path), ".")
+	// load include config
+	vv := viper.New()
+	vv.SetConfigType(ext)
+	err = vv.ReadConfig(bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	return vv, nil
 }
 
 func TestConfig() (*Config, error) {
