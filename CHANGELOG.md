@@ -1,4 +1,4 @@
-## 0.14.x
+## 0.14.0
 
 - use Go 1.22 routing enhancements (and remove pat)
 - breaking API changes:
@@ -9,8 +9,9 @@
 - support local filesystem buckets
 - breaking config change buckets, s3 and fs have own configs now
 - added server config include & exclude dirs
-- support config ${include}
+- support config include directive
 - removed SomaFM streams from default config
+- removed recommended from defeault config
 
 ## 0.13.2
 

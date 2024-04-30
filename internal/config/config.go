@@ -339,7 +339,7 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Activity.PopularLimit", "50")
 	v.SetDefault("Activity.RecentMoviesTitle", "Recently Watched")
 	v.SetDefault("Activity.RecentTracksTitle", "Recently Played")
-	v.SetDefault("Activity.PopularMoviesTitle", "Popular Tracks")
+	v.SetDefault("Activity.PopularMoviesTitle", "Popular Movies")
 	v.SetDefault("Activity.PopularTracksTitle", "Popular Tracks")
 
 	// TODO apply as default
@@ -415,34 +415,6 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Video.SyncInterval", "1h")
 	v.SetDefault("Video.PosterSyncInterval", "24h")
 	v.SetDefault("Video.BackdropSyncInterval", "24h")
-	v.SetDefault("Video.Recommend.When", []DateRecommend{
-		// day of week + day of month
-		{Match: "Fri 13", Layout: "Mon 02", Name: "Friday 13th Movies", Query: `+character:voorhees`},
-		// day of month
-		{Match: "Jan 03", Layout: "Jan 02", Name: "Tolkien Movies", Query: `+writing:tolkien`},
-		{Match: "Feb 02", Layout: "Jan 02", Name: "Groundhog Day Movies", Query: `+keyword:groundhog`},
-		{Match: "Feb 14", Layout: "Jan 02", Name: "Valentine's Day Movies", Query: `+genre:Romance`},
-		{Match: "Mar 02", Layout: "Jan 02", Name: "Dr. Seuss Movies", Query: `+writing:seuss`},
-		{Match: "Mar 12", Layout: "Jan 02", Name: "Hitchcock Movies", Query: `+directing:hitchcock`},
-		{Match: "Mar 17", Layout: "Jan 02", Name: "St. Patrick's Day Movies", Query: `+keyword:leprechaun`},
-		{Match: "Mar 27", Layout: "Jan 02", Name: "Tarantino Movies", Query: `+directing:tarantino`},
-		{Match: "Apr 01", Layout: "Jan 02", Name: "April Fool's Movies", Query: `+keyword:"april fool's day"`},
-		{Match: "Apr 28", Layout: "Jan 02", Name: "Superhero Movies", Query: `+keyword:superhero`},
-		{Match: "May 02", Layout: "Jan 02", Name: "Harry Potter Movies", Query: `+title:"harry potter"`},
-		{Match: "May 04", Layout: "Jan 02", Name: "Star Wars Movies", Query: `+title:"star wars"`},
-		{Match: "May 11", Layout: "Jan 02", Name: "Twilight Zone Movies", Query: `+title:"twilight zone"`},
-		{Match: "Jul 04", Layout: "Jan 02", Name: "July 4th Movies", Query: `keyword:patriotism keyword:patriotic keyword:independence`},
-		{Match: "Jul 04", Layout: "Jan 02", Name: "Alice in Wonderland",
-			Query: `character:"Alice Kingsleigh" character:"Mad Hatter" character:"Red Queen"`},
-		{Match: "Aug 11", Layout: "Jan 02", Name: "Spider-man Movies", Query: `+title:"spider-man"`},
-		{Match: "Sep 17", Layout: "Jan 02", Name: "Batman Movies", Query: `+character:batman`},
-		{Match: "Sep 22", Layout: "Jan 02", Name: "Hobbit Movies", Query: `+keyword:hobbit`},
-		{Match: "Oct 21", Layout: "Jan 02", Name: "Back to the Future Movies", Query: `+title:"back to the future"`},
-		{Match: "Dec 23", Layout: "Jan 02", Name: "It's Festivus", Query: `+keyword:festivus`},
-		// months
-		{Match: "Oct", Layout: "Jan", Name: "Halloween Movies", Query: `+keyword:halloween`},
-		{Match: "Dec", Layout: "Jan", Name: "Christmas Movies", Query: `+keyword:christmas +keyword:holiday`},
-	})
 
 	// see https://musicbrainz.org/search (series)
 	v.SetDefault("Music.RadioSeries", []string{
@@ -524,26 +496,11 @@ func postProcessConfig(v *viper.Viper, rootDir string) (*Config, error) {
 	for _, k := range v.AllKeys() {
 		val := v.Get(k)
 		if _, ok := val.(string); ok {
-			// expand $var or ${var} on any string values
 			sval := val.(string)
-			if strings.HasPrefix(sval, "${include") {
-				s := os.Expand(sval, func(s string) string {
-					return s
-				})
-				path := strings.TrimPrefix(s, "include ")
-				if strings.Contains(path, "://") == false &&
-					strings.HasPrefix(path, "/") == false {
-					// resolve relative paths
-					path = strings.Join([]string{rootDir, path}, "/")
-				}
-				vv, err := loadConfig(path)
-				if err != nil {
-					log.Panicf("include '%s': %s", path, err)
-				}
-				// use included config to (re)set this value in
-				// current config
-				v.Set(k, vv.Get(k))
+			if k == "include" {
+				doInclude(v, sval, rootDir)
 			} else if strings.Contains(sval, "$") {
+				// expand $var or ${var} on any string values
 				v.Set(k, os.Expand(sval, func(s string) string {
 					r := v.Get(s)
 					if r == nil {
@@ -554,6 +511,12 @@ func postProcessConfig(v *viper.Viper, rootDir string) (*Config, error) {
 					}
 					return r.(string)
 				}))
+			}
+		} else if _, ok := val.([]any); ok {
+			if k == "include" {
+				for _, path := range val.([]any) {
+					doInclude(v, path.(string), rootDir)
+				}
 			}
 		}
 		if pathRegexp.MatchString(k) {
@@ -572,8 +535,38 @@ func postProcessConfig(v *viper.Viper, rootDir string) (*Config, error) {
 	return &config, err
 }
 
-func loadConfig(path string) (*viper.Viper, error) {
-	log.Printf("loading '%s'\n", path)
+// Include directive can be used as follows to include files from various
+// sources (yaml example) as an array of strings or a single string:
+//
+// include:
+//   - file.yaml
+//   - /path/to/file.yaml
+//   - file:///path/to/file.yaml
+//   - http://host/path/to/file.yaml
+//   - https://host/path/to/file.yaml
+//
+// include: file.yaml # or any of the above
+//
+func doInclude(v *viper.Viper, path, rootDir string) {
+	if strings.Contains(path, "://") == false &&
+		strings.HasPrefix(path, "/") == false {
+		// resolve relative paths
+		path = strings.Join([]string{rootDir, path}, "/")
+	}
+	vv, err := includeConfig(path)
+	if err != nil {
+		log.Panicf("include '%s': %s", path, err)
+	}
+	// use included config to (re)set this value in
+	// current config
+	//v.Set(key, vv.Get(key))
+	for _, k := range vv.AllKeys() {
+		v.Set(k, vv.Get(k))
+	}
+}
+
+func includeConfig(path string) (*viper.Viper, error) {
+	log.Printf("include '%s'\n", path)
 	body, err := client.Get(path)
 	if err != nil {
 		return nil, err
