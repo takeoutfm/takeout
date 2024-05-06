@@ -1,4 +1,6 @@
-# Copyleft (C) 2022 The Takeout Authors. See COPYING.
+# Copyleft (C) 2024 defsub. See COPYING.
+
+TakeoutCacheDir: /var/cache/takeout
 
 # Music configuration
 # - ReleaseCountries are preferred countries used in MusicBrainz release matching
@@ -25,39 +27,40 @@ Music:
 # - This example uses the same bucket for music and video but they can be different
 # - Multiple music and/or video buckets are supported
 # - Change endpoint and region to match your bucket provider (Wasabi used as an example)
-#   Any S3 compatible service should work, such as: AWS, Backblaze, Wasabi, and Minio
+#   Any S3 compatible service should work (AWS, Backblaze, Wasabi, Minio)
 # - Change AccessKeyID to your bucket AccessKeyID
 # - Change SecretAccessKey to your bucket SecretAccessKey
 # - Change BucketName to your bucket name
 # - Change ObjectPrefix to your prefix (used to narrow the bucket files)
 # - Change URLExpiration based on your needs for pre-signed URL access to your media
-#   https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html
-# - Example RewriteRules are included by commented out
+# - Example RewriteRules are incluced for reference
 Buckets:
   - Media: music
-    Endpoint: s3.us-west-1.wasabisys.com
-    Region: us-west-1
-    AccessKeyID: your-access-key-id
-    SecretAccessKey: your-secret-access-key
-    BucketName: your-bucket-name
-    ObjectPrefix: Music
-    URLExpiration: 15m
-    UseSSL: true
-    # RewriteRules:
-    #  - Pattern: "^(.+/)Dr. Octagon(/Dr. Octagon, Part II.+/.+)$"
-    #    Replace: "$1Kool Keith$2"
-    #  - Pattern: "^(.+/White Zombie/La Sexorcisto_ Devil Music, )Volume One(.+/.+)$"
-    #    Replace: "$1Vol. 1$2"
+    S3:
+      Endpoint: s3.us-west-1.wasabisys.com
+      Region: us-west-1
+      AccessKeyID: your-access-key-id
+      SecretAccessKey: your-secret-access-key
+      BucketName: your-bucket-name
+      ObjectPrefix: MyMusic
+      URLExpiration: 15m
+      UseSSL: true
+    RewriteRules:
+      - Pattern: "^(.+/)Dr. Octagon(/Dr. Octagon, Part II.+/.+)$"
+        Replace: "$1Kool Keith$2"
+      - Pattern: "^(.+/White Zombie/La Sexorcisto_ Devil Music, )Volume One(.+/.+)$"
+        Replace: "$1Vol. 1$2"
 
   - Media: video
-    Endpoint: s3.us-west-1.wasabisys.com
-    Region: us-west-1
-    AccessKeyID: your-access-key-id
-    SecretAccessKey: your-secret-access-key
-    BucketName: your-bucket-name
-    ObjectPrefix: Movies
-    URLExpiration: 15m
-    UseSSL: true
+    S3:
+      Endpoint: s3.us-west-1.wasabisys.com
+      Region: us-west-1
+      AccessKeyID: your-access-key-id
+      SecretAccessKey: your-secret-access-key
+      BucketName: your-bucket-name
+      ObjectPrefix: MyMovies
+      URLExpiration: 15m
+      UseSSL: true
 
 # Get your own API key from last.fm
 # https://www.last.fm/api
@@ -66,4 +69,4 @@ Lastfm:
   Secret: "put shared secret here"
 
 Client:
-  CacheDir: /var/cache/takeout/httpcache
+  CacheDir: ${TakeoutCacheDir}/httpcache

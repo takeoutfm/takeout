@@ -1,42 +1,52 @@
-# Copyleft (C) 2022 The Takeout Authors. See COPYING.
+# Copyleft (C) 2024 defsub. See COPYING.
 
-# Directory structure:
-# - /etc/takeout
+# Example directory structure:
 # - /var/lib/takeout
-# - /var/lib/takeout/auth
-# - /var/lib/takeout/data
+# - /var/lib/takeout/keys
 # - /var/cache/takeout
 # - /var/cache/takeout/httpcache
 # - /var/cache/takeout/imagecache
-#
-# Server working directory is /var/lib/takeout
+TakeoutDir: /var/lib/takeout
+TakeoutCacheDir: /var/cache/takeout
 
 # Server configuration
-# - Port 3000 is used by default for nginx
+# - Port 3000 is used by default
+# - KeyDir is where secret keys are stored
 # - DataDir is for server databases (activity.db, auth.db, progress.db)
 # - MediaDir is used for user bucket media config, databases and search indices
 # - ImageCache is used for caching of media covers, posters, etc.
 Server:
   Listen: :3000
-  DataDir: /var/lib/takeout
-  MediaDir: /var/lib/takeout/media
+  DataDir: ${TakeoutDir}
+  MediaDir: ${TakeoutDir}
+  KeyDir: ${TakeoutDir}/keys
   ImageCache:
-    CacheDir: /var/cache/takeout/imagecache
+    CacheDir: ${TakeoutCacheDir}/imagecache
 
 # Security configuration
 # - Change SecureCookies to false when not using nginx and/or TLS.
 # - Login session age is 30 days (720h)
 # - Access tokens valid for 4 hours
 # - Media tokens valid for 1 year (8766h)
+# - Code tokens are valid for 5 minutes
+# - File tokens are valid for 1 hour
 # - Add your own secrets
 Auth:
   SecureCookies: true
   SessionAge: 720h
   AccessToken:
     Issuer: takeout
-    SecretFile: ${Server.DataDir}/keys/access.key
+    SecretFile: ${Server.KeyDir}/access.key
     Age: 4h
   MediaToken:
     Issuer: takeout
-    SecretFile: ${Server.DataDir}/keys/media.key
+    SecretFile: ${Server.KeyDir}/media.key
     Age: 8766h
+  CodeToken:
+    Issuer: takeout
+    SecretFile: ${Server.KeyDir}/code.key
+    Age: 5m
+  FileToken:
+    Issuer: takeout
+    SecretFile: ${Server.KeyDir}/code.key
+    Age: 1h

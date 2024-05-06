@@ -72,7 +72,7 @@ Tracks longer than 15 minutes (60*15=900):
 
 Tracks produced by Butch Vig:
 
-	producer:"butch vig"
+	+producer:"butch vig"
 
 Cover songs:
 

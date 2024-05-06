@@ -2,50 +2,36 @@
 
 ## Overview
 
-This setup assumes the use of a UNIX system such as Linux. Takeout is written
-in Go, so most systems will work just fine. Please adjust commands below as
-needed. You can setup on a virtual private server (VPS) in the cloud such as
-EC2, GCE, Digital Ocean, Linode, or use your spiffy computer at home.
+This setup assumes a Linux system is being used. Takeout is written in Go, so
+most other systems will also work fine. Please adjust commands below as needed.
+You can setup on a virtual private server (VPS) in the cloud such as EC2, GCE,
+Digital Ocean, Linode, or use your spiffy computer at home.
 
-You need to have media stored in an S3 bucket somewhere. Some common services
-are AWS S3, Wasabi, Backblaze, and Minio. And if you're using that spiffy home
-computer, you can also install Minio at home and make your local media
-available via S3 to your home network. The other bucket services cost money,
-however you have the added benefit of having your media securely available
-wherever you go.
+For cloud storage, you need to have media stored in an S3 bucket somewhere.
+Some common services are AWS S3, Wasabi, Backblaze, and Minio. And if you're
+using that spiffy home computer, you can also install Minio at home and make
+your local media available via S3 to your home network.
 
-General VPS requirements:
-* Network - monthly 8GB in / 300MB out (depends on usage)
-* Storage - 500MB for databases and search index
-* CPU - Shared CPU with 1 core, 1GB RAM
-* RAM - The Takeout server needs around 1MB of RAM
-
-A recommended cloud setup would be:
-* Linode (Nanode 1GB $5/mo) for running Takeout
-* Wasabi ($5.99 TB/mo) for S3 media
-
-Remember that Takeout indirectly streams media and redirects clients/apps to
-the S3 bucket using pre-signed time-based URLs for streaming. Any media
-streaming network costs are only related to the S3 bucket provider and not the
-VPS.
+Takeout can also access local media files without needing S3. This may be your
+best option for home media access. Using S3 in the cloud is recommended if you
+want to have your media securely available wherever you go.
 
 Please see [bucket.md](bucket.md) for further details on how you should
-organize your media in S3. [rclone](https://rclone.org) is an excellent tool to
-manage S3 buckets from the command line. Once that's all done, proceed with the
-steps below.
+organize your media is S3 or locally. [rclone](https://rclone.org) is an
+excellent tool to manage S3 buckets from the command line. Once that's all
+done, proceed with the steps below.
 
 ## Steps
 
 Download and install Go from [https://go.dev/](https://go.dev/) as needed. Run
 the following command to ensure Go is correctly installed. You should have Go
-1.18 or higher.
+1.22 or higher.
 
 ```console
 $ go version
 ```
 
-Download and build the Takeout server from Github. Precompiled versions may be
-available at a later time. Check the [Takeout Releases Page](https://github.com/takeoutfm/takeout/releases).
+Download and build the Takeout server from Github.
 
 ```console
 $ go install github.com/takeoutfm/takeout/cmd/takeout@latest
@@ -91,11 +77,11 @@ $ cp doc/config.yaml ${TAKEOUT_HOME}/mymedia
 ```
 Sync your media. This may take multiple hours depending on the amount of media
 files. Repeat the sync command for other media directories you may have
-created.
+created. The Takeout server will sync media periodically as well.
 
 ```console
 $ cd ${TAKEOUT_HOME}/mymedia
-$ ~/go/bin/takeout sync
+$ takeout sync
 ```
 
 You may encounter sync errors like the following:
@@ -106,18 +92,17 @@ You may encounter sync errors like the following:
 In this example the artist "Billy F Gibbons" was used to tag and store the
 media, however, MusicBrainz knows this artist as "Billy Gibbons". You can fix
 this with RewriteRules or adjust your media file names and/or directory names.
-
 Troubleshooting this stuff may be difficult so ask for help as needed.
 
 Create your first user. Change the example user "ozzy" and password. Please use
 a strong password to protect access to your media. Note that "mymedia" must
-match the takeout sub-directory name used above. The idea here is that there
+match the Takeout sub-directory name used above. The idea here is that there
 can be multiple users and users can use the same or different buckets of
 media. Indie for Dad, scary movies for Mom, and some emo for the teenager.
 
 ```console
 $ cd ${TAKEOUT_HOME}
-$ ~/go/bin/takeout user --add --user="ozzy" --pass="changeme" --media="mymedia"
+$ takeout user --add --user="ozzy" --pass="changeme" --media="mymedia"
 ```
 
 Setup a secure TLS front-end to the Takeout server. [Nginx](http://nginx.org/)
@@ -159,7 +144,7 @@ Create some radio stations.
 
 ```console
 $ cd ${TAKEOUT_HOME}/mymedia
-$ ~/go/bin/takeout radio
+$ takeout radio
 ```
 
 Start the server.

@@ -229,6 +229,7 @@ type AuthConfig struct {
 
 type ServerConfig struct {
 	Listen      string
+	KeyDir      string
 	DataDir     string
 	MediaDir    string
 	ImageClient client.Config
@@ -364,7 +365,7 @@ func configDefaults(v *viper.Viper) {
 
 	v.SetDefault("Music.Recent", "8760h") // 1 year
 	v.SetDefault("Music.RecentLimit", "50")
-	v.SetDefault("Music.SearchIndexName", "")
+	v.SetDefault("Music.SearchIndexName", "music")
 	v.SetDefault("Music.SearchLimit", "100")
 	v.SetDefault("Music.SimilarArtistsLimit", "10")
 	v.SetDefault("Music.SimilarReleases", "8760h") // +/- 1 year
@@ -487,52 +488,112 @@ func readConfig(v *viper.Viper) (*Config, error) {
 		return nil, err
 	}
 	rootDir := filepath.Dir(v.ConfigFileUsed())
-	return postProcessConfig(v, rootDir)
+	return makeConfig(v, rootDir)
 }
 
-func postProcessConfig(v *viper.Viper, rootDir string) (*Config, error) {
+func makeConfig(v *viper.Viper, rootDir string) (*Config, error) {
+	postProcessConfig(v, rootDir)
+
 	var config Config
-	var pathRegexp = regexp.MustCompile(`(file|dir|source)$`)
-	for _, k := range v.AllKeys() {
-		val := v.Get(k)
-		if _, ok := val.(string); ok {
-			sval := val.(string)
-			if k == "include" {
-				doInclude(v, sval, rootDir)
-			} else if strings.Contains(sval, "$") {
-				// expand $var or ${var} on any string values
-				v.Set(k, os.Expand(sval, func(s string) string {
-					r := v.Get(s)
-					if r == nil {
-						log.Panicf("'%s' not found for %s\n", s, sval)
-					}
-					if _, ok := r.(string); !ok {
-						log.Panicf("'%s' not a string for %s\n", s, sval)
-					}
-					return r.(string)
-				}))
-			}
-		} else if _, ok := val.([]any); ok {
-			if k == "include" {
-				for _, path := range val.([]any) {
-					doInclude(v, path.(string), rootDir)
-				}
-			}
-		}
-		if pathRegexp.MatchString(k) {
-			val := v.Get(k)
-			// resolve relative paths only
-			if strings.HasPrefix(val.(string), "/") == false &&
-				strings.Contains(val.(string), "@") == false &&
-				strings.Contains(val.(string), "::") == false {
-				val = strings.Join([]string{rootDir, val.(string)}, "/")
-				v.Set(k, val)
-			}
-		}
-	}
 	err := v.Unmarshal(&config)
 	config.Music.readMaps()
 	return &config, err
+}
+
+const opInclude = "include"
+
+func postProcessConfig(v *viper.Viper, rootDir string) {
+	for _, k := range v.AllKeys() {
+		if k == opInclude {
+			var paths []string
+			path := v.GetString(k)
+			if path != "" {
+				paths = append(paths, path)
+			} else {
+				p := v.GetStringSlice(k)
+				paths = append(paths, p...)
+			}
+			for _, path := range paths {
+				doInclude(v, path, rootDir)
+			}
+		}
+	}
+	v.Set(opInclude, "") // remove include
+	for _, k := range v.AllKeys() {
+		postProcessKey(v, rootDir, k)
+	}
+}
+
+func expandValue(v *viper.Viper, val string) string {
+	if strings.Contains(val, "$") {
+		// expand $var or ${var}
+		val = os.Expand(val, func(s string) string {
+			r := v.Get(s)
+			if r == nil {
+				log.Panicf("'%s' not found for %s\n", s, val)
+			}
+			if _, ok := r.(string); !ok {
+				log.Panicf("'%s' not a string for %s\n", s, val)
+			}
+			return r.(string)
+		})
+		if strings.Contains(val, "$") {
+			// keep going
+			val = expandValue(v, val)
+		}
+	}
+	return val
+}
+
+var pathRegexp = regexp.MustCompile(`(file|dir|source)$`)
+
+func resolvePathRef(v *viper.Viper, rootDir, key, val string) string {
+	if pathRegexp.MatchString(key) {
+		// resolve relative paths only
+		if strings.HasPrefix(val, "/") == false &&
+			strings.Contains(val, "@") == false &&
+			strings.Contains(val, "::") == false {
+			val = strings.Join([]string{rootDir, val}, "/")
+		}
+	}
+	return val
+}
+
+func processMap(v *viper.Viper, rootDir string, m map[string]any) {
+	for key, val := range m {
+		switch val.(type) {
+		case map[string]any:
+			// nested struct
+			processMap(v, rootDir, val.(map[string]any))
+		case string:
+			// string within struct
+			m[key] = expandValue(v, val.(string))
+		}
+	}
+}
+
+func postProcessKey(v *viper.Viper, rootDir, key string) {
+	val := v.Get(key)
+	switch val.(type) {
+	case []any:
+		// viper AllKeys includes nested structs as a.b.c except for
+		// arrays so they need to be handled separately
+		list := val.([]any)
+		for i, x := range list {
+			switch x.(type) {
+			case map[string]any:
+				// array of struct
+				processMap(v, rootDir, x.(map[string]any))
+			case string:
+				// array of string
+				list[i] = expandValue(v, x.(string))
+			}
+		}
+	case string:
+		sval := expandValue(v, v.GetString(key))
+		sval = resolvePathRef(v, rootDir, key, sval)
+		v.Set(key, sval)
+	}
 }
 
 // Include directive can be used as follows to include files from various
@@ -546,7 +607,6 @@ func postProcessConfig(v *viper.Viper, rootDir string) (*Config, error) {
 //   - https://host/path/to/file.yaml
 //
 // include: file.yaml # or any of the above
-//
 func doInclude(v *viper.Viper, path, rootDir string) {
 	if strings.Contains(path, "://") == false &&
 		strings.HasPrefix(path, "/") == false {
@@ -557,9 +617,7 @@ func doInclude(v *viper.Viper, path, rootDir string) {
 	if err != nil {
 		log.Panicf("include '%s': %s", path, err)
 	}
-	// use included config to (re)set this value in
-	// current config
-	//v.Set(key, vv.Get(key))
+	// use included config to (re)set this value in the parent config
 	for _, k := range vv.AllKeys() {
 		v.Set(k, vv.Get(k))
 	}
@@ -627,7 +685,7 @@ func TestingConfig() (*Config, error) {
 	v.SetDefault("Podcast.SearchIndexName", "")
 	v.SetDefault("Video.SearchIndexName", "")
 
-	return postProcessConfig(v, "/tmp")
+	return makeConfig(v, "/tmp")
 }
 
 var configFile, configPath, configName string
@@ -644,7 +702,7 @@ func SetConfigName(name string) {
 	configName = name
 }
 
-// GetConfig uses viper loads the default configuration.
+// GetConfig uses viper to load the default configuration.
 func GetConfig() (*Config, error) {
 	v := viper.New()
 	if configFile != "" {
@@ -662,8 +720,8 @@ func GetConfig() (*Config, error) {
 
 var dirConfigCache = make(map[string]interface{})
 
-// LoadConfig uses viper to load a config file in the provided directory.  The
-// result is returned as a Config and cached.
+// LoadConfig uses viper to load a config file in the provided directory. The
+// result is cached.
 func LoadConfig(dir string) (*Config, error) {
 	if val, ok := dirConfigCache[dir]; ok {
 		switch val.(type) {
@@ -691,6 +749,29 @@ func LoadConfig(dir string) (*Config, error) {
 	}
 	return c, err
 }
+
+// func loadConfigs(dirs []string) (*viper.Viper, error) {
+// 	result := viper.New()
+// 	for _, dir := range dirs {
+// 		v, err := loadConfig(dir)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		for _, k := range v.AllKeys() {
+// 			// merge into result
+// 			result.Set(k, v.Get(k))
+// 		}
+// 	}
+// 	return result, nil
+// }
+
+// func LoadConfig(dirs []string) (*Config, error) {
+// 	v, err := loadConfigs(dirs)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return readConfig(v)
+// }
 
 func gormLogger(name string) logger.Interface {
 	return g.Logger(name)

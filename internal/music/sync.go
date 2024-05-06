@@ -1056,6 +1056,7 @@ func (m *Music) syncIndexFor(artists []Artist) error {
 	for _, a := range artists {
 		log.Printf("index for %s\n", a.Name)
 		index, err := m.artistIndex(&a)
+		//log.Println(index, err)
 		if err != nil {
 			return err
 		}

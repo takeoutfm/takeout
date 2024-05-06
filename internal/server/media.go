@@ -64,6 +64,8 @@ func mediaConfig(root *config.Config, mediaName string) (*config.Config, error) 
 	path := strings.Join([]string{root.Server.MediaDir, mediaName}, "/")
 	// load relative media configuration
 	userConfig, err := config.LoadConfig(path)
+	// XXX merge, copy server config for now
+	userConfig.Server = root.Server
 	if err != nil {
 		return nil, err
 	}
