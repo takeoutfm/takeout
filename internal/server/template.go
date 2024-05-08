@@ -35,6 +35,7 @@ import (
 	"github.com/takeoutfm/takeout/model"
 )
 
+//go:embed res/static
 var resStatic embed.FS
 
 func mountResFS(resFS embed.FS) http.FileSystem {
@@ -45,6 +46,7 @@ func mountResFS(resFS embed.FS) http.FileSystem {
 	return http.FS(fsys)
 }
 
+//go:embed res/template
 var resTemplates embed.FS
 
 func getTemplateFS(config *config.Config) fs.FS {
