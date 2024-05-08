@@ -377,11 +377,11 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Music.CoverSyncInterval", "24h")
 
 	// see https://wiki.musicbrainz.org/Release_Country
-	// v.SetDefault("Music.ReleaseCountries", []string{
-	// 	"US", // United States
-	// 	"XW", // Worldwide
-	// 	"XE", // Europe
-	// })
+	v.SetDefault("Music.ReleaseCountries", []string{
+		"US", // United States
+		"XW", // Worldwide
+		"XE", // Europe
+	})
 
 	v.SetDefault("Music.DB.Driver", "sqlite3")
 	v.SetDefault("Music.DB.Source", "music.db")
@@ -469,12 +469,8 @@ func configDefaults(v *viper.Viper) {
 		"https://feeds.twit.tv/twit.xml",
 		"https://feeds.twit.tv/sn.xml",
 		"https://feeds.twit.tv/twig.xml",
-		"https://feeds.twit.tv/floss.xml",
-		"https://www.pbs.org/newshour/feeds/rss/podcasts/show",
-		"http://feeds.feedburner.com/TEDTalks_audio",
 		"https://feeds.eff.org/howtofixtheinternet",
 		"https://feeds.npr.org/510019/podcast.xml", // all songs considered
-		"https://rss.art19.com/rotten-tomatoes-is-wrong",
 	})
 }
 
@@ -641,18 +637,18 @@ func includeConfig(path string) (*viper.Viper, error) {
 	return vv, nil
 }
 
-func TestConfig() (*Config, error) {
-	testDir := os.Getenv("TEST_CONFIG")
-	if testDir == "" {
-		return nil, ErrTestConfig
-	}
-	v := viper.New()
-	configDefaults(v)
-	v.SetConfigFile(filepath.Join(testDir, "test.yaml"))
-	v.SetDefault("Music.DB.Source", filepath.Join(testDir, "music.db"))
-	v.SetDefault("Auth.DB.Source", filepath.Join(testDir, "auth.db"))
-	return readConfig(v)
-}
+// func TestConfig() (*Config, error) {
+// 	testDir := os.Getenv("TEST_CONFIG")
+// 	if testDir == "" {
+// 		return nil, ErrTestConfig
+// 	}
+// 	v := viper.New()
+// 	configDefaults(v)
+// 	v.SetConfigFile(filepath.Join(testDir, "test.yaml"))
+// 	v.SetDefault("Music.DB.Source", filepath.Join(testDir, "music.db"))
+// 	v.SetDefault("Auth.DB.Source", filepath.Join(testDir, "auth.db"))
+// 	return readConfig(v)
+// }
 
 func TestingConfig() (*Config, error) {
 	v := viper.New()

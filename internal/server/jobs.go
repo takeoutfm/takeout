@@ -210,6 +210,18 @@ func syncPodcasts(config *config.Config, mediaConfig *config.Config) error {
 	return p.Sync()
 }
 
+func createStations(config *config.Config, mediaConfig *config.Config) error {
+	m := music.NewMusic(mediaConfig)
+	err := m.Open()
+	if err != nil {
+		return err
+	}
+	defer m.Close()
+	m.DeleteStations()
+	m.CreateStations()
+	return nil
+}
+
 func Job(config *config.Config, name string) error {
 	list, err := assignedMedia(config)
 	if err != nil {
@@ -248,6 +260,8 @@ func Job(config *config.Config, name string) error {
 			syncMusicSimilar(config, mediaConfig)
 		case "video":
 			syncVideo(config, mediaConfig)
+		case "stations":
+			createStations(config, mediaConfig)
 		}
 	}
 	return nil

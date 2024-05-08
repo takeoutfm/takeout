@@ -1,3 +1,8 @@
+## 0.14.1, 0.14.2
+
+- improved $ support in configs
+- added "takeout run"
+
 ## 0.14.0
 
 - use Go 1.22 routing enhancements (and remove pat)

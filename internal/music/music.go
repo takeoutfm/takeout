@@ -279,6 +279,10 @@ func (m *Music) ClearStations() {
 	m.clearStationPlaylists()
 }
 
+func (m *Music) DeleteStations() {
+	m.deleteStations()
+}
+
 func (m *Music) CreateStations() {
 	genres := m.config.Music.RadioGenres
 	if len(m.config.Music.RadioGenres) == 0 {

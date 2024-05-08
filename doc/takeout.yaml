@@ -48,5 +48,5 @@ Auth:
     Age: 5m
   FileToken:
     Issuer: takeout
-    SecretFile: ${Server.KeyDir}/code.key
+    SecretFile: ${Server.KeyDir}/file.key
     Age: 1h

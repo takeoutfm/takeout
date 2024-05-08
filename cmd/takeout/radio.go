@@ -24,6 +24,7 @@ import (
 
 var radioCreate bool
 var radioClear bool
+var radioDelete bool
 
 var radioCmd = &cobra.Command{
 	Use:   "radio",
@@ -49,6 +50,8 @@ func radio() error {
 		m.CreateStations()
 	} else if radioClear {
 		m.ClearStations()
+	} else if radioDelete {
+		m.DeleteStations()
 	}
 	return nil
 }
@@ -57,5 +60,6 @@ func init() {
 	radioCmd.Flags().StringVarP(&configFile, "config", "c", "", "config file")
 	radioCmd.Flags().BoolVarP(&radioCreate, "create", "n", true, "(re)create radio stations")
 	radioCmd.Flags().BoolVarP(&radioClear, "clear", "x", false, "clear cached radio stations")
+	radioCmd.Flags().BoolVarP(&radioDelete, "delete", "d", false, "delete radio stations")
 	rootCmd.AddCommand(radioCmd)
 }

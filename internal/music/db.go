@@ -832,6 +832,10 @@ func (m *Music) clearStationPlaylists() {
 	m.db.Exec(`update stations set playlist = ""`)
 }
 
+func (m *Music) deleteStations() {
+	m.db.Exec(`delete from stations`)
+}
+
 // Obtain user station by id.
 func (m *Music) LookupStation(id int) (Station, error) {
 	var s Station
