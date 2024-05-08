@@ -78,7 +78,7 @@ func TestPickDisamiguation(t *testing.T) {
 			t.Error("expect release")
 		}
 		if r.Country != "US" {
-			t.Error("expect us release")
+			t.Error("expect US release" + r.Country)
 		}
 		if r.Status != "Official" {
 			t.Error("expect official release")
@@ -136,7 +136,7 @@ func TestPickRelease(t *testing.T) {
 		t.Fatal("expect release")
 	}
 	if r.Country != "US" {
-		t.Error("expect us release")
+		t.Error("expect US release")
 	}
 	if r.FrontArtwork != true {
 		t.Error("expect release with front art")

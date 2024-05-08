@@ -23,7 +23,6 @@ package player
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -40,6 +39,7 @@ import (
 	"github.com/faiface/beep/wav"
 	"github.com/takeoutfm/takeout/client"
 	"github.com/takeoutfm/takeout/spiff"
+	"github.com/takeoutfm/takeout/lib/log"
 )
 
 type playing struct {
@@ -202,7 +202,7 @@ func (p *Player) handle(err error) {
 	if p.config != nil && p.config.OnError != nil {
 		p.config.OnError(p, err)
 	} else {
-		fmt.Println(err)
+		log.Println(err)
 	}
 }
 

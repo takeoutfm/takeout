@@ -71,13 +71,10 @@ func makeSecret(dir, file string) string {
 			panic(err)
 		}
 		secret := generateSecret(tokenSize)
-		fmt.Println("generating", path)
 		err = writeSecret(dir, file, secret)
 		if err != nil {
 			panic(err)
 		}
-	} else {
-		fmt.Println("using", path)
 	}
 	return path
 }

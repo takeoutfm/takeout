@@ -18,11 +18,11 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/takeoutfm/takeout/internal/config"
+	"github.com/takeoutfm/takeout/lib/log"
 )
 
 var rootCmd = &cobra.Command{
@@ -64,7 +64,6 @@ func getConfig() (*config.Config, error) {
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 }

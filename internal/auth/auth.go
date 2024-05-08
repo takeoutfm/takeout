@@ -30,6 +30,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/takeoutfm/takeout"
 	"github.com/takeoutfm/takeout/internal/config"
+	"github.com/takeoutfm/takeout/lib/log"
 	"golang.org/x/crypto/scrypt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -101,24 +102,24 @@ func NewAuth(config *config.Config) *Auth {
 	// ensure secrets exist before going any further
 	_, err := auth.readSecret(config.Auth.AccessToken)
 	if err != nil {
-		panic(ErrInvalidAccessTokenSecret)
+		log.Panicln(ErrInvalidAccessTokenSecret)
 	}
 	_, err = auth.readSecret(config.Auth.MediaToken)
 	if err != nil {
-		panic(ErrInvalidMediaTokenSecret)
+		log.Panicln(ErrInvalidMediaTokenSecret)
 	}
 	_, err = auth.readSecret(config.Auth.CodeToken)
 	if err != nil {
-		panic(ErrInvalidCodeTokenSecret)
+		log.Panicln(ErrInvalidCodeTokenSecret)
 	}
 	_, err = auth.readSecret(config.Auth.FileToken)
 	if err != nil {
-		panic(ErrInvalidCodeTokenSecret)
+		log.Panicln(ErrInvalidCodeTokenSecret)
 	}
 
 	err = auth.fileCache.Start()
 	if err != nil {
-		panic(err)
+		log.Panicln(err)
 	}
 
 	return auth

@@ -226,11 +226,11 @@ func TestResolveSearchRef(t *testing.T) {
 	}
 }
 
-func TestResolveRadioRef(t *testing.T) {
+func TestResolveStationRef(t *testing.T) {
 	ctx := NewTestContext(t)
 
 	var entries []spiff.Entry
-	entries, err := resolveRadioRef(ctx, TestStationID, entries)
+	entries, err := resolveStationRef(ctx, TestStationID, entries)
 	if err != nil {
 		t.Error(err)
 	}

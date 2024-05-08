@@ -31,40 +31,23 @@ import (
 
 	"github.com/takeoutfm/takeout/internal/config"
 	"github.com/takeoutfm/takeout/lib/date"
+	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/takeoutfm/takeout/model"
 )
 
-//go:embed res/static
 var resStatic embed.FS
 
 func mountResFS(resFS embed.FS) http.FileSystem {
 	fsys, err := fs.Sub(resFS, "res")
 	if err != nil {
-		panic(err)
+		log.Panicln(err)
 	}
 	return http.FS(fsys)
 }
 
-// func getStaticFS(config *config.Config) http.FileSystem {
-// 	// dev := false
-// 	// if dev {
-// 	// 	return http.FS(os.DirFS(fmt.Sprintf("%s/static", config.Server.WebDir)))
-// 	// }
-// 	fsys, err := fs.Sub(resStatic, "res")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return http.FS(fsys)
-// }
-
-//go:embed res/template
 var resTemplates embed.FS
 
 func getTemplateFS(config *config.Config) fs.FS {
-	// dev := false
-	// if dev {
-	// 	return os.DirFS(fmt.Sprintf("%s/template", config.Server.WebDir))
-	// }
 	return resTemplates
 }
 
@@ -195,7 +178,7 @@ func doFuncMap() template.FuncMap {
 			case string:
 				ref = fmt.Sprintf("/music/search?q=%s", url.QueryEscape(o.(string)))
 			case model.Station:
-				ref = fmt.Sprintf("/music/radio/%d", o.(model.Station).ID)
+				ref = fmt.Sprintf("/music/stations/%d", o.(model.Station).ID)
 			}
 			return ref
 		},

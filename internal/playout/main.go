@@ -25,6 +25,7 @@ import (
 	"syscall"
 
 	"github.com/takeoutfm/takeout/client"
+	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/takeoutfm/takeout/model"
 	"github.com/takeoutfm/takeout/player"
 	"github.com/takeoutfm/takeout/spiff"
@@ -135,7 +136,7 @@ func (playout Playout) Play(options PlayOptions) error {
 	}
 
 	onError := func(p *player.Player, err error) {
-		fmt.Printf("Got err %v\n", err)
+		log.Println(err)
 		p.Next()
 	}
 

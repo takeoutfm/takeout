@@ -26,6 +26,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/mattn/go-runewidth"
 	"github.com/qeesung/image2ascii/ascii"
+	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/takeoutfm/takeout/player"
 )
 
@@ -37,7 +38,7 @@ func NewVisualView() Viewer {
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
 	screen, err := tcell.NewScreen()
 	if err != nil {
-		panic(err)
+		log.Panicln(err)
 	}
 	return &VisualView{screen: screen}
 }
@@ -45,7 +46,7 @@ func NewVisualView() Viewer {
 func (v VisualView) OnStart(p *player.Player) {
 	err := v.screen.Init()
 	if err != nil {
-		panic(err)
+		log.Panicln(err)
 	}
 
 	events := make(chan tcell.Event)
@@ -96,7 +97,7 @@ func (v VisualView) OnTrack(p *player.Player) {
 }
 
 func (v VisualView) OnError(p *player.Player, err error) {
-	fmt.Printf("Error %v\n", err)
+	log.Printf("Error %v\n", err)
 }
 
 func (v VisualView) OnStop() {
@@ -139,7 +140,7 @@ func emitStr(s tcell.Screen, x, y int, style tcell.Style, str string) {
 		w := runewidth.RuneWidth(c)
 		if w == 0 {
 			comb = []rune{c}
- 			c = ' '
+			c = ' '
 			w = 1
 		}
 		s.SetContent(x, y, c, comb, style)

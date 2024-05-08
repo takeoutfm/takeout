@@ -538,8 +538,8 @@ func (m *MusicBrainz) SearchArtist(name string) *Artist /*(a *music.Artist, tags
 	if len(artists) > 1 {
 		// multiple matches
 		for index, artist := range artists {
-			fmt.Printf("ID: %s Name: %-25sScore: %d\n",
-				artist.ID, artist.Name, artist.Score)
+			// fmt.Printf("ID: %s Name: %-25sScore: %d\n",
+			// 	artist.ID, artist.Name, artist.Score)
 			if strings.EqualFold(name, artist.Name) {
 				// try to use a close match
 				pick = index

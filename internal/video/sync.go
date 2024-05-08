@@ -18,7 +18,6 @@
 package video
 
 import (
-	"fmt"
 	"regexp"
 	"sort"
 	"strings"
@@ -109,29 +108,29 @@ func (v *Video) syncBucket(bucket bucket.Bucket, lastSync time.Time) error {
 		}
 		title := matches[1]
 		year := matches[2]
-		opt := ""
-		if len(matches) > 3 {
-			opt = matches[4]
-		}
-		fmt.Printf("%s (%s) - %s\n", title, year, opt)
+		// opt := ""
+		// if len(matches) > 3 {
+		// 	opt = matches[4]
+		// }
+		//fmt.Printf("%s (%s) - %s\n", title, year, opt)
 
 		results, err := client.MovieSearch(title)
 		if err != nil {
-			fmt.Printf("err is %s\n", err)
+			log.Println(err)
 			continue
 		}
 
 		index := make(search.IndexMap)
 
 		for _, r := range results {
-			fmt.Printf("result %s %s\n", r.Title, r.ReleaseDate)
+			//fmt.Printf("result %s %s\n", r.Title, r.ReleaseDate)
 			if fuzzyName(title) == fuzzyName(r.Title) &&
 				strings.Contains(r.ReleaseDate, year) {
-				fmt.Printf("--> matched: %s (%s)\n", r.Title, r.ReleaseDate)
+				log.Println("matched", r.Title, r.ReleaseDate)
 				fields, err := v.syncMovie(client, r.ID,
 					o.Key, o.Size, o.ETag, o.LastModified)
 				if err != nil {
-					fmt.Printf("err %s\n", err)
+					log.Println(err)
 					continue
 				}
 				index[o.Key] = fields

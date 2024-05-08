@@ -32,6 +32,7 @@ import (
 	"github.com/takeoutfm/takeout/lib/bucket"
 	"github.com/takeoutfm/takeout/lib/fanart"
 	"github.com/takeoutfm/takeout/lib/lastfm"
+	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/takeoutfm/takeout/lib/musicbrainz"
 	"github.com/takeoutfm/takeout/lib/search"
 	. "github.com/takeoutfm/takeout/model"
@@ -344,7 +345,7 @@ func (m *Music) CreateStations() {
 	for _, v := range m.config.Music.RadioStreams {
 		src, err := json.Marshal(v.Source)
 		if err != nil {
-			fmt.Printf("json err %v\n", err)
+			log.Println(err)
 			continue
 		}
 		ref := string(src)

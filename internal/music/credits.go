@@ -231,7 +231,7 @@ func addField(c search.FieldMap, key string, value interface{}) search.FieldMap 
 					s = append(s, svalue)
 					c[k] = s
 				default:
-					panic("bad field types")
+					log.Panicln("bad field types")
 				}
 			} else {
 				// single string

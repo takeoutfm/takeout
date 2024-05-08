@@ -320,8 +320,8 @@ func searchTracks(ctx Context, u *url.URL) []model.Track {
 	return tracks
 }
 
-// /music/radio/{id,name}
-func resolveRadioRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.Entry, error) {
+// /music/stations/{id,name}
+func resolveStationRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.Entry, error) {
 	s, err := ctx.FindStation(id)
 	if err != nil {
 		s, err = ctx.FindStation("name:" + id)
@@ -515,7 +515,7 @@ var (
 	releasesRegexp     = regexp.MustCompile(`^/music/releases/([0-9a-zA-Z-]+)/tracks$`)
 	tracksRegexp       = regexp.MustCompile(`^/music/tracks/([\d]+)$`)
 	searchRegexp       = regexp.MustCompile(`^/music/search.*`)
-	radioRegexp        = regexp.MustCompile(`^/music/stations/([\w ]+)$`)
+	stationsRegexp     = regexp.MustCompile(`^/music/stations/([\w ]+)$`)
 	moviesRegexp       = regexp.MustCompile(`^/movies/([\d]+)$`)
 	seriesRegexp       = regexp.MustCompile(`^/podcasts/series/([\d]+)$`)
 	episodesRegexp     = regexp.MustCompile(`^/podcasts/episodes/([\d]+)$`)
@@ -569,9 +569,9 @@ func Resolve(ctx Context, plist *spiff.Playlist) (err error) {
 			continue
 		}
 
-		matches = radioRegexp.FindStringSubmatch(pathRef)
+		matches = stationsRegexp.FindStringSubmatch(pathRef)
 		if matches != nil {
-			entries, err = resolveRadioRef(ctx, matches[1], entries)
+			entries, err = resolveStationRef(ctx, matches[1], entries)
 			if err != nil {
 				return err
 			}

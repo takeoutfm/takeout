@@ -18,9 +18,9 @@
 package playout
 
 import (
-	"fmt"
 	"strings"
 
+	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/takeoutfm/takeout/player"
 )
 
@@ -52,11 +52,12 @@ func (SimpleView) OnTrack(p *player.Player) {
 	if len(p.Title()) > 0 {
 		a = append(a, p.Title())
 	}
-	fmt.Println(strings.Join(a, " / "))
+
+	log.Println(strings.Join(a, " / "))
 }
 
 func (SimpleView) OnError(p *player.Player, err error) {
-	fmt.Printf("Error %v\n", err)
+	log.Printf("Error %v\n", err)
 }
 
 func (SimpleView) OnStop() {

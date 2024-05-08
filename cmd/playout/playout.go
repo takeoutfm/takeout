@@ -18,12 +18,10 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/takeoutfm/takeout/internal/playout"
+	"github.com/takeoutfm/takeout/lib/log"
 )
 
 func systemConfig() *viper.Viper {
@@ -58,14 +56,13 @@ func NewPlayout() *playout.Playout {
 	config := systemConfig()
 	err := config.ReadInConfig()
 	if err != nil {
-		panic(err)
+		log.Panicln(err)
 	}
 
 	tokens := tokensConfig()
 	err = tokens.ReadInConfig()
 	if err != nil {
-		// TODO err is ok sometimes
-		fmt.Printf("tokens %s\n", err)
+		log.Println(err)
 	}
 
 	return playout.NewPlayout(config, tokens)
@@ -73,7 +70,6 @@ func NewPlayout() *playout.Playout {
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 }

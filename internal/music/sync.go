@@ -481,15 +481,18 @@ var unwantedDisambRegexp = regexp.MustCompile(`(exclusive|deluxe|edition)`)
 
 func (m *Music) pickRelease(releases []Release) *Release {
 	first, second, third, fourth := -1, -1, -1, -1
+	firstRank := -1
 	countryMap := m.countryMap()
 	for i, r := range releases {
-		_, prefCountry := countryMap[r.Country]
-		if prefCountry && r.FrontArtwork && r.Disambiguation == "" && r.Official() {
-			first = i
-			break
+		rank, preferred := countryMap[r.Country]
+		if preferred && r.FrontArtwork && r.Disambiguation == "" && r.Official() {
+			if first == -1 || rank < firstRank {
+				first = i
+				firstRank = rank
+			}
 		} else if r.FrontArtwork && r.Disambiguation == "" && r.Official() {
 			second = i
-		} else if r.FrontArtwork && prefCountry {
+		} else if r.FrontArtwork && preferred {
 			if unwantedDisambRegexp.MatchString(r.Disambiguation) {
 				fourth = i
 			} else {
@@ -520,6 +523,7 @@ func (m *Music) pickRelease(releases []Release) *Release {
 func (m *Music) pickDisambiguation(t *Track, releases []Release) *Release {
 	countryMap := m.countryMap()
 	first, second, third := -1, -1, -1
+	firstRank := -1
 	for i, r := range releases {
 		name1 := fmt.Sprintf("%s (%s)", r.Name, r.Disambiguation)
 		name2 := fmt.Sprintf("%s - %s", r.Name, r.Disambiguation)
@@ -531,16 +535,20 @@ func (m *Music) pickDisambiguation(t *Track, releases []Release) *Release {
 			strings.EqualFold(name3, t.Release) ||
 			strings.EqualFold(name4, t.Release) ||
 			strings.EqualFold(name5, t.Release) {
-			_, prefCountry := countryMap[r.Country]
-			if prefCountry && r.FrontArtwork && r.Official() {
-				first = i
-				break
+			rank, preferred := countryMap[r.Country]
+			if preferred && r.FrontArtwork && r.Official() {
+				if first == -1 || rank < firstRank {
+					first = i
+					firstRank = rank
+				}
 			} else if r.FrontArtwork {
 				second = i
 			} else {
 				third = i
 			}
-		}
+		}//  else {
+		// 	fmt.Print("no match %s\n", t.Release)
+		// }
 	}
 	var r *Release
 	if first != -1 {

@@ -19,7 +19,6 @@ package podcast
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -46,7 +45,6 @@ func (p *Podcast) SyncSince(lastSync time.Time) error {
 	for _, url := range p.config.Podcast.Series {
 		err := p.syncPodcast(url)
 		if err != nil {
-			fmt.Printf("err %s\n", err)
 			return err
 		}
 	}

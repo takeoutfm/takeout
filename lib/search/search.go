@@ -20,9 +20,9 @@
 package search
 
 import (
-	"fmt"
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/keyword"
+	"path/filepath"
 	"strings"
 )
 
@@ -64,7 +64,7 @@ func (s *search) Open(name string, keywords []string) error {
 
 	path := "" // in memory
 	if s.config.IndexDir != "" && name != "" {
-		path = fmt.Sprintf("%s/%s.bleve", s.config.IndexDir, name)
+		path = filepath.Join(s.config.IndexDir, name+".bleve")
 	} else if name != "" {
 		path = name
 	}
@@ -73,11 +73,9 @@ func (s *search) Open(name string, keywords []string) error {
 	if err == bleve.ErrorIndexPathExists {
 		index, err = bleve.Open(path)
 		if err != nil {
-			fmt.Printf("bleve %s err %s\n", path, err)
 			return err
 		}
 	} else if err != nil {
-		fmt.Printf("bleve %s err %s\n", path, err)
 		return err
 	}
 	s.index = index
@@ -102,7 +100,6 @@ func (s *search) Search(q string, limit int) ([]string, error) {
 		return nil, err
 	}
 	var keys []string
-	//fmt.Printf("search `%s` - %d hits %d\n", q, limit, len(searchResult.Hits))
 	for _, hit := range searchResult.Hits {
 		keys = append(keys, hit.ID)
 	}
