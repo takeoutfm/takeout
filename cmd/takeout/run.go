@@ -20,6 +20,7 @@ package main
 import (
 	"fmt"
 	rando "math/rand"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,21 +31,24 @@ import (
 	"github.com/takeoutfm/takeout/internal/auth"
 	"github.com/takeoutfm/takeout/internal/config"
 	"github.com/takeoutfm/takeout/internal/server"
+	"github.com/takeoutfm/takeout/lib/log"
 )
+
+var options *viper.Viper
 
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "takeout server",
 	Long:  `TODO`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return run()
+		return run(options)
 	},
 }
 
 const (
 	passwordSize = 12
-	tokenSize  = 16
-	secretChars = "0123456789abcdefghijklmnpqrstuvwxyzABCDEFGHILKMNOPQRSTUVWXYZ~`!@#$%^&*()_-+={[}];:,<.>/?"
+	tokenSize    = 16
+	secretChars  = "0123456789abcdefghijklmnpqrstuvwxyzABCDEFGHILKMNOPQRSTUVWXYZ~`!@#$%^&*()_-+={[}];:,<.>/?"
 )
 
 func generateSecret(size int) string {
@@ -84,35 +88,84 @@ func writeConfig(dir, file string, content []string) error {
 	return os.WriteFile(path, []byte(strings.Join(content, "\n")), 0600)
 }
 
-func addUser(cfg *config.Config, userid, mediaName string) (string, error) {
+func addUser(cfg *config.Config, userid, password, mediaName string) (bool, error) {
+	added := false
 	a := auth.NewAuth(cfg)
 	err := a.Open()
 	if err != nil {
-		return "", err
+		return false, err
 	}
-
-	var password string
 	_, err = a.User(userid)
 	if err != nil {
-		password = generateSecret(passwordSize)
 		err = a.AddUser(userid, password)
 		if err != nil {
-			return "", err
+			return false, err
 		}
+		added = true
 		err = a.AssignMedia(userid, mediaName)
 		if err != nil {
-			return "", err
+			return added, err
 		}
 	}
-	return password, nil
+	return added, nil
 }
 
-var takeoutDir string
-var cacheDir string
-var musicDir string
-var moviesDir string
+func run(opts *viper.Viper) error {
+	logFile := opts.GetString("log")
+	if logFile != "" {
+		file, err := os.OpenFile(logFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+		log.CheckError(err)
+		log.SetOutput(file)
+	}
 
-func run() error {
+	err := createConfig(opts)
+	if err != nil {
+		return err
+	}
+
+	os.Chdir(opts.GetString("dir"))
+
+	cfg, err := getConfig()
+	if err != nil {
+		return err
+	}
+
+	// add user as needed
+	userid := opts.GetString("user")
+	password := opts.GetString("password")
+	mediaName := opts.GetString("name")
+	newPassword := false
+	if password == "" {
+		newPassword = true
+		password = generateSecret(passwordSize)
+	}
+	added, err := addUser(cfg, user, password, mediaName)
+
+	if opts.GetBool("setup_only") == true {
+		if added && newPassword {
+			fmt.Println("userid", userid, "password", password)
+		}
+		return nil
+	}
+
+	// run sync jobs
+	jobs := []string{"media", "stations"}
+	for _, job := range jobs {
+		server.Job(cfg, job)
+	}
+
+	if added && newPassword {
+		fmt.Println("userid", userid, "password", password)
+	}
+
+	// start the server
+	return server.Serve(cfg)
+}
+
+func createConfig(opts *viper.Viper) error {
+	takeoutDir := opts.GetString("dir")
+	cacheDir := opts.GetString("cache")
+
 	os.MkdirAll(takeoutDir, 0700)
 	os.MkdirAll(cacheDir, 0700)
 
@@ -142,54 +195,85 @@ func run() error {
 	})
 
 	// create media configuration
-	mymedia := "mymedia"
-	myMediaDir := filepath.Join(mediaDir, mymedia)
+	mediaName := opts.GetString("name")
+	myMediaDir := filepath.Join(mediaDir, mediaName)
 	os.MkdirAll(myMediaDir, 0700)
 	config := []string{"Buckets:"}
-	if musicDir != "" {
-		config = append(config,
-			"  - Media: music",
-			"    FS:",
-			"      Root: " + musicDir, "")
+
+	doit := func(mediaType, uri string) {
+		if uri != "" {
+			u, err := url.Parse(uri)
+			if err != nil {
+				panic(err)
+			}
+			if u.Scheme == "s3" {
+				config = append(config,
+					"  - Media: "+mediaType,
+					"    S3:",
+					"      Endpoint: "+opts.GetString("endpoint"),
+					"      Region: "+opts.GetString("region"),
+					"      AccessKeyID: "+opts.GetString("access_key_id"),
+					"      SecretAccessKey: "+opts.GetString("secret_access_key"),
+					"      BucketName: "+u.Host,
+					"      ObjectPrefix: "+strings.TrimPrefix(u.Path, "/"),
+					"      URLExpiration: "+"15m",
+					"")
+			} else {
+				config = append(config,
+					"  - Media: "+mediaType,
+					"    FS:",
+					"      Root: "+u.Path, "")
+			}
+		}
 	}
-	if moviesDir != "" {
-		config = append(config,
-			"  - Media: video",
-			"    FS:",
-			"      Root: " + moviesDir, "")
-	}
+	doit("music", opts.GetString("music"))
+	doit("video", opts.GetString("video"))
+
 	config = append(config,
 		"Client:",
-		"  CacheDir: " + httpCacheDir, "")
+		"  CacheDir: "+httpCacheDir, "")
 	writeConfig(myMediaDir, "config.yaml", config)
 
-	os.Chdir(takeoutDir)
-	cfg, err := getConfig()
-	if err != nil {
-		return err
+	return nil
+}
+
+var optFile string
+
+func makeOptions() *viper.Viper {
+	v := viper.New()
+	v.AutomaticEnv()
+	if optFile != "" {
+		v.SetConfigFile(configFile)
+	} else {
+		v.SetConfigName("config")
+		v.SetConfigType("yaml")
+		v.AddConfigPath(".")
+		v.AddConfigPath("$HOME/.config/takeout")
+		v.AddConfigPath("$HOME/.takeout")
 	}
-
-	// add user as needed
-	userid := "takeout"
-	password, err := addUser(cfg, userid, mymedia)
-
-	// sync media
-	server.Job(cfg, "media")
-	server.Job(cfg, "stations")
-
-	if password != "" {
-		fmt.Println("userid", userid, "password", password)
-	}
-
-	return server.Serve(cfg)
+	v.ReadInConfig()
+	return v
 }
 
 func init() {
+	runCmd.Flags().StringVar(&optFile, "file", "", "configuration file")
+	runCmd.Flags().Bool("setup_only", false, "Setup configuration only")
 	runCmd.Flags().String("listen", "127.0.0.1:3000", "Address to listen on")
-	runCmd.Flags().StringVar(&takeoutDir, "dir", "/var/lib/takeout", "Takeout directory")
-	runCmd.Flags().StringVar(&cacheDir, "cache", "/var/cache/takeout", "Takeout cache directory")
-	runCmd.Flags().StringVar(&musicDir, "music", "", "Music directory")
-	runCmd.Flags().StringVar(&moviesDir, "movies", "", "Movies directory")
+	runCmd.Flags().String("log", "", "Log output file")
+	runCmd.Flags().String("user", "takeout", "Takeout userid")
+	runCmd.Flags().String("password", "", "Takeout password")
+	runCmd.Flags().String("dir", "/var/lib/takeout", "Takeout directory")
+	runCmd.Flags().String("cache", "/var/cache/takeout", "Takeout cache directory")
+	runCmd.Flags().String("name", "mymedia", "media name")
+	runCmd.Flags().String("music", "", "dir or s3://bucket/prefix")
+	runCmd.Flags().String("movies", "", "dir or s3://bucket/prefix")
+	runCmd.Flags().String("endpoint", os.Getenv("AWS_ENDPOINT_URL"), "s3 endpoint (host name)")
+	runCmd.Flags().String("region", os.Getenv("AWS_DEFAULT_REGION"), "s3 region")
+	runCmd.Flags().String("access_key_id", os.Getenv("AWS_ACCESS_KEY_ID"), "s3 access key id")
+	runCmd.Flags().String("secret_access_key", os.Getenv("AWS_SECRET_ACCESS_KEY"), "s3 secret access key")
+
+	options = makeOptions()
+	options.BindPFlags(runCmd.Flags())
+
 	rootCmd.AddCommand(runCmd)
-	viper.BindPFlag("Server.Listen", serveCmd.Flags().Lookup("listen"))
 }

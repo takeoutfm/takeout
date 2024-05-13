@@ -47,6 +47,8 @@ func job() error {
 
 func init() {
 	jobCmd.Flags().StringVarP(&configFile, "config", "c", "", "config file")
-	jobCmd.Flags().StringVarP(&jobName, "name", "n", "", "name of job")
+	jobCmd.Flags().StringVarP(
+		&jobName, "name", "n", "",
+		"backdrops, covers, fanart, lastfm, music, popular, podcasts, posters, profiles, similar, video, stations")
 	rootCmd.AddCommand(jobCmd)
 }

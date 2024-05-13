@@ -32,7 +32,7 @@ var userCmd = &cobra.Command{
 }
 
 var user, pass, media string
-var add, change bool
+var add, change, expire bool
 
 func doit() error {
 	cfg, err := getConfig()
@@ -67,6 +67,13 @@ func doit() error {
 		}
 	}
 
+	if expire && user != ""{
+		err := a.ExpireAll(user)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -77,5 +84,6 @@ func init() {
 	userCmd.Flags().StringVarP(&media, "media", "m", "", "media")
 	userCmd.Flags().BoolVarP(&add, "add", "a", false, "add")
 	userCmd.Flags().BoolVarP(&change, "change", "n", false, "change")
+	userCmd.Flags().BoolVarP(&expire, "expire", "x", false, "expire all sessions")
 	rootCmd.AddCommand(userCmd)
 }

@@ -19,10 +19,12 @@ package log
 
 import (
 	l "log"
+	"io"
 	"os"
 )
 
-type Logger interface {
+type logger interface {
+	SetOutput(io.Writer)
 	// Print followed by Panic
 	Panicf(format string, v ...interface{})
 	Panicln(v ...interface{})
@@ -34,39 +36,43 @@ type Logger interface {
 	Println(v ...interface{})
 }
 
-var logger = defaultLogger()
+var Logger = defaultLogger()
 
-func defaultLogger() Logger {
+func defaultLogger() logger {
 	return l.New(os.Stdout, "", l.LstdFlags)
+}
+
+func SetOutput(w io.Writer) {
+	Logger.SetOutput(w)
 }
 
 // Panic if err
 func CheckError(err error) {
 	if err != nil {
-		logger.Panicln(err)
+		Logger.Panicln(err)
 	}
 }
 
 func Panicf(format string, v ...interface{}) {
-	logger.Panicf(format, v...)
+	Logger.Panicf(format, v...)
 }
 
 func Panicln(v ...interface{}) {
-	logger.Panicln(v...)
+	Logger.Panicln(v...)
 }
 
 func Fatalf(format string, v ...interface{}) {
-	logger.Fatalf(format, v...)
+	Logger.Fatalf(format, v...)
 }
 
 func Fatalln(v ...interface{}) {
-	logger.Fatalln(v...)
+	Logger.Fatalln(v...)
 }
 
 func Printf(format string, v ...interface{}) {
-	logger.Printf(format, v...)
+	Logger.Printf(format, v...)
 }
 
 func Println(v ...interface{}) {
-	logger.Println(v...)
+	Logger.Println(v...)
 }

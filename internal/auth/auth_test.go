@@ -240,3 +240,28 @@ func TestNewFileToken(t *testing.T) {
 		t.Fatal("expect good token")
 	}
 }
+
+func TestExpireAll(t *testing.T) {
+	user := "defsub@defsub.com"
+	pass := "other&pass;test@_1234"
+
+	a := makeAuth(t)
+	session, err := a.Login(user, pass)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if session.Valid() == false {
+		t.Fatal("session should be valid")
+	}
+
+	err = a.ExpireAll(user)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := a.findSession(session.Token)
+	if s.Valid() == true {
+		t.Fatal("expire not valid")
+	}
+}

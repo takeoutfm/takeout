@@ -38,7 +38,6 @@ type S3Config struct {
 	SecretAccessKey string
 	BucketName      string
 	ObjectPrefix    string
-	UseSSL          bool
 	URLExpiration   time.Duration
 }
 

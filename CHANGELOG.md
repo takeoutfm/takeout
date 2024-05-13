@@ -1,3 +1,9 @@
+## 0.14.4, 0.14.5
+
+- fixed embeds
+- expanded "takeout run" options
+- added "takeout user --user userid --expire" to expire all sessions
+
 ## 0.14.3
 
 - fix template station ref

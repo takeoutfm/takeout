@@ -473,6 +473,17 @@ func (a *Auth) DeleteExpiredSessions() error {
 	return a.db.Unscoped().Where("expires < ?", now).Delete(Session{}).Error
 }
 
+// Expire all user sessions. This will expire all cookies and refresh tokens.
+// All other tokens will be valid until their ExpireAt.
+func (a *Auth) ExpireAll(userid string) error {
+	user, err := a.User(userid)
+	if err != nil {
+		return err
+	}
+	now := time.Now()
+	return a.db.Model(Session{}).Where("user = ?", user.Name).Updates(Session{Expires: now}).Error
+}
+
 func (a *Auth) SessionUser(session *Session) (*User, error) {
 	u, err := a.User(session.User)
 	if err != nil {

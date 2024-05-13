@@ -43,9 +43,9 @@ func (u *User) FirstMedia() string {
 	return list[0]
 }
 
-func (a *Auth) AssignMedia(email, media string) error {
+func (a *Auth) AssignMedia(userid, media string) error {
 	var u User
-	err := a.db.Where("name = ?", email).First(&u).Error
+	err := a.db.Where("name = ?", userid).First(&u).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		return ErrUserNotFound
 	}

@@ -345,7 +345,6 @@ func configDefaults(v *viper.Viper) {
 
 	// TODO apply as default
 	// v.SetDefault("Bucket.URLExpiration", "15m")
-	// v.SetDefault("Bucket.UseSSL", "true")
 
 	v.SetDefault("Client.CacheDir", ".httpcache")
 	v.SetDefault("Client.MaxAge", "720h") // 30 days in hours
@@ -745,29 +744,6 @@ func LoadConfig(dir string) (*Config, error) {
 	}
 	return c, err
 }
-
-// func loadConfigs(dirs []string) (*viper.Viper, error) {
-// 	result := viper.New()
-// 	for _, dir := range dirs {
-// 		v, err := loadConfig(dir)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		for _, k := range v.AllKeys() {
-// 			// merge into result
-// 			result.Set(k, v.Get(k))
-// 		}
-// 	}
-// 	return result, nil
-// }
-
-// func LoadConfig(dirs []string) (*Config, error) {
-// 	v, err := loadConfigs(dirs)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return readConfig(v)
-// }
 
 func gormLogger(name string) logger.Interface {
 	return g.Logger(name)

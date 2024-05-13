@@ -18,15 +18,14 @@
 package gorm
 
 import (
-	"log"
-	"os"
 	"time"
 
 	"gorm.io/gorm/logger"
+	"github.com/takeoutfm/takeout/lib/log"
 )
 
 var (
-	DebugLogger = logger.New(log.New(os.Stdout, "\r\n", log.LstdFlags),
+	DebugLogger = logger.New(log.Logger,
 		logger.Config{
 			SlowThreshold:             200 * time.Millisecond,
 			LogLevel:                  logger.Info,
@@ -34,7 +33,7 @@ var (
 			Colorful:                  true,
 		})
 
-	DefaultLogger = logger.New(log.New(os.Stdout, "\r\n", log.LstdFlags),
+	DefaultLogger = logger.New(log.Logger,
 		logger.Config{
 			SlowThreshold:             200 * time.Millisecond,
 			LogLevel:                  logger.Warn,
