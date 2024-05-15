@@ -60,6 +60,11 @@ var (
 	ErrInvalidFileTokenSecret   = errors.New("invalid file token secret")
 	ErrInvalidTokenSecret       = errors.New("invalid token secret")
 	ErrTokenExpired             = errors.New("token expired")
+	ErrMissingTOTP              = errors.New("missing totp")
+	ErrInvalidPasscodeIssuer    = errors.New("invalid passcode issuer")
+	ErrInvalidPasscode          = errors.New("invalid passcode")
+	ErrPasscodeRequired         = errors.New("passcode required")
+	ErrLoginFailed              = errors.New("login failed")
 )
 
 type User struct {
@@ -68,6 +73,7 @@ type User struct {
 	Key   []byte
 	Salt  []byte
 	Media string
+	TOTP  string
 }
 
 // A Session is an authenticated user login session associated with a token and
@@ -180,7 +186,7 @@ func (a *Auth) User(userid string) (User, error) {
 
 // Check will check if the provided userid and password match a user in the
 // database.
-func (a *Auth) Check(userid, pass string) (User, error) {
+func (a *Auth) check(userid, pass string) (User, error) {
 	u, err := a.User(userid)
 	if err != nil {
 		return u, ErrUserNotFound
@@ -198,9 +204,22 @@ func (a *Auth) Check(userid, pass string) (User, error) {
 	return u, nil
 }
 
+func (a *Auth) checkPasscode(u User, passcode string) (bool, error) {
+	if u.TOTP == "" {
+		return false, ErrMissingTOTP
+	}
+
+	secret, err := SecretFromURL(u.TOTP)
+	if err != nil {
+		return false, err
+	}
+
+	return ValidatePasscode(passcode, secret), nil
+}
+
 func CredentialsError(err error) bool {
 	switch err {
-	case ErrUserNotFound, ErrKeyMismatch:
+	case ErrUserNotFound, ErrKeyMismatch, ErrMissingTOTP:
 		return true
 	default:
 		return false
@@ -210,11 +229,14 @@ func CredentialsError(err error) bool {
 // Login will create a new login session after authenticating the userid and
 // password.
 func (a *Auth) Login(userid, pass string) (Session, error) {
-	u, err := a.Check(userid, pass)
+	u, err := a.loginCheck(userid, pass)
 	if err != nil {
 		return Session{}, err
 	}
-	session := a.session(&u)
+	if u == nil {
+		return Session{}, ErrLoginFailed
+	}
+	session := a.session(u)
 	err = a.createSession(&session)
 	if err != nil {
 		return Session{}, err
@@ -222,8 +244,53 @@ func (a *Auth) Login(userid, pass string) (Session, error) {
 	return session, err
 }
 
+func (a *Auth) loginCheck(userid, pass string) (*User, error) {
+	u, err := a.check(userid, pass)
+	if err != nil {
+		return nil, err
+	}
+	if u.TOTP != "" {
+		// user has TOTP, require a passcode login
+		return nil, ErrPasscodeRequired
+	}
+	return &u, nil
+}
+
+func (a *Auth) PasscodeLogin(userid, pass, passcode string) (Session, error) {
+	u, err := a.passcodeLoginCheck(userid, pass, passcode)
+	if err != nil {
+		return Session{}, err
+	}
+	if u == nil {
+		return Session{}, ErrLoginFailed
+	}
+	session := a.session(u)
+	err = a.createSession(&session)
+	if err != nil {
+		return Session{}, err
+	}
+	return session, err
+}
+
+func (a *Auth) passcodeLoginCheck(userid, pass, passcode string) (*User, error) {
+	u, err := a.check(userid, pass)
+	if err != nil {
+		return nil, err
+	}
+	valid, err := a.checkPasscode(u, passcode)
+	if err != nil {
+		return nil, err
+	}
+	if valid == false {
+		return nil, ErrInvalidPasscode
+	}
+	return &u, err
+}
+
 // ChangePass changes the password associated with the provided userid.  User
 // Check prior to this if you'd like to verify the current password.
+//
+// TODO this should trigger a TOTP change as well.
 func (a *Auth) ChangePass(userid, newpass string) error {
 	u, err := a.User(userid)
 	if err != nil {
@@ -245,6 +312,23 @@ func (a *Auth) ChangePass(userid, newpass string) error {
 	u.Key = key
 
 	return a.db.Model(u).Update("salt", u.Salt).Update("key", u.Key).Error
+}
+
+// assign a TOTP to a user
+//
+// The TOTP secret is not stored encrypted. May change this later but would
+// need a way to protect passwords used to encrypt secrets.
+//
+// Entire otpauth URL is stored to support future use of different parameters.
+func (a *Auth) AssignTOTP(userid, url string) error {
+	u, err := a.User(userid)
+	if err != nil {
+		return ErrUserNotFound
+	}
+
+	u.TOTP = url
+
+	return a.db.Model(u).Update("totp", u.TOTP).Error
 }
 
 // readSecret returns secret from configured string or file

@@ -36,8 +36,14 @@ const (
 )
 
 // doCodeAuth creates a login session and binds to the provided code value.
-func doCodeAuth(ctx Context, user, pass, value string) error {
-	session, err := doLogin(ctx, user, pass)
+func doCodeAuth(ctx Context, user, pass, passcode, value string) error {
+	var err error
+	var session auth.Session
+	if passcode == "" {
+		session, err = doLogin(ctx, user, pass)
+	} else {
+		session, err = doPasscodeLogin(ctx, user, pass, passcode)
+	}
 	if err != nil {
 		return err
 	}

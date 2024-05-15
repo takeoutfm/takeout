@@ -265,3 +265,47 @@ func TestExpireAll(t *testing.T) {
 		t.Fatal("expire not valid")
 	}
 }
+
+func TestPasscode(t *testing.T) {
+	user := "defotp"
+	pass := "test_Pa$$/1234,;&w0rd"
+	url := "otpauth://totp/takeout.fm:defotp?algorithm=SHA1&digits=6&issuer=takeout.fm&period=30&secret=XNTZPZRUIKTRKRDUAPW3AWHEOY7AXKOO"
+
+	a := makeAuth(t)
+	err := a.AddUser(user, pass)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = a.AssignTOTP(user, url)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = a.Login(user, pass)
+	if err == nil {
+		t.Fatal("expected to fail, missing totp")
+	}
+
+	secret, err := SecretFromURL(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	passcode, err := GeneratePasscode(secret)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	session, err := a.PasscodeLogin(user, pass, passcode)
+	if err != nil {
+		t.Fatal("expected session")
+	}
+
+	if (session.User != user) {
+		t.Error("expect user")
+	}
+	if len(session.Token) == 0 {
+		t.Error("expect cookie")
+	}
+}

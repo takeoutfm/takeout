@@ -209,6 +209,10 @@ type SetlistAPIConfig struct {
 	ApiKey string
 }
 
+type TOTPConfig struct {
+	Issuer string
+}
+
 type TokenConfig struct {
 	Issuer     string
 	Age        time.Duration
@@ -225,6 +229,7 @@ type AuthConfig struct {
 	MediaToken    TokenConfig
 	CodeToken     TokenConfig
 	FileToken     TokenConfig
+	TOTP          TOTPConfig
 }
 
 type ServerConfig struct {

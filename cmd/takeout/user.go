@@ -18,8 +18,11 @@
 package main
 
 import (
+	"fmt"
+	"github.com/mdp/qrterminal/v3"
 	"github.com/spf13/cobra"
 	"github.com/takeoutfm/takeout/internal/auth"
+	"os"
 )
 
 var userCmd = &cobra.Command{
@@ -32,7 +35,7 @@ var userCmd = &cobra.Command{
 }
 
 var user, pass, media string
-var add, change, expire bool
+var add, change, expire, generateTOTP bool
 
 func doit() error {
 	cfg, err := getConfig()
@@ -67,11 +70,33 @@ func doit() error {
 		}
 	}
 
-	if expire && user != ""{
+	if expire && user != "" {
 		err := a.ExpireAll(user)
 		if err != nil {
 			return err
 		}
+	}
+
+	if generateTOTP && user != "" {
+		url, err := auth.GenerateTOTP(cfg.Auth.TOTP, user)
+		if err != nil {
+			return err
+		}
+
+		err = a.AssignTOTP(user, url)
+		if err != nil {
+			return err
+		}
+
+		config := qrterminal.Config{
+			Level:     qrterminal.L,
+			Writer:    os.Stdout,
+			BlackChar: qrterminal.WHITE,
+			WhiteChar: qrterminal.BLACK,
+			QuietZone: 1,
+		}
+		qrterminal.GenerateWithConfig(url, config)
+		fmt.Println(url)
 	}
 
 	return nil
@@ -85,5 +110,6 @@ func init() {
 	userCmd.Flags().BoolVarP(&add, "add", "a", false, "add")
 	userCmd.Flags().BoolVarP(&change, "change", "n", false, "change")
 	userCmd.Flags().BoolVarP(&expire, "expire", "x", false, "expire all sessions")
+	userCmd.Flags().BoolVar(&generateTOTP, "generate_totp", false, "generate & assign user a TOTP")
 	rootCmd.AddCommand(userCmd)
 }

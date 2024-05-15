@@ -37,14 +37,20 @@ const (
 	LinkRedirect    = LinkPage
 	LoginRedirect   = LoginPage
 
-	FormUser = "user"
-	FormPass = "pass"
-	FormCode = "code"
+	FormUser     = "user"
+	FormPass     = "pass"
+	FormCode     = "code"
+	FormPassCode = "passcode"
 )
 
 // doLogin creates a login session for the provided user or returns an error
 func doLogin(ctx Context, user, pass string) (auth.Session, error) {
 	return ctx.Auth().Login(user, pass)
+}
+
+// doPasscodeLogin creates a login session for the provided user or returns an error
+func doPasscodeLogin(ctx Context, user, pass, passcode string) (auth.Session, error) {
+	return ctx.Auth().PasscodeLogin(user, pass, passcode)
 }
 
 // upgradeContext creates a full context based on user and media configuration.
@@ -74,7 +80,15 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	user := r.Form.Get(FormUser)
 	pass := r.Form.Get(FormPass)
-	session, err := doLogin(ctx, user, pass)
+	passcode := r.Form.Get(FormPassCode)
+
+	var err error
+	var session auth.Session
+	if passcode == "" {
+		session, err = doLogin(ctx, user, pass)
+	} else {
+		session, err = doPasscodeLogin(ctx, user, pass, passcode)
+	}
 	if err != nil {
 		authErr(w, ErrUnauthorized)
 		return
@@ -94,8 +108,9 @@ func linkHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	user := r.Form.Get(FormUser)
 	pass := r.Form.Get(FormPass)
+	passcode := r.Form.Get(FormPassCode)
 	value := r.Form.Get(FormCode)
-	err := doCodeAuth(ctx, user, pass, value)
+	err := doCodeAuth(ctx, user, pass, passcode, value)
 	if err == nil {
 		// success
 		// Use 303 for PRG
@@ -209,6 +224,7 @@ func Serve(config *config.Config) error {
 	// code auth
 	mux.Handle("GET /api/code", requestHandler(ctx, apiCodeGet))
 	mux.Handle("POST /api/code", codeTokenAuthHandler(ctx, apiCodeCheck))
+	mux.Handle("POST /api/link", requestHandler(ctx, apiLink))
 
 	// misc
 	mux.Handle("GET /api/home", accessTokenAuthHandler(ctx, apiHome))

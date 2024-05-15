@@ -54,8 +54,9 @@ const (
 )
 
 type credentials struct {
-	User string
-	Pass string
+	User     string
+	Pass     string
+	Passcode string
 }
 
 type status struct {
@@ -78,7 +79,12 @@ func apiLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var result status
-	session, err := doLogin(ctx, creds.User, creds.Pass)
+	var session auth.Session
+	if creds.Passcode == "" {
+		session, err = doLogin(ctx, creds.User, creds.Pass)
+	} else {
+		session, err = doPasscodeLogin(ctx, creds.User, creds.Pass, creds.Passcode)
+	}
 	if err != nil {
 		authErr(w, err)
 		result = status{
@@ -117,7 +123,12 @@ func apiTokenLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := doLogin(ctx, creds.User, creds.Pass)
+	var session auth.Session
+	if creds.Passcode == "" {
+		session, err = doLogin(ctx, creds.User, creds.Pass)
+	} else {
+		session, err = doPasscodeLogin(ctx, creds.User, creds.Pass, creds.Passcode)
+	}
 	if err != nil {
 		if auth.CredentialsError(err) {
 			authErr(w, err)
@@ -128,6 +139,38 @@ func apiTokenLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	authorizeNew(session, w, r)
+}
+
+type linkCredentials struct {
+	Code     string
+	User     string
+	Pass     string
+	Passcode string
+}
+
+// apiLink links a code to valid login credentials
+func apiLink(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+
+	var creds linkCredentials
+	body, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(body, &creds)
+	if err != nil {
+		authErr(w, err)
+		return
+	}
+
+	err = doCodeAuth(ctx, creds.User, creds.Pass, creds.Passcode, creds.Code)
+	if err != nil {
+		if auth.CredentialsError(err) {
+			authErr(w, err)
+		} else {
+			serverErr(w, err)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // authorizeNew creates and sends new tokens for the provided session.

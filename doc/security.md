@@ -20,6 +20,18 @@ strong passwords.
 Each user has a list of media bucket names they are allowed to access. This is
 the only level of media access control.
 
+## Two-Factor Authentication (2FA)
+
+Takeout supports time-based one-time passwords (TOTP) for 2FA. The 6 digit code
+which changes every 30 seconds is referred to as a *passcode*.
+
+Users can optionally be assigned a TOTP using the *takeout user* command. Once
+assigned, the corresponding passcode must be provided along with the userid and
+password. The QR code and otpauth URL are printed to the screen when assigned.
+Use your mobile authenticator app to scan the QR code or enter secret as
+needed. By default a period of 30 seconds, 6 digits, and SHA1 are used. An
+issuer must be provded in the *Auth.TOTP.Issuer* configuration.
+
 ## Sessions
 
 An authenticated user login will create a unique session that is stored in the
@@ -49,7 +61,7 @@ is used only during playback to authorize media access. The *Media Token* is
 designed to be long-lived (months) since media access URLs can only be obtained
 using using an *Access Token*.
 
-The *Cookie* and  *Refresh Token* are intended to expire and force a re-login.
+The *Cookie* and *Refresh Token* are intended to expire and force a re-login.
 
 ## Codes
 

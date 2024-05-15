@@ -1,3 +1,9 @@
+## 0.15.0
+
+- added TOTP support, optional but recommended
+- added "takeout user --user=defsub --generate\_totp"
+- added /api/link for app-based code linking
+
 ## 0.14.4, 0.14.5
 
 - fixed embeds

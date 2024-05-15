@@ -191,6 +191,8 @@ func createConfig(opts *viper.Viper) error {
 		"    SecretFile: " + makeSecret(keysDir, "code.key"),
 		"  FileToken:",
 		"    SecretFile: " + makeSecret(keysDir, "file.key"),
+		"  TOTP:",
+		"    Issuer: Takeout",
 		"",
 	})
 
