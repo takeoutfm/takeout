@@ -43,6 +43,10 @@ func newFSBucket(config Config) *fileBucket {
 	return &fileBucket{config: config}
 }
 
+func (f *fileBucket) IsLocal() bool {
+	return true //f.config.Local
+}
+
 func (f *fileBucket) List(lastSync time.Time) (objectCh chan *Object, err error) {
 	objectCh = make(chan *Object)
 

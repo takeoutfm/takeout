@@ -1,9 +1,15 @@
 # Music Files
 
 Takeout will index all the objects in the S3 bucket to find music files that
-start with the configured prefix and end with supported file extensions: mp3, flac,
-ogg, m4a. Files are not accessed to inspect metadata tags. Instead, a specific
-file path structure is needed to understand and obtain metadata.
+start with the configured prefix and end with supported file extensions: mp3,
+flac, ogg, m4a. For performace and cost reasons objects are not directly
+accessed to inspect metadata tags. Instead, a specific file path structure is
+needed to understand and obtain metadata.
+
+Newer versions of Takeout can be configured to support local music files. In
+this case, metadata is obtained directly from the files and mp3, mp4, flac, and
+ogg tags are supported. When metadata is found, path structure and file naming
+conventions are not required.
 
 The bucket file path structure should be:
 

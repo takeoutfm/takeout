@@ -36,11 +36,13 @@ type Config struct {
 	RewriteRules []RewriteRule
 	S3           S3Config
 	FS           FSConfig
+	Local        bool
 }
 
 type Bucket interface {
 	List(time.Time) (chan *Object, error)
 	ObjectURL(string) *url.URL
+	IsLocal() bool
 }
 
 type Object struct {

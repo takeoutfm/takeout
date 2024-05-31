@@ -19,9 +19,12 @@ package music
 
 import (
 	"net/url"
+	"os"
 	"regexp"
 	"time"
 
+	"github.com/dhowden/tag"
+	"github.com/dhowden/tag/mbz"
 	"github.com/takeoutfm/takeout/lib/bucket"
 	"github.com/takeoutfm/takeout/lib/str"
 	. "github.com/takeoutfm/takeout/model"
@@ -46,11 +49,24 @@ func (m *Music) syncFromBucket(bucket bucket.Bucket, lastSync time.Time) (trackC
 }
 
 func checkObject(b bucket.Bucket, object *bucket.Object, trackCh chan *Track) {
-	matchPath(b, object.Path, trackCh, func(t *Track, trackCh chan *Track) {
-		t.Key = object.Key
-		t.ETag = object.ETag
-		t.Size = object.Size
-		t.LastModified = object.LastModified
+	t := &Track{
+		Key:          object.Key,
+		ETag:         object.ETag,
+		Size:         object.Size,
+		LastModified: object.LastModified,
+	}
+
+	if b.IsLocal() {
+		url := b.ObjectURL(t.Key)
+		err := parseMetadata(url, t)
+		if err == nil {
+			trackCh <- t
+			return
+		}
+		// failed so try regexps
+	}
+
+	matchPath(b, object.Path, t, trackCh, func(t *Track, trackCh chan *Track) {
 		trackCh <- t
 	})
 }
@@ -63,10 +79,10 @@ var coverRegexp = regexp.MustCompile(`cover\.(png|jpg)$`)
 
 var pathRegexp = regexp.MustCompile(`([^\/]+)\/([^\/]+)\/([^\/]+)$`)
 
-func matchPath(b bucket.Bucket, path string, trackCh chan *Track, doMatch func(t *Track, music chan *Track)) {
+func matchPath(b bucket.Bucket, path string, t *Track, trackCh chan *Track,
+	doMatch func(t *Track, music chan *Track)) {
 	matches := pathRegexp.FindStringSubmatch(path)
 	if matches != nil {
-		var t Track
 		t.Artist = matches[1]
 		release, date := matchRelease(matches[2])
 		if release != "" && date != "" {
@@ -75,13 +91,14 @@ func matchPath(b bucket.Bucket, path string, trackCh chan *Track, doMatch func(t
 		} else {
 			t.Release = release
 		}
-		if matchTrack(matches[3], &t) {
-			doMatch(&t, trackCh)
+		if matchTrack(matches[3], t) {
+			doMatch(t, trackCh)
 		}
 	}
 }
 
 var releaseRegexp = regexp.MustCompile(`(.+?)\s*(\(([\d]+)\))?\s*$`)
+
 // 1|1|Airlane|Music/Gary Numan/The Pleasure Principle (1998)/01-Airlane.flac
 // 1|1|Airlane|Music/Gary Numan/The Pleasure Principle (2009)/1-01-Airlane.flac
 //
@@ -169,4 +186,37 @@ func matchTrack(file string, t *Track) bool {
 func (m *Music) bucketURL(t *Track) *url.URL {
 	// TODO FIXME assume first bucket!!!
 	return m.buckets[0].ObjectURL(t.Key)
+}
+
+func parseMetadata(u *url.URL, t *Track) error {
+	if u.Scheme != "file" {
+		panic("scheme not supported")
+	}
+
+	path := u.RawPath
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	m, err := tag.ReadFrom(file)
+	if err != nil {
+		return err
+	}
+
+	t.Artist = m.AlbumArtist()
+	t.Release = m.Album()
+	t.Title = m.Title()
+	t.TrackArtist = m.Artist()
+	t.TrackNum, t.TrackCount = m.Track()
+	t.DiscNum, t.DiscCount = m.Disc()
+
+	info := mbz.Extract(m)
+	t.RID = info.Get(mbz.Recording)
+	t.RGID = info.Get(mbz.ReleaseGroup)
+	t.REID = info.Get(mbz.Album)
+	t.ARID = info.Get(mbz.AlbumArtist)
+
+	return nil
 }

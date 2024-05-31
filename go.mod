@@ -47,6 +47,7 @@ require (
 	github.com/blevesearch/zapx/v14 v14.3.10 // indirect
 	github.com/blevesearch/zapx/v15 v15.3.13 // indirect
 	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
+	github.com/dhowden/tag v0.0.0-20240417053706-3d75831295e8 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/go-sql-driver/mysql v1.7.1 // indirect

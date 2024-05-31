@@ -413,6 +413,26 @@ func (m *Music) trackArtistNames() []string {
 	return artists
 }
 
+// Builds a list of artist name and arid pairs to allow for track metadata to
+// provide name and arid which aids in resolving names.
+func (m *Music) trackArtists() ([][]string, error) {
+	rows, err := m.db.Table("tracks").
+		Select("artist, ar_id").
+		Group("artist").
+		Order("artist").Rows()
+	if err != nil {
+		return nil, err
+	}
+	var result [][]string
+	for rows.Next() {
+		var artist, arid string
+		rows.Scan(&artist, &arid)
+		result = append(result, []string{artist, arid})
+	}
+	rows.Close()
+	return result, nil
+}
+
 func (m *Music) assignTrackArtist(t Track, artist string) error {
 	err := m.db.Model(t).
 		Update("track_artist", artist).Error

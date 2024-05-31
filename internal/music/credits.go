@@ -261,7 +261,7 @@ func relationCredits(c search.FieldMap, relations []musicbrainz.Relation) search
 					"publishing", "translator", "vocal arranger":
 					// ignore these
 				default:
-					log.Printf("** ignore performance work relation '%s'\n", wr.Type)
+					//log.Printf("** ignore performance work relation '%s'\n", wr.Type)
 				}
 			}
 			// check if this song is a cover

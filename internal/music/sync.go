@@ -131,7 +131,7 @@ func (m *Music) Sync(options SyncOptions) {
 			if a != nil {
 				artists = []Artist{*a}
 			} else {
-				a, err := m.syncArtist(options.Artist)
+				a, err := m.syncArtist(options.Artist, "")
 				log.CheckError(err)
 				if a != nil {
 					artists = []Artist{*a}
@@ -843,9 +843,14 @@ func (m *Music) resolve() error {
 // from MusicBrainz. This doesn't always work since there can be
 // multiple artists with the same name. Last.fm is used to help.
 func (m *Music) syncArtists() error {
-	artists := m.trackArtistNames()
-	for _, name := range artists {
-		_, err := m.syncArtist(name)
+	artists, err := m.trackArtists()
+	if err != nil {
+		return err
+	}
+
+	for _, a := range artists {
+		name, arid := a[0], a[1]
+		_, err := m.syncArtist(name, arid)
 		if err != nil {
 			return err
 		}
@@ -853,26 +858,33 @@ func (m *Music) syncArtists() error {
 	return nil
 }
 
-func (m *Music) syncArtist(name string) (*Artist, error) {
+func (m *Music) syncArtist(name, arid string) (*Artist, error) {
 	var tags []ArtistTag
 	artist := m.Artist(name)
-	if artist == nil {
-		artist, tags = m.resolveArtist(name)
-		if artist != nil {
-			artist.Name = fixName(artist.Name)
-			log.Printf("creating %s\n", artist.Name)
-			m.createArtist(artist)
-			for _, t := range tags {
-				t.Artist = artist.Name
-				m.createArtistTag(&t)
-			}
+	if artist == nil && arid != "" {
+		// first try arid
+		v := m.mbz.SearchArtistID(arid)
+		if v != nil {
+			artist, tags = doArtist(v)
 		}
+	}
+	if artist == nil {
+		// next try name
+		artist, tags = m.resolveArtist(name)
 	}
 
 	if artist == nil {
 		err := errors.New(fmt.Sprintf("'%s' artist not found", name))
 		log.Printf("%s\n", err)
 		return artist, nil // TODO ignore error?
+	}
+
+	artist.Name = fixName(artist.Name)
+	log.Printf("creating %s\n", artist.Name)
+	m.createArtist(artist)
+	for _, t := range tags {
+		t.Artist = artist.Name
+		m.createArtistTag(&t)
 	}
 
 	if name != artist.Name {

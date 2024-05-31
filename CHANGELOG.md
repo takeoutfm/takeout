@@ -1,3 +1,7 @@
+## 0.15.1
+
+- Support for local file music metadata instead of naming conventions
+
 ## 0.15.0
 
 - added TOTP support, optional but recommended

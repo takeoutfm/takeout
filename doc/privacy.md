@@ -24,8 +24,8 @@ and for clients to access directly using time-based pre-signed URLs. The
 Takeout server does not directly access any S3 media.
 
 When using local media files, The Takeout server will index media directories,
-compute ETags for media files, and serve media files using time-based
-pre-signed URLs.
+compute ETags for media files, access metadata, and serve media files using
+time-based pre-signed URLs.
 
 ## Personal Information
 
@@ -57,9 +57,10 @@ not stored by the server, however, they are stored on app/client devices
 similar to cookies. The *Refresh Token* is the same as a cookie and stored by
 the Takeout server. Please see the security design for further details.
 
-JWTs claims are plain-text within the token. The Takeout server uses subject
-and audience claims which specificy a userid and media file name respectively.
-Unintended disclosure of a JWT could explose a userid or media file name.
+JWTs claims are stored in plain-text within the token. The Takeout server uses
+subject and audience claims which specificy a userid and media file name
+respectively. Unintended disclosure of a JWT could explose a userid or media
+file name.
 
 The Takeout server is recommended to be configured with TLS to ensure all
 communication is encrypted to avoid unintended disclosure of cookies and
@@ -68,16 +69,16 @@ tokens.
 ## Media in S3
 
 The Takeout server requires access to your S3 bucket to obtain a listing of
-media stored within the S3 bucket. The bucket object file names are used to
-obtain further metadata related to music and video files. These object names
-are stored in the corresponding *music*, *video* and *search* databases to
-enable media streaming or downloading directly from your S3 bucket using
-time-based pre-signed URLs.
+media stored within the S3 bucket. The bucket object names are used to obtain
+further metadata related to music and video files. These object names are
+stored in the corresponding *music*, *video* and *search* databases to enable
+media streaming or downloading directly from your S3 bucket using time-based
+pre-signed URLs.
 
-The Takeout server does not access your media, it does not parse your media
-containers, and it does not parse any embedded tags or related information in
-your media. All related metadata is obtained using third-party services based
-on file naming conventions.
+The Takeout server does not access your S3 media, it does not parse your S3
+media containers, and it does not parse any embedded tags or related
+information in your S3 media. All related metadata is obtained using
+third-party services based on file naming conventions.
 
 Media stored in your S3 bucket can potentially be visible to the S3 bucket
 service provider. Contact your service provider to obtain further information

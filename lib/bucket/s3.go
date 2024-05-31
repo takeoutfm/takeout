@@ -66,6 +66,10 @@ func newS3Bucket(config Config) (*s3bucket, error) {
 	return bucket, nil
 }
 
+func (b *s3bucket) IsLocal() bool {
+	return b.config.Local
+}
+
 func (b *s3bucket) List(lastSync time.Time) (objectCh chan *Object, err error) {
 	objectCh = make(chan *Object)
 

@@ -26,9 +26,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -329,9 +329,9 @@ func Get(path string) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		return ioutil.ReadFile(u.Path)
+		return os.ReadFile(u.Path)
 	} else {
-		return ioutil.ReadFile(path)
+		return os.ReadFile(path)
 	}
 	return nil, ErrSchemeNotSupported
 }
