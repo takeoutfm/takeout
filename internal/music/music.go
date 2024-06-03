@@ -124,6 +124,12 @@ func (m *Music) CoverSmall(o interface{}) string {
 		return Cover(o.(Release), "250")
 	case Track:
 		return m.TrackCover(o.(Track), "250")
+	case Station:
+		img := o.(Station).Image
+		if img == "" {
+			img = "/static/radio-white-24dp.svg";
+		}
+		return img
 	}
 	return ""
 }

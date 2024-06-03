@@ -83,6 +83,8 @@ func doFuncMap() template.FuncMap {
 				link = fmt.Sprintf("/v?series=%d", o.(model.Series).ID)
 			case model.Episode:
 				link = fmt.Sprintf("/v?episode=%d", o.(model.Episode).ID)
+			case model.Station:
+				link = fmt.Sprintf("/v?station=%d", o.(model.Station).ID)
 			}
 			return link
 		},

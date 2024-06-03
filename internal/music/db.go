@@ -19,6 +19,7 @@ package music
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/takeoutfm/takeout/internal/auth"
@@ -798,23 +799,52 @@ func (m *Music) Query(query string) ([]Artist, []Release, []Track, []Station) {
 	var tracks []Track
 	var stations []Station
 
-	query = "%" + query + "%"
+	queryArtists := func(name string) {
+		m.db.Where("name like ?", name).
+			Order("sort_name asc").
+			Limit(m.config.Music.SearchLimit).Find(&artists)
+	}
 
-	m.db.Where("name like ?", query).
-		Order("sort_name asc").
-		Limit(m.config.Music.SearchLimit).Find(&artists)
+	queryReleases := func(name string) {
+		m.db.Joins("inner join tracks on"+
+			" tracks.re_id = releases.re_id and tracks.release like ?", name).
+			Group("releases.name, releases.date").
+			Order("releases.name").Limit(m.config.Music.SearchLimit).
+			Find(&releases)
+	}
 
-	m.db.Joins("inner join tracks on"+
-		" tracks.re_id = releases.re_id and tracks.release like ?", query).
-		Group("releases.name, releases.date").
-		Order("releases.name").Limit(m.config.Music.SearchLimit).
-		Find(&releases)
+	queryTitles := func(name string) {
+		m.db.Where("title like ?", name).
+			Order("title").Limit(m.config.Music.SearchLimit).Find(&tracks)
+	}
 
-	m.db.Where("title like ?", query).
-		Order("title").Limit(m.config.Music.SearchLimit).Find(&tracks)
+	queryStations := func(name string) {
+		m.db.Where("name like ? or creator like ?", name, name).
+			Limit(m.config.Music.SearchLimit).Find(&stations)
+	}
 
-	m.db.Where("name like ? or creator like ?", query, query).
-		Limit(m.config.Music.SearchLimit).Find(&stations)
+	s := strings.Split(query, ":")
+	if len(s) > 1 {
+		field, terms := s[0], strings.Join(s[1:], "")
+		terms = strings.Trim(terms, `"`)
+		terms = "%" + terms + "%"
+		switch field {
+		case "+artist", "artist":
+			queryArtists(terms)
+		case "+release", "release":
+			queryReleases(terms)
+		case "+title", "title":
+			queryTitles(terms)
+		case "+radio", "radio", "+station", "station":
+			queryStations(terms)
+		}
+	} else {
+		query = "%" + query + "%"
+		queryArtists(query)
+		queryReleases(query)
+		queryTitles(query)
+		queryStations(query)
+	}
 
 	return artists, releases, tracks, stations
 }

@@ -34,7 +34,7 @@ var userCmd = &cobra.Command{
 	},
 }
 
-var user, pass, media string
+var user, pass, media, link string
 var add, change, expire, generateTOTP bool
 
 func doit() error {
@@ -77,6 +77,17 @@ func doit() error {
 		}
 	}
 
+	if user != "" && link != "" {
+		session, err := a.LoginSession(user)
+		if err != nil {
+			return err
+		}
+		err = a.AuthorizeCode(link, session.Token)
+		if err != nil {
+			return err
+		}
+	}
+
 	if generateTOTP && user != "" {
 		url, err := auth.GenerateTOTP(cfg.Auth.TOTP, user)
 		if err != nil {
@@ -111,5 +122,6 @@ func init() {
 	userCmd.Flags().BoolVarP(&change, "change", "n", false, "change")
 	userCmd.Flags().BoolVarP(&expire, "expire", "x", false, "expire all sessions")
 	userCmd.Flags().BoolVar(&generateTOTP, "generate_totp", false, "generate & assign user a TOTP")
+	userCmd.Flags().StringVarP(&link, "link", "l", "", "link code to new user session")
 	rootCmd.AddCommand(userCmd)
 }

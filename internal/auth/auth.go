@@ -244,6 +244,21 @@ func (a *Auth) Login(userid, pass string) (Session, error) {
 	return session, err
 }
 
+// LoginSession will create a new login session for the given userid. No
+// password or passcode are required so use with caution.
+func (a *Auth) LoginSession(userid string) (Session, error) {
+	u, err := a.User(userid)
+	if err != nil {
+		return Session{}, ErrUserNotFound
+	}
+	session := a.session(&u)
+	err = a.createSession(&session)
+	if err != nil {
+		return Session{}, err
+	}
+	return session, err
+}
+
 func (a *Auth) loginCheck(userid, pass string) (*User, error) {
 	u, err := a.check(userid, pass)
 	if err != nil {

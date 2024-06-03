@@ -1,6 +1,11 @@
+## 0.16.x
+
+- added "takeout user --user=defsub --link=code"
+- improved search for artists, releases and stations
+
 ## 0.15.1
 
-- Support for local file music metadata instead of naming conventions
+- support for local file music metadata instead of naming conventions
 
 ## 0.15.0
 

@@ -34,6 +34,23 @@
   </div>
   <div style="clear: both;"/>
   {{ end }}
+  {{ if .Stations }}
+  <div>
+    <h2>Stations</h2>
+    {{ range .Stations }}
+    <div style="float: left; padding: 10px; max-width: 110px;">
+      <a class="nodecor" data-playlist="add-ref" data-ref='{{.|ref}}'>
+	<img width="110" height="110" src="{{call $.CoverSmall .}}" style="border-radius: 10px;">
+	<br/>
+	<div class="release-small-title">{{ .Name }}</div>
+	<br style="display: none"/>
+	<div class="release-small-year">{{ .Creator }}</div>
+      </a>
+    </div>
+    {{ end }}
+  </div>
+  <div style="clear: both;"/>
+  {{ end }}
   {{ if .Tracks }}
   <div>
     <div class="parent">

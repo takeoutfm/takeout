@@ -1,21 +1,20 @@
 # TakeoutFM
 
 TakeoutFM is a copyleft, secure, and private media system that allows you to
-manage and stream your media on your own terms. It has a small and fast server
-designed to run with minimal resources and mobile, watch, tv, and console apps
-for media streaming on your devices. Support for media in the cloud using S3 is
-a primary design goal and local media files are supported as well. See
+manage and stream your media on your own terms. It has a small and fast server,
+with mobile, watch, tv, and console apps for media streaming on your devices.
+Support for storing media in the cloud using S3 is a primary design goal and
+local media files are supported as well. See
 [takeoutfm.com](https://takeoutfm.com/) for further details.
 
 ## Takeout
 
-The TakeoutFM server, known as Takeout, is a copyleft media server that indexes
-organized media files in S3 (or local) using MusicBrainz, Last.fm, Fanart.tv,
-and TMDB. Media is browsed using Takeout and securely streamed directly from S3
-or local files. Music, movies, podcasts, and radio are supported.
-
-Takeout is built as a single binary that includes all server functionality
-include media syncing, streaming, REST API, and a builtin web UI.
+The TakeoutFM server, known as Takeout, indexes organized media files in S3 (or
+local) using MusicBrainz, Last.fm, Fanart.tv, and TMDB. Media is browsed using
+Takeout and securely streamed directly from S3 or local storage. Music, movies,
+podcasts, and radio are supported. Takeout is built as a single binary that
+includes all server functionality including media syncing, streaming, REST
+APIs, and a builtin web UI.
 
 ## Features
 
