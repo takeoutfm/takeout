@@ -1,4 +1,4 @@
-## 0.16.x
+## 0.16.0
 
 - added "takeout user --user=defsub --link=code"
 - improved search for artists, releases and stations
