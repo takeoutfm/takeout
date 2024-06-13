@@ -1,3 +1,7 @@
+## 0.17.1
+
+- fix *takeout run* video option
+
 ## 0.17.0
 
 - perform *takeout run* syncs in the background

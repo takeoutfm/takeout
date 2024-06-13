@@ -286,7 +286,7 @@ func init() {
 	runCmd.Flags().String("cache", "/var/cache/takeout", "Takeout cache directory")
 	runCmd.Flags().String("name", "mymedia", "media name")
 	runCmd.Flags().String("music", "", "dir or s3://bucket/prefix")
-	runCmd.Flags().String("movies", "", "dir or s3://bucket/prefix")
+	runCmd.Flags().String("video", "", "dir or s3://bucket/prefix")
 	runCmd.Flags().String("endpoint", os.Getenv("AWS_ENDPOINT_URL"), "s3 endpoint (host name)")
 	runCmd.Flags().String("region", os.Getenv("AWS_DEFAULT_REGION"), "s3 region")
 	runCmd.Flags().String("access_key_id", os.Getenv("AWS_ACCESS_KEY_ID"), "s3 access key id")
