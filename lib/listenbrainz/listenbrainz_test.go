@@ -34,6 +34,6 @@ func TestArtistTopTracks(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, track := range tracks {
-		t.Log(track.Rank, track.Track)
+		t.Log(track.Rank(), track.Track())
 	}
 }
