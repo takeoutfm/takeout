@@ -20,8 +20,6 @@ package server
 import (
 	"errors"
 	"net/http"
-
-	"github.com/takeoutfm/takeout/lib/log"
 )
 
 var (
@@ -40,11 +38,12 @@ var (
 	ErrInvalidSession     = errors.New("invalid session")
 	ErrInvalidUUID        = errors.New("invalid uuid")
 	ErrInvalidContent     = errors.New("invalid content")
+	ErrMissingTitle       = errors.New("missing title")
 )
 
 func serverErr(w http.ResponseWriter, err error) {
 	if err != nil {
-		log.Printf("got err %s\n", err)
+		//log.Printf("got err %s\n", err)
 		handleErr(w, "bummer", http.StatusInternalServerError)
 	}
 }

@@ -23,6 +23,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -43,6 +44,8 @@ import (
 	"github.com/takeoutfm/takeout/lib/tmdb"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -752,4 +755,13 @@ func LoadConfig(dir string) (*Config, error) {
 
 func gormLogger(name string) logger.Interface {
 	return g.Logger(name)
+}
+
+func (c Config) Write(w io.Writer) error {
+	buf, err := yaml.Marshal(c)
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(buf)
+	return err
 }

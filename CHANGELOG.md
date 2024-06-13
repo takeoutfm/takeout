@@ -1,3 +1,25 @@
+## 0.17.0
+
+- perform *takeout run* syncs in the background
+- added control requests via unix socket
+  * profiling
+  * config
+  * run jobs
+  * curl -s -N --unix-socket /tmp/takeout.sock http://takeout/config/mymedia
+  * curl -s -N --unix-socket /tmp/takeout.sock 'http://takeout/debug/pprof/goroutine?debug=2'
+- added listenbrainz popular
+- fixed *takeout run* user
+- added user playlist API, with tests
+  * GET /api/playlists
+  * POST /api/playlists
+  * GET /api/playlists/{id}
+  * GET /api/playlists/{id}/playlist
+  * PATCH /api/playlists/{id}/playlist
+  * DELETE /api/playlists/{id}
+- added view model *Playlist* and *Playlists* with ID and Name
+- added playlist ref */music/playlists/1*
+- removed older */api/login* API, apps used */api/token* or */api/code*
+
 ## 0.16.0
 
 - added "takeout user --user=defsub --link=code"

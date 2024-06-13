@@ -108,6 +108,12 @@ func addStationEntries(ctx Context, station model.Station, entries []spiff.Entry
 	return entries
 }
 
+func addPlaylistEntries(ctx Context, playlist model.Playlist, entries []spiff.Entry) []spiff.Entry {
+	plist, _ := spiff.Unmarshal(playlist.Playlist)
+	entries = append(entries, plist.Spiff.Entries...)
+	return entries
+}
+
 // /music/artists/{id}/{res}
 func resolveArtistRef(ctx Context, id, res string, entries []spiff.Entry) ([]spiff.Entry, error) {
 	artist, err := ctx.FindArtist(id)
@@ -336,6 +342,20 @@ func resolveStationRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.E
 	return entries, nil
 }
 
+// /music/playlists/{id,name}
+func resolvePlaylistRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.Entry, error) {
+	p, err := ctx.FindPlaylist(id)
+	if err != nil {
+		p, err = ctx.FindPlaylist("name:" + id)
+		if err != nil {
+			return entries, err
+		}
+	}
+	// note that FindPlaylist checks ctx user
+	entries = addPlaylistEntries(ctx, p, entries)
+	return entries, nil
+}
+
 // ref is a json encoded array of ContentDescription records. The result of
 // this is intended to be a list of locations to the same stream encoded in
 // different formats and allow the client to chose the best source.
@@ -516,6 +536,7 @@ var (
 	tracksRegexp       = regexp.MustCompile(`^/music/tracks/([\d]+)$`)
 	searchRegexp       = regexp.MustCompile(`^/music/search.*`)
 	stationsRegexp     = regexp.MustCompile(`^/music/stations/([\w ]+)$`)
+	playlistsRegexp    = regexp.MustCompile(`^/music/playlists/([\w ]+)$`)
 	moviesRegexp       = regexp.MustCompile(`^/movies/([\d]+)$`)
 	seriesRegexp       = regexp.MustCompile(`^/podcasts/series/([\d]+)$`)
 	episodesRegexp     = regexp.MustCompile(`^/podcasts/episodes/([\d]+)$`)
@@ -572,6 +593,15 @@ func Resolve(ctx Context, plist *spiff.Playlist) (err error) {
 		matches = stationsRegexp.FindStringSubmatch(pathRef)
 		if matches != nil {
 			entries, err = resolveStationRef(ctx, matches[1], entries)
+			if err != nil {
+				return err
+			}
+			continue
+		}
+
+		matches = playlistsRegexp.FindStringSubmatch(pathRef)
+		if matches != nil {
+			entries, err = resolvePlaylistRef(ctx, matches[1], entries)
 			if err != nil {
 				return err
 			}

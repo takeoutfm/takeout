@@ -70,6 +70,7 @@ type Context interface {
 	FindReleaseTracks(model.Release) []model.Track
 	FindTrack(string) (model.Track, error)
 	FindStation(string) (model.Station, error)
+	FindPlaylist(string) (model.Playlist, error)
 	FindMovie(string) (model.Movie, error)
 	FindSeries(string) (model.Series, error)
 	FindSeriesEpisodes(model.Series) []model.Episode
@@ -189,6 +190,10 @@ func (ctx RequestContext) FindTrack(id string) (model.Track, error) {
 
 func (ctx RequestContext) FindStation(id string) (model.Station, error) {
 	return ctx.Music().FindStation(id)
+}
+
+func (ctx RequestContext) FindPlaylist(id string) (model.Playlist, error) {
+	return ctx.Music().FindPlaylist(ctx.User(), id)
 }
 
 func (ctx RequestContext) FindMovie(id string) (model.Movie, error) {

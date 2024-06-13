@@ -19,7 +19,12 @@
 package server
 
 import (
+	"net"
 	"net/http"
+	"net/http/pprof"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/takeoutfm/takeout/internal/activity"
 	"github.com/takeoutfm/takeout/internal/auth"
@@ -177,7 +182,6 @@ func Serve(config *config.Config) error {
 		progress: progress,
 		template: getTemplates(config),
 	}
-
 	resFileServer := http.FileServer(mountResFS(resStatic))
 	staticHandler := func(w http.ResponseWriter, r *http.Request) {
 		resFileServer.ServeHTTP(w, r)
@@ -207,7 +211,7 @@ func Serve(config *config.Config) error {
 	mux.Handle("GET /v", accessTokenAuthHandler(ctx, viewHandler))
 
 	// cookie auth
-	mux.Handle("POST /api/login", requestHandler(ctx, apiLogin))
+	// mux.Handle("POST /api/login", requestHandler(ctx, apiLogin)) -- not used anymore?
 	mux.Handle("POST /login", requestHandler(ctx, loginHandler))
 	mux.Handle("GET /login", http.HandlerFunc(aliasHandler))
 	mux.Handle("GET /login.htm", http.HandlerFunc(aliasHandler))
@@ -232,8 +236,16 @@ func Serve(config *config.Config) error {
 	mux.Handle("GET /api/search", accessTokenAuthHandler(ctx, apiSearch))
 
 	// playlist
-	mux.Handle("GET /api/playlist", accessTokenAuthHandler(ctx, apiPlaylistGet))
+	mux.Handle("GET /api/playlist", accessTokenAuthHandler(ctx, apiPlaylist))
 	mux.Handle("PATCH /api/playlist", accessTokenAuthHandler(ctx, apiPlaylistPatch))
+
+	// saved playlists
+	mux.Handle("GET /api/playlists", accessTokenAuthHandler(ctx, apiPlaylists))
+	mux.Handle("POST /api/playlists", accessTokenAuthHandler(ctx, apiPlaylistsCreate))
+	mux.Handle("GET /api/playlists/{id}", accessTokenAuthHandler(ctx, apiPlaylistsGet))
+	mux.Handle("GET /api/playlists/{id}/playlist", accessTokenAuthHandler(ctx, apiPlaylistsGetPlaylist))
+	mux.Handle("PATCH /api/playlists/{id}/playlist", accessTokenAuthHandler(ctx, apiPlaylistsPatch))
+	mux.Handle("DELETE /api/playlists/{id}", accessTokenAuthHandler(ctx, apiPlaylistsDelete))
 
 	// music
 	mux.Handle("GET /api/artists", accessTokenAuthHandler(ctx, apiArtists))
@@ -303,9 +315,6 @@ func Serve(config *config.Config) error {
 	// mux.Handle("GET /api/objects", accessTokenAuthHandler(ctx, apiObjectsList));
 	// mux.Handle("GET /api/objects/{uuid}", accessTokenAuthHandler(ctx, apiObjectGet));
 
-	// Hook
-	//mux.Post("/hook/", requestHandler(ctx, hookHandler))
-
 	// Images
 	client := client.NewCacheOnlyGetter(config.Server.ImageClient)
 	mux.Handle("GET /img/mb/rg/{rgid}", imageHandler(ctx, imgReleaseGroupFront, client))
@@ -316,22 +325,54 @@ func Serve(config *config.Config) error {
 	mux.Handle("GET /img/fa/{arid}/t/{path}", imageHandler(ctx, imgArtistThumb, client))
 	mux.Handle("GET /img/fa/{arid}/b/{path}", imageHandler(ctx, imgArtistBackground, client))
 
-	// pprof
-	// mux.Handle("GET /debug/pprof", http.HandlerFunc(pprof.Index))
-	// mux.Handle("GET /debug/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
-	// mux.Handle("GET /debug/pprof/profile", http.HandlerFunc(pprof.Profile))
-	// mux.Handle("GET /debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
-	// mux.Handle("GET /debug/pprof/heap", pprof.Handler("heap"))
-	// mux.Handle("GET /debug/pprof/block", pprof.Handler("block"))
-	// mux.Handle("GET /debug/pprof/goroutine", pprof.Handler("goroutine"))
-	// mux.Handle("GET /debug/pprof/threadcreate", pprof.Handler("threadcreate"))
-
 	// // swaggerHandler := func(w http.ResponseWriter, r *http.Request) {
 	// // 	http.Redirect(w, r, "/static/swagger.json", 302)
 	// // }
 	// http.HandleFunc("/swagger.json", swaggerHandler)
 
-	log.Printf("listening on %s\n", config.Server.Listen)
+	go func() {
+		ctrl := http.NewServeMux()
+		ctrl.Handle("GET /jobs/{name}", requestHandler(ctx, jobsHandler))
+		ctrl.Handle("GET /config", requestHandler(ctx,
+			func(w http.ResponseWriter, r *http.Request) {
+				ctx := contextValue(r)
+				ctx.Config().Write(w)
+			}))
+		ctrl.Handle("GET /config/{media}", requestHandler(ctx,
+			func(w http.ResponseWriter, r *http.Request) {
+				ctx := contextValue(r)
+				config, err := mediaConfig(ctx.Config(), r.PathValue("media"))
+				if err != nil {
+					serverErr(w, err)
+				} else {
+					config.Write(w)
+				}
+			}))
 
+		ctrl.Handle("GET /debug/pprof", http.HandlerFunc(pprof.Index))
+		ctrl.Handle("GET /debug/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
+		ctrl.Handle("GET /debug/pprof/profile", http.HandlerFunc(pprof.Profile))
+		ctrl.Handle("GET /debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
+		ctrl.Handle("GET /debug/pprof/heap", pprof.Handler("heap"))
+		ctrl.Handle("GET /debug/pprof/block", pprof.Handler("block"))
+		ctrl.Handle("GET /debug/pprof/goroutine", pprof.Handler("goroutine"))
+		ctrl.Handle("GET /debug/pprof/threadcreate", pprof.Handler("threadcreate"))
+
+		socketPath := "/tmp/takeout.sock"
+		sock, err := net.Listen("unix", socketPath)
+		log.CheckError(err)
+		log.CheckError(os.Chmod(socketPath, 0600))
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+		go func() {
+			<-c
+			os.Remove(socketPath)
+			os.Exit(1)
+		}()
+		err = http.Serve(sock, ctrl)
+		log.CheckError(err)
+	}()
+
+	log.Println("listening on", config.Server.Listen)
 	return http.ListenAndServe(config.Server.Listen, mux)
 }

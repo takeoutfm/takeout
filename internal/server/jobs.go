@@ -18,6 +18,8 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/go-co-op/gocron"
 
 	"github.com/takeoutfm/takeout/internal/auth"
@@ -265,4 +267,16 @@ func Job(config *config.Config, name string) error {
 		}
 	}
 	return nil
+}
+
+func jobsHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	name := r.PathValue("name")
+	go func() {
+		err := Job(ctx.Config(), name)
+		if err != nil {
+			log.Println(name, err)
+		}
+	}()
+	w.WriteHeader(http.StatusNoContent)
 }

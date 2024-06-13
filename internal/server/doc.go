@@ -357,9 +357,9 @@ type LoginParam struct {
 // swagger:response
 type StatusResponse struct {
 	// in: body
-	Body struct {
-		status
-	}
+	// Body struct {
+	// 	status
+	// }
 }
 
 // swagger:response

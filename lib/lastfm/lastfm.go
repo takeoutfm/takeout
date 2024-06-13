@@ -48,8 +48,16 @@ func NewLastfm(config Config, client client.Getter) *Lastfm {
 // * looking up artists not found by MusicBrainz to get their MBID
 
 type TopTrack struct {
-	Track string
-	Rank  int
+	track string
+	rank  int
+}
+
+func (t TopTrack) Track() string {
+	return t.track
+}
+
+func (t TopTrack) Rank() int {
+	return t.rank
 }
 
 func (m *Lastfm) ArtistTopTracks(arid string) []TopTrack {
@@ -69,7 +77,7 @@ func (m *Lastfm) ArtistTopTracks(arid string) []TopTrack {
 	var tracks []TopTrack
 	for _, track := range result.Tracks {
 		rank, _ := strconv.Atoi(track.Rank)
-		tracks = append(tracks, TopTrack{Track: track.Name, Rank: rank})
+		tracks = append(tracks, TopTrack{track: track.Name, rank: rank})
 	}
 
 	return tracks

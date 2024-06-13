@@ -713,25 +713,72 @@ func (m *Music) syncPopular() error {
 	return m.syncPopularFor(m.Artists())
 }
 
+// Sync popular from lastfm or listenbrainz. This tries lastfm first and if no
+// results (no api keys configured or error) will use listenbrainz.
 func (m *Music) syncPopularFor(artists []Artist) error {
 	for _, a := range artists {
 		log.Printf("popular for %s\n", a.Name)
-		tracks := m.lastfm.ArtistTopTracks(a.ARID)
-		if len(tracks) == 0 {
-			continue
+		count, err := m.syncLastfmPopular(a)
+		if err != nil {
+			return err
 		}
-		// remove what we have now
-		m.deletePopularFor(a.Name)
-		for _, t := range tracks {
-			// TODO how to check for specific error?
-			// - UNIQUE constraint failed
-			p := Popular{
-				Artist: a.Name,
-				Title:  t.Track,
-				Rank:   t.Rank,
+		if count == 0 {
+			_, err = m.syncListenBrainzPopular(a)
+			if err != nil {
+				return err
 			}
-			m.createPopular(&p)
 		}
+	}
+	return nil
+}
+
+type TopTrack interface {
+	Track() string
+	Rank() int
+}
+
+func (m *Music) syncLastfmPopular(a Artist) (int, error) {
+	tracks := m.lastfm.ArtistTopTracks(a.ARID)
+	if len(tracks) == 0 {
+		return 0, nil
+	}
+
+	top := make([]TopTrack, len(tracks))
+	for i := range tracks {
+		top[i] = tracks[i]
+	}
+	err := m.doTopTracks(a, top)
+
+	return len(tracks), err
+}
+
+func (m *Music) syncListenBrainzPopular(a Artist) (int, error) {
+	tracks, err := m.lbz.ArtistTopTracks(a.ARID)
+	if len(tracks) == 0 || err != nil {
+		return 0, err
+	}
+
+	top := make([]TopTrack, len(tracks))
+	for i := range tracks {
+		top[i] = tracks[i]
+	}
+	err = m.doTopTracks(a, top)
+
+	return len(tracks), err
+}
+
+func (m *Music) doTopTracks(a Artist, tracks []TopTrack) error {
+	m.deletePopularFor(a.Name)
+	for i, t := range tracks {
+		if i == m.config.Music.PopularLimit {
+			break
+		}
+		p := Popular{
+			Artist: a.Name,
+			Title:  t.Track(),
+			Rank:   t.Rank(),
+		}
+		m.createPopular(&p)
 	}
 	return nil
 }

@@ -32,8 +32,8 @@ const (
 
 type Code struct {
 	gorm.Model
-	Value   string `gorm:"unique_index:idx_code_value"`
-	Expires time.Time
+	Value   string    `gorm:"unique_index:idx_code_value"`
+	Expires time.Time `gorm:"index:idx_code_expires"`
 	Token   string
 }
 

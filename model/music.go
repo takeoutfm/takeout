@@ -166,6 +166,7 @@ func (t Track) PreferredArtist() string {
 type Playlist struct {
 	gorm.Model
 	User     string `gorm:"uniqueIndex:idx_playlist"`
+	Name     string `gorm:"uniqueIndex:idx_playlist"`
 	Playlist []byte
 }
 

@@ -253,3 +253,16 @@ type ActivityTracks struct {
 type ActivityReleases struct {
 	Releases []model.ActivityRelease
 }
+
+type Playlist struct {
+	ID   int
+	Name string
+}
+
+type Playlists struct {
+	Playlists []Playlist
+}
+
+func NewPlaylist(p model.Playlist) *Playlist {
+	return &Playlist{ID: int(p.ID), Name: p.Name}
+}

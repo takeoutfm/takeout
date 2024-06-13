@@ -28,10 +28,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/takeoutfm/takeout/internal/auth"
 	"github.com/takeoutfm/takeout/internal/config"
 	"github.com/takeoutfm/takeout/lib/bucket"
 	"github.com/takeoutfm/takeout/lib/fanart"
 	"github.com/takeoutfm/takeout/lib/lastfm"
+	"github.com/takeoutfm/takeout/lib/listenbrainz"
 	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/takeoutfm/takeout/lib/musicbrainz"
 	"github.com/takeoutfm/takeout/lib/search"
@@ -53,6 +55,7 @@ type Music struct {
 	lastfm  *lastfm.Lastfm
 	fanart  *fanart.Fanart
 	mbz     *musicbrainz.MusicBrainz
+	lbz     *listenbrainz.ListenBrainz
 }
 
 func NewMusic(config *config.Config) *Music {
@@ -62,6 +65,7 @@ func NewMusic(config *config.Config) *Music {
 		fanart: fanart.NewFanart(config.Fanart, client),
 		lastfm: lastfm.NewLastfm(config.LastFM, client),
 		mbz:    musicbrainz.NewMusicBrainz(client),
+		lbz:    listenbrainz.NewListenBrainz(client),
 	}
 }
 
@@ -127,7 +131,7 @@ func (m *Music) CoverSmall(o interface{}) string {
 	case Station:
 		img := o.(Station).Image
 		if img == "" {
-			img = "/static/radio-white-24dp.svg";
+			img = "/static/radio-white-24dp.svg"
 		}
 		return img
 	}
@@ -201,6 +205,26 @@ func (m *Music) FindStation(identifier string) (Station, error) {
 		return Station{}, errors.New("station not found")
 	} else {
 		return m.LookupStation(id)
+	}
+}
+
+func (m *Music) FindPlaylist(user *auth.User, identifier string) (Playlist, error) {
+	id, err := strconv.Atoi(identifier)
+	if err != nil {
+		if strings.HasPrefix(identifier, "name:") {
+			stations := m.PlaylistsLike(user, "%" + identifier[5:] + "%")
+			if len(stations) > 0 {
+				return stations[0], nil
+			}
+		}
+		return Playlist{}, errors.New("playlist not found")
+	} else {
+		p := m.LookupPlaylist(user, id)
+		if p != nil {
+			return *p, nil
+		} else {
+			return Playlist{}, errors.New("playlist not found")
+		}
 	}
 }
 

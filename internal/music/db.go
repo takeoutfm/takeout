@@ -849,19 +849,44 @@ func (m *Music) Query(query string) ([]Artist, []Release, []Track, []Station) {
 	return artists, releases, tracks, stations
 }
 
-// Lookup user playlist.
-func (m *Music) LookupPlaylist(user *auth.User) *Playlist {
+// Lookup user playlist
+func (m *Music) LookupPlaylist(user *auth.User, id int) *Playlist {
 	var p Playlist
-	err := m.db.Where("user = ?", user.Name).First(&p).Error
+	err := m.db.Where("user = ? and id = ?", user.Name, id).First(&p).Error
 	if err != nil {
 		return nil
 	}
 	return &p
 }
 
+func (m *Music) PlaylistsLike(user *auth.User, name string) []Playlist {
+	var playlists []Playlist
+	m.db.Where("user = ? and name like ?", user.Name, name).Find(&playlists)
+	return playlists
+}
+
+func (m *Music) UserPlaylist(user *auth.User) *Playlist {
+	var p Playlist
+	err := m.db.Where("user = ? and ifnull(name, '') = ''", user.Name).First(&p).Error
+	if err != nil {
+		return nil
+	}
+	return &p
+}
+
+func (m *Music) UserPlaylists(user *auth.User) []*Playlist {
+	var playlists []*Playlist
+	m.db.Where("user = ? and ifnull(name, '') <> ''", user.Name).Find(&playlists)
+	return playlists
+}
+
 // Save a playlist.
 func (m *Music) UpdatePlaylist(p *Playlist) error {
 	return m.db.Save(p).Error
+}
+
+func (m *Music) DeletePlaylist(user *auth.User, id int) error {
+	return m.db.Unscoped().Where("user = ? and id = ?", user.Name, id).Delete(Playlist{}).Error
 }
 
 // Obtain user stations.

@@ -389,7 +389,7 @@ func TestPlaylist(t *testing.T) {
 		Name: user,
 	}
 
-	pp := m.LookupPlaylist(&u)
+	pp := m.UserPlaylist(&u)
 	if pp == nil {
 		t.Error("expect playlist")
 	}
@@ -398,5 +398,84 @@ func TestPlaylist(t *testing.T) {
 	err = m.UpdatePlaylist(pp)
 	if err != nil {
 		t.Error("expect updated")
+	}
+}
+
+func TestPlaylistID(t *testing.T) {
+	user := "takeout"
+	m := makeMusic(t)
+	u := auth.User{Name: user}
+
+	p := model.Playlist{
+		User: user,
+		Name: "my playlist",
+		Playlist: []byte(`{"playlist":{}}`),
+	}
+
+	err := m.CreatePlaylist(&p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	playlists := m.UserPlaylists(&u)
+	if len(playlists) == 0 {
+		t.Error("expect playlists")
+	}
+
+	found := false
+	id := 0
+	for _, p := range playlists {
+		if p.Name == "my playlist" {
+			found = true
+			id = int(p.ID)
+			break
+		}
+	}
+	if !found {
+		t.Error("playlist not found")
+	}
+
+	pp := m.LookupPlaylist(&u, id)
+	if pp == nil {
+		t.Error("playlist id not found")
+	}
+
+	if pp.Name != "my playlist" {
+		t.Error("wrong playlist name")
+	}
+}
+
+func TestPlaylistDelete(t *testing.T) {
+	user := "takeout"
+	m := makeMusic(t)
+	u := auth.User{Name: user}
+
+	id := -1
+	playlists := m.UserPlaylists(&u)
+	for _, p := range playlists {
+		if p.Name == "my playlist" {
+			id = int(p.ID)
+			break
+		}
+	}
+	if id == -1 {
+		t.Error("playlist not found")
+	}
+
+	err := m.DeletePlaylist(&u, id)
+	if err != nil {
+		t.Error(err)
+	}
+
+	id = -1
+	playlists = m.UserPlaylists(&u)
+	for _, p := range playlists {
+		if p.Name == "my playlist" {
+			id = int(p.ID)
+			break
+		}
+	}
+	if id != -1 {
+		t.Error("playlist not deleted")
 	}
 }

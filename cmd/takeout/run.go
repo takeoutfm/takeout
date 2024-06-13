@@ -18,6 +18,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	rando "math/rand"
 	"net/url"
@@ -38,7 +39,7 @@ var options *viper.Viper
 
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "takeout server",
+	Short: "takeout run",
 	Long:  `TODO`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return run(options)
@@ -95,6 +96,9 @@ func addUser(cfg *config.Config, userid, password, mediaName string) (bool, erro
 	if err != nil {
 		return false, err
 	}
+	if len(userid) == 0 {
+		return false, errors.New("invalid user")
+	}
 	_, err = a.User(userid)
 	if err != nil {
 		err = a.AddUser(userid, password)
@@ -139,7 +143,10 @@ func run(opts *viper.Viper) error {
 		newPassword = true
 		password = generateSecret(passwordSize)
 	}
-	added, err := addUser(cfg, user, password, mediaName)
+	added, err := addUser(cfg, userid, password, mediaName)
+	if err != nil {
+		return err
+	}
 
 	if opts.GetBool("setup_only") == true {
 		if added && newPassword {
@@ -148,11 +155,9 @@ func run(opts *viper.Viper) error {
 		return nil
 	}
 
-	// run sync jobs
-	jobs := []string{"media", "stations"}
-	for _, job := range jobs {
-		server.Job(cfg, job)
-	}
+	go doMusic(cfg)
+	go doVideo(cfg)
+	go doPodcasts(cfg)
 
 	if added && newPassword {
 		fmt.Println("userid", userid, "password", password)
@@ -160,6 +165,19 @@ func run(opts *viper.Viper) error {
 
 	// start the server
 	return server.Serve(cfg)
+}
+
+func doMusic(cfg *config.Config) {
+	server.Job(cfg, "music")
+	server.Job(cfg, "stations")
+}
+
+func doVideo(cfg *config.Config) {
+	server.Job(cfg, "video")
+}
+
+func doPodcasts(cfg *config.Config) {
+	server.Job(cfg, "podcasts")
 }
 
 func createConfig(opts *viper.Viper) error {

@@ -52,6 +52,7 @@ const TestStationID = "103"
 const TestMovieID = "104"
 const TestSeriesID = "105"
 const TestEpisodeID = "106"
+const TestPlaylistID = "107"
 
 type TextContext struct {
 	t *testing.T
@@ -218,6 +219,17 @@ func (c *TextContext) FindStation(id string) (model.Station, error) {
 		return model.Station{Name: "test station", Shared: true}, nil
 	}
 	return model.Station{}, errors.New("station not found")
+}
+
+func (c *TextContext) FindPlaylist(id string) (model.Playlist, error) {
+	if id == TestPlaylistID {
+		return model.Playlist{Name: "test playlist", User: TestUserID}, nil
+	}
+	p, err := c.Music().FindPlaylist(&auth.User{Name: TestUserID}, id)
+	if err == nil {
+		return p, nil
+	}
+	return model.Playlist{}, errors.New("playlist not found")
 }
 
 func (c *TextContext) FindMovie(id string) (model.Movie, error) {

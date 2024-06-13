@@ -393,3 +393,17 @@ func ActivityReleasesView(ctx Context, start, end time.Time) *ActivityReleases {
 	view.Releases = ctx.Activity().Releases(ctx, start, end)
 	return view
 }
+
+func PlaylistView(ctx Context, playlist model.Playlist) *Playlist {
+	return NewPlaylist(playlist)
+}
+
+func PlaylistsView(ctx Context, playlists []*model.Playlist) *Playlists {
+	view := &Playlists{}
+	list := make([]Playlist, len(playlists))
+	for i := range playlists {
+		list[i] = *NewPlaylist(*playlists[i])
+	}
+	view.Playlists = list
+	return view
+}

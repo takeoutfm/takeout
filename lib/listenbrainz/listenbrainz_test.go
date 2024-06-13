@@ -1,4 +1,4 @@
-// Copyright 2023 defsub
+// Copyright 2024 defsub
 //
 // This file is part of TakeoutFM.
 //
@@ -15,10 +15,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-package takeout
+package listenbrainz
 
-const (
-	AppName = "Takeout"
-	Version = "0.1j.0"
-	Contact = "takeoutfm.com"
+import (
+	// "sort"
+	// "strconv"
+
+	"testing"
+
+	"github.com/takeoutfm/takeout/lib/client"
 )
+
+func TestArtistTopTracks(t *testing.T) {
+	c := client.NewDefaultGetter()
+	l := NewListenBrainz(c)
+	tracks, err := l.ArtistTopTracks("6cb79cb2-9087-44d4-828b-5c6fdff2c957")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, track := range tracks {
+		t.Log(track.Rank, track.Track)
+	}
+}

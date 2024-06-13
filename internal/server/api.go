@@ -20,7 +20,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -59,51 +59,51 @@ type credentials struct {
 	Passcode string
 }
 
-type status struct {
-	Status  int
-	Message string `json:,omitempty`
-	Cookie  string `json:,omitempty`
-}
+// type status struct {
+// 	Status  int
+// 	Message string `json:,omitempty`
+// 	Cookie  string `json:,omitempty`
+// }
 
 // apiLogin handles login requests and returns a cookie.
-func apiLogin(w http.ResponseWriter, r *http.Request) {
-	ctx := contextValue(r)
-	w.Header().Set(header.ContentType, ApplicationJson)
+// func apiLogin(w http.ResponseWriter, r *http.Request) {
+// 	ctx := contextValue(r)
+// 	w.Header().Set(header.ContentType, ApplicationJson)
 
-	var creds credentials
-	body, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(body, &creds)
-	if err != nil {
-		serverErr(w, err)
-		return
-	}
+// 	var creds credentials
+// 	body, _ := ioutil.ReadAll(r.Body)
+// 	err := json.Unmarshal(body, &creds)
+// 	if err != nil {
+// 		serverErr(w, err)
+// 		return
+// 	}
 
-	var result status
-	var session auth.Session
-	if creds.Passcode == "" {
-		session, err = doLogin(ctx, creds.User, creds.Pass)
-	} else {
-		session, err = doPasscodeLogin(ctx, creds.User, creds.Pass, creds.Passcode)
-	}
-	if err != nil {
-		authErr(w, err)
-		result = status{
-			Status:  http.StatusUnauthorized,
-			Message: "error",
-		}
-	} else {
-		cookie := ctx.Auth().NewCookie(&session)
-		http.SetCookie(w, &cookie)
-		result = status{
-			Status:  http.StatusOK,
-			Message: "ok",
-			Cookie:  cookie.Value,
-		}
-	}
+// 	var result status
+// 	var session auth.Session
+// 	if creds.Passcode == "" {
+// 		session, err = doLogin(ctx, creds.User, creds.Pass)
+// 	} else {
+// 		session, err = doPasscodeLogin(ctx, creds.User, creds.Pass, creds.Passcode)
+// 	}
+// 	if err != nil {
+// 		authErr(w, err)
+// 		result = status{
+// 			Status:  http.StatusUnauthorized,
+// 			Message: "error",
+// 		}
+// 	} else {
+// 		cookie := ctx.Auth().NewCookie(&session)
+// 		http.SetCookie(w, &cookie)
+// 		result = status{
+// 			Status:  http.StatusOK,
+// 			Message: "ok",
+// 			Cookie:  cookie.Value,
+// 		}
+// 	}
 
-	enc := json.NewEncoder(w)
-	enc.Encode(result)
-}
+// 	enc := json.NewEncoder(w)
+// 	enc.Encode(result)
+// }
 
 type tokenResponse struct {
 	AccessToken  string
@@ -116,7 +116,7 @@ func apiTokenLogin(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 
 	var creds credentials
-	body, _ := ioutil.ReadAll(r.Body)
+	body, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(body, &creds)
 	if err != nil {
 		authErr(w, err)
@@ -153,7 +153,7 @@ func apiLink(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 
 	var creds linkCredentials
-	body, _ := ioutil.ReadAll(r.Body)
+	body, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(body, &creds)
 	if err != nil {
 		authErr(w, err)
@@ -265,7 +265,7 @@ func apiCodeCheck(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 
 	var check codeCheck
-	body, _ := ioutil.ReadAll(r.Body)
+	body, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(body, &check)
 	if err != nil {
 		authErr(w, err)
@@ -335,7 +335,7 @@ func writePlaylist(w http.ResponseWriter, r *http.Request, plist *spiff.Playlist
 func recvStation(w http.ResponseWriter, r *http.Request,
 	s *model.Station) error {
 	ctx := contextValue(r)
-	body, _ := ioutil.ReadAll(r.Body)
+	body, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(body, s)
 	if err != nil {
 		serverErr(w, err)
@@ -348,7 +348,7 @@ func recvStation(w http.ResponseWriter, r *http.Request,
 	s.User = ctx.User().Name
 	if s.Ref == "/api/playlist" {
 		// copy playlist
-		p := ctx.Music().LookupPlaylist(ctx.User())
+		p := ctx.Music().UserPlaylist(ctx.User())
 		if p != nil {
 			s.Playlist = p.Playlist
 		}
@@ -366,9 +366,9 @@ func makeEmptyPlaylist(w http.ResponseWriter, r *http.Request) (*model.Playlist,
 	return &p, err
 }
 
-func apiPlaylistGet(w http.ResponseWriter, r *http.Request) {
+func apiPlaylist(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	p := ctx.Music().LookupPlaylist(ctx.User())
+	p := ctx.Music().UserPlaylist(ctx.User())
 	if p == nil {
 		var err error
 		p, err = makeEmptyPlaylist(w, r)
@@ -384,24 +384,141 @@ func apiPlaylistGet(w http.ResponseWriter, r *http.Request) {
 
 func apiPlaylistPatch(w http.ResponseWriter, r *http.Request) {
 	var err error
-
 	ctx := contextValue(r)
 	user := ctx.User()
 	m := ctx.Music()
-	p := m.LookupPlaylist(user)
+	p := m.UserPlaylist(user)
 	if p == nil {
-		var err error
 		p, err = makeEmptyPlaylist(w, r)
 		if err != nil {
 			serverErr(w, err)
 			return
 		}
 	}
+	doPlaylistPatch(ctx, p, w, r)
+}
+
+func apiPlaylists(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	playlists := ctx.Music().UserPlaylists(ctx.User())
+	view := PlaylistsView(ctx, playlists)
+	apiView(w, r, view)
+}
+
+func apiPlaylistsCreate(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		serverErr(w, err)
+		return
+	}
+
+	// unmarshal to obtain playlist title
+	plist, err := spiff.Unmarshal(data)
+	if err != nil {
+		serverErr(w, err)
+		return
+	}
+	if plist.Spiff.Title == "" {
+		badRequest(w, ErrMissingTitle)
+		return
+	}
+
+	// user name is creator
+	plist.Spiff.Creator = ctx.User().Name
+
+	// save user playlist with name from title
+	p := model.Playlist{User: ctx.User().Name, Name: plist.Spiff.Title, Playlist: data}
+	err = ctx.Music().CreatePlaylist(&p)
+	if err != nil {
+		serverErr(w, err)
+		return
+	}
+
+	// update location from saved playlist ID (/api/playlists/id)
+	plist.Spiff.Location = fmt.Sprintf("%s/%d", r.URL.Path, p.ID)
+	err = Resolve(ctx, plist)
+	if err != nil {
+		serverErr(w, err)
+		return
+	}
+
+	// save updated playlist
+	data, err = plist.Marshal()
+	if err != nil {
+		serverErr(w, err)
+		return
+	}
+	p.Playlist = data
+	err = ctx.Music().UpdatePlaylist(&p)
+	if err != nil {
+		serverErr(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func apiPlaylistsGet(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	id := r.PathValue(ParamID)
+	playlist, err := ctx.FindPlaylist(id)
+	if err != nil {
+		notFoundErr(w)
+	} else {
+		apiView(w, r, PlaylistView(ctx, playlist))
+	}
+}
+
+func apiPlaylistsGetPlaylist(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	id := r.PathValue(ParamID)
+	playlist, err := ctx.FindPlaylist(id)
+	if err != nil {
+		notFoundErr(w)
+	} else {
+		w.Header().Set(header.ContentType, ApplicationJson)
+		w.WriteHeader(http.StatusOK)
+		w.Write(playlist.Playlist)
+	}
+}
+
+func apiPlaylistsPatch(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	id := r.PathValue(ParamID)
+	playlist, err := ctx.FindPlaylist(id)
+	if err != nil {
+		notFoundErr(w)
+	} else {
+		doPlaylistPatch(ctx, &playlist, w, r)
+	}
+}
+
+func apiPlaylistsDelete(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	id := r.PathValue(ParamID)
+	playlist, err := ctx.FindPlaylist(id)
+	if err != nil {
+		notFoundErr(w)
+	} else {
+		err = ctx.Music().DeletePlaylist(ctx.User(), int(playlist.ID))
+		if err != nil {
+			serverErr(w, err)
+		} else {
+			w.WriteHeader(http.StatusNoContent)
+		}
+	}
+}
+
+
+func doPlaylistPatch(ctx Context, p *model.Playlist, w http.ResponseWriter, r *http.Request) {
+	var err error
 
 	before := p.Playlist
 
 	// apply patch
-	patch, _ := ioutil.ReadAll(r.Body)
+	patch, _ := io.ReadAll(r.Body)
 	p.Playlist, err = spiff.Patch(p.Playlist, patch)
 	if err != nil {
 		serverErr(w, err)
@@ -424,24 +541,24 @@ func apiPlaylistPatch(w http.ResponseWriter, r *http.Request) {
 		// better way to handle this but for now, any entry without
 		// identifiers or sizes is a radio stream so fix spiff
 		// accordingly
+		change := false
 		for _, e := range plist.Spiff.Entries {
-			if len(e.Identifier) == 0 {
-				plist.Type = spiff.TypeStream
+			if len(e.Identifier) == 0 || len(e.Size) == 0 {
+				change = true
 				break
 			}
-			if len(e.Size) == 0 {
-				plist.Type = spiff.TypeStream
+			if len(e.Size) == 1 && e.Size[0] == -1 {
+				change = true
 				break
 			}
-			if e.Size[0] == -1 {
-				plist.Type = spiff.TypeStream
-				break
-			}
+		}
+		if change {
+			plist.Type = spiff.TypeStream
 		}
 	}
 
 	p.Playlist, _ = plist.Marshal()
-	m.UpdatePlaylist(p)
+	ctx.Music().UpdatePlaylist(p)
 
 	v, _ := spiff.Compare(before, p.Playlist)
 	if v {
@@ -464,7 +581,7 @@ func apiProgressPost(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	user := ctx.User()
 	var offsets model.Offsets
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		badRequest(w, err)
 		return
@@ -818,7 +935,7 @@ func apiStation(w http.ResponseWriter, r *http.Request, id int) {
 		}
 		w.WriteHeader(http.StatusNoContent)
 	case http.MethodPatch:
-		patch, _ := ioutil.ReadAll(r.Body)
+		patch, _ := io.ReadAll(r.Body)
 		s.Playlist, err = spiff.Patch(s.Playlist, patch)
 		if err != nil {
 			serverErr(w, err)
@@ -925,7 +1042,7 @@ func apiActivityPost(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 
 	var events model.Events
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		badRequest(w, err)
 		return
