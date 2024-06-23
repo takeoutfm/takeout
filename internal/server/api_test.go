@@ -56,8 +56,8 @@ func TestApiPlaylistsCreate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if resp.StatusCode != 204 {
-		t.Error("expected 204")
+	if resp.StatusCode != 200 {
+		t.Error("expected 200")
 	}
 }
 

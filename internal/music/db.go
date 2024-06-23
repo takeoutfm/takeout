@@ -660,7 +660,7 @@ func (m *Music) release(reid string) (*Release, error) {
 	var release Release
 	err := m.db.Where("re_id = ?", reid).First(&release).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errors.New("release group not found")
+		return nil, errors.New("release for re_id not found")
 	}
 	return &release, err
 }

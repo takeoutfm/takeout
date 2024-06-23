@@ -1,3 +1,8 @@
+## 0.17.3
+
+- fixed api_test
+- fixed REID not found during assignment
+
 ## 0.17.2
 
 - fixed serve listen option

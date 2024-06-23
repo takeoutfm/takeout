@@ -94,6 +94,7 @@ func (m *Music) Sync(options SyncOptions) {
 			_, err = m.assignTrackReleases()
 			log.CheckError(err)
 			_, err = m.assignTrackReleaseDates()
+			// XXX this crashed with release group not found
 			log.CheckError(err)
 			log.Printf("fix track release titles\n")
 			log.CheckError(m.fixTrackReleaseTitles())
@@ -481,10 +482,20 @@ func (m *Music) assignTrackReleaseDates() (bool, error) {
 		if !ok {
 			r, err = m.release(t.REID)
 			if err != nil {
-				return false, err
+				log.Println("REID not found for", t.Artist, t.Release, t.REID)
+				// REID not found, find new one
+				r = m.findTrackRelease(&t)
+				if r == nil {
+					// still not found, try harder
+					r = m.findTrackReleaseDisambiguate(&t)
+					if r == nil {
+						return false, err
+					}
+				}
 			}
 			cache[t.REID] = r
 		}
+		// this will reassign REID & RGID as needed
 		m.assignTrackRelease(&t, r)
 	}
 
