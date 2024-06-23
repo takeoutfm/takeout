@@ -65,7 +65,6 @@ func newS3Bucket(config Config) (*s3bucket, error) {
 	}
 	return bucket, nil
 }
-
 func (b *s3bucket) IsLocal() bool {
 	return b.config.Local
 }

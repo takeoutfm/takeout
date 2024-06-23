@@ -1,3 +1,9 @@
+## 0.17.2
+
+- fixed serve listen option
+- fixed spiff json track null after resolve
+- fixed assigned track release dates
+
 ## 0.17.1
 
 - fix *takeout run* video option

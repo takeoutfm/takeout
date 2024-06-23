@@ -360,6 +360,7 @@ func makeEmptyPlaylist(w http.ResponseWriter, r *http.Request) (*model.Playlist,
 	ctx := contextValue(r)
 	plist := spiff.NewPlaylist(spiff.TypeMusic)
 	plist.Spiff.Location = r.URL.Path
+	plist.Spiff.Entries = []spiff.Entry{} // so json track isn't null
 	data, _ := plist.Marshal()
 	p := model.Playlist{User: ctx.User().Name, Playlist: data}
 	err := ctx.Music().CreatePlaylist(&p)
@@ -425,9 +426,6 @@ func apiPlaylistsCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// user name is creator
-	plist.Spiff.Creator = ctx.User().Name
-
 	// save user playlist with name from title
 	p := model.Playlist{User: ctx.User().Name, Name: plist.Spiff.Title, Playlist: data}
 	err = ctx.Music().CreatePlaylist(&p)
@@ -438,11 +436,16 @@ func apiPlaylistsCreate(w http.ResponseWriter, r *http.Request) {
 
 	// update location from saved playlist ID (/api/playlists/id)
 	plist.Spiff.Location = fmt.Sprintf("%s/%d", r.URL.Path, p.ID)
+
+	// resolve refs
 	err = Resolve(ctx, plist)
 	if err != nil {
 		serverErr(w, err)
 		return
 	}
+
+	// user name is creator
+	plist.Spiff.Creator = ctx.User().Name
 
 	// save updated playlist
 	data, err = plist.Marshal()
@@ -457,7 +460,7 @@ func apiPlaylistsCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	apiView(w, r, PlaylistView(ctx, p))
 }
 
 func apiPlaylistsGet(w http.ResponseWriter, r *http.Request) {

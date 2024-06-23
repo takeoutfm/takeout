@@ -237,6 +237,14 @@ func (m *Music) tracksWithoutArtwork() []Track {
 	return tracks
 }
 
+func (m *Music) tracksWithoutAssignedReleaseDate() []Track {
+	var tracks []Track
+	m.db.Where("re_id <> '' and rg_id <> ''" +
+		" and (ifnull(date, '') = '' or ifnull(release_date, '') == '')").
+		Find(&tracks)
+	return tracks
+}
+
 // Assign a track to a specific MusicBrainz release. Since the
 // original data is just file names, the release is selected
 // automatically.

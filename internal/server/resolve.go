@@ -545,7 +545,7 @@ var (
 )
 
 func Resolve(ctx Context, plist *spiff.Playlist) (err error) {
-	var entries []spiff.Entry
+	entries := []spiff.Entry{}
 
 	for _, e := range plist.Spiff.Entries {
 		if e.Ref == "" {

@@ -93,6 +93,8 @@ func (m *Music) Sync(options SyncOptions) {
 			log.Printf("assign track releases\n")
 			_, err = m.assignTrackReleases()
 			log.CheckError(err)
+			_, err = m.assignTrackReleaseDates()
+			log.CheckError(err)
 			log.Printf("fix track release titles\n")
 			log.CheckError(m.fixTrackReleaseTitles())
 		}
@@ -147,6 +149,8 @@ func (m *Music) Sync(options SyncOptions) {
 			modified, err := m.assignTrackReleases()
 			log.CheckError(err)
 			if modified {
+				_, err = m.assignTrackReleaseDates()
+				log.CheckError(err)
 				log.CheckError(m.fixTrackReleaseTitles())
 			}
 		}
@@ -463,6 +467,28 @@ func (m *Music) assignTrackReleases() (bool, error) {
 		}
 	}
 	return modified, nil
+}
+
+// this is primarily for local tracks where the REID was obtained from tags but
+// remaining release metadata still needs to be assigned.
+func (m *Music) assignTrackReleaseDates() (bool, error) {
+	var err error
+	tracks := m.tracksWithoutAssignedReleaseDate()
+	cache := make(map[string]*Release)
+
+	for _, t := range tracks {
+		r, ok := cache[t.REID]
+		if !ok {
+			r, err = m.release(t.REID)
+			if err != nil {
+				return false, err
+			}
+			cache[t.REID] = r
+		}
+		m.assignTrackRelease(&t, r)
+	}
+
+	return len(tracks) > 0, nil
 }
 
 var cachedCountryMap map[string]int
@@ -878,6 +904,11 @@ func (m *Music) resolve() error {
 	}
 	// try to assign any unassigned releases
 	_, err = m.assignTrackReleases()
+	if err != nil {
+		return err
+	}
+	// fix up any track release dates
+	_, err = m.assignTrackReleaseDates()
 	if err != nil {
 		return err
 	}

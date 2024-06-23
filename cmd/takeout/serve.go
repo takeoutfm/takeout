@@ -20,7 +20,6 @@ package main
 import (
 	"github.com/takeoutfm/takeout/internal/server"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var serveCmd = &cobra.Command{
@@ -32,17 +31,19 @@ var serveCmd = &cobra.Command{
 	},
 }
 
+var listen string
+
 func serve() error {
 	cfg, err := getConfig()
 	if err != nil {
 		return err
 	}
+	cfg.Server.Listen = listen
 	return server.Serve(cfg)
 }
 
 func init() {
 	serveCmd.Flags().StringVarP(&configFile, "config", "c", "", "config file")
-	serveCmd.Flags().String("listen", "127.0.0.1:3000", "Address to listen on")
+	serveCmd.Flags().StringVar(&listen, "listen", "127.0.0.1:3000", "Address to listen on")
 	rootCmd.AddCommand(serveCmd)
-	viper.BindPFlag("Server.Listen", serveCmd.Flags().Lookup("listen"))
 }
