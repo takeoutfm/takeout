@@ -79,3 +79,15 @@ func TestTrimLength(t *testing.T) {
 		t.Error("expect The M...")
 	}
 }
+
+func TestTrimNulls(t *testing.T) {
+	b := []byte{'h', 'e', 'l', 'l', 'o', 0}
+	s := string(b)
+	if len(s) != 6 {
+		t.Error("expect 6")
+	}
+	s = TrimNulls(s)
+	if len(s) != 5 {
+		t.Error("expect 5")
+	}
+}

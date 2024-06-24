@@ -205,18 +205,23 @@ func parseMetadata(u *url.URL, t *Track) error {
 		return err
 	}
 
-	t.Artist = m.AlbumArtist()
-	t.Release = m.Album()
-	t.Title = m.Title()
-	t.TrackArtist = m.Artist()
+	t.Artist = trim(m.AlbumArtist())
+	t.Release = trim(m.Album())
+	t.Title = trim(m.Title())
+	t.TrackArtist = trim(m.Artist())
 	t.TrackNum, t.TrackCount = m.Track()
 	t.DiscNum, t.DiscCount = m.Disc()
 
 	info := mbz.Extract(m)
-	t.RID = info.Get(mbz.Recording)
-	t.RGID = info.Get(mbz.ReleaseGroup)
-	t.REID = info.Get(mbz.Album)
-	t.ARID = info.Get(mbz.AlbumArtist)
+	t.RID = trim(info.Get(mbz.Recording))
+	t.RGID = trim(info.Get(mbz.ReleaseGroup))
+	t.REID = trim(info.Get(mbz.Album))
+	t.ARID = trim(info.Get(mbz.AlbumArtist))
 
 	return nil
+}
+
+// fix nulls in embedded tags
+func trim(s string) string {
+	return str.TrimNulls(s)
 }

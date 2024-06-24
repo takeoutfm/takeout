@@ -67,3 +67,7 @@ func TrimLength(s string, n int) string {
 	}
 	return s
 }
+
+func TrimNulls(s string) string {
+	return strings.Trim(s, "\x00")
+}

@@ -1,3 +1,7 @@
+## 0.17.4
+
+- fix nulls found in embedded tags
+
 ## 0.17.3
 
 - fixed api_test

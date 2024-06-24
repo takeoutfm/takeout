@@ -434,8 +434,8 @@ func apiPlaylistsCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// update location from saved playlist ID (/api/playlists/id)
-	plist.Spiff.Location = fmt.Sprintf("%s/%d", r.URL.Path, p.ID)
+	// update location from saved playlist ID (/api/playlists/id/playlist)
+	plist.Spiff.Location = fmt.Sprintf("%s/%d/playlist", r.URL.Path, p.ID)
 
 	// resolve refs
 	err = Resolve(ctx, plist)
@@ -514,7 +514,6 @@ func apiPlaylistsDelete(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 func doPlaylistPatch(ctx Context, p *model.Playlist, w http.ResponseWriter, r *http.Request) {
 	var err error
 
@@ -534,7 +533,6 @@ func doPlaylistPatch(ctx Context, p *model.Playlist, w http.ResponseWriter, r *h
 		return
 	}
 
-	// save result
 	if plist.Spiff.Entries == nil {
 		plist.Spiff.Entries = []spiff.Entry{}
 	}
