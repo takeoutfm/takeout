@@ -1,3 +1,7 @@
+## 0.17.5
+
+- add track count to playlists
+
 ## 0.17.4
 
 - fix nulls found in embedded tags

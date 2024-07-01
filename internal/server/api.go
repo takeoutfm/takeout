@@ -454,6 +454,7 @@ func apiPlaylistsCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p.Playlist = data
+	p.TrackCount = len(plist.Spiff.Entries)
 	err = ctx.Music().UpdatePlaylist(&p)
 	if err != nil {
 		serverErr(w, err)
@@ -559,6 +560,7 @@ func doPlaylistPatch(ctx Context, p *model.Playlist, w http.ResponseWriter, r *h
 	}
 
 	p.Playlist, _ = plist.Marshal()
+	p.TrackCount = len(plist.Spiff.Entries)
 	ctx.Music().UpdatePlaylist(p)
 
 	v, _ := spiff.Compare(before, p.Playlist)

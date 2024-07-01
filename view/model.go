@@ -255,8 +255,9 @@ type ActivityReleases struct {
 }
 
 type Playlist struct {
-	ID   int
-	Name string
+	ID         int
+	Name       string
+	TrackCount int
 }
 
 type Playlists struct {
@@ -264,5 +265,5 @@ type Playlists struct {
 }
 
 func NewPlaylist(p model.Playlist) *Playlist {
-	return &Playlist{ID: int(p.ID), Name: p.Name}
+	return &Playlist{ID: int(p.ID), Name: p.Name, TrackCount: p.TrackCount}
 }
