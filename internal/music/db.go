@@ -888,6 +888,12 @@ func (m *Music) UserPlaylists(user *auth.User) []*Playlist {
 	return playlists
 }
 
+func (m *Music) UserPlaylistCount(user *auth.User) int64 {
+	var count int64;
+	m.db.Model(&Playlist{}).Where("user = ?", user.Name).Count(&count)
+	return count
+}
+
 // Save a playlist.
 func (m *Music) UpdatePlaylist(p *Playlist) error {
 	return m.db.Save(p).Error

@@ -36,10 +36,11 @@ type TrackList struct {
 }
 
 type Index struct {
-	Time        int64
-	HasMusic    bool
-	HasMovies   bool
-	HasPodcasts bool
+	Time         int64
+	HasMusic     bool
+	HasMovies    bool
+	HasPodcasts  bool
+	HasPlaylists bool
 }
 
 // swagger:model

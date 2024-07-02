@@ -34,6 +34,7 @@ func IndexView(ctx Context) *Index {
 	view.HasMusic = ctx.Music().HasMusic()
 	view.HasMovies = ctx.Video().HasMovies()
 	view.HasPodcasts = ctx.Podcast().HasPodcasts()
+	view.HasPlaylists = ctx.Music().HasPlaylists(ctx.User())
 	return view
 }
 

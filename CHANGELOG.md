@@ -1,7 +1,8 @@
-## 0.18.x
+## 0.17.6
 
 - add playlists to web ui
 - de-dup playlists
+- add has playlists to index
 
 ## 0.17.5
 

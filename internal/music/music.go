@@ -459,6 +459,10 @@ func (m *Music) HasMusic() bool {
 	return m.TrackCount() > 0
 }
 
+func (m *Music) HasPlaylists(user *auth.User) bool {
+	return m.UserPlaylistCount(user) > 0
+}
+
 func (m *Music) SearchTracks(title, artist, album string) []Track {
 	return m.searchTracks(title, artist, album)
 }
