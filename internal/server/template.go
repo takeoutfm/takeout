@@ -33,6 +33,7 @@ import (
 	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/takeoutfm/takeout/model"
+	"github.com/takeoutfm/takeout/view"
 )
 
 //go:embed res/static
@@ -183,6 +184,8 @@ func doFuncMap() template.FuncMap {
 				ref = fmt.Sprintf("/music/search?q=%s", url.QueryEscape(o.(string)))
 			case model.Station:
 				ref = fmt.Sprintf("/music/stations/%d", o.(model.Station).ID)
+			case view.Playlist:
+				ref = fmt.Sprintf("/music/playlists/%d", o.(view.Playlist).ID)
 			}
 			return ref
 		},
@@ -256,6 +259,11 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 		// /v?radio=x
 		result = RadioView(ctx)
 		temp = "radio.html"
+	} else if v := r.URL.Query().Get("playlists"); v != "" {
+		// /v?playlist=x
+		playlists := ctx.Music().UserPlaylists(ctx.User())
+		result = PlaylistsView(ctx, playlists)
+		temp = "playlists.html"
 	} else if v := r.URL.Query().Get("movies"); v != "" {
 		// /v?movies=x
 		result = MoviesView(ctx)

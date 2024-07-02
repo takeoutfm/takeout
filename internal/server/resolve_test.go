@@ -301,4 +301,19 @@ func TestResolvePlaylistWithEpisodeRef(t *testing.T) {
 	}
 }
 
+func TestDedup(t *testing.T) {
+	var p spiff.Playlist
+	p.Spiff.Entries = []spiff.Entry{
+		{Identifier: []string{"bbb"}},
+		{Identifier: []string{"aaa"}},
+		{Identifier: []string{"aaa"}},
+		{Identifier: []string{""}},
+		{Identifier: []string{"aaa"}},
+	}
+	dedup(&p)
+	if len(p.Spiff.Entries) != 3 {
+		t.Error("expect 3 entries")
+	}
+}
+
 // TODO incomplete

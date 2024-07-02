@@ -1,3 +1,8 @@
+## 0.18.x
+
+- add playlists to web ui
+- de-dup playlists
+
 ## 0.17.5
 
 - add track count to playlists

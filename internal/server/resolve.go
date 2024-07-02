@@ -344,6 +344,7 @@ func resolveStationRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.E
 
 // /music/playlists/{id,name}
 func resolvePlaylistRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.Entry, error) {
+	// note that FindPlaylist checks ctx user
 	p, err := ctx.FindPlaylist(id)
 	if err != nil {
 		p, err = ctx.FindPlaylist("name:" + id)
@@ -351,7 +352,6 @@ func resolvePlaylistRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.
 			return entries, err
 		}
 	}
-	// note that FindPlaylist checks ctx user
 	entries = addPlaylistEntries(ctx, p, entries)
 	return entries, nil
 }
@@ -546,7 +546,6 @@ var (
 
 func Resolve(ctx Context, plist *spiff.Playlist) (err error) {
 	entries := []spiff.Entry{}
-
 	for _, e := range plist.Spiff.Entries {
 		if e.Ref == "" {
 			entries = append(entries, e)
@@ -655,8 +654,25 @@ func Resolve(ctx Context, plist *spiff.Playlist) (err error) {
 	}
 
 	plist.Spiff.Entries = entries
+	dedup(plist)
 
 	return nil
+}
+
+func dedup(plist *spiff.Playlist) {
+	seen := make(map[string]struct{}, len(plist.Spiff.Entries))
+	i := 0
+	for _, v := range plist.Spiff.Entries {
+		if len(v.Identifier) > 0 {
+			if _, ok := seen[v.Identifier[0]]; ok {
+				continue
+			}
+			seen[v.Identifier[0]] = struct{}{}
+		}
+		plist.Spiff.Entries[i] = v
+		i++
+	}
+	plist.Spiff.Entries = plist.Spiff.Entries[:i]
 }
 
 func ResolveArtistPlaylist(ctx Context, v *view.Artist, path, nref string) *spiff.Playlist {
