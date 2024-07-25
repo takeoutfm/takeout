@@ -263,6 +263,7 @@ func Serve(config *config.Config) error {
 	mux.Handle("GET /api/releases/{id}", accessTokenAuthHandler(ctx, apiReleaseGet))
 	mux.Handle("GET /api/releases/{id}/playlist", accessTokenAuthHandler(ctx, apiReleaseGetPlaylist))
 	mux.Handle("GET /api/releases/{id}/playlist.xspf", accessTokenAuthHandler(ctx, apiReleaseGetPlaylist))
+	mux.Handle("GET /api/tracks/{id}/playlist", accessTokenAuthHandler(ctx, apiTrackPlaylist))
 
 	// video
 	mux.Handle("GET /api/movies", accessTokenAuthHandler(ctx, apiMovies))

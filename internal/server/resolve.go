@@ -167,6 +167,17 @@ func resolveTrackRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.Ent
 	return entries, nil
 }
 
+// /music/tracks/{id}/radio
+func resolveTrackRadioRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.Entry, error) {
+	t, err := ctx.FindTrack(id)
+	if err != nil {
+		return entries, err
+	}
+	radio := ctx.Music().TrackRadio(t)
+	entries = addTrackEntries(ctx, radio, entries)
+	return entries, nil
+}
+
 // /movies/{id}
 func resolveMovieRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.Entry, error) {
 	m, err := ctx.FindMovie(id)
@@ -534,6 +545,7 @@ var (
 	artistsRegexp      = regexp.MustCompile(`^/music/artists/([0-9a-zA-Z-]+)/([\w]+)$`)
 	releasesRegexp     = regexp.MustCompile(`^/music/releases/([0-9a-zA-Z-]+)/tracks$`)
 	tracksRegexp       = regexp.MustCompile(`^/music/tracks/([\d]+)$`)
+	trackRadioRegexp   = regexp.MustCompile(`^/music/tracks/([\d]+)/radio$`)
 	searchRegexp       = regexp.MustCompile(`^/music/search.*`)
 	stationsRegexp     = regexp.MustCompile(`^/music/stations/([\w ]+)$`)
 	playlistsRegexp    = regexp.MustCompile(`^/music/playlists/([\w ]+)$`)
@@ -575,6 +587,15 @@ func Resolve(ctx Context, plist *spiff.Playlist) (err error) {
 		matches = tracksRegexp.FindStringSubmatch(pathRef)
 		if matches != nil {
 			entries, err = resolveTrackRef(ctx, matches[1], entries)
+			if err != nil {
+				return err
+			}
+			continue
+		}
+
+		matches = trackRadioRegexp.FindStringSubmatch(pathRef)
+		if matches != nil {
+			entries, err = resolveTrackRadioRef(ctx, matches[1], entries)
 			if err != nil {
 				return err
 			}
@@ -750,12 +771,10 @@ func ResolveSeriesEpisodePlaylist(ctx Context, series *view.Series,
 	return plist
 }
 
-func ResolveActivityTracksPlaylist(ctx Context, v *view.ActivityTracks, res, path string) *spiff.Playlist {
-	var tracks []model.Track
+func creators(tracks []model.Track) string {
 	artistMap := make(map[string]bool)
-	for _, t := range v.Tracks {
-		artistMap[t.Track.Artist] = true
-		tracks = append(tracks, t.Track)
+	for _, t := range tracks {
+		artistMap[t.Artist] = true
 	}
 	var artists []string
 	for k := range artistMap {
@@ -764,7 +783,15 @@ func ResolveActivityTracksPlaylist(ctx Context, v *view.ActivityTracks, res, pat
 	sort.Slice(artists, func(i, j int) bool {
 		return artists[i] < artists[j]
 	})
-	creators := strings.Join(artists, " \u2022 ")
+	return strings.Join(artists, " \u2022 ")
+}
+
+func ResolveActivityTracksPlaylist(ctx Context, v *view.ActivityTracks, res, path string) *spiff.Playlist {
+	var tracks []model.Track
+	for _, t := range v.Tracks {
+		tracks = append(tracks, t.Track)
+	}
+
 	image := ""
 	for _, t := range tracks {
 		img := ctx.TrackImage(t)
@@ -784,9 +811,23 @@ func ResolveActivityTracksPlaylist(ctx Context, v *view.ActivityTracks, res, pat
 
 	plist := spiff.NewPlaylist(spiff.TypeMusic)
 	plist.Spiff.Location = path
-	plist.Spiff.Creator = creators
+	plist.Spiff.Creator = creators(tracks)
 	plist.Spiff.Title = title
 	plist.Spiff.Image = image
+	plist.Spiff.Date = date.FormatJson(time.Now())
+	plist.Spiff.Entries = addTrackEntries(ctx, tracks, plist.Spiff.Entries)
+	return plist
+}
+
+func ResolveTrackPlaylist(ctx Context, track model.Track, path string) *spiff.Playlist {
+	// /music/tracks/{id}/playlist
+	tracks := ctx.Music().TrackRadio(track)
+
+	plist := spiff.NewPlaylist(spiff.TypeMusic)
+	plist.Spiff.Location = path
+	plist.Spiff.Creator = creators(tracks)
+	plist.Spiff.Title = fmt.Sprintf("%s \u2013 Radio", track.Title)
+	plist.Spiff.Image = ctx.TrackImage(track)
 	plist.Spiff.Date = date.FormatJson(time.Now())
 	plist.Spiff.Entries = addTrackEntries(ctx, tracks, plist.Spiff.Entries)
 	return plist

@@ -20,6 +20,7 @@ package auth
 import (
 	"errors"
 	rando "math/rand"
+	"hash/maphash"
 	"time"
 
 	"gorm.io/gorm"
@@ -39,9 +40,9 @@ type Code struct {
 
 func randomCode() string {
 	var code string
-	rando.Seed(time.Now().UnixNano())
+	r := rando.New(rando.NewSource(int64(new(maphash.Hash).Sum64())))
 	for i := 0; i < CodeSize; i++ {
-		n := rando.Intn(len(CodeChars))
+		n := r.Intn(len(CodeChars))
 		code += string(CodeChars[n])
 	}
 	return code

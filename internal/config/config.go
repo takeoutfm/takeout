@@ -126,6 +126,8 @@ type MusicConfig struct {
 	ArtistFile           string
 	ArtistRadioBreadth   int
 	ArtistRadioDepth     int
+	TrackRadioBreadth    int
+	TrackRadioDepth      int
 	DB                   DatabaseConfig
 	DeepLimit            int
 	PopularLimit         int
@@ -365,6 +367,8 @@ func configDefaults(v *viper.Viper) {
 
 	v.SetDefault("Music.ArtistRadioBreadth", "10")
 	v.SetDefault("Music.ArtistRadioDepth", "3")
+	v.SetDefault("Music.TrackRadioBreadth", "10")
+	v.SetDefault("Music.TrackRadioDepth", "5")
 	v.SetDefault("Music.DeepLimit", "50")
 	v.SetDefault("Music.PopularLimit", "50")
 	v.SetDefault("Music.RadioLimit", "25")

@@ -212,7 +212,7 @@ func (m *Music) FindPlaylist(user *auth.User, identifier string) (Playlist, erro
 	id, err := strconv.Atoi(identifier)
 	if err != nil {
 		if strings.HasPrefix(identifier, "name:") {
-			stations := m.PlaylistsLike(user, "%" + identifier[5:] + "%")
+			stations := m.PlaylistsLike(user, "%"+identifier[5:]+"%")
 			if len(stations) > 0 {
 				return stations[0], nil
 			}
@@ -450,8 +450,8 @@ func contains(tracks []Track, t Track) bool {
 }
 
 func Shuffle(tracks []Track) []Track {
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(tracks), func(i, j int) { tracks[i], tracks[j] = tracks[j], tracks[i] })
+	r := rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
+	r.Shuffle(len(tracks), func(i, j int) { tracks[i], tracks[j] = tracks[j], tracks[i] })
 	return tracks
 }
 
@@ -501,4 +501,39 @@ func (m *Music) ArtistBackground(artist *Artist) string {
 		}
 	}
 	return imgs[0]
+}
+
+func removeTrack(track Track, tracks []Track) []Track {
+	for i := 0; i < len(tracks); i++ {
+		if track.ID == tracks[i].ID {
+			tracks = append(tracks[:i], tracks[i+1:]...)
+			i--
+		}
+	}
+	return tracks
+}
+
+func (m *Music) TrackRadio(track Track) []Track {
+	var tracks []Track
+
+	// track is first
+	tracks = append([]Track{track}, tracks...)
+
+	artist, err := m.FindArtist(track.ARID)
+	if err != nil {
+		return tracks
+	}
+
+	similar := m.ArtistSimilar(artist,
+		m.config.Music.TrackRadioDepth,
+		m.config.Music.TrackRadioBreadth)
+
+	similar = removeTrack(track, similar)
+	tracks = append(tracks, similar...)
+
+	if len(tracks) > m.config.Music.RadioLimit {
+		tracks = tracks[:m.config.Music.RadioLimit]
+	}
+
+	return tracks
 }

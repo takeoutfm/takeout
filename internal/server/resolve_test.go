@@ -316,4 +316,29 @@ func TestDedup(t *testing.T) {
 	}
 }
 
+func TestResolvePlaylistWithTrackRadioRef(t *testing.T) {
+	ctx := NewTestContext(t)
+	var p spiff.Playlist
+	p.Spiff.Entries = []spiff.Entry{{Ref: "/music/tracks/" + TestTrackID + "/radio"}}
+	err := Resolve(ctx, &p)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(p.Spiff.Entries) == 0 {
+		t.Error("expect entries")
+	}
+}
+
+func TestResolveTrackPlaylist(t *testing.T) {
+	ctx := NewTestContext(t)
+	track, err := ctx.FindTrack(TestTrackID)
+	if err != nil {
+		t.Error(err)
+	}
+	plist := ResolveTrackPlaylist(ctx, track, "/api/track/"+TestTrackID+"/playlist")
+	if len(plist.Spiff.Entries) == 0 {
+		t.Error("expect entries")
+	}
+}
+
 // TODO incomplete

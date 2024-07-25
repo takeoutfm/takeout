@@ -990,6 +990,19 @@ func apiReleaseGetPlaylist(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func apiTrackPlaylist(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	id := r.PathValue(ParamID)
+	track, err := ctx.FindTrack(id)
+	if err != nil {
+		notFoundErr(w)
+	} else {
+		// TODO create a TrackView() ?
+		plist := ResolveTrackPlaylist(ctx, track, r.URL.Path)
+		writePlaylist(w, r, plist)
+	}
+}
+
 func apiTrackLocation(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	uuid := r.PathValue(ParamUUID)

@@ -1,3 +1,11 @@
+## 0.18.0
+
+- use better random seed for codes
+- use new random w/ seed for shuffling
+- added track-based radio
+  * /api/tracks/{id}/playlist
+- added config for TrackRadioBreadth, TrackRadioDepth
+
 ## 0.17.6
 
 - add playlists to web ui
