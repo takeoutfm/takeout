@@ -138,7 +138,7 @@ type Track struct {
 	REID         string `gorm:"index:idx_track_reid"`
 	RGID         string `gorm:"index:idx_track_rgid"`
 	RID          string `gorm:"index:idx_track_rid"` // recording id
-	ARID         string `gorm:"index:idx_track_arid"`
+	ARID         string `gorm:"index:idx_track_arid"` // TODO only for local right now
 	MediaTitle   string
 	ReleaseTitle string `spiff:"album"`
 	TrackArtist  string // artist with featured artists

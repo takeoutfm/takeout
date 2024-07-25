@@ -519,12 +519,12 @@ func (m *Music) TrackRadio(track Track) []Track {
 	// track is first
 	tracks = append([]Track{track}, tracks...)
 
-	artist, err := m.FindArtist(track.ARID)
-	if err != nil {
+	artist := m.Artist(track.Artist)
+	if artist == nil {
 		return tracks
 	}
 
-	similar := m.ArtistSimilar(artist,
+	similar := m.ArtistSimilar(*artist,
 		m.config.Music.TrackRadioDepth,
 		m.config.Music.TrackRadioBreadth)
 

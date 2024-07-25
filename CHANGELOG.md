@@ -1,3 +1,7 @@
+## 0.18.2
+
+- don't use track ARID since it's not populated for s3 buckets yet
+
 ## 0.18.0, 0.18.1
 
 - use better random seed for codes
