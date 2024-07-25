@@ -1,4 +1,4 @@
-## 0.18.0
+## 0.18.0, 0.18.1
 
 - use better random seed for codes
 - use new random w/ seed for shuffling
