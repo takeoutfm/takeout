@@ -406,10 +406,16 @@ func (m *Music) ArtistRadio(artist Artist) []Track {
 func (m *Music) ArtistSimilar(artist Artist, depth int, breadth int) []Track {
 	var station []Track
 	tracks := m.ArtistPopularTracks(artist, depth)
+	if len(tracks) == 0 {
+		tracks = m.ArtistSingleTracks(artist, depth)
+	}
 	station = append(station, tracks...)
 	artists := m.SimilarArtists(&artist, breadth)
 	for _, a := range artists {
 		tracks = m.ArtistPopularTracks(a, depth)
+		if len(tracks) == 0 {
+			tracks = m.ArtistSingleTracks(a, depth)
+		}
 		station = append(station, tracks...)
 	}
 	return Shuffle(station)

@@ -1,3 +1,8 @@
+## 0.18.3
+
+- added RelatedArtists
+- use related artists when there are no similar artists
+
 ## 0.18.2
 
 - don't use track ARID since it's not populated for s3 buckets yet

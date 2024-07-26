@@ -151,6 +151,7 @@ type MusicConfig struct {
 	PopularSyncInterval  time.Duration
 	SimilarSyncInterval  time.Duration
 	CoverSyncInterval    time.Duration
+	RelatedArtists       time.Duration
 }
 
 type VideoConfig struct {
@@ -386,6 +387,7 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Music.PopularSyncInterval", "24h")
 	v.SetDefault("Music.SimilarSyncInterval", "24h")
 	v.SetDefault("Music.CoverSyncInterval", "24h")
+	v.SetDefault("Music.RelatedArtists", "43800h") // +/- 5 years
 
 	// see https://wiki.musicbrainz.org/Release_Country
 	v.SetDefault("Music.ReleaseCountries", []string{

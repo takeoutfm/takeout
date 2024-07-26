@@ -23,6 +23,7 @@ import (
 
 	"github.com/takeoutfm/takeout/internal/auth"
 	"github.com/takeoutfm/takeout/internal/config"
+	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/model"
 )
 
@@ -373,7 +374,7 @@ func TestPlaylist(t *testing.T) {
 	m := makeMusic(t)
 
 	p := model.Playlist{
-		User: user,
+		User:     user,
 		Playlist: []byte(`{"playlist":{}}`),
 	}
 
@@ -407,8 +408,8 @@ func TestPlaylistID(t *testing.T) {
 	u := auth.User{Name: user}
 
 	p := model.Playlist{
-		User: user,
-		Name: "my playlist",
+		User:     user,
+		Name:     "my playlist",
 		Playlist: []byte(`{"playlist":{}}`),
 	}
 
@@ -477,5 +478,94 @@ func TestPlaylistDelete(t *testing.T) {
 	}
 	if id != -1 {
 		t.Error("playlist not deleted")
+	}
+}
+
+func TestRelatedArtists(t *testing.T) {
+	m := makeMusic(t)
+
+	artists := []model.Artist{
+		{
+			Name:           "the test artist0",
+			SortName:       "test artist0, the",
+			ARID:           "arid0",
+			Disambiguation: "none",
+			Country:        "test country",
+			Area:           "test area",
+			Date:           date.ParseDate("2002-01-01"),
+			// no EndDate
+			Genre: "test rock",
+		},
+		{
+			Name:           "the test artist1",
+			SortName:       "test artist1, the",
+			ARID:           "arid1",
+			Disambiguation: "none",
+			Country:        "test country",
+			Area:           "test area",
+			Date:           date.ParseDate("2000-01-01"),
+			// no EndDate
+			Genre: "test rock",
+		},
+		{
+			Name:           "the test artist2",
+			SortName:       "test artist2, the",
+			ARID:           "arid2",
+			Disambiguation: "none",
+			Country:        "test country",
+			Area:           "test area",
+			Date:           date.ParseDate("1998-01-01"),
+			// no EndDate
+			Genre: "test rock",
+		},
+		{
+			Name:           "the test artist3",
+			SortName:       "test artist3, the",
+			ARID:           "arid3",
+			Disambiguation: "none",
+			Country:        "test country",
+			Area:           "test area",
+			Date:           date.ParseDate("2000-01-01"),
+			// no EndDate
+			Genre: "other rock",
+		},
+		{
+			Name:           "the test artist4",
+			SortName:       "test artist4, the",
+			ARID:           "arid4",
+			Disambiguation: "none",
+			Country:        "test country",
+			Area:           "test area",
+			Date:           date.ParseDate("2020-01-01"),
+			// no EndDate
+			Genre: "other rock",
+		},
+	}
+
+	for _, a := range artists {
+		err := m.createArtist(&a)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	result := m.RelatedArtists(&artists[0])
+	if len(result) != 2 {
+		t.Errorf("expect 2 related to 0, got %d", len(result))
+	}
+
+	result = m.RelatedArtists(&artists[1])
+	if len(result) != 2 {
+		t.Errorf("expect 2 related to 1, got %d", len(result))
+	}
+
+	result = m.RelatedArtists(&artists[2])
+	if len(result) != 2 {
+		t.Errorf("expect 2 related to 2, got %d", len(result))
+	}
+
+	result = m.RelatedArtists(&artists[3])
+	if len(result) != 0 {
+		t.Errorf("expect 0 related to 3, got %d", len(result))
 	}
 }

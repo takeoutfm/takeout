@@ -561,11 +561,36 @@ func (m *Music) SimilarArtists(a *Artist, limit ...int) []Artist {
 	if len(limit) == 1 {
 		l = limit[0]
 	}
+
 	m.db.Joins("inner join similar on similar.artist = ?", a.Name).
 		Where("artists.ar_id = similar.ar_id").
 		Order("similar.rank asc").
 		Limit(l).
 		Find(&artists)
+
+	if len(artists) == 0 {
+		artists = m.RelatedArtists(a, limit...)
+	}
+
+	return artists
+}
+
+// Useful when there are no similar artists. Artists with same genre that
+// started around the same time (default is +/- 5 years)
+func (m *Music) RelatedArtists(a *Artist, limit ...int) []Artist {
+	var artists []Artist
+	l := m.config.Music.SimilarArtistsLimit
+	if len(limit) == 1 {
+		l = limit[0]
+	}
+
+	after := a.Date.Add(m.config.Music.RelatedArtists * -1)
+	before := a.Date.Add(m.config.Music.RelatedArtists)
+
+	m.db.Where("ar_id <> ? and genre = ? and date >= ? and date <= ?", a.ARID, a.Genre, after, before).
+		Limit(l).
+		Find(&artists)
+
 	return artists
 }
 
@@ -889,7 +914,7 @@ func (m *Music) UserPlaylists(user *auth.User) []*Playlist {
 }
 
 func (m *Music) UserPlaylistCount(user *auth.User) int64 {
-	var count int64;
+	var count int64
 	m.db.Model(&Playlist{}).Where("user = ?", user.Name).Count(&count)
 	return count
 }
