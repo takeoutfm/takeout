@@ -69,9 +69,9 @@ func (p *Podcast) syncPodcast(url string) error {
 	}
 	defer s.Close()
 
-	series := p.findSeries(sid)
-	if series == nil {
-		series = &Series{
+	series, err := p.findSeries(sid)
+	if err != nil {
+		series = Series{
 			SID:         sid,
 			Title:       channel.Title,
 			Author:      channel.Author,
@@ -82,7 +82,7 @@ func (p *Podcast) syncPodcast(url string) error {
 			Date:        channel.LastBuildTime(),
 			TTL:         channel.TTL,
 		}
-		err := p.createSeries(series)
+		err := p.createSeries(&series)
 		if err != nil {
 			return err
 		}
@@ -107,7 +107,7 @@ func (p *Podcast) syncPodcast(url string) error {
 			series.Date = latest
 		}
 		series.TTL = channel.TTL
-		err := p.db.Save(series).Error
+		err := p.db.Save(&series).Error
 		if err != nil {
 			return err
 		}
@@ -130,9 +130,9 @@ func (p *Podcast) syncPodcast(url string) error {
 			img = series.Image
 		}
 
-		episode := p.findEpisode(eid)
-		if episode == nil {
-			episode = &Episode{
+		episode, err := p.findEpisode(eid)
+		if err != nil {
+			episode = Episode{
 				SID:         sid,
 				EID:         eid,
 				Title:       i.ItemTitle(),
@@ -145,7 +145,7 @@ func (p *Podcast) syncPodcast(url string) error {
 				Date:        i.PublishTime(),
 				Image:       img,
 			}
-			err = p.createEpisode(episode)
+			err = p.createEpisode(&episode)
 			if err != nil {
 				return err
 			}
@@ -160,7 +160,7 @@ func (p *Podcast) syncPodcast(url string) error {
 			episode.URL = i.URL()
 			episode.Date = i.PublishTime()
 			episode.Image = img
-			err := p.db.Save(episode).Error
+			err := p.db.Save(&episode).Error
 			if err != nil {
 				return err
 			}

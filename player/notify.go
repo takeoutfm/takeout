@@ -36,7 +36,7 @@ type notify struct {
 	f *funcs
 }
 
-func (p notify) Stream(samples [][2]float64) (int, bool) {
+func (p *notify) Stream(samples [][2]float64) (int, bool) {
 	if p.f.midpoint != nil {
 		// FIXME Len() may return zero
 		if p.s.Position() > (p.s.Len() / 2) {
@@ -47,22 +47,22 @@ func (p notify) Stream(samples [][2]float64) (int, bool) {
 	return p.s.Stream(samples)
 }
 
-func (p notify) Close() error {
+func (p *notify) Close() error {
 	return p.s.Close()
 }
 
-func (p notify) Len() int {
+func (p *notify) Len() int {
 	return p.s.Len()
 }
 
-func (p notify) Position() int {
+func (p *notify) Position() int {
 	return p.s.Position()
 }
 
-func (p notify) Err() error {
+func (p *notify) Err() error {
 	return p.s.Err()
 }
 
-func (p notify) Seek(n int) error {
+func (p *notify) Seek(n int) error {
 	return p.s.Seek(n)
 }

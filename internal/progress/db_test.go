@@ -79,11 +79,13 @@ func TestOffset(t *testing.T) {
 		t.Error("expect duration")
 	}
 
-	if p.lookupUserOffset(user, int(o.ID)) == nil {
+	_, err = p.lookupUserOffset(user, int(o.ID))
+	if err != nil {
 		t.Error("expect to find user offset with id")
 	}
 
-	if p.lookupUserOffsetEtag(user, etag) == nil {
+	_, err = p.lookupUserOffsetEtag(user, etag)
+	if err != nil {
 		t.Error("expect to find user offset with etag")
 	}
 

@@ -90,14 +90,14 @@ type client struct {
 }
 
 func NewDefaultGetter() Getter {
-	c := client{}
+	c := &client{}
 	c.client = &http.Client{}
 	c.rateLimiter = DefaultLimiter
 	return c
 }
 
 func NewCacheOnlyGetter(config Config) Getter {
-	c := client{}
+	c := &client{}
 	c.onlyCached = true
 	c.useCache = true
 	c.userAgent = config.UserAgent
@@ -110,7 +110,7 @@ func NewCacheOnlyGetter(config Config) Getter {
 }
 
 func NewGetter(config Config) Getter {
-	c := client{}
+	c := &client{}
 	c.userAgent = config.UserAgent
 	c.useCache = len(config.CacheDir) > 0
 	if c.useCache {
@@ -126,7 +126,7 @@ func NewGetter(config Config) Getter {
 }
 
 func NewTransportGetter(config Config, transport http.RoundTripper) Getter {
-	c := client{}
+	c := &client{}
 	c.userAgent = config.UserAgent
 	c.useCache = false
 	c.client = &http.Client{Transport: transport}
@@ -152,7 +152,7 @@ type unlimitedLimiter int
 func (unlimitedLimiter) RateLimit(host string) {
 }
 
-func (c client) doGet(headers map[string]string, urlStr string) (*http.Response, error) {
+func (c *client) doGet(headers map[string]string, urlStr string) (*http.Response, error) {
 	//log.Printf("doGet %s\n", urlStr)
 	url, err := url.Parse(urlStr)
 	if err != nil {
@@ -217,7 +217,7 @@ const (
 	backoff     = time.Second * 3
 )
 
-func (c client) doGetWithRetry(headers map[string]string, url string) (*http.Response, error) {
+func (c *client) doGetWithRetry(headers map[string]string, url string) (*http.Response, error) {
 	var resp *http.Response
 	var err error
 
@@ -245,7 +245,7 @@ func (c client) doGetWithRetry(headers map[string]string, url string) (*http.Res
 	return resp, err
 }
 
-func (c client) GetWith(headers map[string]string, url string) (http.Header, []byte, error) {
+func (c *client) GetWith(headers map[string]string, url string) (http.Header, []byte, error) {
 	resp, err := c.doGetWithRetry(headers, url)
 	if err != nil {
 		return nil, nil, err
@@ -255,20 +255,20 @@ func (c client) GetWith(headers map[string]string, url string) (http.Header, []b
 	return resp.Header, body, err
 }
 
-func (c client) Get(url string) (http.Header, []byte, error) {
+func (c *client) Get(url string) (http.Header, []byte, error) {
 	return c.GetWith(nil, url)
 }
 
-func (c client) GetBody(url string) (body []byte, err error) {
+func (c *client) GetBody(url string) (body []byte, err error) {
 	_, body, err = c.GetWith(nil, url)
 	return
 }
 
-func (c client) GetJson(url string, result interface{}) error {
+func (c *client) GetJson(url string, result interface{}) error {
 	return c.GetJsonWith(nil, url, result)
 }
 
-func (c client) GetJsonWith(headers map[string]string, url string, result interface{}) error {
+func (c *client) GetJsonWith(headers map[string]string, url string, result interface{}) error {
 	resp, err := c.doGetWithRetry(headers, url)
 	if err != nil {
 		return err
@@ -281,7 +281,7 @@ func (c client) GetJsonWith(headers map[string]string, url string, result interf
 	return nil
 }
 
-func (c client) GetXML(urlString string, result interface{}) error {
+func (c *client) GetXML(urlString string, result interface{}) error {
 	// TODO use only for testing
 	// if strings.HasPrefix(urlString, "file:") {
 	// 	u, err := url.Parse(urlString)
@@ -310,7 +310,7 @@ func (c client) GetXML(urlString string, result interface{}) error {
 	return nil
 }
 
-func (c client) GetPLS(urlString string) (pls.Playlist, error) {
+func (c *client) GetPLS(urlString string) (pls.Playlist, error) {
 	resp, err := c.doGet(nil, urlString)
 	if err != nil {
 		return pls.Playlist{}, err

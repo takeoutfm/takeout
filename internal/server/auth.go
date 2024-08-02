@@ -76,47 +76,42 @@ func getAuthToken(r *http.Request) string {
 }
 
 // authorizeAccessToken validates the provided JWT access token for API access.
-func authorizeAccessToken(ctx Context, w http.ResponseWriter, r *http.Request) (*auth.User, error) {
+func authorizeAccessToken(ctx Context, w http.ResponseWriter, r *http.Request) (auth.User, error) {
 	token := getAuthToken(r)
 	if token == "" {
-		return nil, nil
+		return auth.User{}, ErrMissingAccessToken
 	}
 	// token should be a JWT
 	user, err := ctx.Auth().CheckAccessTokenUser(token)
 	if err != nil {
-		authErr(w, err)
-		return nil, err
+		return auth.User{}, err
 	}
-	return &user, nil
+	return user, nil
 }
 
 // authorizeMediaToken validates the provided JWT media token for API access.
-func authorizeMediaToken(ctx Context, w http.ResponseWriter, r *http.Request) (*auth.User, error) {
+func authorizeMediaToken(ctx Context, w http.ResponseWriter, r *http.Request) (auth.User, error) {
 	token := getAuthToken(r)
 	if token == "" {
-		return nil, nil
+		return auth.User{}, ErrMissingMediaToken
 	}
 	// token should be a JWT
 	user, err := ctx.Auth().CheckMediaTokenUser(token)
 	if err != nil {
-		authErr(w, err)
-		return nil, err
+		return auth.User{}, err
 	}
-	return &user, nil
+	return user, nil
 }
 
 // authorizeCodeToken validates the provided JWT code token for code auth access.
 func authorizeCodeToken(ctx Context, w http.ResponseWriter, r *http.Request) error {
 	token := getAuthToken(r)
 	if token == "" {
-		err := ErrMissingToken
-		authErr(w, err)
-		return err
+		return ErrMissingCodeToken
 	}
 	// token should be a JWT with valid code in the subject
 	err := ctx.Auth().CheckCodeToken(token)
 	if err != nil {
-		authErr(w, err)
 		return err
 	}
 
@@ -127,49 +122,43 @@ func authorizeCodeToken(ctx Context, w http.ResponseWriter, r *http.Request) err
 func authorizeFileToken(ctx Context, w http.ResponseWriter, r *http.Request, path string) error {
 	token := r.URL.Query().Get(QueryToken)
 	if token == "" {
-		return nil
+		return ErrMissingToken
 	}
 
 	err := ctx.Auth().CheckFileToken(token, path)
 	if err != nil {
-		authErr(w, err)
 		return err
 	}
 	return nil
 }
 
 // authorizeCookie validates the provided cookie for API or web view access.
-func authorizeCookie(ctx Context, w http.ResponseWriter, r *http.Request) (*auth.User, error) {
+func authorizeCookie(ctx Context, w http.ResponseWriter, r *http.Request) (auth.User, error) {
 	a := ctx.Auth()
 	cookie, err := r.Cookie(auth.CookieName)
 	if err != nil {
 		if err != http.ErrNoCookie {
 			http.SetCookie(w, auth.ExpireCookie(cookie)) // what cookie is this?
 		}
-		http.Redirect(w, r, LoginRedirect, http.StatusTemporaryRedirect)
-		return nil, err
+		return auth.User{}, ErrAccessDeniedRedirect
 	}
 
-	session := a.CookieSession(cookie)
-	if session == nil {
+	session, err := a.CookieSession(cookie)
+	if err != nil {
 		http.SetCookie(w, auth.ExpireCookie(cookie))
-		http.Redirect(w, r, LoginRedirect, http.StatusTemporaryRedirect)
-		return nil, ErrAccessDenied
+		return auth.User{}, ErrAccessDeniedRedirect
 	} else if session.Expired() {
-		err = ErrAccessDenied
-		a.DeleteSession(*session)
+		a.DeleteSession(&session)
 		http.SetCookie(w, auth.ExpireCookie(cookie))
-		http.Redirect(w, r, LoginRedirect, http.StatusTemporaryRedirect)
-		return nil, ErrAccessDenied
+		return auth.User{}, ErrAccessDeniedRedirect
 	}
 
 	user, err := a.SessionUser(session)
 	if err != nil {
 		// session with no user?
-		a.DeleteSession(*session)
+		a.DeleteSession(&session)
 		http.SetCookie(w, auth.ExpireCookie(cookie))
-		http.Redirect(w, r, LoginRedirect, http.StatusTemporaryRedirect)
-		return nil, err
+		return auth.User{}, ErrAccessDeniedRedirect
 	}
 
 	// send back an updated cookie
@@ -180,74 +169,63 @@ func authorizeCookie(ctx Context, w http.ResponseWriter, r *http.Request) (*auth
 }
 
 // authorizeRefreshToken validates the provided refresh token for API access.
-func authorizeRefreshToken(ctx Context, w http.ResponseWriter, r *http.Request) *auth.Session {
+func authorizeRefreshToken(ctx Context, w http.ResponseWriter, r *http.Request) (auth.Session, error) {
 	token := getAuthToken(r)
 	if token == "" {
-		authErr(w, ErrUnauthorized)
-		return nil
+		return auth.Session{}, ErrUnauthorized
 	}
 	// token should be a refresh token not JWT
 	a := ctx.Auth()
-	session := a.TokenSession(token)
-	if session == nil {
+	session, err := a.TokenSession(token)
+	if err != nil {
 		// no session for token
-		authErr(w, ErrUnauthorized)
-		return nil
+		return auth.Session{}, err
 	} else if session.Expired() {
 		// session expired
-		a.DeleteSession(*session)
-		authErr(w, ErrUnauthorized)
-		return nil
+		a.DeleteSession(&session)
+		return auth.Session{}, ErrUnauthorized
 	} else if session.Duration() < ctx.Config().Auth.AccessToken.Age {
 		// session will expire before token
-		authErr(w, ErrUnauthorized)
-		return nil
+		return auth.Session{}, ErrUnauthorized
 	}
 	// session still valid
-	return session
+	return session, nil
 }
 
 // authorizeRequest authorizes the request with one or more of the allowed
 // authorization methods.
-func authorizeRequest(ctx Context, w http.ResponseWriter, r *http.Request, auth bits) *auth.User {
-	if auth&AllowAccessToken != 0 {
+func authorizeRequest(ctx Context, w http.ResponseWriter, r *http.Request, mask bits) (auth.User, error) {
+	if mask&AllowAccessToken != 0 {
 		user, err := authorizeAccessToken(ctx, w, r)
-		if user != nil {
-			return user
-		}
-		if err != nil {
-			return nil
+		if err == nil || err != ErrMissingAccessToken {
+			return user, err
 		}
 	}
 
-	if auth&AllowMediaToken != 0 {
+	if mask&AllowMediaToken != 0 {
 		user, err := authorizeMediaToken(ctx, w, r)
-		if user != nil {
-			return user
-		}
-		if err != nil {
-			return nil
+		if err == nil || err != ErrMissingMediaToken {
+			return user, err
 		}
 	}
 
-	if auth&AllowCookie != 0 {
+	if mask&AllowCookie != 0 {
 		user, err := authorizeCookie(ctx, w, r)
-		if user != nil {
-			return user
-		}
-		if err != nil {
-			return nil
+		if err == nil || err == ErrAccessDeniedRedirect {
+			return user, err
 		}
 	}
 
-	return nil
+	return auth.User{}, ErrUnauthorized
 }
 
 // refreshTokenAuthHandler handles requests intended to refresh and access token.
 func refreshTokenAuthHandler(ctx RequestContext, handler http.HandlerFunc) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		session := authorizeRefreshToken(ctx, w, r)
-		if session != nil {
+		session, err := authorizeRefreshToken(ctx, w, r)
+		if err != nil {
+			authErr(w, ErrUnauthorized)
+		} else {
 			ctx := sessionContext(ctx, session)
 			handler.ServeHTTP(w, withContext(r, ctx))
 		}
@@ -257,15 +235,21 @@ func refreshTokenAuthHandler(ctx RequestContext, handler http.HandlerFunc) http.
 
 // authHandler authorizes and handles all (except refresh) requests based on
 // allowed auth methods.
-func authHandler(ctx RequestContext, handler http.HandlerFunc, auth bits) http.Handler {
+func authHandler(ctx RequestContext, handler http.HandlerFunc, mask bits) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		user := authorizeRequest(ctx, w, r, auth)
-		if user != nil {
-			ctx, err := upgradeContext(ctx, user)
-			if err != nil {
-				serverErr(w, err)
-				return
+		user, err := authorizeRequest(ctx, w, r, mask)
+		if err != nil {
+			if err == ErrAccessDeniedRedirect {
+				http.Redirect(w, r, LoginRedirect, http.StatusTemporaryRedirect)
+			} else {
+				authErr(w, err)
 			}
+			return
+		}
+		ctx, err := upgradeContext(ctx, user)
+		if err != nil {
+			serverErr(w, err)
+		} else {
 			handler.ServeHTTP(w, withContext(r, ctx))
 		}
 	}
@@ -285,7 +269,9 @@ func accessTokenAuthHandler(ctx RequestContext, handler http.HandlerFunc) http.H
 func codeTokenAuthHandler(ctx RequestContext, handler http.HandlerFunc) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		err := authorizeCodeToken(ctx, w, r)
-		if err == nil {
+		if err != nil {
+			authErr(w, err)
+		} else {
 			handler.ServeHTTP(w, withContext(r, ctx))
 		}
 	}

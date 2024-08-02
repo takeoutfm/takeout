@@ -50,9 +50,6 @@ func TestFetch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c == nil {
-		t.Fatal("expect channel")
-	}
 	if c.Title != "This Week in Tech (Audio)" {
 		t.Error("expect title")
 	}

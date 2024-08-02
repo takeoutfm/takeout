@@ -56,7 +56,7 @@ func TestPlaylist(t *testing.T) {
 		t.Error("expect same creator")
 	}
 
-	if len(p.Spiff.Entries) != len(plist.Spiff.Entries) {
+	if p.Length() != plist.Length() {
 		t.Error("expect same entries")
 	}
 

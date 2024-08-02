@@ -42,7 +42,7 @@ type PlayOptions struct {
 	Best    bool
 }
 
-func (playout Playout) Play(options PlayOptions) error {
+func (playout *Playout) Play(options PlayOptions) error {
 	var view Viewer
 
 	if options.Visual {
@@ -60,7 +60,7 @@ func (playout Playout) Play(options PlayOptions) error {
 		offsets[o.ETag] = o
 	}
 
-	var playlist *spiff.Playlist
+	var playlist spiff.Playlist
 
 	if len(options.Stream) > 0 || len(options.Radio) > 0 {
 		result, err := client.Radio(playout)
@@ -96,12 +96,12 @@ func (playout Playout) Play(options PlayOptions) error {
 				break
 			}
 		}
-		if playlist == nil {
+		if playlist.Empty() {
 			return fmt.Errorf("radio/stream not found")
 		}
 	}
 
-	if playlist == nil {
+	if playlist.Empty() {
 		if len(options.Query) > 0 {
 			playlist, err = client.SearchReplace(playout, options.Query, options.Shuffle, options.Best)
 		} else {
@@ -112,7 +112,7 @@ func (playout Playout) Play(options PlayOptions) error {
 		return err
 	}
 
-	if len(playlist.Spiff.Entries) == 0 {
+	if playlist.Empty() {
 		return fmt.Errorf("playlist empty")
 	}
 

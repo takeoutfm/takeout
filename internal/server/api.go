@@ -226,7 +226,7 @@ func authorizeRefresh(session auth.Session, w http.ResponseWriter, r *http.Reque
 func apiTokenRefresh(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	session := ctx.Session()
-	authorizeRefresh(*session, w, r)
+	authorizeRefresh(session, w, r)
 }
 
 type codeResponse struct {
@@ -283,13 +283,13 @@ func apiCodeCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session := ctx.Auth().TokenSession(code.Token)
-	if session == nil {
+	session, err := ctx.Auth().TokenSession(code.Token)
+	if err != nil {
 		serverErr(w, ErrInvalidSession)
 		return
 	}
 
-	authorizeNew(*session, w, r)
+	authorizeNew(session, w, r)
 }
 
 var locationRegexp = regexp.MustCompile(`/api/(tracks)/([0-9a-zA-Z-]+)/location`)
@@ -315,7 +315,7 @@ func writePlaylist(w http.ResponseWriter, r *http.Request, plist *spiff.Playlist
 						continue
 					}
 					// TODO need to extent bucket URLExpiration for these tracks
-					url := m.TrackURL(&track)
+					url := m.TrackURL(track)
 					plist.Spiff.Entries[i].Location = []string{url.String()}
 				}
 			}
@@ -348,15 +348,15 @@ func recvStation(w http.ResponseWriter, r *http.Request,
 	s.User = ctx.User().Name
 	if s.Ref == "/api/playlist" {
 		// copy playlist
-		p := ctx.Music().UserPlaylist(ctx.User())
-		if p != nil {
+		p, err := ctx.Music().UserPlaylist(ctx.User())
+		if err == nil {
 			s.Playlist = p.Playlist
 		}
 	}
 	return nil
 }
 
-func makeEmptyPlaylist(w http.ResponseWriter, r *http.Request) (*model.Playlist, error) {
+func makeEmptyPlaylist(w http.ResponseWriter, r *http.Request) (model.Playlist, error) {
 	ctx := contextValue(r)
 	plist := spiff.NewPlaylist(spiff.TypeMusic)
 	plist.Spiff.Location = r.URL.Path
@@ -364,14 +364,13 @@ func makeEmptyPlaylist(w http.ResponseWriter, r *http.Request) (*model.Playlist,
 	data, _ := plist.Marshal()
 	p := model.Playlist{User: ctx.User().Name, Playlist: data}
 	err := ctx.Music().CreatePlaylist(&p)
-	return &p, err
+	return p, err
 }
 
 func apiPlaylist(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	p := ctx.Music().UserPlaylist(ctx.User())
-	if p == nil {
-		var err error
+	p, err := ctx.Music().UserPlaylist(ctx.User())
+	if err != nil {
 		p, err = makeEmptyPlaylist(w, r)
 		if err != nil {
 			serverErr(w, err)
@@ -388,15 +387,15 @@ func apiPlaylistPatch(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	user := ctx.User()
 	m := ctx.Music()
-	p := m.UserPlaylist(user)
-	if p == nil {
+	p, err := m.UserPlaylist(user)
+	if err != nil {
 		p, err = makeEmptyPlaylist(w, r)
 		if err != nil {
 			serverErr(w, err)
 			return
 		}
 	}
-	doPlaylistPatch(ctx, p, w, r)
+	doPlaylistPatch(ctx, &p, w, r)
 }
 
 func apiPlaylists(w http.ResponseWriter, r *http.Request) {
@@ -454,7 +453,7 @@ func apiPlaylistsCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p.Playlist = data
-	p.TrackCount = len(plist.Spiff.Entries)
+	p.TrackCount = plist.Length()
 	err = ctx.Music().UpdatePlaylist(&p)
 	if err != nil {
 		serverErr(w, err)
@@ -560,7 +559,7 @@ func doPlaylistPatch(ctx Context, p *model.Playlist, w http.ResponseWriter, r *h
 	}
 
 	p.Playlist, _ = plist.Marshal()
-	p.TrackCount = len(plist.Spiff.Entries)
+	p.TrackCount = plist.Length()
 	ctx.Music().UpdatePlaylist(p)
 
 	v, _ := spiff.Compare(before, p.Playlist)
@@ -1016,7 +1015,7 @@ func apiTrackLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url := ctx.Music().TrackURL(&track)
+	url := ctx.Music().TrackURL(track)
 	doRedirect(w, r, url, http.StatusTemporaryRedirect)
 }
 

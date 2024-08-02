@@ -136,15 +136,15 @@ func (c *TextContext) Template() *template.Template {
 	return &template.Template{}
 }
 
-func (c *TextContext) User() *auth.User {
-	return &auth.User{
+func (c *TextContext) User() auth.User {
+	return auth.User{
 		Name:  TestUserID,
 		Media: "test",
 	}
 }
 
-func (c *TextContext) Session() *auth.Session {
-	return &auth.Session{
+func (c *TextContext) Session() auth.Session {
+	return auth.Session{
 		User:    TestUserID,
 		Token:   "2c52d8aa-e37e-4ed6-884b-1a565f18bbfc",
 		Expires: time.Now().Add(24 * time.Hour),
@@ -225,7 +225,7 @@ func (c *TextContext) FindPlaylist(id string) (model.Playlist, error) {
 	if id == TestPlaylistID {
 		return model.Playlist{Name: "test playlist", User: TestUserID}, nil
 	}
-	p, err := c.Music().FindPlaylist(&auth.User{Name: TestUserID}, id)
+	p, err := c.Music().FindPlaylist(auth.User{Name: TestUserID}, id)
 	if err == nil {
 		return p, nil
 	}
@@ -292,5 +292,5 @@ func TestMakeContext(t *testing.T) {
 	ctx := NewTestContext(t)
 	u := auth.User{Name: "test user"}
 	m := makeMedia("test media", ctx.Config())
-	makeContext(ctx, &u, &config.Config{}, m)
+	makeContext(ctx, u, &config.Config{}, m)
 }

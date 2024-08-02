@@ -48,8 +48,8 @@ func randomCode() string {
 	return code
 }
 
-func (a *Auth) createCode(c *Code) (err error) {
-	err = a.db.Create(c).Error
+func (a *Auth) createCode(c Code) (err error) {
+	err = a.db.Create(&c).Error
 	return
 }
 

@@ -38,13 +38,13 @@ func NewRSS(client client.Getter) *RSS {
 	}
 }
 
-func (rss RSS) Fetch(url string) (*Channel, error) {
+func (rss *RSS) Fetch(url string) (Channel, error) {
 	var result Rss
 	err := rss.client.GetXML(url, &result)
-	return &result.Channel, err
+	return result.Channel, err
 }
 
-func (rss RSS) FetchPodcast(url string) (*Podcast, error) {
+func (rss *RSS) FetchPodcast(url string) (Podcast, error) {
 	result, err := rss.Fetch(url)
 	podcast := Podcast{
 		Title:         result.Title,
@@ -71,7 +71,7 @@ func (rss RSS) FetchPodcast(url string) (*Podcast, error) {
 		}
 		podcast.Episodes = append(podcast.Episodes, episode)
 	}
-	return &podcast, err
+	return podcast, err
 }
 
 type Podcast struct {
@@ -146,39 +146,39 @@ type Item struct {
 	Comments    string    `xml:"comments"`
 }
 
-func (i Item) ItemTitle() string {
+func (i *Item) ItemTitle() string {
 	if i.Content.Title != "" {
 		return i.Content.Title
 	}
 	return i.Title
 }
 
-func (i Item) PublishTime() time.Time {
+func (i *Item) PublishTime() time.Time {
 	return date.ParseRFC1123(i.PubDate)
 }
 
-func (i Item) Size() int64 {
+func (i *Item) Size() int64 {
 	if i.Content.FileSize > 0 {
 		return i.Content.FileSize
 	}
 	return i.Enclosure.Length
 }
 
-func (i Item) ContentType() string {
+func (i *Item) ContentType() string {
 	if i.Content.Title != "" {
 		return i.Content.Type
 	}
 	return i.Enclosure.Type
 }
 
-func (i Item) URL() string {
+func (i *Item) URL() string {
 	if i.Content.URL != "" {
 		return i.Content.URL
 	}
 	return i.Enclosure.URL
 }
 
-func (i Item) ItemGUID() string {
+func (i *Item) ItemGUID() string {
 	guid := i.GUID.Value
 	if guid == "" {
 		guid = hash.MD5Hex(i.Link)
@@ -188,7 +188,7 @@ func (i Item) ItemGUID() string {
 	return guid
 }
 
-func (i Item) ItemImage() string {
+func (i *Item) ItemImage() string {
 	return i.Image.Reference
 }
 
@@ -212,11 +212,11 @@ type Rss struct {
 	Channel Channel  `xml:"channel"`
 }
 
-func (c Channel) LastBuildTime() time.Time {
+func (c *Channel) LastBuildTime() time.Time {
 	return date.ParseRFC1123(c.LastBuildDate)
 }
 
-func (c Channel) Link() string {
+func (c *Channel) Link() string {
 	// <atom:link> has no value just href attr
 	for _, l := range c.Links {
 		if l != "" {

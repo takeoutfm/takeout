@@ -1,3 +1,9 @@
+## 0.18.4
+
+- refactoring
+  * updates to pointer and error handling
+  * added playlist Length() & Empty()
+
 ## 0.18.3
 
 - added RelatedArtists

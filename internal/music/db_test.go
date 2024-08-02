@@ -288,7 +288,7 @@ func TestArtistBackground(t *testing.T) {
 	a := model.Artist{
 		Name: "test artist",
 	}
-	list := m.artistBackgrounds(&a)
+	list := m.artistBackgrounds(a)
 	if len(list) == 0 {
 		t.Error("expect backgrounds")
 	}
@@ -312,7 +312,7 @@ func TestArtistImage(t *testing.T) {
 	a := model.Artist{
 		Name: "test artist",
 	}
-	list := m.artistImages(&a)
+	list := m.artistImages(a)
 	if len(list) == 0 {
 		t.Error("expect images")
 	}
@@ -390,13 +390,13 @@ func TestPlaylist(t *testing.T) {
 		Name: user,
 	}
 
-	pp := m.UserPlaylist(&u)
-	if pp == nil {
+	pp, err := m.UserPlaylist(u)
+	if err != nil {
 		t.Error("expect playlist")
 	}
 
 	pp.Playlist = []byte(`{"playlist":{title:"xyz"}}`)
-	err = m.UpdatePlaylist(pp)
+	err = m.UpdatePlaylist(&pp)
 	if err != nil {
 		t.Error("expect updated")
 	}
@@ -418,7 +418,7 @@ func TestPlaylistID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	playlists := m.UserPlaylists(&u)
+	playlists := m.UserPlaylists(u)
 	if len(playlists) == 0 {
 		t.Error("expect playlists")
 	}
@@ -436,8 +436,8 @@ func TestPlaylistID(t *testing.T) {
 		t.Error("playlist not found")
 	}
 
-	pp := m.LookupPlaylist(&u, id)
-	if pp == nil {
+	pp, err := m.LookupPlaylist(u, id)
+	if err != nil {
 		t.Error("playlist id not found")
 	}
 
@@ -452,7 +452,7 @@ func TestPlaylistDelete(t *testing.T) {
 	u := auth.User{Name: user}
 
 	id := -1
-	playlists := m.UserPlaylists(&u)
+	playlists := m.UserPlaylists(u)
 	for _, p := range playlists {
 		if p.Name == "my playlist" {
 			id = int(p.ID)
@@ -463,13 +463,13 @@ func TestPlaylistDelete(t *testing.T) {
 		t.Error("playlist not found")
 	}
 
-	err := m.DeletePlaylist(&u, id)
+	err := m.DeletePlaylist(u, id)
 	if err != nil {
 		t.Error(err)
 	}
 
 	id = -1
-	playlists = m.UserPlaylists(&u)
+	playlists = m.UserPlaylists(u)
 	for _, p := range playlists {
 		if p.Name == "my playlist" {
 			id = int(p.ID)
@@ -549,22 +549,22 @@ func TestRelatedArtists(t *testing.T) {
 		}
 	}
 
-	result := m.RelatedArtists(&artists[0])
+	result := m.RelatedArtists(artists[0])
 	if len(result) != 2 {
 		t.Errorf("expect 2 related to 0, got %d", len(result))
 	}
 
-	result = m.RelatedArtists(&artists[1])
+	result = m.RelatedArtists(artists[1])
 	if len(result) != 2 {
 		t.Errorf("expect 2 related to 1, got %d", len(result))
 	}
 
-	result = m.RelatedArtists(&artists[2])
+	result = m.RelatedArtists(artists[2])
 	if len(result) != 2 {
 		t.Errorf("expect 2 related to 2, got %d", len(result))
 	}
 
-	result = m.RelatedArtists(&artists[3])
+	result = m.RelatedArtists(artists[3])
 	if len(result) != 0 {
 		t.Errorf("expect 0 related to 3, got %d", len(result))
 	}

@@ -43,7 +43,7 @@ func NewVisualView() Viewer {
 	return &VisualView{screen: screen}
 }
 
-func (v VisualView) OnStart(p *player.Player) {
+func (v *VisualView) OnStart(p *player.Player) {
 	err := v.screen.Init()
 	if err != nil {
 		log.Panicln(err)
@@ -92,19 +92,19 @@ func (v VisualView) OnStart(p *player.Player) {
 	}()
 }
 
-func (v VisualView) OnTrack(p *player.Player) {
+func (v *VisualView) OnTrack(p *player.Player) {
 	v.update(p)
 }
 
-func (v VisualView) OnError(p *player.Player, err error) {
+func (v *VisualView) OnError(p *player.Player, err error) {
 	log.Printf("Error %v\n", err)
 }
 
-func (v VisualView) OnStop() {
+func (v *VisualView) OnStop() {
 	v.screen.Fini()
 }
 
-func (v VisualView) update(p *player.Player) {
+func (v *VisualView) update(p *player.Player) {
 	w, h := v.screen.Size()
 	v.screen.Clear()
 

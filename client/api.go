@@ -55,18 +55,18 @@ type request struct {
 }
 
 func with(context Context, bearer int) requestContext {
-	return request{context: context, bearer: bearer}
+	return &request{context: context, bearer: bearer}
 }
 
-func (r request) Endpoint() string {
+func (r *request) Endpoint() string {
 	return r.context.Endpoint()
 }
 
-func (r request) Transport() http.RoundTripper {
+func (r *request) Transport() http.RoundTripper {
 	return r.context.Transport()
 }
 
-func (r request) Headers() Headers {
+func (r *request) Headers() Headers {
 	headers := NewHeaders()
 	headers.UserAgent(r.context.UserAgent())
 	switch r.bearer {
@@ -97,65 +97,48 @@ type codeCheck struct {
 	Code string
 }
 
-func Code(context Context) (*AccessCode, error) {
+func Code(context Context) (AccessCode, error) {
 	var result AccessCode
-	if err := Get(with(context, bearerNone), "/api/code", &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
+	err := Get(with(context, bearerNone), "/api/code", &result)
+	return result, err
 }
 
-func CheckCode(context Context) (*Tokens, error) {
+func CheckCode(context Context) (Tokens, error) {
 	var tokens Tokens
 	check := codeCheck{Code: context.Code()}
 	err := Post(with(context, bearerCode), "/api/code", &check, &tokens)
-	if err != nil {
-		return nil, err
-	}
-	return &tokens, nil
+	return tokens, err
 }
 
-func Home(context Context) (*view.Home, error) {
+func Home(context Context) (view.Home, error) {
 	var result view.Home
 	err := get(context, "/api/home", &result)
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
+	return result, err
 }
 
-func Radio(context Context) (*view.Radio, error) {
+func Radio(context Context) (view.Radio, error) {
 	var result view.Radio
 	err := get(context, "/api/radio", &result)
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
+	return result, err
 }
 
-func Playlist(context Context) (*spiff.Playlist, error) {
+func Playlist(context Context) (spiff.Playlist, error) {
 	var result spiff.Playlist
 	err := get(context, "/api/playlist", &result)
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
+	return result, err
 }
 
 func Locate(context Context, uri string) (*url.URL, error) {
 	return GetLocation(with(context, bearerMedia), uri)
 }
 
-func Progress(context Context) (*view.Progress, error) {
+func Progress(context Context) (view.Progress, error) {
 	var result view.Progress
 	err := get(context, "/api/progress", &result)
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
+	return result, err
 }
 
-func SearchReplace(context Context, query string, shuffle, best bool) (*spiff.Playlist, error) {
+func SearchReplace(context Context, query string, shuffle, best bool) (spiff.Playlist, error) {
 	var result spiff.Playlist
 	var radio string
 	var match string
@@ -169,20 +152,14 @@ func SearchReplace(context Context, query string, shuffle, best bool) (*spiff.Pl
 		strings.Join([]string{"/music/search?q=", url.QueryEscape(query), radio, match}, ""),
 		spiff.TypeMusic, "", "")
 	err := patch(context, "/api/playlist", data, &result)
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
+	return result, err
 }
 
-func Replace(context Context, ref, spiffType, creator, title string) (*spiff.Playlist, error) {
+func Replace(context Context, ref, spiffType, creator, title string) (spiff.Playlist, error) {
 	var result spiff.Playlist
 	data := patchReplace(ref, spiffType, creator, title)
 	err := patch(context, "/api/playlist", data, &result)
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
+	return result, err
 }
 
 func Position(context Context, index int, position float64) error {

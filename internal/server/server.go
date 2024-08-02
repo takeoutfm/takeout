@@ -60,7 +60,7 @@ func doPasscodeLogin(ctx Context, user, pass, passcode string) (auth.Session, er
 
 // upgradeContext creates a full context based on user and media configuration.
 // This is used for most requests after the user has been authorized.
-func upgradeContext(ctx Context, user *auth.User) (RequestContext, error) {
+func upgradeContext(ctx Context, user auth.User) (RequestContext, error) {
 	mediaName, userConfig, err := mediaConfigFor(ctx.Config(), user)
 	if err != nil {
 		return RequestContext{}, err
@@ -70,7 +70,7 @@ func upgradeContext(ctx Context, user *auth.User) (RequestContext, error) {
 }
 
 // sessionContext creates a minimal context with the provided session.
-func sessionContext(ctx Context, session *auth.Session) RequestContext {
+func sessionContext(ctx Context, session auth.Session) RequestContext {
 	return makeAuthOnlyContext(ctx, session)
 }
 

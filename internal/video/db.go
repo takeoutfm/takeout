@@ -105,16 +105,13 @@ func (v *Video) Collections() []Collection {
 	return collections
 }
 
-func (v *Video) MovieCollection(m Movie) *Collection {
+func (v *Video) MovieCollections(m Movie) []Collection {
 	var collections []Collection
 	v.db.Where("tm_id = ?", m.TMID).Find(&collections)
-	if len(collections) == 0 {
-		return nil
-	}
-	return &collections[0]
+	return collections
 }
 
-func (v *Video) CollectionMovies(c *Collection) []Movie {
+func (v *Video) CollectionMovies(c Collection) []Movie {
 	var movies []Movie
 	v.db.Where("movies.tm_id in (select tm_id from collections where name = ?)", c.Name).
 		Order("movies.date").Find(&movies)
@@ -222,36 +219,36 @@ func (v *Video) deleteKeywords(tmid int) {
 	}
 }
 
-func (v *Video) Person(peid int) (*Person, error) {
+func (v *Video) Person(peid int) (Person, error) {
 	var person Person
 	// TODO fix this logs an error every time and it's not an error
 	err := v.db.Where("pe_id = ?", peid).First(&person).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errors.New("person not found")
+		return Person{}, errors.New("person not found")
 	}
-	return &person, err
+	return person, err
 }
 
-func (v *Video) Movie(tmid int) (*Movie, error) {
+func (v *Video) Movie(tmid int) (Movie, error) {
 	var movie Movie
 	err := v.db.Where("tm_id = ?", tmid).First(&movie).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errors.New("movie not found")
+		return Movie{}, errors.New("movie not found")
 	}
-	return &movie, err
+	return movie, err
 }
 
 func (v *Video) UpdateMovie(m *Movie) error {
 	return v.db.Save(m).Error
 }
 
-func (v *Video) LookupCollectionName(name string) (*Collection, error) {
+func (v *Video) LookupCollectionName(name string) (Collection, error) {
 	var collection Collection
 	err := v.db.First(&collection, "name = ?", name).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errors.New("collection not found")
+		return Collection{}, errors.New("collection not found")
 	}
-	return &collection, err
+	return collection, err
 }
 
 func (v *Video) LookupMovie(id int) (Movie, error) {
@@ -356,10 +353,10 @@ func (v *Video) RecentlyReleased() []Movie {
 	return movies
 }
 
-func (v *Video) LookupETag(etag string) (*Movie, error) {
+func (v *Video) LookupETag(etag string) (Movie, error) {
 	movie := Movie{ETag: etag}
 	err := v.db.First(&movie, &movie).Error
-	return &movie, err
+	return movie, err
 }
 
 func (v *Video) MovieCount() int64 {

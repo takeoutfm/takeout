@@ -38,8 +38,8 @@ import (
 	"github.com/faiface/beep/vorbis"
 	"github.com/faiface/beep/wav"
 	"github.com/takeoutfm/takeout/client"
-	"github.com/takeoutfm/takeout/spiff"
 	"github.com/takeoutfm/takeout/lib/log"
+	"github.com/takeoutfm/takeout/spiff"
 )
 
 type playing struct {
@@ -74,7 +74,7 @@ func NewConfig() *Config {
 
 type Player struct {
 	context  client.Context
-	playlist *spiff.Playlist
+	playlist spiff.Playlist
 	playing  *playing
 	config   *Config
 	control  chan playerAction
@@ -84,7 +84,7 @@ type Player struct {
 	mu       sync.Mutex
 }
 
-func NewPlayer(context client.Context, playlist *spiff.Playlist, config *Config) *Player {
+func NewPlayer(context client.Context, playlist spiff.Playlist, config *Config) *Player {
 	return &Player{context: context, playlist: playlist, config: config, skipTo: -1}
 }
 
@@ -134,7 +134,7 @@ func (p *Player) Index() int {
 }
 
 func (p *Player) Length() int {
-	return len(p.playlist.Spiff.Entries)
+	return p.playlist.Length()
 }
 
 func (p *Player) Title() string {

@@ -25,6 +25,10 @@ import (
 	"gorm.io/gorm"
 )
 
+var (
+	ErrOffsetNotFound = errors.New("offset not found")
+)
+
 func (p *Progress) openDB() (err error) {
 	cfg := p.config.Music.DB.GormConfig()
 
@@ -57,34 +61,34 @@ func (p *Progress) userOffsets(user string) []Offset {
 	return offsets
 }
 
-func (p *Progress) lookupUserOffset(user string, id int) *Offset {
+func (p *Progress) lookupUserOffset(user string, id int) (Offset, error) {
 	offset, err := p.lookupOffset(id)
 	if err != nil {
-		return nil
+		return Offset{}, ErrOffsetNotFound
 	}
 	if offset.User != user {
-		return nil
+		return Offset{}, ErrOffsetNotFound
 	}
-	return offset
+	return offset, nil
 }
 
-func (p *Progress) lookupUserOffsetEtag(user, etag string) *Offset {
+func (p *Progress) lookupUserOffsetEtag(user, etag string) (Offset, error) {
 	var list []Offset
 	p.db.Where("user = ? and e_tag = ?", user, etag).
 		Order("date desc").Find(&list)
 	if len(list) > 0 {
-		return &list[0]
+		return list[0], nil
 	}
-	return nil
+	return Offset{}, ErrOffsetNotFound
 }
 
-func (p *Progress) lookupOffset(id int) (*Offset, error) {
+func (p *Progress) lookupOffset(id int) (Offset, error) {
 	var offset Offset
 	err := p.db.First(&offset, id).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errors.New("offset not found")
+		return Offset{}, ErrOffsetNotFound
 	}
-	return &offset, err
+	return offset, err
 }
 
 func (p *Progress) createOffset(o *Offset) error {

@@ -183,7 +183,7 @@ func matchTrack(file string, t *Track) bool {
 }
 
 // Generate a presigned url which expires based on config settings.
-func (m *Music) bucketURL(t *Track) *url.URL {
+func (m *Music) bucketURL(t Track) *url.URL {
 	// TODO FIXME assume first bucket!!!
 	return m.buckets[0].ObjectURL(t.Key)
 }

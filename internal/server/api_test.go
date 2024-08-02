@@ -130,8 +130,8 @@ func TestApiPlaylistsGetPlaylist(t *testing.T) {
 
 	var plist spiff.Playlist
 	json.Unmarshal(body, &plist)
-	if len(plist.Spiff.Entries) != 1 {
-		t.Errorf("expected 1 entries got %d", len(plist.Spiff.Entries))
+	if plist.Length() != 1 {
+		t.Errorf("expected 1 entries got %d", plist.Length())
 	}
 }
 
@@ -155,8 +155,8 @@ func TestApiPlaylistsPatch(t *testing.T) {
 
 	var plist spiff.Playlist
 	json.Unmarshal(body, &plist)
-	if len(plist.Spiff.Entries) != 2 {
-		t.Errorf("expected 2 entries got %d", len(plist.Spiff.Entries))
+	if plist.Length() != 2 {
+		t.Errorf("expected 2 entries got %d", plist.Length())
 	}
 
 }
@@ -178,8 +178,8 @@ func TestApiPlaylistsGetPlaylistPatched(t *testing.T) {
 
 	var plist spiff.Playlist
 	json.Unmarshal(body, &plist)
-	if len(plist.Spiff.Entries) != 2 {
-		t.Errorf("expected 2 entries got %d", len(plist.Spiff.Entries))
+	if plist.Length() != 2 {
+		t.Errorf("expected 2 entries got %d", plist.Length())
 	}
 }
 

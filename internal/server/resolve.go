@@ -681,7 +681,7 @@ func Resolve(ctx Context, plist *spiff.Playlist) (err error) {
 }
 
 func dedup(plist *spiff.Playlist) {
-	seen := make(map[string]struct{}, len(plist.Spiff.Entries))
+	seen := make(map[string]struct{}, plist.Length())
 	i := 0
 	for _, v := range plist.Spiff.Entries {
 		if len(v.Identifier) > 0 {

@@ -76,7 +76,7 @@ func TestTrackEvent(t *testing.T) {
 	e := model.TrackEvent{
 		User: user,
 		Date: time.Now(),
-		RID: rid,
+		RID:  rid,
 		RGID: rgid,
 	}
 	err := a.createTrackEvent(&e)
@@ -143,7 +143,7 @@ func TestEpisodeEvent(t *testing.T) {
 	e := model.EpisodeEvent{
 		User: user,
 		Date: time.Now(),
-		EID: eid,
+		EID:  eid,
 	}
 	err := a.createEpisodeEvent(&e)
 	if err != nil {

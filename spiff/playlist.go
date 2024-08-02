@@ -44,6 +44,14 @@ type Playlist struct {
 	Type     string  `json:"type"`
 }
 
+func (p *Playlist) Empty() bool {
+	return len(p.Spiff.Entries) == 0
+}
+
+func (p *Playlist) Length() int {
+	return len(p.Spiff.Entries)
+}
+
 type Spiff struct {
 	Header
 	Entries  []Entry `json:"track"`

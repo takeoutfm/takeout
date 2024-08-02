@@ -22,6 +22,7 @@ package musicbrainz
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -31,6 +32,10 @@ import (
 
 	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/takeoutfm/takeout/lib/date"
+)
+
+var (
+	ErrArtistNotFound = errors.New("artist not found")
 )
 
 type MusicBrainz struct {
@@ -424,16 +429,16 @@ func (m *MusicBrainz) ArtistReleases(artist, arid string) ([]Release, error) {
 	return releases, nil
 }
 
-func (m *MusicBrainz) doArtistReleases(arid string, limit int, offset int) (*ReleasesPage, error) {
+func (m *MusicBrainz) doArtistReleases(arid string, limit int, offset int) (ReleasesPage, error) {
 	var result ReleasesPage
 	inc := []string{"release-groups", "media"}
 	url := fmt.Sprintf("https://musicbrainz.org/ws/2/release?fmt=json&artist=%s&inc=%s&limit=%d&offset=%d",
 		arid, strings.Join(inc, "%2B"), limit, offset)
 	err := m.client.GetJson(url, &result)
-	return &result, err
+	return result, err
 }
 
-func (m *MusicBrainz) Release(reid string) (*Release, error) {
+func (m *MusicBrainz) Release(reid string) (Release, error) {
 	inc := []string{"aliases", "artist-credits", "labels",
 		"discids", "recordings", "artist-rels",
 		"release-groups", "genres", "tags", "ratings",
@@ -442,10 +447,10 @@ func (m *MusicBrainz) Release(reid string) (*Release, error) {
 		reid, strings.Join(inc, "%2B"))
 	var result Release
 	err := m.client.GetJson(url, &result)
-	return &result, err
+	return result, err
 }
 
-func (m *MusicBrainz) ReleaseGroup(rgid string) (*ReleaseGroup, error) {
+func (m *MusicBrainz) ReleaseGroup(rgid string) (ReleaseGroup, error) {
 	inc := []string{"releases", "media", "release-group-rels",
 		"genres", "tags", "ratings", "series-rels"}
 	url := fmt.Sprintf("https://musicbrainz.org/ws/2/release-group/%s?fmt=json&inc=%s",
@@ -457,7 +462,7 @@ func (m *MusicBrainz) ReleaseGroup(rgid string) (*ReleaseGroup, error) {
 			r.Title = result.Title
 		}
 	}
-	return &result, err
+	return result, err
 }
 
 func (m *MusicBrainz) Releases(rgid string) ([]Release, error) {
@@ -467,7 +472,7 @@ func (m *MusicBrainz) Releases(rgid string) ([]Release, error) {
 		return releases, err
 	}
 	for _, r := range rg.Releases {
-		r.ReleaseGroup = *rg
+		r.ReleaseGroup = rg
 		//releases = append(releases, release(a, r))
 		releases = append(releases, r)
 	}
@@ -481,13 +486,13 @@ type SearchResult struct {
 	ReleaseGroups []ReleaseGroup `json:"release-groups"`
 }
 
-func (m *MusicBrainz) SearchReleaseGroup(arid string, name string) (*SearchResult, error) {
+func (m *MusicBrainz) SearchReleaseGroup(arid string, name string) (SearchResult, error) {
 	url := fmt.Sprintf(
 		`https://musicbrainz.org/ws/2/release-group/?fmt=json&query=arid:%s+AND+release:"%s"`,
 		arid, url.QueryEscape(name))
 	var result SearchResult
 	err := m.client.GetJson(url, &result)
-	return &result, err
+	return result, err
 }
 
 // func doArtist(artist Artist) (a *music.Artist, tags []music.ArtistTag) {
@@ -506,18 +511,18 @@ func (m *MusicBrainz) SearchReleaseGroup(arid string, name string) (*SearchResul
 // }
 
 // Obtain artist details using MusicBrainz artist ID.
-func (m *MusicBrainz) SearchArtistID(arid string) *Artist /*(a *music.Artist, tags []music.ArtistTag)*/ {
+func (m *MusicBrainz) SearchArtistID(arid string) (Artist, error) {
 	query := fmt.Sprintf(`arid:%s`, arid)
 	result, _ := m.doArtistSearch(query, 100, 0)
 	if len(result.Artists) == 0 {
-		return nil
+		return Artist{}, ErrArtistNotFound
 	}
 	//a, tags = doArtist(result.Artists[0])
-	return &result.Artists[0]
+	return result.Artists[0], nil
 }
 
 // Search for artist by name using MusicBrainz.
-func (m *MusicBrainz) SearchArtist(name string) *Artist /*(a *music.Artist, tags []music.ArtistTag)*/ {
+func (m *MusicBrainz) SearchArtist(name string) (Artist, error) {
 	var artists []Artist
 	limit, offset := 100, 0
 
@@ -531,7 +536,7 @@ func (m *MusicBrainz) SearchArtist(name string) *Artist /*(a *music.Artist, tags
 	score := 100 // change to widen matches below
 	artists = scoreFilter(artists, score)
 	if len(artists) == 0 {
-		return nil
+		return Artist{}, ErrArtistNotFound
 	}
 
 	pick := 0
@@ -548,7 +553,7 @@ func (m *MusicBrainz) SearchArtist(name string) *Artist /*(a *music.Artist, tags
 	}
 	artist := artists[pick]
 	//a, tags = doArtist(artist)
-	return &artist
+	return artist, nil
 }
 
 func scoreFilter(artists []Artist, score int) []Artist {
@@ -563,20 +568,20 @@ func scoreFilter(artists []Artist, score int) []Artist {
 }
 
 // query should be formatted correctly - arid:xyz or artist:"name"
-func (m *MusicBrainz) doArtistSearch(query string, limit int, offset int) (*ArtistsPage, error) {
+func (m *MusicBrainz) doArtistSearch(query string, limit int, offset int) (ArtistsPage, error) {
 	var result ArtistsPage
 	url := fmt.Sprintf(`https://musicbrainz.org/ws/2/artist?fmt=json&query=%s&limit=%d&offset=%d`,
 		url.QueryEscape(query), limit, offset)
 	err := m.client.GetJson(url, &result)
-	return &result, err
+	return result, err
 }
 
-func (m *MusicBrainz) ArtistDetail(arid string) (*Artist, error) {
+func (m *MusicBrainz) ArtistDetail(arid string) (Artist, error) {
 	var result Artist
 	url := fmt.Sprintf(`http://musicbrainz.org/ws/2/artist/%s?fmt=json&inc=genres+url-rels`,
 		arid)
 	err := m.client.GetJson(url, &result)
-	return &result, err
+	return result, err
 }
 
 type coverArtImage struct {
@@ -606,7 +611,7 @@ func unquote(s string) string {
 	return s
 }
 
-func (m *MusicBrainz) CoverArtArchive(reid string, rgid string) (*coverArt, error) {
+func (m *MusicBrainz) CoverArtArchive(reid string, rgid string) (coverArt, error) {
 	var result coverArt
 	result.FromGroup = false
 	// try release first
@@ -619,7 +624,7 @@ func (m *MusicBrainz) CoverArtArchive(reid string, rgid string) (*coverArt, erro
 		err = m.client.GetJson(url, &result)
 		if err != nil {
 			// can get 404 for direct checks
-			return &result, err
+			return result, err
 		}
 		result.FromGroup = true
 	}
@@ -629,5 +634,5 @@ func (m *MusicBrainz) CoverArtArchive(reid string, rgid string) (*coverArt, erro
 		// id: "42"
 		result.Images[i].ID = unquote(string(img.RawID))
 	}
-	return &result, err
+	return result, err
 }

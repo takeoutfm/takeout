@@ -244,7 +244,7 @@ func TestResolvePlaylistWithTrackRef(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if len(p.Spiff.Entries) == 0 {
+	if p.Empty() {
 		t.Error("expect entries")
 	}
 }
@@ -257,7 +257,7 @@ func TestResolvePlaylistWithReleaseRef(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if len(p.Spiff.Entries) == 0 {
+	if p.Empty() {
 		t.Error("expect entries")
 	}
 }
@@ -270,7 +270,7 @@ func TestResolvePlaylistWithMovieRef(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if len(p.Spiff.Entries) == 0 {
+	if p.Empty() {
 		t.Error("expect entries")
 	}
 }
@@ -283,7 +283,7 @@ func TestResolvePlaylistWithSeriesRef(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if len(p.Spiff.Entries) == 0 {
+	if p.Empty() {
 		t.Error("expect entries")
 	}
 }
@@ -296,7 +296,7 @@ func TestResolvePlaylistWithEpisodeRef(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if len(p.Spiff.Entries) == 0 {
+	if p.Empty() {
 		t.Error("expect entries")
 	}
 }
@@ -311,7 +311,7 @@ func TestDedup(t *testing.T) {
 		{Identifier: []string{"aaa"}},
 	}
 	dedup(&p)
-	if len(p.Spiff.Entries) != 3 {
+	if p.Length() != 3 {
 		t.Error("expect 3 entries")
 	}
 }
@@ -324,7 +324,7 @@ func TestResolvePlaylistWithTrackRadioRef(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if len(p.Spiff.Entries) == 0 {
+	if p.Empty() {
 		t.Error("expect entries")
 	}
 }
@@ -336,7 +336,7 @@ func TestResolveTrackPlaylist(t *testing.T) {
 		t.Error(err)
 	}
 	plist := ResolveTrackPlaylist(ctx, track, "/api/track/"+TestTrackID+"/playlist")
-	if len(plist.Spiff.Entries) == 0 {
+	if plist.Length() == 0 {
 		t.Error("expect entries")
 	}
 }

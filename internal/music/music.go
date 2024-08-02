@@ -145,11 +145,11 @@ func (m *Music) TrackCover(t Track, size string) string {
 	if ok {
 		return v
 	}
-	release, _ := m.assignedRelease(&t)
-	if release == nil {
+	release, err := m.assignedRelease(t)
+	if err != nil {
 		v = ""
 	} else {
-		v = Cover(*release, size)
+		v = Cover(release, size)
 	}
 	coverCache[t.REID] = v
 	return v
@@ -157,13 +157,13 @@ func (m *Music) TrackCover(t Track, size string) string {
 
 // URL to stream track from the S3 bucket. This will be signed and
 // expired based on config.
-func (m *Music) TrackURL(t *Track) *url.URL {
+func (m *Music) TrackURL(t Track) *url.URL {
 	url := m.bucketURL(t)
 	return url
 }
 
 // Find track using the etag from the S3 bucket.
-func (m *Music) TrackLookup(etag string) *Track {
+func (m *Music) TrackLookup(etag string) Track {
 	track, _ := m.LookupETag(etag)
 	return track
 }
@@ -208,7 +208,7 @@ func (m *Music) FindStation(identifier string) (Station, error) {
 	}
 }
 
-func (m *Music) FindPlaylist(user *auth.User, identifier string) (Playlist, error) {
+func (m *Music) FindPlaylist(user auth.User, identifier string) (Playlist, error) {
 	id, err := strconv.Atoi(identifier)
 	if err != nil {
 		if strings.HasPrefix(identifier, "name:") {
@@ -217,14 +217,9 @@ func (m *Music) FindPlaylist(user *auth.User, identifier string) (Playlist, erro
 				return stations[0], nil
 			}
 		}
-		return Playlist{}, errors.New("playlist not found")
+		return Playlist{}, ErrPlaylistNotFound
 	} else {
-		p := m.LookupPlaylist(user, id)
-		if p != nil {
-			return *p, nil
-		} else {
-			return Playlist{}, errors.New("playlist not found")
-		}
+		return m.LookupPlaylist(user, id)
 	}
 }
 
@@ -410,7 +405,7 @@ func (m *Music) ArtistSimilar(artist Artist, depth int, breadth int) []Track {
 		tracks = m.ArtistSingleTracks(artist, depth)
 	}
 	station = append(station, tracks...)
-	artists := m.SimilarArtists(&artist, breadth)
+	artists := m.SimilarArtists(artist, breadth)
 	for _, a := range artists {
 		tracks = m.ArtistPopularTracks(a, depth)
 		if len(tracks) == 0 {
@@ -465,7 +460,7 @@ func (m *Music) HasMusic() bool {
 	return m.TrackCount() > 0
 }
 
-func (m *Music) HasPlaylists(user *auth.User) bool {
+func (m *Music) HasPlaylists(user auth.User) bool {
 	return m.UserPlaylistCount(user) > 0
 }
 
@@ -477,7 +472,7 @@ func (m *Music) UnmatchedTracks() []Track {
 	return m.tracksWithoutAssignedRelease()
 }
 
-func (m *Music) ArtistImage(artist *Artist) string {
+func (m *Music) ArtistImage(artist Artist) string {
 	imgs := m.artistImages(artist)
 	if len(imgs) == 0 {
 		return ""
@@ -493,7 +488,7 @@ func (m *Music) ArtistImage(artist *Artist) string {
 	return imgs[0]
 }
 
-func (m *Music) ArtistBackground(artist *Artist) string {
+func (m *Music) ArtistBackground(artist Artist) string {
 	imgs := m.artistBackgrounds(artist)
 	if len(imgs) == 0 {
 		return ""
@@ -525,12 +520,12 @@ func (m *Music) TrackRadio(track Track) []Track {
 	// track is first
 	tracks = append([]Track{track}, tracks...)
 
-	artist := m.Artist(track.Artist)
-	if artist == nil {
+	artist, err := m.Artist(track.Artist)
+	if err != nil {
 		return tracks
 	}
 
-	similar := m.ArtistSimilar(*artist,
+	similar := m.ArtistSimilar(artist,
 		m.config.Music.TrackRadioDepth,
 		m.config.Music.TrackRadioBreadth)
 

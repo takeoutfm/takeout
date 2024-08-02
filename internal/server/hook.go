@@ -77,8 +77,8 @@ func hookHandler(w http.ResponseWriter, r *http.Request) {
 				authRequired(ctx, hookRequest, hookResponse)
 			}
 		} else {
-			user, _ := authCheck(ctx, hookRequest, hookResponse, cookie)
-			if user == nil {
+			user, err := authCheck(ctx, hookRequest, hookResponse, cookie)
+			if err != nil {
 				authRequired(ctx, hookRequest, hookResponse)
 			} else {
 
@@ -101,7 +101,7 @@ func hookHandler(w http.ResponseWriter, r *http.Request) {
 	hookResponse.Send(w)
 }
 
-func fulfillIntent(ctx Context, user *auth.User, resp http.ResponseWriter,
+func fulfillIntent(ctx Context, user auth.User, resp http.ResponseWriter,
 	r *actions.WebhookRequest, w *actions.WebhookResponse) {
 	ctx, err := upgradeContext(ctx, user)
 	if err != nil {
@@ -145,9 +145,9 @@ func fulfillPlay(ctx Context, r *actions.WebhookRequest, w *actions.WebhookRespo
 	query := ""
 
 	if artist != "" {
-		a := m.ArtistLike(artist)
-		if a != nil {
-			v := ArtistView(ctx, *a)
+		a, err := m.ArtistLike(artist)
+		if err == nil {
+			v := ArtistView(ctx, a)
 			if radio != "" {
 				// play [artist] radio
 				tracks = v.Radio.Tracks()
@@ -198,9 +198,9 @@ func fulfillPlay(ctx Context, r *actions.WebhookRequest, w *actions.WebhookRespo
 		}
 	} else if any != "" {
 		// play [any]
-		a := m.ArtistLike(any)
-		if a != nil {
-			v := ArtistView(ctx, *a)
+		a, err := m.ArtistLike(any)
+		if err == nil {
+			v := ArtistView(ctx, a)
 			tracks = v.Popular.Tracks()
 		}
 		if len(tracks) == 0 {
@@ -221,7 +221,7 @@ func fulfillPlay(ctx Context, r *actions.WebhookRequest, w *actions.WebhookRespo
 			name := config.Assistant.MediaObjectName.Execute(t)
 			desc := config.Assistant.MediaObjectDesc.Execute(t)
 			w.AddMedia(name, desc,
-				m.TrackURL(&t).String(),
+				m.TrackURL(t).String(),
 				m.TrackImage(t).String())
 		}
 	} else {
@@ -293,21 +293,21 @@ func authNext(ctx Context, r *actions.WebhookRequest, w *actions.WebhookResponse
 }
 
 func authCheck(ctx Context, r *actions.WebhookRequest, w *actions.WebhookResponse,
-	cookie string) (*auth.User, error) {
+	cookie string) (auth.User, error) {
 	a := ctx.Auth()
-	session := a.TokenSession(cookie)
-	if session == nil {
-		return nil, ErrUnauthorized
+	session, err := a.TokenSession(cookie)
+	if err != nil {
+		return auth.User{}, ErrUnauthorized
 	} else if session.Expired() {
-		a.DeleteSession(*session)
-		return nil, ErrUnauthorized
+		a.DeleteSession(&session)
+		return auth.User{}, ErrUnauthorized
 	}
 	user, err := a.SessionUser(session)
 	if err != nil {
-		a.DeleteSession(*session)
-		return nil, ErrUnauthorized
+		a.DeleteSession(&session)
+		return auth.User{}, ErrUnauthorized
 	}
-	a.Refresh(session) // TODO remove
+	a.Refresh(&session) // TODO remove
 	return user, nil
 }
 

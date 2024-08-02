@@ -70,10 +70,10 @@ func ArtistView(ctx Context, artist model.Artist) *Artist {
 	m := ctx.Music()
 	view := &Artist{}
 	view.Artist = artist
-	view.Releases = m.ArtistReleases(&artist)
-	view.Similar = m.SimilarArtists(&artist)
-	view.Image = m.ArtistImage(&artist)
-	view.Background = m.ArtistBackground(&artist)
+	view.Releases = m.ArtistReleases(artist)
+	view.Similar = m.SimilarArtists(artist)
+	view.Image = m.ArtistImage(artist)
+	view.Background = m.ArtistBackground(artist)
 	view.CoverSmall = m.CoverSmall
 	view.Popular = TrackList{
 		Title: fmt.Sprintf("%s \u2013 Popular", artist.Name),
@@ -155,14 +155,14 @@ func ReleaseView(ctx Context, release model.Release) *Release {
 	m := ctx.Music()
 	view := &Release{}
 	view.Release = release
-	artist := m.Artist(release.Artist)
-	if artist != nil {
-		view.Artist = *artist
+	artist, err := m.Artist(release.Artist)
+	if err == nil {
+		view.Artist = artist
 	}
 	view.Tracks = ctx.FindReleaseTracks(release)
 	view.Singles = m.ReleaseSingles(release)
 	view.Popular = m.ReleasePopular(release)
-	view.Similar = m.SimilarReleases(&view.Artist, release)
+	view.Similar = m.SimilarReleases(view.Artist, release)
 	view.Image = m.CoverSmall(release)
 	view.CoverSmall = m.CoverSmall
 	return view
@@ -235,10 +235,10 @@ func MovieView(ctx Context, m model.Movie) *Movie {
 	view := &Movie{}
 	view.Movie = m
 	view.Location = ctx.LocateMovie(m)
-	collection := v.MovieCollection(m)
-	if collection != nil {
-		view.Collection = *collection
-		view.Other = v.CollectionMovies(collection)
+	collections := v.MovieCollections(m)
+	if len(collections) > 0 {
+		view.Collection = collections[0]
+		view.Other = v.CollectionMovies(collections[0])
 		if len(view.Other) == 1 && view.Other[0].ID == m.ID {
 			// collection is just this movie so remove
 			view.Other = view.Other[1:]
@@ -399,11 +399,11 @@ func PlaylistView(ctx Context, playlist model.Playlist) *Playlist {
 	return NewPlaylist(playlist)
 }
 
-func PlaylistsView(ctx Context, playlists []*model.Playlist) *Playlists {
+func PlaylistsView(ctx Context, playlists []model.Playlist) *Playlists {
 	view := &Playlists{}
 	list := make([]Playlist, len(playlists))
 	for i := range playlists {
-		list[i] = *NewPlaylist(*playlists[i])
+		list[i] = *NewPlaylist(playlists[i])
 	}
 	view.Playlists = list
 	return view

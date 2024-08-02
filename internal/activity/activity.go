@@ -40,7 +40,7 @@ var (
 type Context interface {
 	Music() *music.Music
 	Podcast() *podcast.Podcast
-	User() *auth.User
+	User() auth.User
 	Video() *video.Video
 }
 
@@ -214,7 +214,7 @@ func (a *Activity) RecentReleases(ctx Context) []ActivityRelease {
 }
 
 // Add a scrobble with an MBID that should match a track we have
-func (a *Activity) UserScrobble(user *auth.User, s Scrobble, music *music.Music) error {
+func (a *Activity) UserScrobble(user auth.User, s Scrobble, music *music.Music) error {
 	// ensure there's a valid user
 	// if s.User == "" {
 	// 	s.User = user.Name

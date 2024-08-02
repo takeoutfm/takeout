@@ -63,7 +63,8 @@ func TestSeries(t *testing.T) {
 	}
 
 	// TODO why findSeries and LookupSID?
-	if p.findSeries(sid) == nil {
+	_, err = p.findSeries(sid)
+	if err != nil {
 		t.Error("expect series")
 	}
 	_, err = p.LookupSID(sid)
@@ -120,7 +121,8 @@ func TestEpisode(t *testing.T) {
 		t.Error("expect ID")
 	}
 
-	if p.findEpisode(eid) == nil {
+	_, err = p.findEpisode(eid)
+	if err != nil {
 		t.Error("expect to find episode")
 	}
 	_, err = p.LookupEpisode(int(e.ID))
@@ -141,14 +143,16 @@ func TestEpisode(t *testing.T) {
 		t.Error("expect episodesfor")
 	}
 
-	p.retainEpisodes(&s, []string{eid})
-	if p.findEpisode(eid) == nil {
+	p.retainEpisodes(s, []string{eid})
+	_, err = p.findEpisode(eid)
+	if err != nil {
 		t.Error("expect retained")
 	}
 
 	p.deleteEpisode(eid)
 
-	if p.findEpisode(eid) != nil {
+	_, err = p.findEpisode(eid)
+	if err == nil {
 		t.Error("expect no episode")
 	}
 }

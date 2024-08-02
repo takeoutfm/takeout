@@ -63,7 +63,7 @@ type Artist struct {
 	MusicBanners      []Art            `json:"musicbanner"`
 }
 
-func (f Fanart) ArtistArt(arid string) *Artist {
+func (f *Fanart) ArtistArt(arid string) *Artist {
 	key := f.config.PersonalKey
 	if key == "" {
 		key = f.config.ProjectKey

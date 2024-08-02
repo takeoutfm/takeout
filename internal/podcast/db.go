@@ -25,6 +25,11 @@ import (
 	"gorm.io/gorm"
 )
 
+var (
+	ErrSeriesNotFound  = errors.New("series not found")
+	ErrEpisodeNotFound = errors.New("episode not found")
+)
+
 func (p *Podcast) openDB() (err error) {
 	cfg := p.config.Music.DB.GormConfig()
 
@@ -130,22 +135,22 @@ func (p *Podcast) createEpisode(e *Episode) error {
 	return p.db.Create(e).Error
 }
 
-func (p *Podcast) findSeries(sid string) *Series {
+func (p *Podcast) findSeries(sid string) (Series, error) {
 	var list []Series
 	p.db.Where("s_id = ?", sid).Find(&list)
 	if len(list) > 0 {
-		return &list[0]
+		return list[0], nil
 	}
-	return nil
+	return Series{}, ErrSeriesNotFound
 }
 
-func (p *Podcast) findEpisode(eid string) *Episode {
+func (p *Podcast) findEpisode(eid string) (Episode, error) {
 	var list []Episode
 	p.db.Where("e_id = ?", eid).Find(&list)
 	if len(list) > 0 {
-		return &list[0]
+		return list[0], nil
 	}
-	return nil
+	return Episode{}, ErrEpisodeNotFound
 }
 
 func (p *Podcast) LookupSeries(id int) (Series, error) {
@@ -161,7 +166,7 @@ func (p *Podcast) LookupSID(sid string) (Series, error) {
 	var series Series
 	err := p.db.First(&series, "s_id = ?", sid).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return Series{}, errors.New("series not found")
+		return Series{}, ErrSeriesNotFound
 	}
 	return series, err
 }
@@ -170,7 +175,7 @@ func (p *Podcast) LookupEpisode(id int) (Episode, error) {
 	var episode Episode
 	err := p.db.First(&episode, id).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return Episode{}, errors.New("episode not found")
+		return Episode{}, ErrEpisodeNotFound
 	}
 	return episode, err
 }
@@ -179,7 +184,7 @@ func (p *Podcast) LookupEID(eid string) (Episode, error) {
 	var episode Episode
 	err := p.db.First(&episode, "e_id = ?", eid).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return Episode{}, errors.New("episode not found")
+		return Episode{}, ErrEpisodeNotFound
 	}
 	return episode, err
 }
@@ -190,7 +195,7 @@ func (p *Podcast) SeriesCount() int64 {
 	return count
 }
 
-func (p *Podcast) retainEpisodes(series *Series, eids []string) ([]string, error) {
+func (p *Podcast) retainEpisodes(series Series, eids []string) ([]string, error) {
 	sid := series.SID
 	var list []Episode
 	var removed []string

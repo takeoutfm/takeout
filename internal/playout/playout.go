@@ -53,20 +53,20 @@ func NewPlayout(config *viper.Viper, tokens *viper.Viper) *Playout {
 	return &Playout{config: config, tokens: tokens}
 }
 
-func (p Playout) UpdateAccessCode(code, access string) error {
+func (p *Playout) UpdateAccessCode(code, access string) error {
 	p.tokens.Set(Code, code)
 	p.tokens.Set(TokenCode, access)
 	return p.writeTokens()
 }
 
-func (p Playout) UpdateTokens(access, refresh, media string) error {
+func (p *Playout) UpdateTokens(access, refresh, media string) error {
 	p.tokens.Set(TokenAccess, access)
 	p.tokens.Set(TokenRefresh, refresh)
 	p.tokens.Set(TokenMedia, media)
 	return p.writeTokens()
 }
 
-func (p Playout) UpdateAccessToken(value string) {
+func (p *Playout) UpdateAccessToken(value string) {
 	p.tokens.Set(TokenAccess, value)
 	err := p.writeTokens()
 	if err != nil {
@@ -74,12 +74,12 @@ func (p Playout) UpdateAccessToken(value string) {
 	}
 }
 
-func (p Playout) UpdateListenBrainzToken(value string) error {
+func (p *Playout) UpdateListenBrainzToken(value string) error {
 	p.tokens.Set(TokenListenBrainz, value)
 	return p.writeTokens()
 }
 
-func (p Playout) writeTokens() error {
+func (p *Playout) writeTokens() error {
 	err := p.tokens.WriteConfig()
 	if err != nil {
 		err = p.tokens.SafeWriteConfig()
@@ -87,46 +87,46 @@ func (p Playout) writeTokens() error {
 	return err
 }
 
-func (p Playout) Endpoint() string {
+func (p *Playout) Endpoint() string {
 	return p.config.GetString(Endpoint)
 }
 
-func (p Playout) UseListenBrainz() bool {
+func (p *Playout) UseListenBrainz() bool {
 	return p.config.GetBool(EnableListenBrainz)
 }
 
-func (p Playout) UseTrackActivity() bool {
+func (p *Playout) UseTrackActivity() bool {
 	return p.config.GetBool(EnableTrackActivity)
 }
 
-func (p Playout) UserAgent() string {
+func (p *Playout) UserAgent() string {
 	return UserAgent
 }
 
-func (p Playout) Code() string {
+func (p *Playout) Code() string {
 	return p.tokens.GetString(Code)
 }
 
-func (p Playout) CodeToken() string {
+func (p *Playout) CodeToken() string {
 	return p.tokens.GetString(TokenCode)
 }
 
-func (p Playout) AccessToken() string {
+func (p *Playout) AccessToken() string {
 	return p.tokens.GetString(TokenAccess)
 }
 
-func (p Playout) RefreshToken() string {
+func (p *Playout) RefreshToken() string {
 	return p.tokens.GetString(TokenRefresh)
 }
 
-func (p Playout) MediaToken() string {
+func (p *Playout) MediaToken() string {
 	return p.tokens.GetString(TokenMedia)
 }
 
-func (p Playout) ListenBrainzToken() string {
+func (p *Playout) ListenBrainzToken() string {
 	return p.tokens.GetString(TokenListenBrainz)
 }
 
-func (p Playout) Transport() http.RoundTripper {
+func (p *Playout) Transport() http.RoundTripper {
 	return nil
 }

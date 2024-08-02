@@ -50,7 +50,7 @@ func (m Media) Video() *video.Video {
 	return m.video
 }
 
-func mediaConfigFor(root *config.Config, user *auth.User) (string, *config.Config, error) {
+func mediaConfigFor(root *config.Config, user auth.User) (string, *config.Config, error) {
 	// only supports one media collection right now
 	mediaName := user.FirstMedia()
 	if mediaName == "" {

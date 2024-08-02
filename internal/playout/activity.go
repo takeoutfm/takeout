@@ -25,7 +25,7 @@ import (
 	"github.com/takeoutfm/takeout/player"
 )
 
-func (playout Playout) activityTrackListen(p *player.Player) {
+func (playout *Playout) activityTrackListen(p *player.Player) {
 	if p.IsMusic() == false {
 		return
 	}

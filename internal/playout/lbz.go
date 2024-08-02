@@ -32,7 +32,7 @@ func lbzTrack(p *player.Player) lbz.Track {
 	}
 }
 
-func (playout Playout) lbzNowPlaying(p *player.Player) {
+func (playout *Playout) lbzNowPlaying(p *player.Player) {
 	if p.IsMusic() {
 		if lbzToken := playout.ListenBrainzToken(); len(lbzToken) > 0 {
 			go func() {
@@ -42,7 +42,7 @@ func (playout Playout) lbzNowPlaying(p *player.Player) {
 	}
 }
 
-func (playout Playout) lbzListened(p *player.Player) {
+func (playout *Playout) lbzListened(p *player.Player) {
 	if p.IsMusic() {
 		if lbzToken := playout.ListenBrainzToken(); len(lbzToken) > 0 {
 			go func() {

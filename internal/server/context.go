@@ -56,8 +56,8 @@ type Context interface {
 	Podcast() *podcast.Podcast
 	Progress() *progress.Progress
 	Template() *template.Template
-	User() *auth.User
-	Session() *auth.Session
+	User() auth.User
+	Session() auth.Session
 	Video() *video.Video
 	ImageClient() client.Getter
 
@@ -87,15 +87,15 @@ type RequestContext struct {
 	activity    *activity.Activity
 	auth        *auth.Auth
 	config      *config.Config
-	user        *auth.User
+	user        auth.User
 	media       *Media
 	progress    *progress.Progress
-	session     *auth.Session
+	session     auth.Session
 	template    *template.Template
 	imageClient client.Getter
 }
 
-func makeContext(ctx Context, u *auth.User, c *config.Config, m *Media) RequestContext {
+func makeContext(ctx Context, u auth.User, c *config.Config, m *Media) RequestContext {
 	return RequestContext{
 		activity: ctx.Activity(),
 		auth:     ctx.Auth(),
@@ -107,7 +107,7 @@ func makeContext(ctx Context, u *auth.User, c *config.Config, m *Media) RequestC
 	}
 }
 
-func makeAuthOnlyContext(ctx Context, session *auth.Session) RequestContext {
+func makeAuthOnlyContext(ctx Context, session auth.Session) RequestContext {
 	return RequestContext{
 		auth:    ctx.Auth(),
 		session: session,
@@ -148,11 +148,11 @@ func (ctx RequestContext) Template() *template.Template {
 	return ctx.template
 }
 
-func (ctx RequestContext) User() *auth.User {
+func (ctx RequestContext) User() auth.User {
 	return ctx.user
 }
 
-func (ctx RequestContext) Session() *auth.Session {
+func (ctx RequestContext) Session() auth.Session {
 	return ctx.session
 }
 
@@ -217,11 +217,11 @@ func (ctx RequestContext) TrackImage(t model.Track) string {
 }
 
 func (ctx RequestContext) ArtistImage(a model.Artist) string {
-	return ctx.Music().ArtistImage(&a)
+	return ctx.Music().ArtistImage(a)
 }
 
 func (ctx RequestContext) ArtistBackground(a model.Artist) string {
-	return ctx.Music().ArtistBackground(&a)
+	return ctx.Music().ArtistBackground(a)
 }
 
 func (ctx RequestContext) MovieImage(m model.Movie) string {

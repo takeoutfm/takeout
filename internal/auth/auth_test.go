@@ -216,9 +216,9 @@ func TestNewCodeToken(t *testing.T) {
 	}
 
 	// find the session for this token
-	s := a.TokenSession(c.Token)
-	if s == nil {
-		t.Fatal("expect session")
+	_, err = a.TokenSession(c.Token)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -260,7 +260,10 @@ func TestExpireAll(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	s := a.findSession(session.Token)
+	s, err := a.findSession(session.Token)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if s.Valid() == true {
 		t.Fatal("expire not valid")
 	}

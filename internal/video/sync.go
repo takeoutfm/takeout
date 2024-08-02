@@ -325,10 +325,10 @@ func (v *Video) syncEpisode(client *tmdb.TMDB, tvid, season, episode int,
 	return fields, nil
 }
 
-func personDetail(client *tmdb.TMDB, peid int) (*Person, error) {
+func personDetail(client *tmdb.TMDB, peid int) (Person, error) {
 	detail, err := client.PersonDetail(peid)
 	if err != nil {
-		return nil, err
+		return Person{}, err
 	}
 	p := Person{
 		PEID:        int64(peid),
@@ -340,7 +340,7 @@ func personDetail(client *tmdb.TMDB, peid int) (*Person, error) {
 		Birthday:    date.ParseDate(detail.Birthday),
 		Deathday:    date.ParseDate(detail.Deathday),
 	}
-	return &p, nil
+	return p, nil
 }
 
 func (v *Video) certification(client *tmdb.TMDB, tmid int, country string) (*tmdb.Release, error) {
@@ -399,14 +399,14 @@ func (v *Video) processCredits(tmid int64, client *tmdb.TMDB, credits *tmdb.Cred
 			break
 		}
 		p, err := v.Person(o.ID)
-		if p == nil {
+		if err != nil {
 			// person detail
 			p, err = personDetail(client, o.ID)
 			if err != nil {
 				return err
 			}
 			//fmt.Printf("%s cast person %s -> %s\n", m.Title, p.Name, o.Character)
-			err = v.createPerson(p)
+			err = v.createPerson(&p)
 			if err != nil {
 				return err
 			}
@@ -438,14 +438,14 @@ func (v *Video) processCredits(tmid int64, client *tmdb.TMDB, credits *tmdb.Cred
 			continue
 		}
 		p, err := v.Person(o.ID)
-		if p == nil {
+		if err != nil {
 			// person detail
 			p, err = personDetail(client, o.ID)
 			if err != nil {
 				return err
 			}
 			//fmt.Printf("%s crew person %s -> %s\n", m.Title, p.Name, o.Job)
-			err = v.createPerson(p)
+			err = v.createPerson(&p)
 			if err != nil {
 				return err
 			}

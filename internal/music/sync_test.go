@@ -73,10 +73,11 @@ func TestPickDisamiguation(t *testing.T) {
 	}
 
 	for _, track := range tracks {
-		r := m.pickDisambiguation(&track, releases)
-		if r == nil {
-			t.Error("expect release")
+		pick := m.pickDisambiguation(track, releases)
+		if pick == -1 {
+			t.Fatal("expect release")
 		}
+		r := releases[pick]
 		if r.Country != "US" {
 			t.Error("expect US release" + r.Country)
 		}
@@ -131,10 +132,11 @@ func TestPickRelease(t *testing.T) {
 		},
 	}
 
-	r := m.pickRelease(releases)
-	if r == nil {
+	pick := m.pickRelease(releases)
+	if pick == -1 {
 		t.Fatal("expect release")
 	}
+	r := releases[pick]
 	if r.Country != "US" {
 		t.Error("expect US release")
 	}

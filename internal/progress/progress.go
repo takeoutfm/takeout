@@ -55,47 +55,41 @@ func (p *Progress) Close() {
 }
 
 // Offsets gets all the offets for the user.
-func (p *Progress) Offsets(user *auth.User) []Offset {
+func (p *Progress) Offsets(user auth.User) []Offset {
 	offsets := p.userOffsets(user.Name)
 	return offsets
 }
 
 // Offset gets the user offset based on the internal id.
-func (p *Progress) Offset(user *auth.User, id int) *Offset {
+func (p *Progress) Offset(user auth.User, id int) (Offset, error) {
 	return p.lookupUserOffset(user.Name, id)
 }
 
 // Update will create or update an offset for the provided user using the etag
 // as the primary key.
-func (p *Progress) Update(user *auth.User, newOffset Offset) error {
-	offset := p.lookupUserOffsetEtag(user.Name, newOffset.ETag)
-	if offset != nil {
-		if newOffset.Date.Before(offset.Date) {
-			return ErrOffsetTooOld
-		} else if newOffset.Date == offset.Date {
-			return ErrOffsetSame
-		}
-		offset.Offset = newOffset.Offset
-		offset.Date = newOffset.Date
-		if newOffset.Duration > 0 {
-			offset.Duration = newOffset.Duration
-		}
-		err := p.updateOffset(offset)
-		if err != nil {
-			return err
-		}
-	} else {
-		err := p.createOffset(&newOffset)
-		if err != nil {
-			return err
-		}
+func (p *Progress) Update(user auth.User, newOffset Offset) error {
+	offset, err := p.lookupUserOffsetEtag(user.Name, newOffset.ETag)
+	if err != nil {
+		return p.createOffset(&newOffset)
 	}
-	return nil
+
+	if newOffset.Date.Before(offset.Date) {
+		return ErrOffsetTooOld
+	} else if newOffset.Date == offset.Date {
+		return ErrOffsetSame
+	}
+	offset.Offset = newOffset.Offset
+	offset.Date = newOffset.Date
+	if newOffset.Duration > 0 {
+		offset.Duration = newOffset.Duration
+	}
+
+	return p.updateOffset(&offset)
 }
 
 // Delete will delete the provided user & offset, ensuring the offset belongs
 // to the user.
-func (p *Progress) Delete(user *auth.User, offset Offset) error {
+func (p *Progress) Delete(user auth.User, offset Offset) error {
 	if user.Name != offset.User {
 		return ErrAccessDenied
 	}

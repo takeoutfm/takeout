@@ -91,9 +91,6 @@ func TestArtistDetail1(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if a == nil {
-		t.Fatal("expect artist")
-	}
 	if a.Name != "The Smashing Pumpkins" {
 		t.Error("expect smashing pumpkins")
 	}
@@ -111,9 +108,6 @@ func TestArtistDetail2(t *testing.T) {
 	a, err := m.ArtistDetail("5b11f4ce-a62d-471e-81fc-a69a8278c7da")
 	if err != nil {
 		t.Fatal(err)
-	}
-	if a == nil {
-		t.Fatal("expect artist")
 	}
 	if a.Name != "Nirvana" {
 		t.Error("")
@@ -135,8 +129,8 @@ func TestArtistDetail2(t *testing.T) {
 func TestSearchArtist(t *testing.T) {
 	c := client.NewTransportGetter(client.Config{UserAgent: "test/1.0"}, mbzServer{t: t})
 	m := NewMusicBrainz(c)
-	a := m.SearchArtist("The Black Angels")
-	if a == nil {
+	a, err := m.SearchArtist("The Black Angels")
+	if err != nil {
 		t.Fatal("expect artist")
 	}
 	if a.Name != "The Black Angels" {
@@ -156,8 +150,8 @@ func TestSearchArtist(t *testing.T) {
 func TestSearchArtistID(t *testing.T) {
 	c := client.NewTransportGetter(client.Config{UserAgent: "test/1.0"}, mbzServer{t: t})
 	m := NewMusicBrainz(c)
-	a := m.SearchArtistID("a74b1b7f-71a5-4011-9441-d0b5e4122711")
-	if a == nil {
+	a, err := m.SearchArtistID("a74b1b7f-71a5-4011-9441-d0b5e4122711")
+	if err != nil {
 		t.Fatal("expect artist")
 	}
 	if a.Name != "Radiohead" {
@@ -203,9 +197,6 @@ func TestSearchReleaseGroup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result == nil {
-		t.Fatal("expect result")
-	}
 	if len(result.ReleaseGroups) == 0 {
 		t.Error("expect release groups")
 	}
@@ -247,9 +238,6 @@ func TestCoverArtArchive(t *testing.T) {
 		"df28cef9-7e83-481a-8c6d-61c45d0f3cd8", "b067cde8-f3a7-394a-b8e7-640ca744f2e4") // undertow rgid
 	if err != nil {
 		t.Fatal(err)
-	}
-	if art == nil {
-		t.Error("expect art")
 	}
 	if len(art.Images) == 0 {
 		t.Error("expect images")
