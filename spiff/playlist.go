@@ -80,6 +80,7 @@ func NewPlaylist(listType string) *Playlist {
 	return &Playlist{Spiff{Header{}, []Entry{}}, -1, 0, listType}
 }
 
+// TODO could be large Playlist so return pointer
 func Unmarshal(data []byte) (*Playlist, error) {
 	var playlist Playlist
 	err := json.Unmarshal(data, &playlist)

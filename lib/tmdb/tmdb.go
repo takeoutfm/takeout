@@ -20,6 +20,7 @@
 package tmdb
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 
@@ -55,6 +56,10 @@ const (
 	ProfileOriginal = "original"
 )
 
+var (
+	ErrReleaseTypeNotFound = errors.New("release type not found")
+)
+
 type Config struct {
 	Key      string
 	Language string
@@ -63,7 +68,7 @@ type Config struct {
 type TMDB struct {
 	config      Config
 	client      client.Getter
-	configCache *apiConfig
+	apiConfig   apiConfig
 	movieGenres Genres
 	tvGenres    Genres
 }
@@ -302,11 +307,15 @@ type apiConfig struct {
 	ChangeKey []string     `json:"change_keys"`
 }
 
+func (c *apiConfig) empty() bool {
+	return c.Images.SecureBaseURL == ""
+}
+
 const (
 	endpoint = "api.themoviedb.org"
 )
 
-func (m *TMDB) moviePage(q string, page int) (*moviePage, error) {
+func (m *TMDB) moviePage(q string, page int) (moviePage, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/search/movie?api_key=%s&language=%s&query=%s&page=%d",
 		endpoint,
@@ -315,7 +324,7 @@ func (m *TMDB) moviePage(q string, page int) (*moviePage, error) {
 		url.QueryEscape(q), page)
 	var result moviePage
 	err := m.client.GetJson(url, &result)
-	return &result, err
+	return result, err
 }
 
 func (m *TMDB) MovieSearch(q string) ([]MovieResult, error) {
@@ -324,7 +333,7 @@ func (m *TMDB) MovieSearch(q string) ([]MovieResult, error) {
 	return page.Results, err
 }
 
-func (m *TMDB) MovieDetail(tmid int) (*Movie, error) {
+func (m *TMDB) MovieDetail(tmid int) (Movie, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/movie/%d?api_key=%s&language=%s",
 		endpoint, tmid,
@@ -332,10 +341,10 @@ func (m *TMDB) MovieDetail(tmid int) (*Movie, error) {
 		m.config.Language)
 	var result Movie
 	err := m.client.GetJson(url, &result)
-	return &result, err
+	return result, err
 }
 
-func (m *TMDB) MovieCredits(tmid int) (*Credits, error) {
+func (m *TMDB) MovieCredits(tmid int) (Credits, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/movie/%d/credits?api_key=%s&language=%s",
 		endpoint, tmid,
@@ -343,7 +352,7 @@ func (m *TMDB) MovieCredits(tmid int) (*Credits, error) {
 		m.config.Language)
 	var result Credits
 	err := m.client.GetJson(url, &result)
-	return &result, err
+	return result, err
 }
 
 func (m *TMDB) MovieReleases(tmid int) (map[string][]Release, error) {
@@ -362,7 +371,7 @@ func (m *TMDB) MovieReleases(tmid int) (map[string][]Release, error) {
 	return countryMap, err
 }
 
-func (m *TMDB) MovieReleaseType(tmid int, country string, releaseType int) (*Release, error) {
+func (m *TMDB) MovieReleaseType(tmid int, country string, releaseType int) (Release, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/movie/%d/release_dates?api_key=%s&language=%s",
 		endpoint, tmid,
@@ -370,21 +379,23 @@ func (m *TMDB) MovieReleaseType(tmid int, country string, releaseType int) (*Rel
 		m.config.Language)
 	var result Releases
 	err := m.client.GetJson(url, &result)
-	if err == nil {
-		for _, rc := range result.Results {
-			if rc.CountryCode == country {
-				for _, r := range rc.Releases {
-					if r.Type == releaseType {
-						return &r, nil
-					}
+	if err != nil {
+		return Release{}, err
+	}
+
+	for _, rc := range result.Results {
+		if rc.CountryCode == country {
+			for _, r := range rc.Releases {
+				if r.Type == releaseType {
+					return r, nil
 				}
 			}
 		}
 	}
-	return nil, err
+	return Release{}, ErrReleaseTypeNotFound
 }
 
-func (m *TMDB) PersonDetail(peid int) (*Person, error) {
+func (m *TMDB) PersonDetail(peid int) (Person, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/person/%d?api_key=%s&language=%s",
 		endpoint, peid,
@@ -392,7 +403,7 @@ func (m *TMDB) PersonDetail(peid int) (*Person, error) {
 		m.config.Language)
 	var result Person
 	err := m.client.GetJson(url, &result)
-	return &result, err
+	return result, err
 }
 
 func (m *TMDB) movieGenreList() (genreList, error) {
@@ -499,7 +510,7 @@ func (m *TMDB) TVKeywordNames(tvid int) ([]string, error) {
 	return names, err
 }
 
-func (m *TMDB) tvPage(q string, page int) (*tvPage, error) {
+func (m *TMDB) tvPage(q string, page int) (tvPage, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/search/tv?api_key=%s&language=%s&query=%s&page=%d",
 		endpoint,
@@ -508,7 +519,7 @@ func (m *TMDB) tvPage(q string, page int) (*tvPage, error) {
 		url.QueryEscape(q), page)
 	var result tvPage
 	err := m.client.GetJson(url, &result)
-	return &result, err
+	return result, err
 }
 
 func (m *TMDB) TVSearch(q string) ([]TVResult, error) {
@@ -517,7 +528,7 @@ func (m *TMDB) TVSearch(q string) ([]TVResult, error) {
 	return page.Results, err
 }
 
-func (m *TMDB) TVDetail(tvid int) (*TV, error) {
+func (m *TMDB) TVDetail(tvid int) (TV, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/tv/%d?api_key=%s&language=%s",
 		endpoint, tvid,
@@ -525,10 +536,10 @@ func (m *TMDB) TVDetail(tvid int) (*TV, error) {
 		m.config.Language)
 	var result TV
 	err := m.client.GetJson(url, &result)
-	return &result, err
+	return result, err
 }
 
-func (m *TMDB) EpisodeDetail(tvid, season, episode int) (*Episode, error) {
+func (m *TMDB) EpisodeDetail(tvid, season, episode int) (Episode, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/tv/%d/season/%d/episode/%d?api_key=%s&language=%s",
 		endpoint, tvid, season, episode,
@@ -536,10 +547,10 @@ func (m *TMDB) EpisodeDetail(tvid, season, episode int) (*Episode, error) {
 		m.config.Language)
 	var result Episode
 	err := m.client.GetJson(url, &result)
-	return &result, err
+	return result, err
 }
 
-func (m *TMDB) EpisodeCredits(tvid, season, episode int) (*Credits, error) {
+func (m *TMDB) EpisodeCredits(tvid, season, episode int) (Credits, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/tv/%d/season/%d/episode/%d/credits?api_key=%s&language=%s",
 		endpoint, tvid, season, episode,
@@ -547,15 +558,15 @@ func (m *TMDB) EpisodeCredits(tvid, season, episode int) (*Credits, error) {
 		m.config.Language)
 	var result Credits
 	err := m.client.GetJson(url, &result)
-	return &result, err
+	return result, err
 }
 
-func (m *TMDB) configuration() (*apiConfig, error) {
+func (m *TMDB) configuration() (apiConfig, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/configuration?api_key=%s", endpoint, m.config.Key)
 	var result apiConfig
 	err := m.client.GetJson(url, &result)
-	return &result, err
+	return result, err
 }
 
 /*
@@ -568,22 +579,22 @@ func (m *TMDB) configuration() (*apiConfig, error) {
    https://image.tmdb.org/t/p/w500/8uO0gUM8aNqYLs1OsTBQiXu0fEv.jpg
 */
 
-func poster(c *apiConfig, size string, posterPath string) string {
+func poster(c apiConfig, size string, posterPath string) string {
 	url := fmt.Sprintf("%s%s%s", c.Images.SecureBaseURL, size, posterPath)
 	return url
 }
 
-func backdrop(c *apiConfig, size string, backdropPath string) string {
+func backdrop(c apiConfig, size string, backdropPath string) string {
 	url := fmt.Sprintf("%s%s%s", c.Images.SecureBaseURL, size, backdropPath)
 	return url
 }
 
-func still(c *apiConfig, size string, stillPath string) string {
+func still(c apiConfig, size string, stillPath string) string {
 	url := fmt.Sprintf("%s%s%s", c.Images.SecureBaseURL, size, stillPath)
 	return url
 }
 
-func profile(c *apiConfig, size string, profilePath string) string {
+func profile(c apiConfig, size string, profilePath string) string {
 	url := fmt.Sprintf("%s%s%s", c.Images.SecureBaseURL, size, profilePath)
 	return url
 }
@@ -593,14 +604,11 @@ func (m *TMDB) OriginalPoster(posterPath string) *url.URL {
 }
 
 func (m *TMDB) Poster(posterPath string, size string) *url.URL {
-	var err error
-	if m.configCache == nil {
-		m.configCache, err = m.configuration()
-	}
+	err := m.checkApiConfig()
 	if err != nil {
 		return nil
 	}
-	v := poster(m.configCache, size, posterPath)
+	v := poster(m.apiConfig, size, posterPath)
 	url, err := url.Parse(v)
 	if err != nil {
 		return nil
@@ -609,14 +617,11 @@ func (m *TMDB) Poster(posterPath string, size string) *url.URL {
 }
 
 func (m *TMDB) Backdrop(backdropPath string, size string) *url.URL {
-	var err error
-	if m.configCache == nil {
-		m.configCache, err = m.configuration()
-	}
+	err := m.checkApiConfig()
 	if err != nil {
 		return nil
 	}
-	v := backdrop(m.configCache, size, backdropPath)
+	v := backdrop(m.apiConfig, size, backdropPath)
 	url, err := url.Parse(v)
 	if err != nil {
 		return nil
@@ -625,17 +630,22 @@ func (m *TMDB) Backdrop(backdropPath string, size string) *url.URL {
 }
 
 func (m *TMDB) PersonProfile(profilePath string, size string) *url.URL {
-	var err error
-	if m.configCache == nil {
-		m.configCache, err = m.configuration()
-	}
+	err := m.checkApiConfig()
 	if err != nil {
 		return nil
 	}
-	v := profile(m.configCache, size, profilePath)
+	v := profile(m.apiConfig, size, profilePath)
 	url, err := url.Parse(v)
 	if err != nil {
 		return nil
 	}
 	return url
+}
+
+func (m *TMDB) checkApiConfig() error {
+	var err error
+	if m.apiConfig.empty() {
+		m.apiConfig, err = m.configuration()
+	}
+	return err
 }

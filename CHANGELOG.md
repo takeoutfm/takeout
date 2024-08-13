@@ -1,3 +1,7 @@
+## 0.18.5
+
+- more pointer/error refactoring
+
 ## 0.18.4
 
 - refactoring

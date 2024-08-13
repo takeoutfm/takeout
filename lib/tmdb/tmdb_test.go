@@ -79,9 +79,6 @@ func TestConfiguration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if config == nil {
-		t.Error("expect config")
-	}
 	if config.Images.BaseURL == "" {
 		t.Error("expect baseurl")
 	}
@@ -120,9 +117,6 @@ func TestMovieDetail(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if movie == nil {
-		t.Error("expect movie")
-	}
 	if movie.ID != 49849 {
 		t.Error("expect id")
 	}
@@ -150,9 +144,6 @@ func TestMovieCredits(t *testing.T) {
 	credits, err := tmdb.MovieCredits(49849)
 	if err != nil {
 		t.Fatal(err)
-	}
-	if credits == nil {
-		t.Error("expect credits")
 	}
 	found := 0
 	for _, c := range credits.Cast {
@@ -188,9 +179,6 @@ func TestMovieReleaseType(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if release == nil {
-		t.Error("expect release")
-	}
 	if release.Certification != "R" {
 		t.Error("expect R rating")
 	}
@@ -221,9 +209,6 @@ func TestPersonDetail(t *testing.T) {
 	person, err := tmdb.PersonDetail(11357) // bruce campbell
 	if err != nil {
 		t.Fatal(err)
-	}
-	if person == nil {
-		t.Error("expect person")
 	}
 	if person.Name != "Bruce Campbell" {
 		t.Error("expect bruce")

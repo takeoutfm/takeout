@@ -191,13 +191,13 @@ func (v *Video) syncMovie(client *tmdb.TMDB, tmid int,
 	// rating / certification
 	for _, country := range v.config.Video.ReleaseCountries {
 		release, err := v.certification(client, tmid, country)
-		if err != nil {
+		if err == tmdb.ErrReleaseTypeNotFound {
+			continue
+		} else if err != nil {
 			return fields, err
 		}
-		if release != nil {
-			m.Rating = release.Certification
-			break
-		}
+		m.Rating = release.Certification
+		break
 	}
 
 	search.AddField(fields, FieldBudget, m.Budget)
@@ -343,18 +343,16 @@ func personDetail(client *tmdb.TMDB, peid int) (Person, error) {
 	return p, nil
 }
 
-func (v *Video) certification(client *tmdb.TMDB, tmid int, country string) (*tmdb.Release, error) {
+func (v *Video) certification(client *tmdb.TMDB, tmid int, country string) (tmdb.Release, error) {
 	types := []int{tmdb.TypeTheatrical, tmdb.TypeDigital}
 	for _, t := range types {
 		release, err := client.MovieReleaseType(tmid, country, t)
-		if err != nil {
-			return nil, err
+		if err == tmdb.ErrReleaseTypeNotFound {
+			continue
 		}
-		if release != nil {
-			return release, err
-		}
+		return release, err
 	}
-	return nil, nil
+	return tmdb.Release{}, tmdb.ErrReleaseTypeNotFound
 }
 
 func (v *Video) processGenres(tmid int64, genres []tmdb.Genre, fields search.FieldMap) error {
@@ -387,7 +385,7 @@ func (v *Video) processKeywords(tmid int64, keywords []string, fields search.Fie
 	return nil
 }
 
-func (v *Video) processCredits(tmid int64, client *tmdb.TMDB, credits *tmdb.Credits,
+func (v *Video) processCredits(tmid int64, client *tmdb.TMDB, credits tmdb.Credits,
 	fields search.FieldMap) error {
 	// cast
 	sort.Slice(credits.Cast, func(i, j int) bool {
