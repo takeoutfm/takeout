@@ -436,7 +436,8 @@ func (m *Music) assignTrackReleases() (bool, error) {
 
 		r, ok := releaseCache[cacheKey]
 		if !ok {
-			r, err := m.findTrackRelease(t)
+			var err error
+			r, err = m.findTrackRelease(t)
 			if err != nil {
 				r, err = m.findTrackReleaseDisambiguate(t)
 				if err != nil {

@@ -1,3 +1,7 @@
+## 0.18.6
+
+- fixed first track bug recently introduced
+
 ## 0.18.5
 
 - more pointer/error refactoring
