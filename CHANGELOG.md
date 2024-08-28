@@ -1,4 +1,4 @@
-## 0.18.6
+## 0.18.6, 0.18.7
 
 - fixed first track bug recently introduced
 
