@@ -216,6 +216,28 @@ func (m *Music) tracksWithoutReleases() []Track {
 	return tracks
 }
 
+// Return a best guess at the media for this track
+func (m *Music) trackMedia(t Track) ([]Media, error) {
+	var media []Media
+	rows, err := m.db.Table("tracks").
+		Select("max(track_num), disc_num").
+		Where("artist = ? and release = ? and disc_count = ? and track_count = ?",
+			t.Artist, t.Release, t.DiscCount, t.TrackCount).
+		Group("disc_num").
+		Order("disc_num").Rows()
+	if err != nil {
+		return media, err
+	}
+	for rows.Next() {
+		var trackCount, discNum int
+		rows.Scan(&trackCount, &discNum)
+		m := Media{Position: discNum, TrackCount: trackCount}
+		media = append(media, m)
+	}
+	rows.Close()
+	return media, nil
+}
+
 // Try to pattern match releases names. This can help if the track
 // release name contains underscores which match nicely with 'like'.
 func (m *Music) artistReleasesLike(a Artist, pattern string, trackCount, discCount int) []Release {
@@ -531,8 +553,12 @@ func (m *Music) artistDeepTracks(a Artist, limit ...int) []Track {
 }
 
 func (m *Music) ArtistTracks(a Artist) []Track {
+	return m.artistTracks(a.Name)
+}
+
+func (m *Music) artistTracks(artist string) []Track {
 	var tracks []Track
-	m.db.Where("artist = ?", a.Name).
+	m.db.Where("artist = ?", artist).
 		Order("release, date, disc_num, track_num").
 		Find(&tracks)
 	return tracks
@@ -708,7 +734,7 @@ func (m *Music) ReleaseTracks(release Release) []Track {
 
 func (m *Music) releaseMedia(release Release) []Media {
 	var media []Media
-	m.db.Where("re_id = ?", release.REID).Find(&media)
+	m.db.Where("re_id = ?", release.REID).Order("position").Find(&media)
 	return media
 }
 

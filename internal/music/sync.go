@@ -425,6 +425,7 @@ func (m *Music) assignTrackReleases() (bool, error) {
 	notFound := make(map[string]struct{})
 	artChecked := make(map[string]struct{})
 	releaseCache := make(map[string]Release)
+	mediaCache := make(map[string][]Media)
 
 	tracks := m.tracksWithoutAssignedRelease()
 
@@ -434,12 +435,27 @@ func (m *Music) assignTrackReleases() (bool, error) {
 			continue
 		}
 
+		media, ok := mediaCache[cacheKey]
+		if !ok {
+			var err error
+			media, err = m.trackMedia(t)
+			if err != nil {
+				notFound[cacheKey] = struct{}{}
+				log.Printf("track media not found: %s\n", cacheKey)
+				continue
+			}
+			for _, v := range media {
+				fmt.Printf("track media: %s/%s - %d, %d\n", t.Artist, t.Release, v.Position, v.TrackCount)
+			}
+			mediaCache[cacheKey] = media
+		}
+
 		r, ok := releaseCache[cacheKey]
 		if !ok {
 			var err error
-			r, err = m.findTrackRelease(t)
+			r, err = m.findTrackRelease(t, media)
 			if err != nil {
-				r, err = m.findTrackReleaseDisambiguate(t)
+				r, err = m.findTrackReleaseDisambiguate(t, media)
 				if err != nil {
 					notFound[cacheKey] = struct{}{}
 					log.Printf("track release not found: %s\n", cacheKey)
@@ -477,18 +493,33 @@ func (m *Music) assignTrackReleaseDates() (bool, error) {
 
 	tracks := m.tracksWithoutAssignedReleaseDate()
 	releaseCache := make(map[string]Release)
+	mediaCache := make(map[string][]Media)
 
 	for _, t := range tracks {
+		media, ok := mediaCache[t.REID]
+		if !ok {
+			var err error
+			media, err = m.trackMedia(t)
+			if err != nil {
+				log.Printf("track media not found: %s\n", t.REID)
+				return false, err
+			}
+			for _, v := range media {
+				fmt.Printf("track media: %d, %d\n", v.Position, v.TrackCount)
+			}
+			mediaCache[t.REID] = media
+		}
+
 		r, ok := releaseCache[t.REID]
 		if !ok {
 			r, err = m.release(t.REID)
 			if err != nil {
 				log.Println("REID not found for", t.Artist, t.Release, t.REID)
 				// REID not found, find new one
-				r, err = m.findTrackRelease(t)
+				r, err = m.findTrackRelease(t, media)
 				if err != nil {
 					// still not found, try harder
-					r, err = m.findTrackReleaseDisambiguate(t)
+					r, err = m.findTrackReleaseDisambiguate(t, media)
 					if err != nil {
 						return false, err
 					}
@@ -595,8 +626,44 @@ func (m *Music) pickDisambiguation(t Track, releases []Release) int {
 	return -1
 }
 
-func (m *Music) findTrackRelease(t Track) (Release, error) {
+func (m *Music) filterMedia(trackMedia []Media, releases []Release) []Release {
+	var matchedReleases []Release
+	for _, r := range releases {
+		// find releases with media that matches
+		releaseMedia := m.releaseMedia(r)
+		if len(releaseMedia) != len(trackMedia) {
+			// media count doesn't match
+			continue
+		}
+		matched := 0
+		for i := range trackMedia {
+			if trackMedia[i].Position == releaseMedia[i].Position &&
+				trackMedia[i].TrackCount == releaseMedia[i].TrackCount {
+				// same position and track count
+				// example:
+				// disc 1 - 9 tracks
+				// disc 2 - 14 tracks
+				matched++
+			}
+		}
+		if matched == len(trackMedia) {
+			matchedReleases = append(matchedReleases, r)
+		}
+	}
+	fmt.Printf("filter media %d to %d\n", len(releases), len(matchedReleases))
+	return matchedReleases
+}
+
+func (m *Music) findTrackRelease(t Track, trackMedia []Media) (Release, error) {
+	// start with all possible releases
 	releases := m.trackReleases(t)
+	if len(releases) == 0 {
+		return Release{}, ErrReleaseNotFound
+	}
+	releases = m.filterMedia(trackMedia, releases)
+	if len(releases) == 0 {
+		return Release{}, ErrReleaseNotFound
+	}
 	pick := m.pickRelease(releases)
 	if pick == -1 {
 		return Release{}, ErrReleaseNotFound
@@ -605,8 +672,9 @@ func (m *Music) findTrackRelease(t Track) (Release, error) {
 }
 
 // try using disambiguation
-func (m *Music) findTrackReleaseDisambiguate(t Track) (Release, error) {
+func (m *Music) findTrackReleaseDisambiguate(t Track, trackMedia []Media) (Release, error) {
 	releases := m.disambiguate(t.Artist, t.TrackCount, t.DiscCount)
+	releases = m.filterMedia(trackMedia, releases)
 	pick := m.pickDisambiguation(t, releases)
 	if pick == -1 {
 		return Release{}, ErrReleaseNotFound
@@ -948,6 +1016,7 @@ func (m *Music) syncArtists() error {
 		name, arid := a[0], a[1]
 		_, err := m.syncArtist(name, arid)
 		if err != nil {
+			log.Println(err)
 			return err
 		}
 	}
@@ -959,19 +1028,20 @@ func (m *Music) syncArtist(name, arid string) (Artist, error) {
 	artist, err := m.Artist(name)
 	if err != nil {
 		if arid != "" {
-			// first try arid
-			var v musicbrainz.Artist
-			v, err = m.mbz.SearchArtistID(arid)
-			if err == nil {
-				artist, tags = doArtist(v)
-			}
+			artist, tags, err = m.resolveArtistID(arid)
 		}
 		if err != nil {
 			// next try name
 			artist, tags, err = m.resolveArtist(name)
+			if err != nil {
+				// try using tracks to find arid
+				arid := m.findArtistIDFromTracks(name)
+				if arid != "" {
+					artist, tags, err = m.resolveArtistID(arid)
+				}
+			}
 		}
 	}
-
 	if err != nil {
 		err := errors.New(fmt.Sprintf("'%s' artist not found", name))
 		log.Printf("%s\n", err)
@@ -1007,6 +1077,16 @@ func (m *Music) syncArtist(name, arid string) (Artist, error) {
 	return artist, nil
 }
 
+func (m *Music) resolveArtistID(arid string) (Artist, []ArtistTag, error) {
+	var artist Artist
+	var tags []ArtistTag
+	v, err := m.mbz.SearchArtistID(arid)
+	if err == nil {
+		artist, tags = doArtist(v)
+	}
+	return artist, tags, err
+}
+
 // Try MusicBrainz and Last.fm to find an artist. Fortunately Last.fm
 // will give up the ARID so MusicBrainz can still be used.
 func (m *Music) resolveArtist(name string) (Artist, []ArtistTag, error) {
@@ -1018,23 +1098,14 @@ func (m *Music) resolveArtist(name string) (Artist, []ArtistTag, error) {
 	arid, ok := m.config.Music.UserArtistID(name)
 	if ok {
 		v, err = m.mbz.SearchArtistID(arid)
-		if err == nil {
-			artist, tags = doArtist(v)
-		}
 	} else {
 		v, err = m.mbz.SearchArtist(name)
-		if err == nil {
-			artist, tags = doArtist(v)
-		}
-	}
+}
 	if err != nil {
 		// try again
 		fuzzy := fuzzyArtist(name)
 		if fuzzy != name {
 			v, err = m.mbz.SearchArtist(fuzzy)
-			if err == nil {
-				artist, tags = doArtist(v)
-			}
 		}
 	}
 	if err != nil {
@@ -1043,12 +1114,41 @@ func (m *Music) resolveArtist(name string) (Artist, []ArtistTag, error) {
 		if lastName != "" && lastID != "" {
 			log.Printf("try lastfm got %s mbid:'%s'\n", lastName, lastID)
 			v, err = m.mbz.SearchArtistID(lastID)
-			if err == nil {
-				artist, tags = doArtist(v)
-			}
 		}
 	}
+	if err == nil {
+		artist, tags = doArtist(v)
+	}
 	return artist, tags, err
+}
+
+func (m *Music) findArtistIDFromTracks(name string) string {
+	tracks := m.artistTracks(name)
+	if len(tracks) == 0 {
+		return ""
+	}
+
+	t := tracks[0]
+	query := fmt.Sprintf(`artist:"%s" AND release:"%s" AND recording:"%s" AND tnum:%d AND position:%d`,
+		t.Artist, t.Release, t.Title, t.TrackNum, t.DiscNum)
+	recordings, _ := m.mbz.SearchRecordings(query)
+	if len(recordings) == 0 {
+		// try w/o the artist name
+		query = fmt.Sprintf(`release:"%s" AND recording:"%s" AND tnum:%d AND position:%d`,
+			t.Release, t.Title, t.TrackNum, t.DiscNum)
+		recordings, _ = m.mbz.SearchRecordings(query)
+		if len(recordings) == 0 {
+			return ""
+		}
+	}
+
+	for _, r := range recordings {
+		if len(r.ArtistCredit) > 0 {
+			// use first arid
+			return r.ArtistCredit[0].Artist.ID
+		}
+	}
+	return ""
 }
 
 func (m *Music) findRelease(rgid string, trackCount int) (string, error) {

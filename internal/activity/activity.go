@@ -34,7 +34,11 @@ import (
 )
 
 var (
-	ErrInvalidUser = errors.New("invalid user")
+	ErrInvalidUser     = errors.New("invalid user")
+	ErrTrackNotFound   = errors.New("track not found")
+	ErrMovieNotFound   = errors.New("movie not found")
+	ErrEpisodeNotFound = errors.New("episode not found")
+	ErrReleaseNotFound = errors.New("release not found")
 )
 
 type Context interface {
@@ -63,7 +67,6 @@ func (a *Activity) Close() {
 	a.closeDB()
 }
 
-//
 func (a *Activity) DeleteUserEvents(ctx Context) error {
 	user := ctx.User()
 	err := a.deleteMovieEvents(user.Name)
@@ -89,48 +92,73 @@ func (a *Activity) DeleteUserEvents(ctx Context) error {
 	return nil
 }
 
-func (a *Activity) resolveMovieEvent(e MovieEvent, ctx Context) *ActivityMovie {
+func (a *Activity) resolveMovieEvent(e MovieEvent, ctx Context) (ActivityMovie, error) {
 	v := ctx.Video()
+	if e.IMID == "" {
+		return ActivityMovie{}, ErrMovieNotFound
+	}
 	movie, err := v.FindMovie(e.IMID)
 	if err != nil {
-		return nil
+		return ActivityMovie{}, err
 	}
-	return &ActivityMovie{Date: e.Date, Movie: movie}
+	return ActivityMovie{Date: e.Date, Movie: movie}, nil
 }
 
-func (a *Activity) resolveEpisodeEvent(e EpisodeEvent, ctx Context) *ActivityEpisode {
+func (a *Activity) resolveEpisodeEvent(e EpisodeEvent, ctx Context) (ActivityEpisode, error) {
 	p := ctx.Podcast()
+	if e.EID == "" {
+		return ActivityEpisode{}, ErrEpisodeNotFound
+	}
 	episode, err := p.FindEpisode(e.EID)
 	if err != nil {
-		return nil
+		return ActivityEpisode{}, err
 	}
-	return &ActivityEpisode{Date: e.Date, Episode: episode}
+	return ActivityEpisode{Date: e.Date, Episode: episode}, nil
 }
 
-func (a *Activity) resolveReleaseEvent(e ReleaseEvent, ctx Context) *ActivityRelease {
+func (a *Activity) resolveReleaseEvent(e ReleaseEvent, ctx Context) (ActivityRelease, error) {
 	m := ctx.Music()
+	if e.REID == "" {
+		return ActivityRelease{}, ErrReleaseNotFound
+	}
 	release, err := m.FindRelease(e.REID)
 	if err != nil {
-		return nil
+		return ActivityRelease{}, err
 	}
-	return &ActivityRelease{Date: e.Date, Release: release}
+	return ActivityRelease{Date: e.Date, Release: release}, nil
 }
 
-func (a *Activity) resolveTrackEvent(e TrackEvent, ctx Context) *ActivityTrack {
+func (a *Activity) resolveTrackEvent(e TrackEvent, ctx Context) (ActivityTrack, error) {
 	m := ctx.Music()
-	track, err := m.FindTrack(e.RID)
-	if err != nil {
-		return nil
+
+	// if e.RID == "" {
+	// 	log.Println("track event %d, RID is empty", e.ID)
+	// 	return ActivityTrack{}, ErrTrackNotFound
+	// }
+	var err error
+	var track Track
+	if e.RID != "" {
+		track, err = m.FindTrack(e.RID)
+		if err != nil {
+			log.Println("track event %d, RID %s not found", e.ID, e.RID)
+			return ActivityTrack{}, err
+		}
+	} else if e.ETag != "" {
+		track, err = m.LookupETag(e.ETag)
+		if err != nil {
+			log.Println("track event %d, etag %s not found", e.ID, e.ETag)
+			return ActivityTrack{}, err
+		}
 	}
-	return &ActivityTrack{Date: e.Date, Track: track}
+	return ActivityTrack{Date: e.Date, Track: track}, nil
 }
 
 func (a *Activity) resolveMovieEvents(events []MovieEvent, ctx Context) []ActivityMovie {
 	var movies []ActivityMovie
 	for _, e := range events {
-		movie := a.resolveMovieEvent(e, ctx)
-		if movie != nil {
-			movies = append(movies, *movie)
+		movie, err := a.resolveMovieEvent(e, ctx)
+		if err == nil {
+			movies = append(movies, movie)
 		}
 	}
 	return movies
@@ -139,9 +167,9 @@ func (a *Activity) resolveMovieEvents(events []MovieEvent, ctx Context) []Activi
 func (a *Activity) resolveEpisodeEvents(events []EpisodeEvent, ctx Context) []ActivityEpisode {
 	var episodes []ActivityEpisode
 	for _, e := range events {
-		episode := a.resolveEpisodeEvent(e, ctx)
-		if episode != nil {
-			episodes = append(episodes, *episode)
+		episode, err := a.resolveEpisodeEvent(e, ctx)
+		if err == nil {
+			episodes = append(episodes, episode)
 		}
 	}
 	return episodes
@@ -150,9 +178,9 @@ func (a *Activity) resolveEpisodeEvents(events []EpisodeEvent, ctx Context) []Ac
 func (a *Activity) resolveReleaseEvents(events []ReleaseEvent, ctx Context) []ActivityRelease {
 	var releases []ActivityRelease
 	for _, e := range events {
-		release := a.resolveReleaseEvent(e, ctx)
-		if release != nil {
-			releases = append(releases, *release)
+		release, err := a.resolveReleaseEvent(e, ctx)
+		if err == nil {
+			releases = append(releases, release)
 		}
 	}
 	return releases
@@ -161,9 +189,9 @@ func (a *Activity) resolveReleaseEvents(events []ReleaseEvent, ctx Context) []Ac
 func (a *Activity) resolveTrackEvents(events []TrackEvent, ctx Context) []ActivityTrack {
 	var tracks []ActivityTrack
 	for _, e := range events {
-		track := a.resolveTrackEvent(e, ctx)
-		if track != nil {
-			tracks = append(tracks, *track)
+		track, err := a.resolveTrackEvent(e, ctx)
+		if err == nil {
+			tracks = append(tracks, track)
 		}
 	}
 	return tracks
@@ -193,14 +221,12 @@ func (a *Activity) PopularTracks(ctx Context, start, end time.Time) []ActivityTr
 	return a.resolveTrackEvents(events, ctx)
 }
 
-//
 func (a *Activity) RecentTracks(ctx Context) []ActivityTrack {
 	user := ctx.User()
 	events := a.recentTrackEvents(user.Name, a.config.Activity.RecentLimit)
 	return a.resolveTrackEvents(events, ctx)
 }
 
-//
 func (a *Activity) RecentMovies(ctx Context) []ActivityMovie {
 	user := ctx.User()
 	events := a.recentMovieEvents(user.Name, a.config.Activity.RecentLimit)

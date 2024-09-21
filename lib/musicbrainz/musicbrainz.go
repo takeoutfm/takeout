@@ -36,6 +36,7 @@ import (
 
 var (
 	ErrArtistNotFound = errors.New("artist not found")
+	ErrTooManyArtists = errors.New("too many artists")
 )
 
 type MusicBrainz struct {
@@ -202,6 +203,12 @@ type Recording struct {
 
 func (r Recording) FirstReleaseTime() time.Time {
 	return date.ParseDate(r.FirstReleaseDate)
+}
+
+type RecordingPage struct {
+	Recordings []Recording `json:"recordings"`
+	Offset     int         `json:"offset"`
+	Count      int         `json:"count"`
 }
 
 type Track struct {
@@ -527,16 +534,60 @@ func (m *MusicBrainz) SearchArtist(name string) (Artist, error) {
 	limit, offset := 100, 0
 
 	// can also add "AND type:group" or "AND type:person"
-	query := fmt.Sprintf(`artist:"%s"`, name)
-	result, _ := m.doArtistSearch(query, limit, offset)
+	// more fields are defined here:
+	// https://musicbrainz.org/doc/MusicBrainz_API/Search#Search_Fields_3
+	queries := []string{
+		fmt.Sprintf(`artist:"%s"`, name),
+		fmt.Sprintf(`primary_alias:"%s"`, name),
+		fmt.Sprintf(`alias:"%s"`, name),
+	}
+
+	var result ArtistsPage
+	// try multiple queries until something is found
+	for _, query := range queries {
+		result, _ = m.doArtistSearch(query, limit, offset)
+		if result.Count != 0 {
+			break
+		}
+	}
+
+	if result.Count == 0 && strings.Contains(name, " & ") {
+		fmt.Println("check &")
+		// check for something like "Artist One & Artist Two"
+		// or "Artist One, Artist Two & Artist Three"
+		// or "Artist One, Artist Two, Artist Three & Artist Four"
+		var artists []string
+		for _, v := range strings.Split(name, " & ") {
+			for _, artist := range strings.Split(v, ", ") {
+				artists = append(artists, artist)
+			}
+		}
+		for i := range artists {
+			artists[i] = fmt.Sprintf(`artist:"%s"`, strings.Trim(artists[i], " "))
+		}
+		for _, query := range artists {
+			result, _ = m.doArtistSearch(query, limit, offset)
+			fmt.Println(query, result.Count)
+			if result.Count != 0 {
+				break
+			}
+		}
+	}
+
 	for _, r := range result.Artists {
 		artists = append(artists, r)
 	}
 
-	score := 100 // change to widen matches below
+	// Searching for "belly" yields:
+	// - Lead Belly : 100
+	// - Belly : 90 <--- want this one
+	score := 90 // change to widen matches below
 	artists = scoreFilter(artists, score)
 	if len(artists) == 0 {
 		return Artist{}, ErrArtistNotFound
+	}
+	if len(artists) > 3 {
+		return Artist{}, ErrTooManyArtists
 	}
 
 	pick := 0
@@ -548,6 +599,7 @@ func (m *MusicBrainz) SearchArtist(name string) (Artist, error) {
 			if strings.EqualFold(name, artist.Name) {
 				// try to use a close match
 				pick = index
+				break // pick the first equal match
 			}
 		}
 	}
@@ -559,7 +611,7 @@ func (m *MusicBrainz) SearchArtist(name string) (Artist, error) {
 func scoreFilter(artists []Artist, score int) []Artist {
 	result := []Artist{}
 	for _, v := range artists {
-		//fmt.Printf("%d %s\n", v.Score, v.Name)
+		// fmt.Printf("%d %s\n", v.Score, v.Name)
 		if v.Score >= score {
 			result = append(result, v)
 		}
@@ -572,6 +624,7 @@ func (m *MusicBrainz) doArtistSearch(query string, limit int, offset int) (Artis
 	var result ArtistsPage
 	url := fmt.Sprintf(`https://musicbrainz.org/ws/2/artist?fmt=json&query=%s&limit=%d&offset=%d`,
 		url.QueryEscape(query), limit, offset)
+	// fmt.Println(url)
 	err := m.client.GetJson(url, &result)
 	return result, err
 }
@@ -634,5 +687,31 @@ func (m *MusicBrainz) CoverArtArchive(reid string, rgid string) (coverArt, error
 		// id: "42"
 		result.Images[i].ID = unquote(string(img.RawID))
 	}
+	return result, err
+}
+
+func (m *MusicBrainz) SearchRecordings(query string) ([]Recording, error) {
+	var recordings []Recording
+	limit, offset := 100, 0
+	for {
+		result, _ := m.doRecordingSearch(query, limit, offset)
+		for _, r := range result.Recordings {
+			recordings = append(recordings, r)
+		}
+		offset += len(result.Recordings)
+		if offset >= result.Count {
+			break
+		}
+	}
+
+	return recordings, nil
+}
+
+func (m *MusicBrainz) doRecordingSearch(query string, limit int, offset int) (RecordingPage, error) {
+	var result RecordingPage
+	url := fmt.Sprintf(`https://musicbrainz.org/ws/2/recording?fmt=json&query=%s&limit=%d&offset=%d`,
+		url.QueryEscape(query), limit, offset)
+	// fmt.Println(url)
+	err := m.client.GetJson(url, &result)
 	return result, err
 }

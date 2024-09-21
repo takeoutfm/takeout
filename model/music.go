@@ -41,7 +41,7 @@ type Artist struct {
 // Release info from MusicBrainz.
 type Release struct {
 	gorm.Model
-	Artist         string `gorm:"uniqueIndex:idx_release"`
+	Artist         string `gorm:"uniqueIndex:idx_release;index:idx_release_artist"`
 	Name           string `gorm:"uniqueIndex:idx_release;index:idx_release_name" sql:"collate:nocase"`
 	RGID           string `gorm:"index:idx_release_rgid"`
 	REID           string `gorm:"uniqueIndex:idx_release;index:idx_release_reid"`

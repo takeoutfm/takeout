@@ -1,3 +1,16 @@
+## 0.19.0
+
+- fix to not include unresolved activity events in response
+- updated activity pointer and error handling
+- added smarter artist matching
+  * unpack names with `&`
+  * search with mbz aliases
+  * search with recording to derive arid
+  * limit artists matches and err earlier
+- added smarter release matching
+  * use per media track numbers and position
+- add index on releases.artist
+
 ## 0.18.6, 0.18.7
 
 - fixed first track bug recently introduced
