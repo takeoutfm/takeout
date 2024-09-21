@@ -552,7 +552,6 @@ func (m *MusicBrainz) SearchArtist(name string) (Artist, error) {
 	}
 
 	if result.Count == 0 && strings.Contains(name, " & ") {
-		fmt.Println("check &")
 		// check for something like "Artist One & Artist Two"
 		// or "Artist One, Artist Two & Artist Three"
 		// or "Artist One, Artist Two, Artist Three & Artist Four"
@@ -567,7 +566,6 @@ func (m *MusicBrainz) SearchArtist(name string) (Artist, error) {
 		}
 		for _, query := range artists {
 			result, _ = m.doArtistSearch(query, limit, offset)
-			fmt.Println(query, result.Count)
 			if result.Count != 0 {
 				break
 			}

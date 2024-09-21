@@ -1100,7 +1100,7 @@ func (m *Music) resolveArtist(name string) (Artist, []ArtistTag, error) {
 		v, err = m.mbz.SearchArtistID(arid)
 	} else {
 		v, err = m.mbz.SearchArtist(name)
-}
+	}
 	if err != nil {
 		// try again
 		fuzzy := fuzzyArtist(name)
@@ -1108,14 +1108,14 @@ func (m *Music) resolveArtist(name string) (Artist, []ArtistTag, error) {
 			v, err = m.mbz.SearchArtist(fuzzy)
 		}
 	}
-	if err != nil {
-		// try lastfm
-		lastName, lastID := m.lastfm.ArtistSearch(name)
-		if lastName != "" && lastID != "" {
-			log.Printf("try lastfm got %s mbid:'%s'\n", lastName, lastID)
-			v, err = m.mbz.SearchArtistID(lastID)
-		}
-	}
+	// if err != nil {
+	// 	// try lastfm
+	// 	lastName, lastID := m.lastfm.ArtistSearch(name)
+	// 	if lastName != "" && lastID != "" {
+	// 		log.Printf("try lastfm got %s mbid:'%s'\n", lastName, lastID)
+	// 		v, err = m.mbz.SearchArtistID(lastID)
+	// 	}
+	// }
 	if err == nil {
 		artist, tags = doArtist(v)
 	}

@@ -1,3 +1,7 @@
+## 0.19.1
+
+- disable lastfm artist search during sync
+
 ## 0.19.0
 
 - fix to not include unresolved activity events in response
