@@ -62,6 +62,7 @@ type Release struct {
 	GroupArtwork   bool
 	Media          []Media `gorm:"-"`
 	SingleName     string  `gorm:"index:idx_release_single_name"`
+	GroupName      string  `gorm:"index:idx_release_group_name"`
 }
 
 func (r Release) Official() bool {
@@ -137,7 +138,7 @@ type Track struct {
 	DiscCount    int
 	REID         string `gorm:"index:idx_track_reid"`
 	RGID         string `gorm:"index:idx_track_rgid"`
-	RID          string `gorm:"index:idx_track_rid"` // recording id
+	RID          string `gorm:"index:idx_track_rid"`  // recording id
 	ARID         string `gorm:"index:idx_track_arid"` // TODO only for local right now
 	MediaTitle   string
 	ReleaseTitle string `spiff:"album"`

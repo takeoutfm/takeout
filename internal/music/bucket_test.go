@@ -60,7 +60,7 @@ func TestMatchTrack(t *testing.T) {
 		"Music/Gorillaz/Gorillaz (2002)/08-Sound Check (Gravity).flac",
 		"Music/Gorillaz/Gorillaz (2002)/11-19-2000.flac", // song is 19-2000
 		"Music/Gorillaz/Gorillaz (2002)/15-M1 A1.flac",
-		"Music/Gorillaz/Gorillaz (2002)/18-19-2000 (Soulchild remix).flac",
+		"Music/Gorillaz/Gorillaz (2002)/18-19-2000 (Soulchild remix).flac", // song is 19-2000
 		"Music/The Velvet Underground/Loaded (1997)/1-01-Who Loves the Sun.flac",
 		"Music/The Velvet Underground/Loaded (1997)/2-17-Love Makes You Feel Ten Feet Tall (demo).flac",
 		"Music/The Beatles/The Beatles in Mono (2009)/8-12-Sgt. Pepper's Lonely Hearts Club Band (reprise).flac",
@@ -69,12 +69,12 @@ func TestMatchTrack(t *testing.T) {
 		"Music/Artist/Album (2020)/01-2020.flac",
 		"Music/Artist/Album (2020)/1-02-2020.flac",
 		"Music/Artist/Album (2020)/01-02-2020.flac",
-		"Music/Artist/Album (2020)/1-2-2020.flac", // FAIL
+		"Music/Artist/Album (2020)/1-2-2020.flac",
 		"Music/Artist/Album (2020)/11-12 2020.flac",
 		"Music/Artist/Album (2020)/11-12 Twenty.flac",
 		"Music/Artist/Album (2020)/11-12-2020.flac",
 		"Music/Artist/Album (2020)/11-12-Twenty.flac",
-		"Music/ZZ Top/XXX (1999)/4-36-22-36.flac",
+		"Music/ZZ Top/XXX (1999)/4-36-22-36.flac", // song is 36-22-36
 		"Music/Beastie Boys/Paul's Boutique (1989)/07-3-Minute Rule.flac",
 		"Music/Beastie Boys/Paul's Boutique (1989)/09-5-Piece Chicken Dinner.flac",
 		"Music/Iron Maiden/Nights of the Dead Legacy of the Beast Live in Mexico City (2020)/1-04-2 Minutes to Midnight.flac",
@@ -83,7 +83,9 @@ func TestMatchTrack(t *testing.T) {
 		"Music/Iron Maiden/Live After Death (2020)/1-03-2 Minutes to Midnight.flac",
 		"Music/ZZ Top/The Complete Studio Albums 1970-1990 (2013)/10-01-Concrete and Steel.flac",
 		"Music/ZZ Top/The Complete Studio Albums 1970-1990 (2013)/10-08-2000 Blues.flac",
-		"Music/Boz Scaggs/My Time_ A Boz Scaggs Anthology (1969-1997) (1997)/2-02-1993.flac", // FAIL
+		"Music/Boz Scaggs/My Time_ A Boz Scaggs Anthology (1969-1997) (1997)/2-02-1993.flac", // song is 1993
+		"Music/New Order/Substance 1987 (1987)/2-12-1963.flac", // song is 1963
+		"Music/New Order/Retro (2008)/1-01-Fine Time.flac",
 	}
 
 	expect := []string{
@@ -108,7 +110,7 @@ func TestMatchTrack(t *testing.T) {
 		"1 / 1 / 2020",
 		"1 / 1 / 02-2020",
 		"1 / 1 / 02-2020",
-		"1 / 2 / 2020", // fail
+		"1 / 2 / 2020",
 		"1 / 11 / 12 2020",
 		"1 / 11 / 12 Twenty",
 		"1 / 11 / 12-2020",
@@ -123,7 +125,10 @@ func TestMatchTrack(t *testing.T) {
 		"10 / 1 / Concrete and Steel",
 		"10 / 8 / 2000 Blues",
 		"2 / 2 / 1993",
+		"2 / 12 / 1963",
+		"1 / 1 / Fine Time",
 	}
+
 
 	for i, v := range patterns {
 		matches := pathRegexp.FindStringSubmatch(v)
@@ -134,15 +139,32 @@ func TestMatchTrack(t *testing.T) {
 
 		trackTitle := matches[3]
 		track := model.Track{}
+		track.Key = v
 
-		if matchTrack(trackTitle, &track) == false {
+		tracks := matchTrack(trackTitle, &track)
+		if len(tracks) == 0 {
 			t.Errorf("match failed")
 		}
 
-		result := fmt.Sprintf("%d / %d / %s", track.DiscNum, track.TrackNum, track.Title)
-		//t.Logf("%s\n", result)
-		if result != expect[i] {
-			t.Errorf("expect %s got %s\n", expect[i], result)
+		if len(tracks) > 1 {
+			t.Logf("%s - matches %d\n", track.Key, len(tracks))
+			for _, tr := range tracks {
+				t.Logf("- %d/%d/%s\n", tr.DiscNum, tr.TrackNum, tr.Title)
+			}
+		}
+
+		matched := false
+		for _, tr := range tracks {
+			result := fmt.Sprintf("%d / %d / %s", tr.DiscNum, tr.TrackNum, tr.Title)
+			if result == expect[i] {
+				// t.Logf("YES --> %s : %s\n", result, track.Key)
+				matched = true
+				break
+			}
+			// t.Logf("NO --> %s : %s\n", result, track.Key)
+		}
+		if !matched {
+			t.Errorf("expect %s for %s\n", expect[i], track.Key)
 		}
 	}
 }

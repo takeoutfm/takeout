@@ -142,7 +142,7 @@ func (m *Music) creditsIndex(reid string) ([]trackIndex, error) {
 
 	var indices []trackIndex
 
-	for _, m := range rel.Media {
+	for _, m := range rel.FilteredMedia() {
 		for _, t := range m.Tracks {
 			trackFields := search.CloneFields(fields)
 			addField(trackFields, FieldMedia, m.Position)

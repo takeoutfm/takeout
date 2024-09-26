@@ -82,6 +82,14 @@ type Area struct {
 	SortName string `json:"sort-name"`
 }
 
+type Alias struct {
+	Name      string `json:"name"`
+	SortName  string `json:"sort-name"`
+	BeginDate string `json:"begin-date"`
+	EndDate   string `json:"end-date"`
+	Type      string `json:"type"`
+}
+
 type Artist struct {
 	ID             string     `json:"id"`
 	Score          int        `json:"score"`
@@ -97,6 +105,7 @@ type Artist struct {
 	EndArea        Area       `json:"end-area"`
 	LifeSpan       LifeSpan   `json:"life-span"`
 	Relations      []Relation `json:"relations"`
+	Aliases        []Alias    `json:"aliases"`
 }
 
 func doSort(genres []Genre) []Genre {
@@ -181,7 +190,7 @@ type Media struct {
 	Format     string  `json:"format"`
 	Position   int     `json:"position"`
 	TrackCount int     `json:"track-count"`
-	Tracks     []Track `json:"tracks"`
+	Tracks     []Track `json:"track"`
 }
 
 func (m Media) video() bool {
@@ -199,6 +208,7 @@ type Recording struct {
 	Relations        []Relation     `json:"relations"`
 	ArtistCredit     []ArtistCredit `json:"artist-credit"`
 	FirstReleaseDate string         `json:"first-release-date"`
+	Releases         []Release      `json:"releases"`
 }
 
 func (r Recording) FirstReleaseTime() time.Time {
@@ -214,6 +224,7 @@ type RecordingPage struct {
 type Track struct {
 	Title        string         `json:"title"`
 	Position     int            `json:"position"`
+	// Number       string         `json:"number"` -- position & number are the same
 	ArtistCredit []ArtistCredit `json:"artist-credit"`
 	Recording    Recording      `json:"recording"`
 }
@@ -292,6 +303,17 @@ func (r Release) TotalDiscs() int {
 	return count
 }
 
+func (r Release) FilteredMedia() []Media {
+	var media []Media
+	for _, m := range r.Media {
+		if m.video() {
+			continue
+		}
+		media = append(media, m)
+	}
+	return media
+}
+
 type Tag struct {
 	Name  string `json:"name"`
 	Count int    `json:"count"`
@@ -336,7 +358,6 @@ const (
 	PrimaryTypeEP        = "EP"
 	PrimaryTypeBroadcast = "Broadcast"
 	PrimaryTypeOther     = "Other"
-
 	TypeCompilation   = "Compilation"
 	TypeSoundtrack    = "Soundtrack"
 	TypeSpokenword    = "Spokenword"
@@ -530,80 +551,19 @@ func (m *MusicBrainz) SearchArtistID(arid string) (Artist, error) {
 
 // Search for artist by name using MusicBrainz.
 func (m *MusicBrainz) SearchArtist(name string) (Artist, error) {
-	var artists []Artist
-	limit, offset := 100, 0
-
-	// can also add "AND type:group" or "AND type:person"
-	// more fields are defined here:
-	// https://musicbrainz.org/doc/MusicBrainz_API/Search#Search_Fields_3
-	queries := []string{
-		fmt.Sprintf(`artist:"%s"`, name),
-		fmt.Sprintf(`primary_alias:"%s"`, name),
-		fmt.Sprintf(`alias:"%s"`, name),
+	artists := m.doArtistSearchExact(name)
+	if len(artists) == 0 {
+		artists = m.doMultiArtistSearch(name)
 	}
-
-	var result ArtistsPage
-	// try multiple queries until something is found
-	for _, query := range queries {
-		result, _ = m.doArtistSearch(query, limit, offset)
-		if result.Count != 0 {
-			break
-		}
-	}
-
-	if result.Count == 0 && strings.Contains(name, " & ") {
-		// check for something like "Artist One & Artist Two"
-		// or "Artist One, Artist Two & Artist Three"
-		// or "Artist One, Artist Two, Artist Three & Artist Four"
-		var artists []string
-		for _, v := range strings.Split(name, " & ") {
-			for _, artist := range strings.Split(v, ", ") {
-				artists = append(artists, artist)
-			}
-		}
-		for i := range artists {
-			artists[i] = fmt.Sprintf(`artist:"%s"`, strings.Trim(artists[i], " "))
-		}
-		for _, query := range artists {
-			result, _ = m.doArtistSearch(query, limit, offset)
-			if result.Count != 0 {
-				break
-			}
-		}
-	}
-
-	for _, r := range result.Artists {
-		artists = append(artists, r)
-	}
-
-	// Searching for "belly" yields:
-	// - Lead Belly : 100
-	// - Belly : 90 <--- want this one
-	score := 90 // change to widen matches below
+	score := 99
 	artists = scoreFilter(artists, score)
 	if len(artists) == 0 {
 		return Artist{}, ErrArtistNotFound
 	}
-	if len(artists) > 3 {
+	if len(artists) > 1 {
 		return Artist{}, ErrTooManyArtists
 	}
-
-	pick := 0
-	if len(artists) > 1 {
-		// multiple matches
-		for index, artist := range artists {
-			// fmt.Printf("ID: %s Name: %-25sScore: %d\n",
-			// 	artist.ID, artist.Name, artist.Score)
-			if strings.EqualFold(name, artist.Name) {
-				// try to use a close match
-				pick = index
-				break // pick the first equal match
-			}
-		}
-	}
-	artist := artists[pick]
-	//a, tags = doArtist(artist)
-	return artist, nil
+	return artists[0], nil
 }
 
 func scoreFilter(artists []Artist, score int) []Artist {
@@ -615,6 +575,62 @@ func scoreFilter(artists []Artist, score int) []Artist {
 		}
 	}
 	return result
+}
+
+func (m *MusicBrainz) doArtistSearchExact(name string) []Artist {
+	limit, offset := 100, 0
+	var artists []Artist
+
+	queries := []string{
+		fmt.Sprintf(`artist:"%s"`, name),
+		fmt.Sprintf(`primary_alias:"%s"`, name),
+		fmt.Sprintf(`alias:"%s"`, name),
+	}
+
+	for _, query := range queries {
+		result, _ := m.doArtistSearch(query, limit, offset)
+		for _, a := range result.Artists {
+			if strings.EqualFold(a.Name, name) {
+				// return first exact artist name match
+				artists = append(artists, a)
+				return artists
+			} else {
+				// return first exact artist alias match
+				for _, alias := range a.Aliases {
+					// fmt.Printf("%03d: %-20s %-20s\n", a.Score, a.Name, alias.Name)
+					if strings.EqualFold(alias.Name, name) {
+						artists = append(artists, a)
+						return artists
+					}
+				}
+			}
+		}
+	}
+	return artists
+}
+
+func (m *MusicBrainz) doMultiArtistSearch(name string) []Artist {
+	var artists []Artist
+	split := " & "
+	if strings.Contains(name, split) {
+		// check for something like "Artist One & Artist Two"
+		// or "Artist One, Artist Two & Artist Three"
+		// or "Artist One, Artist Two, Artist Three & Artist Four"
+		var names []string
+		for _, v := range strings.Split(name, split) {
+			for _, artist := range strings.Split(v, ", ") {
+				names = append(names, artist)
+			}
+		}
+		for i := range names {
+			result := m.doArtistSearchExact(names[i])
+			if len(result) > 0 {
+				artists = append(artists, result...)
+				return artists
+			}
+		}
+	}
+	return artists
 }
 
 // query should be formatted correctly - arid:xyz or artist:"name"
@@ -690,7 +706,7 @@ func (m *MusicBrainz) CoverArtArchive(reid string, rgid string) (coverArt, error
 
 func (m *MusicBrainz) SearchRecordings(query string) ([]Recording, error) {
 	var recordings []Recording
-	limit, offset := 100, 0
+	limit, offset := 10, 0
 	for {
 		result, _ := m.doRecordingSearch(query, limit, offset)
 		for _, r := range result.Recordings {
@@ -705,10 +721,18 @@ func (m *MusicBrainz) SearchRecordings(query string) ([]Recording, error) {
 	return recordings, nil
 }
 
+func queryEscape(s string) string {
+	s = url.QueryEscape(s)
+	// s = strings.ReplaceAll(s, "'", "%27")
+	// s = strings.ReplaceAll(s, "(", "%28")
+	// s = strings.ReplaceAll(s, ")", "%29")
+	return s
+}
+
 func (m *MusicBrainz) doRecordingSearch(query string, limit int, offset int) (RecordingPage, error) {
 	var result RecordingPage
 	url := fmt.Sprintf(`https://musicbrainz.org/ws/2/recording?fmt=json&query=%s&limit=%d&offset=%d`,
-		url.QueryEscape(query), limit, offset)
+		queryEscape(query), limit, offset)
 	// fmt.Println(url)
 	err := m.client.GetJson(url, &result)
 	return result, err

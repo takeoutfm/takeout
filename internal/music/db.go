@@ -165,15 +165,16 @@ func (m *Music) updateTrackAlbumArtist(oldName, newName string) (err error) {
 // Tracks may have release names that are modified to meet file/directory
 // naming limitations. Update the track entries with these modified names to
 // the actual release name.  Also fix disc counts.
-func (m *Music) updateTrackRelease(artist, oldName, newName string,
+func (m *Music) updateTrackRelease(artist, oldName, newName, date string,
 	trackCount, discCount int) (err error) {
 	var tracks []Track
-	m.db.Where("artist = ? and `release` = ? and track_count = ?",
-		artist, oldName, trackCount).Find(&tracks)
+	m.db.Where("artist = ? and `release` = ? and date = ? and track_count = ?",
+		artist, oldName, date, trackCount).Find(&tracks)
 	for _, t := range tracks {
 		err = m.db.Model(t).
 			Update("release", newName).
 			Update("disc_count", discCount).Error
+		// fmt.Printf("update %s/%s/%s %s %d\n", artist, oldName, date, newName, discCount)
 		if err != nil {
 			break
 		}
@@ -221,8 +222,8 @@ func (m *Music) trackMedia(t Track) ([]Media, error) {
 	var media []Media
 	rows, err := m.db.Table("tracks").
 		Select("max(track_num), disc_num").
-		Where("artist = ? and release = ? and disc_count = ? and track_count = ?",
-			t.Artist, t.Release, t.DiscCount, t.TrackCount).
+		Where("artist = ? and release = ? and date = ? and disc_count = ? and track_count = ?",
+			t.Artist, t.Release, t.Date, t.DiscCount, t.TrackCount).
 		Group("disc_num").
 		Order("disc_num").Rows()
 	if err != nil {
@@ -421,7 +422,7 @@ func (m *Music) releasesWithoutArtwork() []Release {
 // At this point a release couldn't be found easily. Like Weezer has
 // multiple albums called Weezer with the same number of tracks. Use
 // MusicBrainz disambiguate to look further. This returns all artist
-// releases with a specific track count that have a disambiguate.
+// releases with a specific track count that have a disambiguation.
 func (m *Music) disambiguate(artist string, trackCount, discCount int) []Release {
 	var releases []Release
 	m.db.Where("releases.artist = ? and releases.track_count = ? and releases.disc_count = ? and releases.disambiguation != ''",

@@ -18,6 +18,7 @@
 package music
 
 import (
+	"fmt"
 	"net/url"
 	"os"
 	"regexp"
@@ -41,14 +42,14 @@ func (m *Music) syncFromBucket(bucket bucket.Bucket, lastSync time.Time) (trackC
 			return
 		}
 		for o := range objectCh {
-			checkObject(bucket, o, trackCh)
+			m.checkObject(bucket, o, trackCh)
 		}
 	}()
 
 	return
 }
 
-func checkObject(b bucket.Bucket, object *bucket.Object, trackCh chan *Track) {
+func (m *Music) checkObject(b bucket.Bucket, object *bucket.Object, trackCh chan *Track) {
 	t := &Track{
 		Key:          object.Key,
 		ETag:         object.ETag,
@@ -66,7 +67,7 @@ func checkObject(b bucket.Bucket, object *bucket.Object, trackCh chan *Track) {
 		// failed so try regexps
 	}
 
-	matchPath(b, object.Path, t, trackCh, func(t *Track, trackCh chan *Track) {
+	m.matchPath(b, object.Path, t, trackCh, func(t *Track, trackCh chan *Track) {
 		trackCh <- t
 	})
 }
@@ -79,7 +80,7 @@ var coverRegexp = regexp.MustCompile(`cover\.(png|jpg)$`)
 
 var pathRegexp = regexp.MustCompile(`([^\/]+)\/([^\/]+)\/([^\/]+)$`)
 
-func matchPath(b bucket.Bucket, path string, t *Track, trackCh chan *Track,
+func (m *Music) matchPath(b bucket.Bucket, path string, t *Track, trackCh chan *Track,
 	doMatch func(t *Track, music chan *Track)) {
 	matches := pathRegexp.FindStringSubmatch(path)
 	if matches != nil {
@@ -91,7 +92,27 @@ func matchPath(b bucket.Bucket, path string, t *Track, trackCh chan *Track,
 		} else {
 			t.Release = release
 		}
-		if matchTrack(matches[3], t) {
+
+		matched := false
+		tracks := matchTrack(matches[3], t)
+		if len(tracks) > 1 {
+			for _, tr := range tracks {
+				result, err := m.resolveTrack(tr)
+				if err == nil {
+					t.DiscNum = result.DiscNum
+					t.TrackNum = result.TrackNum
+					t.Title = result.Title
+					matched = true
+					break
+				}
+			}
+		} else if len(tracks) == 1 {
+			t.DiscNum = tracks[0].DiscNum
+			t.TrackNum = tracks[0].TrackNum
+			t.Title = tracks[0].Title
+			matched = true
+		}
+		if matched {
 			doMatch(t, trackCh)
 		}
 	}
@@ -133,21 +154,28 @@ func matchRelease(release string) (string, string) {
 
 var trackRegexp = regexp.MustCompile(`(?:([1-9]+[0-9]?)-)?([\d]+)-(.+)\.(mp3|flac|ogg|m4a)$`)
 var singleDiscRegexp = regexp.MustCompile(`([\d]+)-([^+]+)\.(mp3|flac|ogg|m4a)$`)
-var numericRegexp = regexp.MustCompile(`^[\d\s-]+$`)
+var numericRegexp = regexp.MustCompile(`^[\d\s-]+(\s.+)?$`)
 
-func matchTrack(file string, t *Track) bool {
+func copyTrack(t *Track, disc, track int, title string) Track {
+	return Track{Artist: t.Artist, Release: t.Release, Date: t.Date, DiscNum: disc, TrackNum: track, Title: title,}
+}
+
+func matchTrack(file string, t *Track) []Track {
+	var tracks []Track
+
 	matches := trackRegexp.FindStringSubmatch(file)
 	if matches == nil {
-		return false
+		return tracks
 	}
+
 	disc := str.Atoi(matches[1])
 	track := str.Atoi(matches[2])
-	t.DiscNum = disc
-	t.TrackNum = track
-	t.Title = matches[3]
-	if t.DiscNum == 0 {
-		t.DiscNum = 1
+	title := matches[3]
+	if disc == 0 {
+		disc = 1
 	}
+
+	tracks = append(tracks, copyTrack(t, disc, track, title))
 
 	// potentially not multi-disc so assume single disc if too many
 	// TODO make this configurable?
@@ -155,31 +183,48 @@ func matchTrack(file string, t *Track) bool {
 	// Beatles in Mono - 13 discs
 	// Eagles Legacy - 12 discs
 	// Kraftwerk The Catalogue - 8 discs
-	if t.DiscNum > 13 {
-		matches := singleDiscRegexp.FindStringSubmatch(file)
-		if matches == nil {
-			return false
-		}
-		t.DiscNum = 1
-		t.TrackNum = str.Atoi(matches[1])
-		t.Title = matches[2]
-	}
+	// if disc > 13 {
+	// 	matches = singleDiscRegexp.FindStringSubmatch(file)
+	// 	if matches != nil {
+	// 		disc := 1
+	// 		track := str.Atoi(matches[1])
+	// 		title := matches[2]
+	// 		tracks = append(tracks, Track{DiscNum: disc, TrackNum: track, Title: title})
+	// 	}
+	// }
 
-	// all numeric assume is single disc since most are single
+	// all numeric try single disc
 	// eg: 11-19-2000.flac
 	// eg: 4-36-22-36.flac
 	// but 2-02-1993.flac is not a single disc track
-	if numericRegexp.MatchString(t.Title) {
+	if numericRegexp.MatchString(title) {
 		matches := singleDiscRegexp.FindStringSubmatch(file)
-		if matches == nil {
-			return false
+		if matches != nil {
+			disc := 1
+			track := str.Atoi(matches[1])
+			title := matches[2]
+			tracks = append(tracks, copyTrack(t, disc, track, title))
 		}
-		t.DiscNum = 1
-		t.TrackNum = str.Atoi(matches[1])
-		t.Title = matches[2]
 	}
 
-	return true
+	// remove dups
+	seen := make(map[string]struct{}, len(tracks))
+	i := 0
+	for _, v := range tracks {
+		key := fmt.Sprintf("%d/%d/%s", v.DiscNum, v.TrackNum, v.Title)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		tracks[i] = v
+		i++
+	}
+	tracks = tracks[:i]
+
+	// for j, v := range tracks {
+	// 	fmt.Printf("%d: %d/%d/%s\n", j, v.DiscNum, v.TrackNum, v.Title)
+	// }
+	return tracks
 }
 
 // Generate a presigned url which expires based on config settings.

@@ -1,3 +1,11 @@
+## 0.19.2
+
+- changed track matching to use musicbrainz to resolve questionable tracks
+- fully ignore video media in music releases
+- fixes multiple release handling with different media dates (Substance 1987)
+- handle multi-artist searching earlier
+- support artist aliases: Kanye West is now Ye
+
 ## 0.19.1
 
 - disable lastfm artist search during sync

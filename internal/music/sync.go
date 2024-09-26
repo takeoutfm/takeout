@@ -400,7 +400,7 @@ func fixName(name string) string {
 }
 
 func releaseKey(t Track) string {
-	return fmt.Sprintf("%s/%s/%d/%d", t.Artist, t.Release, t.TrackCount, t.DiscCount)
+	return fmt.Sprintf("%s/%s/%d/%d", t.Artist, t.Release, t.DiscCount, t.TrackCount)
 }
 
 // Assign a track to a specific MusicBrainz REID. This isn't exact and
@@ -444,9 +444,9 @@ func (m *Music) assignTrackReleases() (bool, error) {
 				log.Printf("track media not found: %s\n", cacheKey)
 				continue
 			}
-			for _, v := range media {
-				fmt.Printf("track media: %s/%s - %d, %d\n", t.Artist, t.Release, v.Position, v.TrackCount)
-			}
+			// for _, v := range media {
+			// 	fmt.Printf("%s media %s %d %d\n", t.Release, v.Name, v.Position, v.TrackCount)
+			// }
 			mediaCache[cacheKey] = media
 		}
 
@@ -586,6 +586,35 @@ func (m *Music) pickRelease(releases []Release) int {
 	return -1
 }
 
+func (m *Music) pickUsingGroupName(t Track, releases []Release) int {
+	countryMap := m.countryMap()
+	first, second, third := -1, -1, -1
+	firstRank := -1
+	for i, r := range releases {
+		if strings.EqualFold(r.GroupName, t.Release) {
+			rank, preferred := countryMap[r.Country]
+			if preferred && r.FrontArtwork && r.Official() {
+				if first == -1 || rank < firstRank {
+					first = i
+					firstRank = rank
+				}
+			} else if r.FrontArtwork {
+				second = i
+			} else {
+				third = i
+			}
+		}
+	}
+	if first != -1 {
+		return first
+	} else if second != -1 {
+		return second
+	} else if third != -1 {
+		return third
+	}
+	return -1
+}
+
 func (m *Music) pickDisambiguation(t Track, releases []Release) int {
 	countryMap := m.countryMap()
 	first, second, third := -1, -1, -1
@@ -650,7 +679,7 @@ func (m *Music) filterMedia(trackMedia []Media, releases []Release) []Release {
 			matchedReleases = append(matchedReleases, r)
 		}
 	}
-	fmt.Printf("filter media %d to %d\n", len(releases), len(matchedReleases))
+	// fmt.Printf("filter media %d to %d\n", len(releases), len(matchedReleases)) //
 	return matchedReleases
 }
 
@@ -677,7 +706,10 @@ func (m *Music) findTrackReleaseDisambiguate(t Track, trackMedia []Media) (Relea
 	releases = m.filterMedia(trackMedia, releases)
 	pick := m.pickDisambiguation(t, releases)
 	if pick == -1 {
-		return Release{}, ErrReleaseNotFound
+		pick = m.pickUsingGroupName(t, releases)
+		if pick == -1 {
+			return Release{}, ErrReleaseNotFound
+		}
 	}
 	return releases[pick], nil
 }
@@ -691,13 +723,15 @@ func (m *Music) fixTrackReleases() (bool, error) {
 	tracks := m.tracksWithoutAssignedRelease()
 
 	for _, t := range tracks {
+		key := fmt.Sprintf("%s/%s/%s", t.Artist, t.Release, t.Date)
+
 		artist, err := m.Artist(t.Artist)
 		if err != nil {
 			log.Printf("artist not found: %s\n", t.Artist)
 			continue
 		}
 
-		_, ok := fixReleases[t.Release]
+		_, ok := fixReleases[key]
 		if ok {
 			continue
 		}
@@ -707,7 +741,6 @@ func (m *Music) fixTrackReleases() (bool, error) {
 		// 	log.Printf("no releases for %s/%s/%d/%d\n",
 		// 		artist.Name, t.Release, t.TrackCount, t.DiscCount)
 		// }
-
 		if len(releases) > 0 {
 			pick := 0
 			if len(releases) > 1 {
@@ -719,11 +752,12 @@ func (m *Music) fixTrackReleases() (bool, error) {
 				}
 			}
 			r := releases[pick]
-			fixReleases[t.Release] = struct{}{}
+			fixReleases[key] = struct{}{}
 			fixTracks = append(fixTracks, map[string]interface{}{
 				"artist":     artist.Name,
 				"from":       t.Release,
 				"to":         r.Name,
+				"date":       t.Date,
 				"trackCount": r.TrackCount,
 				"discCount":  r.DiscCount,
 			})
@@ -733,12 +767,13 @@ func (m *Music) fixTrackReleases() (bool, error) {
 			for _, r := range releases {
 				// try fuzzy match
 				if strings.EqualFold(FuzzyName(t.Release), FuzzyName(r.Name)) &&
-					t.TrackCount == r.TrackCount {
-					fixReleases[t.Release] = struct{}{}
+					t.TrackCount == r.TrackCount && t.DiscCount == r.DiscCount {
+					fixReleases[key] = struct{}{}
 					fixTracks = append(fixTracks, map[string]interface{}{
 						"artist":     artist.Name,
 						"from":       t.Release,
 						"to":         r.Name,
+						"date":       t.Date,
 						"trackCount": r.TrackCount,
 						"discCount":  r.DiscCount,
 					})
@@ -749,7 +784,7 @@ func (m *Music) fixTrackReleases() (bool, error) {
 			if !matched {
 				// log.Printf("unmatched %s/%s/%d\n",
 				// 	t.Artist, t.Release, t.TrackCount)
-				fixReleases[t.Release] = struct{}{}
+				fixReleases[key] = struct{}{}
 			}
 		}
 	}
@@ -763,6 +798,7 @@ func (m *Music) fixTrackReleases() (bool, error) {
 			v["artist"].(string),
 			v["from"].(string),
 			v["to"].(string),
+			v["date"].(string),
 			v["trackCount"].(int),
 			v["discCount"].(int))
 		if err != nil {
@@ -1328,7 +1364,7 @@ func doRelease(artist string, r musicbrainz.Release) Release {
 	}
 
 	var media []Media
-	for _, m := range r.Media {
+	for _, m := range r.FilteredMedia() {
 		media = append(media, Media{
 			REID:       string(r.ID),
 			Name:       m.Title,
@@ -1368,6 +1404,7 @@ func doRelease(artist string, r musicbrainz.Release) Release {
 		ReleaseDate:    date.ParseDate(r.Date),
 		Status:         r.Status,
 		SingleName:     singleName,
+		GroupName:      r.ReleaseGroup.Title,
 	}
 }
 
@@ -1407,4 +1444,52 @@ func (m *Music) syncFanArtFor(client client.Getter, artists []Artist) error {
 		}
 	}
 	return nil
+}
+
+func wildcards(s string) string {
+	// change chars to lucene wildcards for musicbrainz search
+	s = strings.ReplaceAll(s, "_", "*")
+	return s
+}
+
+// resolve track positions using musicbrainz
+func (m *Music) resolveTrack(t Track) (Track, error) {
+	log.Printf("resolve track %s/%d/%d/%s\n", t.Release, t.DiscNum, t.TrackNum, t.Title)
+
+	artist := wildcards(t.Artist)
+	release := wildcards(t.Release)
+	title := wildcards(t.Title)
+
+	queries := []string{
+		fmt.Sprintf(`artist:"%s" AND release:"%s" AND recording:"%s" AND tnum:%d AND position:%d`,
+			artist, release, title, t.TrackNum, t.DiscNum),
+		fmt.Sprintf(`artist:"%s" AND release:"%s" AND tnum:%d AND position:%d`,
+			artist, release, t.TrackNum, t.DiscNum),
+		fmt.Sprintf(`release:"%s" AND tnum:%d AND position:%d`,
+			release, t.TrackNum, t.DiscNum),
+		fmt.Sprintf(`artist:"%s" AND tnum:%d AND position:%d`,
+			artist, t.TrackNum, t.DiscNum),
+	}
+
+	result := t
+
+	for _, query := range queries {
+		recordings, _ := m.mbz.SearchRecordings(query)
+		// fmt.Println(len(recordings), query)
+		for _, r := range recordings {
+			for _, rel := range r.Releases {
+				for _, media := range rel.Media {
+					for _, tr := range media.Tracks {
+						if tr.Title == t.Title {
+							// fmt.Printf("*** resolved track %s\n", tr.Title)
+							result.Title = tr.Title // needed?
+							return result, nil
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return result, ErrTrackNotFound
 }
