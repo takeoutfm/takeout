@@ -1294,9 +1294,9 @@ func (m *Music) releaseIndex(release Release) (search.IndexMap, error) {
 func (m *Music) artistIndex(a Artist) ([]search.IndexMap, error) {
 	var indices []search.IndexMap
 	releases := m.ArtistReleases(a)
-	//log.Printf("got %d releases\n", len(releases))
+	// log.Printf("got %d releases\n", len(releases))
 	for _, r := range releases {
-		//log.Printf("%s\n", r.Name)
+		// log.Printf("%s\n", r.Name)
 		index, err := m.releaseIndex(r)
 		if err != nil {
 			return indices, err
@@ -1316,7 +1316,6 @@ func (m *Music) syncIndexFor(artists []Artist) error {
 	for _, a := range artists {
 		log.Printf("index for %s\n", a.Name)
 		index, err := m.artistIndex(a)
-		//log.Println(index, err)
 		if err != nil {
 			return err
 		}
@@ -1479,7 +1478,8 @@ func (m *Music) resolveTrack(t Track) (Track, error) {
 		for _, r := range recordings {
 			for _, rel := range r.Releases {
 				for _, media := range rel.Media {
-					for _, tr := range media.Tracks {
+					// use Track not Tracks!
+					for _, tr := range media.Track {
 						if tr.Title == t.Title {
 							// fmt.Printf("*** resolved track %s\n", tr.Title)
 							result.Title = tr.Title // needed?

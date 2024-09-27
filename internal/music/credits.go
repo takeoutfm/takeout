@@ -171,7 +171,7 @@ func (m *Music) creditsIndex(reid string) ([]trackIndex, error) {
 				RID:      t.Recording.ID,
 				Fields:   trackFields,
 			}
-			//fmt.Printf("%d/%d/%s/%s\n", index.DiscNum, index.TrackNum, index.Title, index.RID)
+			// fmt.Printf("%d/%d/%s/%s\n", index.DiscNum, index.TrackNum, index.Title, index.RID)
 			indices = append(indices, index)
 		}
 	}

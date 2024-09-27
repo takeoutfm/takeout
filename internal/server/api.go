@@ -640,7 +640,7 @@ func apiSearch(w http.ResponseWriter, r *http.Request) {
 		view := SearchView(ctx, strings.TrimSpace(v))
 		apiView(w, r, view)
 	} else {
-		notFoundErr(w)
+		badRequest(w, ErrMissingParameter)
 	}
 }
 

@@ -1,3 +1,8 @@
+## 0.19.3
+
+- fix indexing: mbz different "track" vs "tracks" in json responses
+- return bad request with invalid search
+
 ## 0.19.2
 
 - changed track matching to use musicbrainz to resolve questionable tracks

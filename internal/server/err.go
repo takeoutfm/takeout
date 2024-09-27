@@ -41,6 +41,7 @@ var (
 	ErrInvalidUUID          = errors.New("invalid uuid")
 	ErrInvalidContent       = errors.New("invalid content")
 	ErrMissingTitle         = errors.New("missing title")
+	ErrMissingParameter     = errors.New("missing required parameter")
 )
 
 func serverErr(w http.ResponseWriter, err error) {

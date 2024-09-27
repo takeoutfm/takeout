@@ -190,7 +190,8 @@ type Media struct {
 	Format     string  `json:"format"`
 	Position   int     `json:"position"`
 	TrackCount int     `json:"track-count"`
-	Tracks     []Track `json:"track"`
+	Tracks     []Track `json:"tracks"`
+	Track      []Track `json:"track"` // recording search returns single track as []Track
 }
 
 func (m Media) video() bool {
@@ -222,8 +223,8 @@ type RecordingPage struct {
 }
 
 type Track struct {
-	Title        string         `json:"title"`
-	Position     int            `json:"position"`
+	Title    string `json:"title"`
+	Position int    `json:"position"`
 	// Number       string         `json:"number"` -- position & number are the same
 	ArtistCredit []ArtistCredit `json:"artist-credit"`
 	Recording    Recording      `json:"recording"`
@@ -358,17 +359,17 @@ const (
 	PrimaryTypeEP        = "EP"
 	PrimaryTypeBroadcast = "Broadcast"
 	PrimaryTypeOther     = "Other"
-	TypeCompilation   = "Compilation"
-	TypeSoundtrack    = "Soundtrack"
-	TypeSpokenword    = "Spokenword"
-	TypeInterview     = "Interview"
-	TypeAudiobook     = "Audiobook"
-	TypeAudioDrama    = "Audio drama"
-	TypeLive          = "Live"
-	TypeRemix         = "Remix"
-	TypeDJMix         = "DJ-mix"
-	TypeMixtapeStreet = "Mixtape/Street"
-	TypeNone          = ""
+	TypeCompilation      = "Compilation"
+	TypeSoundtrack       = "Soundtrack"
+	TypeSpokenword       = "Spokenword"
+	TypeInterview        = "Interview"
+	TypeAudiobook        = "Audiobook"
+	TypeAudioDrama       = "Audio drama"
+	TypeLive             = "Live"
+	TypeRemix            = "Remix"
+	TypeDJMix            = "DJ-mix"
+	TypeMixtapeStreet    = "Mixtape/Street"
+	TypeNone             = ""
 )
 
 var preferredTypes = []string{
