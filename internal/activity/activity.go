@@ -273,6 +273,7 @@ func (a *Activity) CreateEvents(ctx Context, events Events) error {
 	user := ctx.User()
 	for _, e := range events.MovieEvents {
 		e.User = user.Name
+		e.Date = e.Date.Local()
 		if e.ETag != "" {
 			// resolve using ETag
 			video, err := ctx.Video().LookupETag(e.ETag)
@@ -282,30 +283,42 @@ func (a *Activity) CreateEvents(ctx Context, events Events) error {
 			e.IMID = video.IMID
 			e.TMID = strconv.FormatInt(video.TMID, 10)
 		}
-		err := a.createMovieEvent(&e)
-		if err != nil {
-			return err
+		if e.IsValid() {
+			err := a.createMovieEvent(&e)
+			if err != nil {
+				return err
+			}
 		}
+		// TODO ignore invalid events
 	}
 
 	for _, e := range events.ReleaseEvents {
 		e.User = user.Name
-		err := a.createReleaseEvent(&e)
-		if err != nil {
-			return err
+		e.Date = e.Date.Local()
+		if e.IsValid() {
+			err := a.createReleaseEvent(&e)
+			if err != nil {
+				return err
+			}
 		}
+		// TODO ignore invalid events
 	}
 
 	for _, e := range events.EpisodeEvents {
 		e.User = user.Name
-		err := a.createEpisodeEvent(&e)
-		if err != nil {
-			return err
+		e.Date = e.Date.Local()
+		if e.IsValid() {
+			err := a.createEpisodeEvent(&e)
+			if err != nil {
+				return err
+			}
 		}
+		// TODO ignore invalid events
 	}
 
 	for _, e := range events.TrackEvents {
 		e.User = user.Name
+		e.Date = e.Date.Local()
 		if e.ETag != "" {
 			// resolve using ETag
 			track, err := ctx.Music().LookupETag(e.ETag)
@@ -315,10 +328,13 @@ func (a *Activity) CreateEvents(ctx Context, events Events) error {
 			e.RID = track.RID
 			e.RGID = track.RGID
 		}
-		err := a.createTrackEvent(&e)
-		if err != nil {
-			return err
+		if e.IsValid() {
+			err := a.createTrackEvent(&e)
+			if err != nil {
+				return err
+			}
 		}
+		// TODO ignore invalid events
 	}
 
 	return nil

@@ -163,9 +163,9 @@ func (m *Music) TrackURL(t Track) *url.URL {
 }
 
 // Find track using the etag from the S3 bucket.
-func (m *Music) TrackLookup(etag string) (Track, error) {
-	return m.LookupETag(etag)
-}
+// func (m *Music) TrackLookup(etag string) (Track, error) {
+// 	return m.LookupETag(etag)
+// }
 
 // URL for track cover image.
 func (m *Music) TrackImage(t Track) *url.URL {

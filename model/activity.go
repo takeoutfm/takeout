@@ -75,6 +75,10 @@ type ReleaseEvent struct {
 	REID string
 }
 
+func (r *ReleaseEvent) IsValid() bool {
+	return r.User != "" && r.Date.IsZero() == false && r.RGID != "" && r.REID != ""
+}
+
 type MovieEvent struct {
 	gorm.Model
 	User string    `gorm:"index:idx_movie_user" json:"-"`
@@ -82,6 +86,10 @@ type MovieEvent struct {
 	TMID string
 	IMID string
 	ETag string `gorm:"-"`
+}
+
+func (m *MovieEvent) IsValid() bool {
+	return m.User != "" && m.Date.IsZero() == false && (m.TMID != "" || m.IMID != "")
 }
 
 type TrackEvent struct {
@@ -93,11 +101,19 @@ type TrackEvent struct {
 	ETag string `gorm:"-"`
 }
 
+func (t *TrackEvent) IsValid() bool {
+	return t.User != "" && t.Date.IsZero() == false && t.RID != "" && t.RGID != ""
+}
+
 type EpisodeEvent struct {
 	gorm.Model
 	User string    `gorm:"index:idx_episode_user" json:"-"`
 	Date time.Time `gorm:"uniqueIndex:idx_episode_date"`
 	EID  string
+}
+
+func (e *EpisodeEvent) IsValid() bool {
+	return e.User != "" && e.Date.IsZero() == false && e.EID != ""
 }
 
 type ActivityRelease struct {
@@ -119,29 +135,3 @@ type ActivityEpisode struct {
 	Date    time.Time
 	Episode Episode
 }
-
-// func (t Track) Valid() bool {
-// 	if t.User == "" || t.MBID == "" || t.Date.IsZero() {
-// 		return false
-// 	}
-// 	return true
-// }
-
-// func (p Playlist) Valid() bool {
-// 	if p.User == "" || p.Ref == "" ||
-// 		p.Title == "" || p.Creator == "" || p.Date.IsZero() {
-// 		return false
-// 	}
-// 	return true
-// }
-
-// func (m Movie) Valid() bool {
-// 	if m.User == "" || m.Date.IsZero() {
-// 		return false
-// 	}
-// 	if m.TMID == "" && m.IMID == "" {
-// 		// must have TMID or IMID
-// 		return false
-// 	}
-// 	return true
-// }

@@ -1,3 +1,9 @@
+## 0.19.4
+
+- store activity dates in local timezone
+- check validitiy of activity events
+- different track etag lookup
+
 ## 0.19.3
 
 - fix indexing: mbz different "track" vs "tracks" in json responses

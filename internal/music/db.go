@@ -854,8 +854,11 @@ func (m *Music) tracksFor(keys []string) []Track {
 // be used as a good external identifier (for playlists) since the
 // interal record ID can change.
 func (m *Music) LookupETag(etag string) (Track, error) {
-	track := Track{ETag: etag}
-	err := m.db.First(&track, &track).Error
+	var track Track
+	err := m.db.First(&track, "e_tag = ?", etag).Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return Track{}, ErrTrackNotFound
+	}
 	return track, err
 }
 
