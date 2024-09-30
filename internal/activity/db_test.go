@@ -185,8 +185,43 @@ func TestPopularTrackEvents(t *testing.T) {
 	start := end.Add(time.Hour*-1)
 	events := a.popularTrackEventsFrom("takeout", start, end, 10)
 
-	for _, e := range events {
-		t.Logf("%+v\n", e)
+	if len(events) != 1 {
+		t.Error("expect 1 event")
+	}
+
+	if events[0].Count != 1 {
+		t.Error("expect count is 1")
+	}
+
+	a.deleteTrackEvents(user)
+	if len(a.trackEvents(user)) != 0 {
+		t.Error("expect no events")
+	}
+}
+
+func TestTrackEventsFrom(t *testing.T) {
+	user := "takeout"
+	rid := "7b486d22-ade1-4d61-940b-334071aad0cf"
+	rgid := "c5e5e8ad-dc89-319e-8b2d-b3ff5e59fcea"
+
+	a := makeActivity(t)
+	e := model.TrackEvent{
+		User: user,
+		Date: time.Now(),
+		RID:  rid,
+		RGID: rgid,
+	}
+	err := a.createTrackEvent(&e)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	end := time.Now()
+	start := end.Add(time.Hour*-1)
+	events := a.trackEventsFrom("takeout", start, end, 10)
+
+	if len(events) != 1 {
+		t.Error("expect 1 event")
 	}
 
 	a.deleteTrackEvents(user)

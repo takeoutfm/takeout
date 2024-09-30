@@ -1,3 +1,7 @@
+## 0.20.1
+
+- fix activity recent tracks
+
 ## 0.20.0
 
 - add counts in activity popular tracks

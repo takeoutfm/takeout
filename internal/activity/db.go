@@ -59,6 +59,7 @@ func (a *Activity) closeDB() {
 func (a *Activity) trackEventsFrom(user string, start, end time.Time, limit int) []trackEvent {
 	var events []trackEvent
 	a.db.Model(TrackEvent{}).
+		Select("*").
 		Where("user = ? and date >= ? and date <= ?", user, start, end).
 		Order("date desc").Limit(limit).Find(&events)
 	return events
