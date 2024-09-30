@@ -128,13 +128,9 @@ func (a *Activity) resolveReleaseEvent(e ReleaseEvent, ctx Context) (ActivityRel
 	return ActivityRelease{Date: e.Date, Release: release}, nil
 }
 
-func (a *Activity) resolveTrackEvent(e TrackEvent, ctx Context) (ActivityTrack, error) {
+func (a *Activity) resolveTrackEvent(e trackEvent, ctx Context) (ActivityTrack, error) {
 	m := ctx.Music()
 
-	// if e.RID == "" {
-	// 	log.Println("track event %d, RID is empty", e.ID)
-	// 	return ActivityTrack{}, ErrTrackNotFound
-	// }
 	var err error
 	var track Track
 	if e.RID != "" {
@@ -150,7 +146,7 @@ func (a *Activity) resolveTrackEvent(e TrackEvent, ctx Context) (ActivityTrack, 
 			return ActivityTrack{}, err
 		}
 	}
-	return ActivityTrack{Date: e.Date, Track: track}, nil
+	return ActivityTrack{Date: e.Date, Track: track, Count: e.Count}, nil
 }
 
 func (a *Activity) resolveMovieEvents(events []MovieEvent, ctx Context) []ActivityMovie {
@@ -186,7 +182,7 @@ func (a *Activity) resolveReleaseEvents(events []ReleaseEvent, ctx Context) []Ac
 	return releases
 }
 
-func (a *Activity) resolveTrackEvents(events []TrackEvent, ctx Context) []ActivityTrack {
+func (a *Activity) resolveTrackEvents(events []trackEvent, ctx Context) []ActivityTrack {
 	var tracks []ActivityTrack
 	for _, e := range events {
 		track, err := a.resolveTrackEvent(e, ctx)

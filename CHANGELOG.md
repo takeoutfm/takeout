@@ -1,3 +1,7 @@
+## 0.20.0
+
+- add counts in activity popular tracks
+
 ## 0.19.4
 
 - store activity dates in local timezone

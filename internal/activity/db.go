@@ -26,6 +26,11 @@ import (
 	"gorm.io/gorm"
 )
 
+type trackEvent struct {
+	TrackEvent
+	Count int
+}
+
 func (a *Activity) openDB() (err error) {
 	cfg := a.config.Music.DB.GormConfig()
 
@@ -51,16 +56,18 @@ func (a *Activity) closeDB() {
 	conn.Close()
 }
 
-func (a *Activity) trackEventsFrom(user string, start, end time.Time, limit int) []TrackEvent {
-	var events []TrackEvent
-	a.db.Where("user = ? and date >= ? and date <= ?", user, start, end).
+func (a *Activity) trackEventsFrom(user string, start, end time.Time, limit int) []trackEvent {
+	var events []trackEvent
+	a.db.Model(TrackEvent{}).
+		Where("user = ? and date >= ? and date <= ?", user, start, end).
 		Order("date desc").Limit(limit).Find(&events)
 	return events
 }
 
-func (a *Activity) popularTrackEventsFrom(user string, start, end time.Time, limit int) []TrackEvent {
-	var events []TrackEvent
-	a.db.Where("user = ? and date >= ? and date <= ?", user, start, end).
+func (a *Activity) popularTrackEventsFrom(user string, start, end time.Time, limit int) []trackEvent {
+	var events []trackEvent
+	a.db.Model(TrackEvent{}).
+		Select("count(r_id) as count, *").Where("user = ? and date >= ? and date <= ?", user, start, end).
 		Group("r_id").
 		Order("count(r_id) desc").Limit(limit).Find(&events)
 	return events
@@ -136,9 +143,10 @@ func (a *Activity) recentEpisodeEvents(user string, limit int) []EpisodeEvent {
 	return events
 }
 
-func (a *Activity) recentTrackEvents(user string, limit int) []TrackEvent {
-	var tracks []TrackEvent
-	a.db.Where("user = ?", user).
+func (a *Activity) recentTrackEvents(user string, limit int) []trackEvent {
+	var tracks []trackEvent
+	a.db.Model(TrackEvent{}).
+		Where("user = ?", user).
 		Order("date desc").Limit(limit).Find(&tracks)
 	return tracks
 }

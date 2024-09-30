@@ -129,6 +129,7 @@ type ActivityMovie struct {
 type ActivityTrack struct {
 	Date  time.Time
 	Track Track
+	Count int
 }
 
 type ActivityEpisode struct {
