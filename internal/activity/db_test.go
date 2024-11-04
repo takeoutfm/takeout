@@ -101,40 +101,6 @@ func TestTrackEvent(t *testing.T) {
 	}
 }
 
-func TestReleaseEvent(t *testing.T) {
-	user := "takeout"
-	reid := "8b3ca77d-647d-4e3e-b3a9-e7d5dd17f3e0"
-	rgid := "c5e5e8ad-dc89-319e-8b2d-b3ff5e59fcea"
-
-	a := makeActivity(t)
-	e := model.ReleaseEvent{
-		User: user,
-		Date: time.Now(),
-		REID: reid,
-		RGID: rgid,
-	}
-	err := a.createReleaseEvent(&e)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	events := a.releaseEvents(user)
-	if len(events) == 0 {
-		t.Error("expect events")
-	}
-	if events[0].REID != reid {
-		t.Errorf("expect %s", reid)
-	}
-	if events[0].RGID != rgid {
-		t.Errorf("expect %s", rgid)
-	}
-
-	a.deleteReleaseEvents(user)
-	if len(a.releaseEvents(user)) != 0 {
-		t.Error("expect no events")
-	}
-}
-
 func TestEpisodeEvent(t *testing.T) {
 	user := "takeout"
 	eid := "5c3b551b626a8e9fa04186b448f2d3ed"
@@ -164,33 +130,41 @@ func TestEpisodeEvent(t *testing.T) {
 	}
 }
 
-func TestPopularTrackEvents(t *testing.T) {
+func TestTopTrackEvents(t *testing.T) {
 	user := "takeout"
 	rid := "7b486d22-ade1-4d61-940b-334071aad0cf"
 	rgid := "c5e5e8ad-dc89-319e-8b2d-b3ff5e59fcea"
 
 	a := makeActivity(t)
-	e := model.TrackEvent{
-		User: user,
-		Date: time.Now(),
-		RID:  rid,
-		RGID: rgid,
-	}
-	err := a.createTrackEvent(&e)
-	if err != nil {
-		t.Fatal(err)
+
+	for i := 0; i < 2; i++ {
+		e := model.TrackEvent{
+			User: user,
+			Date: time.Now(),
+			RID:  rid,
+			RGID: rgid,
+		}
+		err := a.createTrackEvent(&e)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("%s\n", e.Date.String())
 	}
 
 	end := time.Now()
 	start := end.Add(time.Hour*-1)
-	events := a.popularTrackEventsFrom("takeout", start, end, 10)
+	events := a.topTrackEventsFrom("takeout", start, end, 10)
 
 	if len(events) != 1 {
 		t.Error("expect 1 event")
 	}
 
-	if events[0].Count != 1 {
-		t.Error("expect count is 1")
+	if events[0].Count != 2 {
+		t.Error("expect count is 2")
+	}
+
+	for _, e := range events {
+		t.Logf("%d - %s\n", e.Count, e.TrackEvent.Date.String())
 	}
 
 	a.deleteTrackEvents(user)

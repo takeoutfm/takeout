@@ -83,11 +83,12 @@ func (playout *Playout) Play(options PlayOptions) error {
 			list = append(list, result.Period...)
 			list = append(list, result.Series...)
 			list = append(list, result.Similar...)
+			list = append(list, result.Stream...)
 		}
 
 		for _, s := range list {
 			if strings.EqualFold(s.Name, name) {
-				ref := fmt.Sprintf("/music/radio/stations/%d", s.ID)
+				ref := fmt.Sprintf("/music/stations/%d", s.ID)
 				playlist, err = client.Replace(playout, ref,
 					spiffType, s.Creator, s.Name)
 				if err != nil {

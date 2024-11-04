@@ -43,7 +43,6 @@ type Index struct {
 	HasPlaylists bool
 }
 
-// swagger:model
 type Home struct {
 	AddedReleases   []model.Release
 	NewReleases     []model.Release
@@ -58,13 +57,11 @@ type Home struct {
 	EpisodeImage    EpisodeImageFunc `json:"-"`
 }
 
-// swagger:model
 type Artists struct {
 	Artists    []model.Artist
 	CoverSmall CoverFunc `json:"-"`
 }
 
-// swagger:model
 type Artist struct {
 	Artist     model.Artist
 	Image      string
@@ -80,28 +77,24 @@ type Artist struct {
 	Tracks     TrackList `json:"-"`
 }
 
-// swagger:model
 type Popular struct {
 	Artist     model.Artist
 	Popular    []model.Track
 	CoverSmall CoverFunc `json:"-"`
 }
 
-// swagger:model
 type Singles struct {
 	Artist     model.Artist
 	Singles    []model.Track
 	CoverSmall CoverFunc `json:"-"`
 }
 
-// swagger:model
 type WantList struct {
 	Artist     model.Artist
 	Releases   []model.Release
 	CoverSmall CoverFunc `json:"-"`
 }
 
-// swagger:model
 type Release struct {
 	Artist     model.Artist
 	Release    model.Release
@@ -113,7 +106,6 @@ type Release struct {
 	CoverSmall CoverFunc `json:"-"`
 }
 
-// swagger:model
 type Search struct {
 	Artists     []model.Artist
 	Releases    []model.Release
@@ -128,7 +120,6 @@ type Search struct {
 	PosterSmall PosterFunc `json:"-"`
 }
 
-// swagger:model
 type Radio struct {
 	Artist     []model.Station
 	Genre      []model.Station
@@ -140,14 +131,12 @@ type Radio struct {
 	CoverSmall CoverFunc `json:"-"`
 }
 
-// swagger:model
 type Movies struct {
 	Movies      []model.Movie
 	PosterSmall PosterFunc   `json:"-"`
 	Backdrop    BackdropFunc `json:"-"`
 }
 
-// swagger:model
 type Movie struct {
 	Movie       model.Movie
 	Location    string
@@ -168,7 +157,6 @@ type Movie struct {
 	Profile     ProfileFunc  `json:"-"`
 }
 
-// swagger:model
 type Profile struct {
 	Person      model.Person
 	Starring    []model.Movie
@@ -179,7 +167,6 @@ type Profile struct {
 	Profile     ProfileFunc  `json:"-"`
 }
 
-// swagger:model
 type Genre struct {
 	Name        string
 	Movies      []model.Movie
@@ -187,7 +174,6 @@ type Genre struct {
 	Backdrop    BackdropFunc `json:"-"`
 }
 
-// swagger:model
 type Keyword struct {
 	Name        string
 	Movies      []model.Movie
@@ -195,7 +181,6 @@ type Keyword struct {
 	Backdrop    BackdropFunc `json:"-"`
 }
 
-// swagger:model
 type Watch struct {
 	Movie       model.Movie
 	Location    string
@@ -203,13 +188,11 @@ type Watch struct {
 	Backdrop    BackdropFunc `json:"-"`
 }
 
-// swagger:model
 type Podcasts struct {
 	Series      []model.Series
 	SeriesImage SeriesImageFunc `json:"-"`
 }
 
-// swagger:model
 type Series struct {
 	Series       model.Series
 	Episodes     []model.Episode
@@ -217,42 +200,27 @@ type Series struct {
 	EpisodeImage EpisodeImageFunc `json:"-"`
 }
 
-// swagger:model
 type Episode struct {
 	Episode      model.Episode
 	EpisodeImage EpisodeImageFunc `json:"-"`
 }
 
-// swagger:model
 type Progress struct {
 	Offsets []model.Offset
 }
 
-// swagger:model
 type Offset struct {
 	Offset model.Offset
 }
 
-// swagger:model
-type Activity struct {
-	RecentMovies   []model.ActivityMovie
-	RecentTracks   []model.ActivityTrack
-	RecentReleases []model.ActivityRelease
-}
-
-// swagger:model
-type ActivityMovies struct {
-	Movies []model.ActivityMovie
-}
-
-// swagger:model
-type ActivityTracks struct {
-	Tracks []model.ActivityTrack
-}
-
-// swagger:model
-type ActivityReleases struct {
+type TrackStats struct {
+	Artists  []model.ActivityArtist
 	Releases []model.ActivityRelease
+	Tracks   []model.ActivityTrack
+}
+
+type TrackHistory struct {
+	Tracks   []model.ActivityTrack
 }
 
 type Playlist struct {

@@ -363,37 +363,31 @@ func OffsetView(ctx Context, offset model.Offset) *Offset {
 	return view
 }
 
-func ActivityView(ctx Context) *Activity {
-	view := &Activity{}
-	view.RecentTracks = ctx.Activity().RecentTracks(ctx)
-	view.RecentMovies = ctx.Activity().RecentMovies(ctx)
-	view.RecentReleases = ctx.Activity().RecentReleases(ctx)
+func TrackStatsView(ctx Context, start, end time.Time) *TrackStats {
+	view := &TrackStats{}
+	view.Artists = ctx.Activity().TopArtists(ctx, start, end)
+	view.Releases = ctx.Activity().TopReleases(ctx, start, end)
+	view.Tracks = ctx.Activity().TopTracks(ctx, start, end)
 	return view
 }
 
-func ActivityTracksView(ctx Context, start, end time.Time) *ActivityTracks {
-	view := &ActivityTracks{}
+func TrackHistoryView(ctx Context, start, end time.Time) *TrackHistory {
+	view := &TrackHistory{}
 	view.Tracks = ctx.Activity().Tracks(ctx, start, end)
 	return view
 }
 
-func ActivityPopularTracksView(ctx Context, start, end time.Time) *ActivityTracks {
-	view := &ActivityTracks{}
-	view.Tracks = ctx.Activity().PopularTracks(ctx, start, end)
-	return view
-}
+// func ActivityMoviesView(ctx Context, start, end time.Time) *ActivityMovies {
+// 	view := &ActivityMovies{}
+// 	view.Movies = ctx.Activity().Movies(ctx, start, end)
+// 	return view
+// }
 
-func ActivityMoviesView(ctx Context, start, end time.Time) *ActivityMovies {
-	view := &ActivityMovies{}
-	view.Movies = ctx.Activity().Movies(ctx, start, end)
-	return view
-}
-
-func ActivityReleasesView(ctx Context, start, end time.Time) *ActivityReleases {
-	view := &ActivityReleases{}
-	view.Releases = ctx.Activity().Releases(ctx, start, end)
-	return view
-}
+// func ActivityReleasesView(ctx Context, start, end time.Time) *ActivityReleases {
+// 	view := &ActivityReleases{}
+// 	view.Releases = ctx.Activity().Releases(ctx, start, end)
+// 	return view
+// }
 
 func PlaylistView(ctx Context, playlist model.Playlist) *Playlist {
 	return NewPlaylist(playlist)

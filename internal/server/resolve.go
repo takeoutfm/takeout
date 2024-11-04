@@ -459,25 +459,15 @@ func resolvePlsRef(ctx Context, url, creator, image string, entries []spiff.Entr
 
 // /activity/tracks
 func resolveActivityTracksRef(ctx Context, entries []spiff.Entry) ([]spiff.Entry, error) {
-	v := ActivityView(ctx)
+	end := time.Now()
+	start := date.BackMonth(end)
+	v := TrackHistoryView(ctx, start, end)
 	var tracks []model.Track
 	// TODO only recent is supported for now
-	for _, t := range v.RecentTracks {
+	for _, t := range v.Tracks {
 		tracks = append(tracks, t.Track)
 	}
 	entries = addTrackEntries(ctx, tracks, entries)
-	return entries, nil
-}
-
-// /activity/movies
-func resolveActivityMoviesRef(ctx Context, entries []spiff.Entry) ([]spiff.Entry, error) {
-	v := ActivityView(ctx)
-	var movies []model.Movie
-	// TODO only recent is supported for now
-	for _, m := range v.RecentMovies {
-		movies = append(movies, m.Movie)
-	}
-	entries = addMovieEntries(ctx, movies, entries)
 	return entries, nil
 }
 
@@ -553,7 +543,6 @@ var (
 	seriesRegexp       = regexp.MustCompile(`^/podcasts/series/([\d]+)$`)
 	episodesRegexp     = regexp.MustCompile(`^/podcasts/episodes/([\d]+)$`)
 	recentTracksRegexp = regexp.MustCompile(`^/activity/tracks$`)
-	recentMoviesRegexp = regexp.MustCompile(`^/activity/movies$`)
 )
 
 func Resolve(ctx Context, plist *spiff.Playlist) (err error) {
@@ -658,15 +647,6 @@ func Resolve(ctx Context, plist *spiff.Playlist) (err error) {
 		matches = recentTracksRegexp.FindStringSubmatch(pathRef)
 		if matches != nil {
 			entries, err = resolveActivityTracksRef(ctx, entries)
-			if err != nil {
-				return err
-			}
-			continue
-		}
-
-		matches = recentMoviesRegexp.FindStringSubmatch(pathRef)
-		if matches != nil {
-			entries, err = resolveActivityMoviesRef(ctx, entries)
 			if err != nil {
 				return err
 			}
@@ -786,7 +766,7 @@ func creators(tracks []model.Track) string {
 	return strings.Join(artists, " \u2022 ")
 }
 
-func ResolveActivityTracksPlaylist(ctx Context, v *view.ActivityTracks, res, path string) *spiff.Playlist {
+func ResolveActivityTracksPlaylist(ctx Context, v *view.TrackStats, res, path string) *spiff.Playlist {
 	var tracks []model.Track
 	for _, t := range v.Tracks {
 		tracks = append(tracks, t.Track)
@@ -804,7 +784,7 @@ func ResolveActivityTracksPlaylist(ctx Context, v *view.ActivityTracks, res, pat
 	title := ""
 	switch res {
 	case "popular":
-		title = ctx.Config().Activity.PopularTracksTitle
+		title = ctx.Config().Activity.TopTracksTitle
 	case "recent":
 		title = ctx.Config().Activity.RecentTracksTitle
 	}

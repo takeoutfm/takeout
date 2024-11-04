@@ -19,6 +19,8 @@
 package activity
 
 import (
+	"sort"
+
 	"github.com/takeoutfm/takeout/internal/auth"
 	"github.com/takeoutfm/takeout/internal/config"
 	"github.com/takeoutfm/takeout/internal/music"
@@ -74,11 +76,6 @@ func (a *Activity) DeleteUserEvents(ctx Context) error {
 		log.Println("movie delete error: ", err)
 		return err
 	}
-	err = a.deleteReleaseEvents(user.Name)
-	if err != nil {
-		log.Println("release delete error: ", err)
-		return err
-	}
 	err = a.deleteEpisodeEvents(user.Name)
 	if err != nil {
 		log.Println("series delete error: ", err)
@@ -101,7 +98,10 @@ func (a *Activity) resolveMovieEvent(e MovieEvent, ctx Context) (ActivityMovie, 
 	if err != nil {
 		return ActivityMovie{}, err
 	}
-	return ActivityMovie{Date: e.Date, Movie: movie}, nil
+	result := ActivityMovie{}
+	//result.Count = e.Count
+	result.Movie = movie
+	return result, nil
 }
 
 func (a *Activity) resolveEpisodeEvent(e EpisodeEvent, ctx Context) (ActivityEpisode, error) {
@@ -113,19 +113,10 @@ func (a *Activity) resolveEpisodeEvent(e EpisodeEvent, ctx Context) (ActivityEpi
 	if err != nil {
 		return ActivityEpisode{}, err
 	}
-	return ActivityEpisode{Date: e.Date, Episode: episode}, nil
-}
-
-func (a *Activity) resolveReleaseEvent(e ReleaseEvent, ctx Context) (ActivityRelease, error) {
-	m := ctx.Music()
-	if e.REID == "" {
-		return ActivityRelease{}, ErrReleaseNotFound
-	}
-	release, err := m.FindRelease(e.REID)
-	if err != nil {
-		return ActivityRelease{}, err
-	}
-	return ActivityRelease{Date: e.Date, Release: release}, nil
+	result := ActivityEpisode{}
+	//result.Count = e.Count
+	result.Episode = episode
+	return result, nil
 }
 
 func (a *Activity) resolveTrackEvent(e trackEvent, ctx Context) (ActivityTrack, error) {
@@ -146,7 +137,10 @@ func (a *Activity) resolveTrackEvent(e trackEvent, ctx Context) (ActivityTrack, 
 			return ActivityTrack{}, err
 		}
 	}
-	return ActivityTrack{Date: e.Date, Track: track, Count: e.Count}, nil
+	result := ActivityTrack{}
+	result.Count = e.Count
+	result.Track = track
+	return result, nil
 }
 
 func (a *Activity) resolveMovieEvents(events []MovieEvent, ctx Context) []ActivityMovie {
@@ -171,17 +165,6 @@ func (a *Activity) resolveEpisodeEvents(events []EpisodeEvent, ctx Context) []Ac
 	return episodes
 }
 
-func (a *Activity) resolveReleaseEvents(events []ReleaseEvent, ctx Context) []ActivityRelease {
-	var releases []ActivityRelease
-	for _, e := range events {
-		release, err := a.resolveReleaseEvent(e, ctx)
-		if err == nil {
-			releases = append(releases, release)
-		}
-	}
-	return releases
-}
-
 func (a *Activity) resolveTrackEvents(events []trackEvent, ctx Context) []ActivityTrack {
 	var tracks []ActivityTrack
 	for _, e := range events {
@@ -195,44 +178,106 @@ func (a *Activity) resolveTrackEvents(events []trackEvent, ctx Context) []Activi
 
 func (a *Activity) Movies(ctx Context, start, end time.Time) []ActivityMovie {
 	user := ctx.User()
-	events := a.movieEventsFrom(user.Name, start, end, a.config.Activity.ActivityLimit)
+	events := a.movieEventsFrom(user.Name, start, end, a.config.Activity.EventLimit)
 	return a.resolveMovieEvents(events, ctx)
 }
 
 func (a *Activity) Tracks(ctx Context, start, end time.Time) []ActivityTrack {
 	user := ctx.User()
-	events := a.trackEventsFrom(user.Name, start, end, a.config.Activity.ActivityLimit)
+	events := a.trackEventsFrom(user.Name, start, end, a.config.Activity.EventLimit)
 	return a.resolveTrackEvents(events, ctx)
 }
 
-func (a *Activity) Releases(ctx Context, start, end time.Time) []ActivityRelease {
+func (a *Activity) TopTracks(ctx Context, start, end time.Time) []ActivityTrack {
 	user := ctx.User()
-	events := a.releaseEventsFrom(user.Name, start, end, a.config.Activity.ActivityLimit)
-	return a.resolveReleaseEvents(events, ctx)
-}
-
-func (a *Activity) PopularTracks(ctx Context, start, end time.Time) []ActivityTrack {
-	user := ctx.User()
-	events := a.popularTrackEventsFrom(user.Name, start, end, a.config.Activity.PopularLimit)
+	events := a.topTrackEventsFrom(user.Name, start, end, a.config.Activity.TopTracksLimit)
 	return a.resolveTrackEvents(events, ctx)
 }
 
-func (a *Activity) RecentTracks(ctx Context) []ActivityTrack {
+func (a *Activity) TopArtists(ctx Context, start, end time.Time) []ActivityArtist {
 	user := ctx.User()
-	events := a.recentTrackEvents(user.Name, a.config.Activity.RecentLimit)
-	return a.resolveTrackEvents(events, ctx)
+	events := a.trackEventsFrom(user.Name, start, end, a.config.Activity.TopTracksLimit)
+	tracks := a.resolveTrackEvents(events, ctx)
+	result := a.groupByArtist(ctx, tracks)
+	if len(result) > a.config.Activity.TopArtistsLimit {
+		result = result[:a.config.Activity.TopArtistsLimit]
+	}
+	return result
 }
 
-func (a *Activity) RecentMovies(ctx Context) []ActivityMovie {
+func (a *Activity) TopReleases(ctx Context, start, end time.Time) []ActivityRelease {
 	user := ctx.User()
-	events := a.recentMovieEvents(user.Name, a.config.Activity.RecentLimit)
-	return a.resolveMovieEvents(events, ctx)
+	events := a.trackEventsFrom(user.Name, start, end, a.config.Activity.TopTracksLimit)
+	tracks := a.resolveTrackEvents(events, ctx)
+	result := a.groupByRelease(ctx, tracks)
+	if len(result) > a.config.Activity.TopReleasesLimit {
+		result = result[:a.config.Activity.TopReleasesLimit]
+	}
+	return result
 }
 
-func (a *Activity) RecentReleases(ctx Context) []ActivityRelease {
-	user := ctx.User()
-	events := a.recentReleaseEvents(user.Name, a.config.Activity.RecentLimit)
-	return a.resolveReleaseEvents(events, ctx)
+func (a *Activity) groupByArtist(ctx Context, tracks []ActivityTrack) []ActivityArtist {
+	// count tracks by artist (ARID)
+	counts := make(map[string]int)
+	for _, t := range tracks {
+		counts[t.Track.ARID]++
+	}
+
+	keys := sortByCount(counts)
+
+	// build artist map with ARID as key
+	list := ctx.Music().ArtistsForARIDs(keys)
+	artists := make(map[string]Artist)
+	for _, v := range list {
+		artists[v.ARID] = v
+	}
+
+	result := make([]ActivityArtist, 0, len(keys))
+	for _, key := range keys {
+		artist := artists[key]
+		count := counts[key]
+		result = append(result, ActivityArtist{Artist: artist, Count: count})
+	}
+
+	return result
+}
+
+func (a *Activity) groupByRelease(ctx Context, tracks []ActivityTrack) []ActivityRelease {
+	// count tracks by release (REID)
+	counts := make(map[string]int)
+	for _, t := range tracks {
+		counts[t.Track.REID]++
+	}
+
+	keys := sortByCount(counts)
+
+	// build release map with REID as key
+	list := ctx.Music().ReleasesForREIDs(keys)
+	releases := make(map[string]Release)
+	for _, v := range list {
+		releases[v.REID] = v
+	}
+
+	result := make([]ActivityRelease, 0, len(keys))
+	for _, key := range keys {
+		release := releases[key]
+		count := counts[key]
+		result = append(result, ActivityRelease{Release: release, Count: count})
+	}
+
+	return result
+}
+
+func sortByCount(counts map[string]int) []string {
+	// sort keys by count
+	keys := make([]string, 0, len(counts))
+	for key := range counts {
+		keys = append(keys, key)
+	}
+	sort.SliceStable(keys, func(i, j int) bool {
+		return counts[keys[i]] > counts[keys[j]]
+	})
+	return keys
 }
 
 // Add a scrobble with an MBID that should match a track we have
@@ -288,17 +333,17 @@ func (a *Activity) CreateEvents(ctx Context, events Events) error {
 		// TODO ignore invalid events
 	}
 
-	for _, e := range events.ReleaseEvents {
-		e.User = user.Name
-		e.Date = e.Date.Local()
-		if e.IsValid() {
-			err := a.createReleaseEvent(&e)
-			if err != nil {
-				return err
-			}
-		}
-		// TODO ignore invalid events
-	}
+	// for _, e := range events.ReleaseEvents {
+	// 	e.User = user.Name
+	// 	e.Date = e.Date.Local()
+	// 	if e.IsValid() {
+	// 		err := a.createReleaseEvent(&e)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 	}
+	// 	// TODO ignore invalid events
+	// }
 
 	for _, e := range events.EpisodeEvents {
 		e.User = user.Name

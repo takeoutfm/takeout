@@ -301,14 +301,11 @@ func Serve(config *config.Config) error {
 	mux.Handle("POST /api/progress", accessTokenAuthHandler(ctx, apiProgressPost))
 
 	// activity
-	mux.Handle("GET /api/activity", accessTokenAuthHandler(ctx, apiActivityGet))
+	// /activity/tracks/yesterday
+	// /activity/tracks/lastweek/stats
 	mux.Handle("POST /api/activity", accessTokenAuthHandler(ctx, apiActivityPost))
-	mux.Handle("GET /api/activity/tracks", accessTokenAuthHandler(ctx, apiActivityTracksGet))
-	mux.Handle("GET /api/activity/tracks/{res}", accessTokenAuthHandler(ctx, apiActivityTracksGetResource))
-	mux.Handle("GET /api/activity/tracks/{res}/playlist", accessTokenAuthHandler(ctx, apiActivityTracksGetPlaylist))
-	mux.Handle("GET /api/activity/movies", accessTokenAuthHandler(ctx, apiActivityMoviesGet))
-	// /activity/radio - ?
-	mux.Handle("GET /api/activity/releases", accessTokenAuthHandler(ctx, apiActivityReleasesGet))
+	mux.Handle("GET /api/activity/tracks/{res}", accessTokenAuthHandler(ctx, apiActivityTrackHistory))
+	mux.Handle("GET /api/activity/tracks/{res}/stats", accessTokenAuthHandler(ctx, apiActivityTrackStats))
 
 	// TODO - disable for now, work in progress
 	// settings

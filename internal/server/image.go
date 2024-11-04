@@ -25,10 +25,18 @@ import (
 )
 
 const (
-	CoverArtArchivePrefix = "http://coverartarchive.org"
+	CoverArtArchivePrefix = "https://coverartarchive.org"
 	TMDBPrefix            = "https://image.tmdb.org"
 	FanArtPrefix          = "https://assets.fanart.tv/fanart"
 )
+
+// The image cache has two different use cases: reading & writing. Writing is
+// performed using a client that will check for updates at the source and cache
+// the result locally. A forced max-age can be used to extend the the age of
+// the cached image. Reading will use a cache-only client which only reads
+// pre-cached images and will not try to fetch from the source. When nothing is
+// cached, the reader will redirect to the original source. Same config is used
+// for both use cases.
 
 func checkImageCache(w http.ResponseWriter, r *http.Request, url string) {
 	ctx := contextValue(r)

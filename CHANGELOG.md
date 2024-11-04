@@ -1,3 +1,10 @@
+## 0.21.0
+
+- Support smallest or largest movie duplicate resolution
+- Refactored activty to stats and history
+  * /api/activity/tracks/{today,yesterday,lastweek,year,etc.}
+  * /api/activity/tracks/.../stats
+
 ## 0.20.1
 
 - fix activity recent tracks

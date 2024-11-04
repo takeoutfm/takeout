@@ -7,14 +7,17 @@ managed, is described within this document. TakeoutFM refers to the Takeout
 server, mobile apps, TV apps, watch apps, console apps, and the web interface.
 
 If you have questions regarding this privacy policy, please contact
-privacy@takeoutfm.com.
+[privacy@takeoutfm.com](privacy@takeoutfm.com).
 
 ## Design Considerations
 
 TakeoutFM is designed around a server and APIs for clients/apps to browse and
 consume media. Clients are not required to store any information but may do so
 to improve performance. State may be stored on the server such that activity
-and progress can be resumed or shared across multiple client devices.
+and progress can be resumed or shared across multiple client devices. Takeout
+does not store or manage any media and instead media must be stored in an S3
+bucket (or local storatge) that is available for the server to index and for
+clients to access directly using time-based pre-signed URLs.
 
 ### Media Access
 
@@ -158,24 +161,13 @@ actual metadata.
 
 ## ListenBrainz
 
-Takeout apps/clients can be optionally enabled to submit music listening
-activity to the ListenBrainz service. Please refer to the ListenBrainz goals
-and terms of service for further information.
-
-## Assistant
-
-The Takeout assistant app is intended to be an offline voice assistant that
-supports voice commands for media and some limited home control. All voice
-recording and processing is local (offline) and does not use any cloud
-services. Voice data is not stored or sent to any third-party services. Voice
-data is converted to text and processed internally. Portions of this text may
-be sent to the Takeout server for further processing such as searching media to
-create playlists.
-
-Home control support as of this writing is limited to the Philips Hue Bridge
-(and lights) which is locally accessed directly without any other apps or
-remote services. Please refer to the Philips Hue Bridge documenation for
-further information.
+Takeout apps can be configured to send *playing now* and *listens* to
+ListenBrainz. This is optional but when configured, ListenBrainz will be made
+aware of music artist, release, and track listening behavior. With this
+information ListenBrainz can infer information about your music and other
+information. ListenBrainz also can make this information available publicly on
+their website and in other data exports. Please consult the ListenBrainz site
+and their privacy policy for further information.
 
 ## Information Disclosure
 

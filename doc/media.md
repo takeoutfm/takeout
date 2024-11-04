@@ -40,7 +40,7 @@ release year, and track/disc number. Takeout will try to find an artist release
 in MusicBrainz for each track. Having a release year helps narrow the available
 options.
 
-Note that it's a good idea to use underscores (_) in place of special
+Note that it's a good idea to use underscores `_` in place of special
 characters that aren't allowed or preferable in file names.
 
 ## Rewrite Rules
@@ -110,7 +110,7 @@ self-titled Gorillaz (2002) album has the track:
     Music/Gorillaz/Gorillaz (2002)/02-5_4.flac
 
 The song name for track #2 is actually "5/4". Slashes aren't typically allowed
-in file names so the tagger used underscore (_) for these non-allowed
+in file names so the tagger used underscore `_` for these non-allowed
 characters. Takeout will see this as track #2 and use MusicBrainz to
 associate the actual title of "5/4".
 

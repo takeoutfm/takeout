@@ -37,6 +37,10 @@ func schedule(config *config.Config) {
 	scheduler := gocron.NewScheduler(time.UTC)
 
 	mediaSync := func(d time.Duration, doit syncFunc, startImmediately bool) {
+		if d == 0 {
+			// job is disabled
+			return
+		}
 		sched := scheduler.Every(d)
 		if startImmediately {
 			sched = sched.StartImmediately()

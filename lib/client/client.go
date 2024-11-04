@@ -223,7 +223,7 @@ func (c *client) doGetWithRetry(headers map[string]string, url string) (*http.Re
 
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 		resp, err = c.doGet(headers, url)
-		if err == nil || (err != nil && resp == nil) {
+		if err == nil || resp == nil {
 			// success
 			// or error with no response
 			break
@@ -333,5 +333,5 @@ func Get(path string) ([]byte, error) {
 	} else {
 		return os.ReadFile(path)
 	}
-	return nil, ErrSchemeNotSupported
+	// return nil, ErrSchemeNotSupported
 }

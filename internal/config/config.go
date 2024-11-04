@@ -167,6 +167,7 @@ type VideoConfig struct {
 	SyncInterval         time.Duration
 	PosterSyncInterval   time.Duration
 	BackdropSyncInterval time.Duration
+	DuplicateResolution  string
 }
 
 type PodcastConfig struct {
@@ -185,14 +186,18 @@ type ProgressConfig struct {
 }
 
 type ActivityConfig struct {
-	DB                 DatabaseConfig
-	ActivityLimit      int
-	RecentLimit        int
-	PopularLimit       int
-	RecentMoviesTitle  string
-	RecentTracksTitle  string
-	PopularMoviesTitle string
-	PopularTracksTitle string
+	DB                DatabaseConfig
+	RecentMoviesTitle string
+	RecentTracksTitle string
+	EventLimit        int
+	TopArtistsLimit   int
+	TopArtistsTitle   string
+	TopTracksLimit    int
+	TopTracksTitle    string
+	TopReleasesLimit  int
+	TopReleasesTitle  string
+	TopMoviesLimit    int
+	TopMoviesTitle    string
 }
 
 type RecommendConfig struct {
@@ -309,6 +314,7 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Server.MediaDir", ".")
 	v.SetDefault("Server.ImageClient.CacheDir", "imagecache")
 	v.SetDefault("Server.ImageClient.UserAgent", userAgent())
+	v.SetDefault("Server.ImageClient.MaxAge", "720h") // 30 days
 	// potential include could be /media, /mnt, /opt, /srv
 	v.SetDefault("Server.IncludeDirs", []string{})
 	// by default provide some reasonable excludes
@@ -346,19 +352,23 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Activity.DB.Driver", "sqlite3")
 	v.SetDefault("Activity.DB.Source", "${Server.DataDir}/activity.db")
 	v.SetDefault("Activity.DB.Logger", "default")
-	v.SetDefault("Activity.ActivityLimit", "50")
-	v.SetDefault("Activity.RecentLimit", "50")
-	v.SetDefault("Activity.PopularLimit", "50")
 	v.SetDefault("Activity.RecentMoviesTitle", "Recently Watched")
 	v.SetDefault("Activity.RecentTracksTitle", "Recently Played")
-	v.SetDefault("Activity.PopularMoviesTitle", "Popular Movies")
-	v.SetDefault("Activity.PopularTracksTitle", "Popular Tracks")
+	v.SetDefault("Activity.EventLimit", "999")
+	v.SetDefault("Activity.TopArtistsLimit", "999")
+	v.SetDefault("Activity.TopArtistsTitle", "Top Artists")
+	v.SetDefault("Activity.TopTracksLimit", "999")
+	v.SetDefault("Activity.TopTracksTitle", "Top Tracks")
+	v.SetDefault("Activity.TopReleasesLimit", "999")
+	v.SetDefault("Activity.TopReleasesTitle", "Top Releases")
+	v.SetDefault("Activity.TopMoviesLimit", "999")
+	v.SetDefault("Activity.TopMoviesTitle", "Top Movies")
 
 	// TODO apply as default
 	// v.SetDefault("Bucket.URLExpiration", "15m")
 
 	v.SetDefault("Client.CacheDir", ".httpcache")
-	v.SetDefault("Client.MaxAge", "720h") // 30 days in hours
+	v.SetDefault("Client.MaxAge", "720h") // 30 days
 	v.SetDefault("Client.UserAgent", userAgent())
 
 	v.SetDefault("Fanart.ProjectKey", "93ede276ba6208318031727060b697c8")
@@ -429,6 +439,7 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Video.SyncInterval", "1h")
 	v.SetDefault("Video.PosterSyncInterval", "24h")
 	v.SetDefault("Video.BackdropSyncInterval", "24h")
+	v.SetDefault("Video.DuplicateResolution", "largest")
 
 	// see https://musicbrainz.org/search (series)
 	v.SetDefault("Music.RadioSeries", []string{

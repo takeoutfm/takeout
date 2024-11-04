@@ -49,34 +49,10 @@ func (s Scrobble) PreferredArtist() string {
 	return s.Artist
 }
 
-// album, playlist or podcast listening event.
-type ActivityPlaylist struct {
-	gorm.Model
-	User    string    `gorm:"index:idx_playlist_user" json:"-"`
-	Title   string    // Album title, Station name, etc.
-	Creator string    // Artist name, Podcast author
-	Image   string    //
-	Ref     string    //
-	Date    time.Time `gorm:"uniqueIndex:idx_playlist_date"`
-}
-
 type Events struct {
 	MovieEvents   []MovieEvent
-	ReleaseEvents []ReleaseEvent
 	EpisodeEvents []EpisodeEvent
 	TrackEvents   []TrackEvent
-}
-
-type ReleaseEvent struct {
-	gorm.Model
-	User string    `gorm:"index:idx_release_user" json:"-"`
-	Date time.Time `gorm:"uniqueIndex:idx_release_date"`
-	RGID string
-	REID string
-}
-
-func (r *ReleaseEvent) IsValid() bool {
-	return r.User != "" && r.Date.IsZero() == false && r.RGID != "" && r.REID != ""
 }
 
 type MovieEvent struct {
@@ -116,23 +92,27 @@ func (e *EpisodeEvent) IsValid() bool {
 	return e.User != "" && e.Date.IsZero() == false && e.EID != ""
 }
 
-type ActivityRelease struct {
-	Date    time.Time
-	Release Release
+type ActivityArtist struct {
+	Artist Artist
+	Count  int
 }
 
-type ActivityMovie struct {
-	Date  time.Time
-	Movie Movie
+type ActivityRelease struct {
+	Release Release
+	Count   int
 }
 
 type ActivityTrack struct {
-	Date  time.Time
 	Track Track
 	Count int
 }
 
+type ActivityMovie struct {
+	Movie Movie
+	Count int
+}
+
 type ActivityEpisode struct {
-	Date    time.Time
 	Episode Episode
+	Count   int
 }

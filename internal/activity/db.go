@@ -28,7 +28,7 @@ import (
 
 type trackEvent struct {
 	TrackEvent
-	Count int
+	Count     int
 }
 
 func (a *Activity) openDB() (err error) {
@@ -44,7 +44,7 @@ func (a *Activity) openDB() (err error) {
 		return
 	}
 
-	a.db.AutoMigrate(&MovieEvent{}, &ReleaseEvent{}, &EpisodeEvent{}, &TrackEvent{})
+	a.db.AutoMigrate(&MovieEvent{}, &EpisodeEvent{}, &TrackEvent{})
 	return
 }
 
@@ -59,38 +59,33 @@ func (a *Activity) closeDB() {
 func (a *Activity) trackEventsFrom(user string, start, end time.Time, limit int) []trackEvent {
 	var events []trackEvent
 	a.db.Model(TrackEvent{}).
-		Select("*").
-		Where("user = ? and date >= ? and date <= ?", user, start, end).
+		Select("1 as count, *").
+		Where("user = ? and date between ? and ?", user, start, end).
 		Order("date desc").Limit(limit).Find(&events)
 	return events
 }
 
-func (a *Activity) popularTrackEventsFrom(user string, start, end time.Time, limit int) []trackEvent {
+func (a *Activity) topTrackEventsFrom(user string, start, end time.Time, limit int) []trackEvent {
 	var events []trackEvent
 	a.db.Model(TrackEvent{}).
-		Select("count(r_id) as count, *").Where("user = ? and date >= ? and date <= ?", user, start, end).
+		Select("count(r_id) as count, *").
+		Where("user = ? and date between ? and ?", user, start, end).
 		Group("r_id").
+		Having("max(date)").
 		Order("count(r_id) desc").Limit(limit).Find(&events)
 	return events
 }
 
 func (a *Activity) movieEventsFrom(user string, start, end time.Time, limit int) []MovieEvent {
 	var events []MovieEvent
-	a.db.Where("user = ? and date >= ? and date <= ?", user, start, end).
-		Order("date desc").Limit(limit).Find(&events)
-	return events
-}
-
-func (a *Activity) releaseEventsFrom(user string, start, end time.Time, limit int) []ReleaseEvent {
-	var events []ReleaseEvent
-	a.db.Where("user = ? and date >= ? and date <= ?", user, start, end).
+	a.db.Where("user = ? and date between ? and ?", user, start, end).
 		Order("date desc").Limit(limit).Find(&events)
 	return events
 }
 
 func (a *Activity) episodeEventsFrom(user string, start, end time.Time, limit int) []EpisodeEvent {
 	var events []EpisodeEvent
-	a.db.Where("user = ? and date >= ? and date <= ?", user, start, end).
+	a.db.Where("user = ? and date between ? and ?", user, start, end).
 		Order("date desc").Limit(limit).Find(&events)
 	return events
 }
@@ -109,13 +104,6 @@ func (a *Activity) episodeEvents(user string) []EpisodeEvent {
 	return events
 }
 
-func (a *Activity) releaseEvents(user string) []ReleaseEvent {
-	var releases []ReleaseEvent
-	a.db.Where("user = ?", user).
-		Order("date desc").Find(&releases)
-	return releases
-}
-
 func (a *Activity) trackEvents(user string) []TrackEvent {
 	var tracks []TrackEvent
 	a.db.Where("user = ?", user).
@@ -128,13 +116,6 @@ func (a *Activity) recentMovieEvents(user string, limit int) []MovieEvent {
 	a.db.Where("user = ?", user).
 		Order("date desc").Limit(limit).Find(&movies)
 	return movies
-}
-
-func (a *Activity) recentReleaseEvents(user string, limit int) []ReleaseEvent {
-	var releases []ReleaseEvent
-	a.db.Where("user = ?", user).
-		Order("date desc").Limit(limit).Find(&releases)
-	return releases
 }
 
 func (a *Activity) recentEpisodeEvents(user string, limit int) []EpisodeEvent {
@@ -160,19 +141,11 @@ func (a *Activity) deleteMovieEvents(user string) error {
 	return a.db.Unscoped().Where("user = ?", user).Delete(MovieEvent{}).Error
 }
 
-func (a *Activity) deleteReleaseEvents(user string) error {
-	return a.db.Unscoped().Where("user = ?", user).Delete(ReleaseEvent{}).Error
-}
-
 func (a *Activity) deleteEpisodeEvents(user string) error {
 	return a.db.Unscoped().Where("user = ?", user).Delete(EpisodeEvent{}).Error
 }
 
 func (a *Activity) createMovieEvent(m *MovieEvent) error {
-	return a.db.Create(m).Error
-}
-
-func (a *Activity) createReleaseEvent(m *ReleaseEvent) error {
 	return a.db.Create(m).Error
 }
 
@@ -192,10 +165,6 @@ func (a *Activity) updateEpisodeEvent(m *EpisodeEvent) error {
 	return a.db.Save(m).Error
 }
 
-func (a *Activity) updateReleaseEvent(m *ReleaseEvent) error {
-	return a.db.Save(m).Error
-}
-
 func (a *Activity) updateTrackEvent(t *TrackEvent) error {
 	return a.db.Save(t).Error
 }
@@ -205,10 +174,6 @@ func (a *Activity) deleteTrackEvent(t *TrackEvent) error {
 }
 
 func (a *Activity) deleteMovieEvent(m *MovieEvent) error {
-	return a.db.Unscoped().Delete(m).Error
-}
-
-func (a *Activity) deleteReleaseEvent(m *ReleaseEvent) error {
 	return a.db.Unscoped().Delete(m).Error
 }
 

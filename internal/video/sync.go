@@ -18,6 +18,7 @@
 package video
 
 import (
+	"errors"
 	"regexp"
 	"sort"
 	"strings"
@@ -55,6 +56,13 @@ const (
 	JobNovel      = "Novel"
 	JobScreenplay = "Screenplay"
 	JobStory      = "Story"
+
+	PreferLargest  = "largest"
+	PreferSmallest = "smallest"
+)
+
+var (
+	ErrDuplicateFound = errors.New("duplicate found")
 )
 
 func (v *Video) Sync() error {
@@ -130,7 +138,9 @@ func (v *Video) syncBucket(bucket bucket.Bucket, lastSync time.Time) error {
 				fields, err := v.syncMovie(client, r.ID,
 					o.Key, o.Size, o.ETag, o.LastModified)
 				if err != nil {
-					log.Println(err)
+					if err != ErrDuplicateFound {
+						log.Println(err)
+					}
 					continue
 				}
 				index[o.Key] = fields
@@ -151,6 +161,27 @@ func fuzzyName(name string) string {
 
 func (v *Video) syncMovie(client *tmdb.TMDB, tmid int,
 	key string, size int64, etag string, lastModified time.Time) (search.FieldMap, error) {
+
+	// check for duplicates and resolve
+	m, err := v.LookupTMID(tmid)
+	if err == nil {
+		switch v.config.Video.DuplicateResolution {
+		case PreferLargest:
+			if m.Size >= size {
+				// ignore the smaller movie
+				return nil, ErrDuplicateFound
+			}
+		case PreferSmallest:
+			if m.Size <= size {
+				// ignore the larger movie
+				return nil, ErrDuplicateFound
+			}
+		default:
+			log.Panicf("unsupported DuplicateResolution '%s'",
+				v.config.Video.DuplicateResolution)
+		}
+	}
+
 	v.deleteMovie(tmid)
 	v.deleteCast(tmid)
 	v.deleteCollections(tmid)
@@ -165,7 +196,7 @@ func (v *Video) syncMovie(client *tmdb.TMDB, tmid int,
 		return fields, err
 	}
 
-	m := Movie{
+	m = Movie{
 		TMID:             int64(detail.ID),
 		IMID:             detail.IMDB_ID,
 		Title:            detail.Title,

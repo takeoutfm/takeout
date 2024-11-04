@@ -42,6 +42,7 @@ var (
 	ErrInvalidContent       = errors.New("invalid content")
 	ErrMissingTitle         = errors.New("missing title")
 	ErrMissingParameter     = errors.New("missing required parameter")
+	ErrInvalidParameter     = errors.New("invalid parameter")
 )
 
 func serverErr(w http.ResponseWriter, err error) {

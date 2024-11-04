@@ -108,6 +108,12 @@ func (m *Music) ArtistLike(artist string) (Artist, error) {
 	return a, nil
 }
 
+func (m *Music) ArtistsForARIDs(arids []string) []Artist {
+	var artists []Artist
+	m.db.Where("ar_id in (?)", arids).Find(&artists)
+	return artists
+}
+
 // Compute and update TrackCount for each track with total number of
 // tracks in the associated release/album. This helps to match up
 // MusicBrainz releases with tracks, especially with non-exact
@@ -765,6 +771,12 @@ func (m *Music) ReleasesLike(name string) []Release {
 		" (select distinct(re_id) from tracks)", name).
 		Order("date").
 		Find(&releases)
+	return releases
+}
+
+func (m *Music) ReleasesForREIDs(reids []string) []Release {
+	var releases []Release
+	m.db.Where("re_id in (?)", reids).Find(&releases)
 	return releases
 }
 

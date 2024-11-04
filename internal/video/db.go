@@ -229,15 +229,6 @@ func (v *Video) Person(peid int) (Person, error) {
 	return person, err
 }
 
-func (v *Video) Movie(tmid int) (Movie, error) {
-	var movie Movie
-	err := v.db.Where("tm_id = ?", tmid).First(&movie).Error
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return Movie{}, errors.New("movie not found")
-	}
-	return movie, err
-}
-
 func (v *Video) UpdateMovie(m *Movie) error {
 	return v.db.Save(m).Error
 }

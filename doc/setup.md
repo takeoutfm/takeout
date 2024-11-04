@@ -16,7 +16,7 @@ Takeout can also access local media files without needing S3. This may be your
 best option for home media access. Using S3 in the cloud is recommended if you
 want to have your media securely available wherever you go.
 
-Please see [bucket.md](bucket.md) for further details on how you should
+Please see [media.md](media.md) for further details on how you should
 organize your media is S3 or locally. [rclone](https://rclone.org) is an
 excellent tool to manage S3 buckets from the command line. Once that's all
 done, proceed with the steps below.

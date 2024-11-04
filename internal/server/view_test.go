@@ -201,49 +201,19 @@ func TestOffsetView(t *testing.T) {
 	}
 }
 
-func TestActivityView(t *testing.T) {
+func TestTrackHistoryView(t *testing.T) {
 	ctx := NewTestContext(t)
-	view := ActivityView(ctx)
+	view := TrackHistoryView(ctx, time.Now(), time.Now())
 	if view == nil {
 		t.Fatal("expect view")
 	}
 }
 
-func TestActivityTracksView(t *testing.T) {
+func TestTrackStatsView(t *testing.T) {
 	ctx := NewTestContext(t)
 	start := time.Now().Add(-time.Hour * 24)
 	end := time.Now()
-	view := ActivityTracksView(ctx, start, end)
-	if view == nil {
-		t.Fatal("expect view")
-	}
-}
-
-func TestActivityPopularTracksView(t *testing.T) {
-	ctx := NewTestContext(t)
-	start := time.Now().Add(-time.Hour * 24)
-	end := time.Now()
-	view := ActivityPopularTracksView(ctx, start, end)
-	if view == nil {
-		t.Fatal("expect view")
-	}
-}
-
-func TestActivityMoviesView(t *testing.T) {
-	ctx := NewTestContext(t)
-	start := time.Now().Add(-time.Hour * 24)
-	end := time.Now()
-	view := ActivityMoviesView(ctx, start, end)
-	if view == nil {
-		t.Fatal("expect view")
-	}
-}
-
-func TestActivityReleasesView(t *testing.T) {
-	ctx := NewTestContext(t)
-	start := time.Now().Add(-time.Hour * 24)
-	end := time.Now()
-	view := ActivityReleasesView(ctx, start, end)
+	view := TrackStatsView(ctx, start, end)
 	if view == nil {
 		t.Fatal("expect view")
 	}
