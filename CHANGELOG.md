@@ -1,3 +1,7 @@
+## 0.21.1
+
+- fix top artists to use name not arid
+
 ## 0.21.0
 
 - Support smallest or largest movie duplicate resolution

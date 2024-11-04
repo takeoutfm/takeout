@@ -69,7 +69,7 @@ type ArtistsPage struct {
 // TODO artist detail
 // get detail for each artist - lifespan, url rel links, genres
 // json api:
-// http://musicbrainz.org/ws/2/artist/3798b104-01cb-484c-a3b0-56adc6399b80?inc=genres+url-rels&fmt=json
+// https://musicbrainz.org/ws/2/artist/3798b104-01cb-484c-a3b0-56adc6399b80?inc=genres+url-rels&fmt=json
 type LifeSpan struct {
 	Ended bool   `json:"ended"`
 	Begin string `json:"begin"`
@@ -646,7 +646,7 @@ func (m *MusicBrainz) doArtistSearch(query string, limit int, offset int) (Artis
 
 func (m *MusicBrainz) ArtistDetail(arid string) (Artist, error) {
 	var result Artist
-	url := fmt.Sprintf(`http://musicbrainz.org/ws/2/artist/%s?fmt=json&inc=genres+url-rels`,
+	url := fmt.Sprintf(`https://musicbrainz.org/ws/2/artist/%s?fmt=json&inc=genres+url-rels`,
 		arid)
 	err := m.client.GetJson(url, &result)
 	return result, err

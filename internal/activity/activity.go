@@ -127,13 +127,13 @@ func (a *Activity) resolveTrackEvent(e trackEvent, ctx Context) (ActivityTrack, 
 	if e.RID != "" {
 		track, err = m.FindTrack(e.RID)
 		if err != nil {
-			log.Println("track event %d, RID %s not found", e.ID, e.RID)
+			log.Printf("track event %d, RID %s not found\n", e.ID, e.RID)
 			return ActivityTrack{}, err
 		}
 	} else if e.ETag != "" {
 		track, err = m.LookupETag(e.ETag)
 		if err != nil {
-			log.Println("track event %d, etag %s not found", e.ID, e.ETag)
+			log.Printf("track event %d, etag %s not found\n", e.ID, e.ETag)
 			return ActivityTrack{}, err
 		}
 	}
@@ -220,16 +220,15 @@ func (a *Activity) groupByArtist(ctx Context, tracks []ActivityTrack) []Activity
 	// count tracks by artist (ARID)
 	counts := make(map[string]int)
 	for _, t := range tracks {
-		counts[t.Track.ARID]++
+		counts[t.Track.Artist]++
 	}
 
 	keys := sortByCount(counts)
 
-	// build artist map with ARID as key
-	list := ctx.Music().ArtistsForARIDs(keys)
+	list := ctx.Music().Artists()
 	artists := make(map[string]Artist)
 	for _, v := range list {
-		artists[v.ARID] = v
+		artists[v.Name] = v
 	}
 
 	result := make([]ActivityArtist, 0, len(keys))
