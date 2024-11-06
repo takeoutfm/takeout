@@ -214,13 +214,14 @@ type Offset struct {
 }
 
 type TrackStats struct {
-	Artists  []model.ActivityArtist
-	Releases []model.ActivityRelease
-	Tracks   []model.ActivityTrack
+	Artists    []model.ActivityArtist
+	Releases   []model.ActivityRelease
+	Tracks     []model.ActivityTrack
+	CoverSmall CoverFunc `json:"-"`
 }
 
 type TrackHistory struct {
-	Tracks   []model.ActivityTrack
+	Tracks []model.ActivityTrack
 }
 
 type Playlist struct {

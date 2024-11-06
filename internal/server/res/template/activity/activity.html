@@ -28,7 +28,7 @@
 	{{ range .Releases }}
 	<tr class="act-row">
 	  <td class="np-cover">
-	    <img class="mini-cover" src="{{call .CoverSmall .Release}}"/>
+	    <img class="mini-cover" src="{{call $.CoverSmall .Release}}"/>
 	  </td>
 	  <td><a data-link="{{.Release|link}}">{{ .Release.Name }}</a></td>
 	  <td class="act-count">{{ .Count }}</td>
@@ -42,7 +42,7 @@
 	{{ range .Tracks }}
 	<tr class="act-row">
 	  <td class="np-cover">
-	    <img class="mini-cover" src="{{call .CoverSmall .Track}}"/>
+	    <img class="mini-cover" src="{{call $.CoverSmall .Track}}"/>
 	  </td>
 	  <td>{{ .Track.Title }}</td>
 	  <td class="act-count">{{ .Count }}</td>
