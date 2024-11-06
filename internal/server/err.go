@@ -20,6 +20,8 @@ package server
 import (
 	"errors"
 	"net/http"
+
+	"github.com/takeoutfm/takeout/lib/log"
 )
 
 var (
@@ -47,7 +49,7 @@ var (
 
 func serverErr(w http.ResponseWriter, err error) {
 	if err != nil {
-		//log.Printf("got err %s\n", err)
+		log.Printf("got err %s\n", err)
 		handleErr(w, "bummer", http.StatusInternalServerError)
 	}
 }

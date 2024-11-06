@@ -58,9 +58,10 @@ func getTemplateFS(config *config.Config) fs.FS {
 func getTemplates(config *config.Config) *template.Template {
 	return template.Must(template.New("").Funcs(doFuncMap()).ParseFS(getTemplateFS(config),
 		"res/template/*.html",
+		"res/template/activity/*.html",
 		"res/template/music/*.html",
-		"res/template/video/*.html",
-		"res/template/podcast/*.html"))
+		"res/template/podcast/*.html",
+		"res/template/video/*.html"))
 }
 
 func doFuncMap() template.FuncMap {
@@ -319,7 +320,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 		result = EpisodeView(ctx, episode)
 		temp = "episode.html"
 	} else if v := r.URL.Query().Get("activity"); v != "" {
-		// v?activity=lastyear
+		// v?activity={lastyear}
 		d := date.NewInterval(time.Now(), v)
 		result = TrackStatsView(ctx, d)
 		temp = "activity.html"
