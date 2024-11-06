@@ -22,6 +22,7 @@ import (
 	_ "embed"
 	"fmt"
 	"html/template"
+	"time"
 
 	"io/fs"
 	"net/http"
@@ -317,6 +318,11 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 		episode, _ := p.LookupEpisode(id)
 		result = EpisodeView(ctx, episode)
 		temp = "episode.html"
+	} else if v := r.URL.Query().Get("activity"); v != "" {
+		// v?activity=lastyear
+		d := date.NewInterval(time.Now(), v)
+		result = TrackStatsView(ctx, d)
+		temp = "activity.html"
 	} else {
 		result = IndexView(ctx)
 		temp = "index.html"

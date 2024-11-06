@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/model"
 )
 
@@ -203,7 +204,8 @@ func TestOffsetView(t *testing.T) {
 
 func TestTrackHistoryView(t *testing.T) {
 	ctx := NewTestContext(t)
-	view := TrackHistoryView(ctx, time.Now(), time.Now())
+	dr := date.NewDateRange(time.Now(), time.Now())
+	view := TrackHistoryView(ctx, dr)
 	if view == nil {
 		t.Fatal("expect view")
 	}
@@ -213,7 +215,7 @@ func TestTrackStatsView(t *testing.T) {
 	ctx := NewTestContext(t)
 	start := time.Now().Add(-time.Hour * 24)
 	end := time.Now()
-	view := TrackStatsView(ctx, start, end)
+	view := TrackStatsView(ctx, date.NewDateRange(start, end))
 	if view == nil {
 		t.Fatal("expect view")
 	}

@@ -144,7 +144,7 @@ func (a *Activity) resolveTrackEvent(e trackEvent, ctx Context) (ActivityTrack, 
 }
 
 func (a *Activity) resolveMovieEvents(events []MovieEvent, ctx Context) []ActivityMovie {
-	var movies []ActivityMovie
+	movies := []ActivityMovie{}
 	for _, e := range events {
 		movie, err := a.resolveMovieEvent(e, ctx)
 		if err == nil {
@@ -155,7 +155,7 @@ func (a *Activity) resolveMovieEvents(events []MovieEvent, ctx Context) []Activi
 }
 
 func (a *Activity) resolveEpisodeEvents(events []EpisodeEvent, ctx Context) []ActivityEpisode {
-	var episodes []ActivityEpisode
+	episodes := []ActivityEpisode{}
 	for _, e := range events {
 		episode, err := a.resolveEpisodeEvent(e, ctx)
 		if err == nil {
@@ -166,7 +166,7 @@ func (a *Activity) resolveEpisodeEvents(events []EpisodeEvent, ctx Context) []Ac
 }
 
 func (a *Activity) resolveTrackEvents(events []trackEvent, ctx Context) []ActivityTrack {
-	var tracks []ActivityTrack
+	tracks := []ActivityTrack{}
 	for _, e := range events {
 		track, err := a.resolveTrackEvent(e, ctx)
 		if err == nil {

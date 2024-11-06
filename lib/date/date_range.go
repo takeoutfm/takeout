@@ -23,26 +23,55 @@ import (
 )
 
 type DateRange struct {
-	after  time.Time
-	before time.Time
+	Start time.Time
+	End   time.Time
 }
 
-func NewDateRange(a, b time.Time) *DateRange {
-	return &DateRange{after: a, before: b}
+func NewDateRange(a, b time.Time) DateRange {
+	return DateRange{Start: a, End: b}
 }
 
 func (d *DateRange) IsZero() bool {
-	return d.after.IsZero() && d.before.IsZero()
+	return d.Start.IsZero() && d.End.IsZero()
 }
 
 func (d *DateRange) AfterDate() string {
-	return YMD(d.after)
+	return YMD(d.Start)
 }
 
 func (d *DateRange) BeforeDate() string {
-	return YMD(d.before)
+	return YMD(d.End)
 }
 
 func YMD(t time.Time) string {
 	return fmt.Sprintf("%04d-%02d-%02d", t.Year(), t.Month(), t.Day())
+}
+
+func NewInterval(t time.Time, name string) DateRange {
+	var start, end time.Time
+	switch name {
+	case "recent":
+		start, end = StartOfDay(BackDays(t, 30)), EndOfDay(t)
+	case "today", "day":
+		start, end = StartOfDay(t), EndOfDay(t)
+	case "yesterday":
+		start, end = StartOfYesterday(t), EndOfYesterday(t)
+	case "week":
+		start, end = StartOfWeek(t), EndOfWeek(t)
+	case "month":
+		start, end = StartOfMonth(t), EndOfMonth(t)
+	case "year":
+		start, end = StartOfYear(t), EndOfYear(t)
+	case "lastweek":
+		start, end = StartOfPreviousWeek(t), EndOfPreviousWeek(t)
+	case "lastmonth":
+		start, end = StartOfPreviousMonth(t), EndOfPreviousMonth(t)
+	case "lastyear":
+		start, end = StartOfPreviousYear(t), EndOfPreviousYear(t)
+	case "all", "":
+		start, end = DayZero(), time.Now()
+	default:
+		start, end = DayZero(), DayZero()
+	}
+	return NewDateRange(start, end)
 }

@@ -1,0 +1,54 @@
+<div>
+  <h1>Activity</h1>
+  <div class="parent4">
+    <div>
+      <a data-link="/v?activity=lastweek" class="takeout">Last Week</a>
+      <a data-link="/v?activity=lastmonth" class="takeout">Last Month</a>
+      <a data-link="/v?activity=lastyear" class="takeout">Last Year</a>
+      <a data-link="/v?activity=year" class="takeout">Year</a>
+      <a data-link="/v?activity=month" class="takeout">Month</a>
+      <a data-link="/v?activity=all" class="takeout">All</a>
+    </div>
+  </div>
+  <div class="three-col-grid">
+    <div>
+      <h2>Artists</h2>
+      <table class="act-table">
+	{{ range .Artists }}
+	<tr class="act-row">
+	  <td><a data-link="{{.Artist|link}}">{{ .Artist.Name }}</a></td>
+	  <td class="act-count">{{ .Count }}</td>
+	</tr>
+	{{ end }}
+      </table>
+    </div>
+    <div>
+      <h2>Releases</h2>
+      <table class="act-table">
+	{{ range .Releases }}
+	<tr class="act-row">
+	  <td class="np-cover">
+	    <img class="mini-cover" src="{{call .CoverSmall .Release}}"/>
+	  </td>
+	  <td><a data-link="{{.Release|link}}">{{ .Release.Name }}</a></td>
+	  <td class="act-count">{{ .Count }}</td>
+	</tr>
+	{{ end }}
+      </table>
+    </div>
+    <div>
+      <h2>Tracks</h2>
+      <table class="act-table">
+	{{ range .Tracks }}
+	<tr class="act-row">
+	  <td class="np-cover">
+	    <img class="mini-cover" src="{{call .CoverSmall .Track}}"/>
+	  </td>
+	  <td>{{ .Track.Title }}</td>
+	  <td class="act-count">{{ .Count }}</td>
+	</tr>
+	{{ end }}
+      </table>
+    </div>
+  </div>
+</div>

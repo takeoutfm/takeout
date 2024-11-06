@@ -23,6 +23,7 @@ import (
 
 	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/takeoutfm/takeout/internal/video"
+	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/model"
 
 	. "github.com/takeoutfm/takeout/view"
@@ -363,17 +364,17 @@ func OffsetView(ctx Context, offset model.Offset) *Offset {
 	return view
 }
 
-func TrackStatsView(ctx Context, start, end time.Time) *TrackStats {
+func TrackStatsView(ctx Context, d date.DateRange) *TrackStats {
 	view := &TrackStats{}
-	view.Artists = ctx.Activity().TopArtists(ctx, start, end)
-	view.Releases = ctx.Activity().TopReleases(ctx, start, end)
-	view.Tracks = ctx.Activity().TopTracks(ctx, start, end)
+	view.Artists = ctx.Activity().TopArtists(ctx, d.Start, d.End)
+	view.Releases = ctx.Activity().TopReleases(ctx, d.Start, d.End)
+	view.Tracks = ctx.Activity().TopTracks(ctx, d.Start, d.End)
 	return view
 }
 
-func TrackHistoryView(ctx Context, start, end time.Time) *TrackHistory {
+func TrackHistoryView(ctx Context, d date.DateRange) *TrackHistory {
 	view := &TrackHistory{}
-	view.Tracks = ctx.Activity().Tracks(ctx, start, end)
+	view.Tracks = ctx.Activity().Tracks(ctx, d.Start, d.End)
 	return view
 }
 

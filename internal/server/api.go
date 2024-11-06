@@ -1089,41 +1089,18 @@ func clientTime(r *http.Request) time.Time {
 	return t
 }
 
-func startEnd(r *http.Request) (time.Time, time.Time) {
-	var start, end time.Time
+func dateRange(r *http.Request) date.DateRange {
+	var interval date.DateRange
 
 	t := clientTime(r)
 	res := r.PathValue(ParamRes)
 
 	if res != "" {
-		switch res {
-		case "recent":
-			start, end = date.StartOfDay(date.BackDays(t, 30)), date.EndOfDay(t)
-		case "today", "day":
-			start, end = date.StartOfDay(t), date.EndOfDay(t)
-		case "yesterday":
-			start, end = date.StartOfYesterday(t), date.EndOfYesterday(t)
-		case "week":
-			start, end = date.StartOfWeek(t), date.EndOfWeek(t)
-		case "month":
-			start, end = date.StartOfMonth(t), date.EndOfMonth(t)
-		case "year":
-			start, end = date.StartOfYear(t), date.EndOfYear(t)
-		case "lastweek":
-			start, end = date.StartOfPreviousWeek(t), date.EndOfPreviousWeek(t)
-		case "lastmonth":
-			start, end = date.StartOfPreviousMonth(t), date.EndOfPreviousMonth(t)
-		case "lastyear":
-			start, end = date.StartOfPreviousYear(t), date.EndOfPreviousYear(t)
-		case "all", "":
-			start, end = date.DayZero(), time.Now()
-		default:
-			return date.DayZero(), date.DayZero()
-		}
+		interval = date.NewInterval(t, res)
 	} else {
 		// default to the past year
-		start = time.Now()
-		end = date.BackYear(start)
+		start := time.Now()
+		end := date.BackYear(start)
 
 		s := r.URL.Query().Get(QueryStart)
 		if s != "" {
@@ -1133,31 +1110,33 @@ func startEnd(r *http.Request) (time.Time, time.Time) {
 		if e != "" {
 			end = date.EndOfDay(date.ParseDate(e))
 		}
+
+		interval = date.NewDateRange(start, end)
 	}
 
-	return start, end
+	return interval
 }
 
 // /api/activity/tracks/yesterday
 func apiActivityTrackHistory(w http.ResponseWriter, r *http.Request) {
-	start, end := startEnd(r)
-	if end.IsZero() {
+	d := dateRange(r)
+	if d.End.IsZero() {
 		badRequest(w, ErrInvalidParameter)
 		return
 	}
 	ctx := contextValue(r)
-	apiView(w, r, TrackHistoryView(ctx, start, end))
+	apiView(w, r, TrackHistoryView(ctx, d))
 }
 
 // /api/activity/tracks/yesterday/stats
 func apiActivityTrackStats(w http.ResponseWriter, r *http.Request) {
-	start, end := startEnd(r)
-	if end.IsZero() {
+	d := dateRange(r)
+	if d.End.IsZero() {
 		badRequest(w, ErrInvalidParameter)
 		return
 	}
 	ctx := contextValue(r)
-	apiView(w, r, TrackStatsView(ctx, start, end))
+	apiView(w, r, TrackStatsView(ctx, d))
 }
 
 func doRedirect(w http.ResponseWriter, r *http.Request, u *url.URL, code int) {

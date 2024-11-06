@@ -24,7 +24,7 @@ import (
 
 func TestNewDateRange(t *testing.T) {
 	v := NewDateRange(time.Now(), time.Now())
-	if v.after.IsZero() || v.before.IsZero() {
+	if v.Start.IsZero() || v.End.IsZero() {
 		t.Error("expect non-zero time")
 	}
 }

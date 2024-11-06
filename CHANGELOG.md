@@ -1,3 +1,8 @@
+## 0.21.2
+
+- return non-nil slices when resolving events
+- added html view for activity
+
 ## 0.21.1
 
 - fix top artists to use name not arid

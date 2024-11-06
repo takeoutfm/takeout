@@ -139,3 +139,32 @@ body {
 .clickable {
     cursor: pointer;
 }
+
+.act-table {
+    width: 100%;
+}
+
+.act-row {
+    height: 33px;
+}
+
+.act-count {
+    text-align: right;
+    width: 20%;
+}
+
+.three-col-grid {
+    display: block;
+}
+
+.three-col-grid > * {
+    padding: 1rem;
+}
+
+@media (min-width:768px) {
+    .three-col-grid {
+        display: grid;
+        grid-auto-rows: 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
