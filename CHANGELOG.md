@@ -1,7 +1,8 @@
-## 0.21.2, 0.21.3
+## 0.21.2, 0.21.x
 
 - return non-nil slices when resolving events
 - added html view for activity
+- more fixes to html
 
 ## 0.21.1
 
