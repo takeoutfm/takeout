@@ -63,7 +63,8 @@ Takeout.music = (function() {
     	    'album': e.getAttribute("data-album"),
     	    'title': e.getAttribute("data-title"),
     	    'image': e.getAttribute("data-image"),
-    	    'location': e.getAttribute("data-location")
+            'location': e.getAttribute("data-location"),
+            'etag': e.getAttribute("data-etag")
     	};
     };
 
@@ -131,6 +132,9 @@ Takeout.music = (function() {
 	    updateTitle(track);
 	    current = track;
 	    audioTag().load();
+	    // TODO: should call updateActivity with same listen rules as the
+	    // app (4 mins or 50%)
+	    updateActivity(track);
 	    if (audioCtx.state === "suspended") {
 		audioCtx.resume().then(function() {
 		    playNow(track);
@@ -165,7 +169,8 @@ Takeout.music = (function() {
 		    album: t.album,
 		    title: t.title,
 		    image: t.image,
-		    location: t.location[0]
+		    location: t.location[0],
+		    etag: t.identifier[0]
 		});
 	    });
 	}
@@ -476,6 +481,47 @@ Takeout.music = (function() {
 	playIndex = data.index;
 	playPos = data.position;
 	updatePlaylist();
+    }
+
+    const updateActivity = function(track) {
+	if (track['etag'] == null) {
+	    return;
+	}
+	if (track['_activity'] != null) {
+	    return;
+	}
+
+	// server wants ISO date string
+	// 2006-01-02T15:04:05Z07:00
+	let date = new Date();
+
+	let events = [];
+	events.push({
+	    Date: date.toISOString(),
+	    ETag: track['etag'],
+	});
+
+	let body = {
+	    TrackEvents: events
+	};
+
+	doActivity(body).then(function() {
+	    track['_activity'] = 'sent';
+	});
+    };
+
+    const doActivity = function(body) {
+	return fetch("/api/activity", {
+	    credentials: 'include',
+	    method: 'POST',
+	    body: JSON.stringify(body),
+	    headers: {
+		"Content-type": "application/json"
+	    }}).then(response => {
+		if (response.status != 204) {
+		    console.log("doActivity " + response);
+		}
+	    });
     }
 
     const playClick = function() {

@@ -504,9 +504,9 @@ func (m *Music) assignTrackReleaseDates() (bool, error) {
 				log.Printf("track media not found: %s\n", t.REID)
 				return false, err
 			}
-			for _, v := range media {
-				fmt.Printf("track media: %d, %d\n", v.Position, v.TrackCount)
-			}
+			// for _, v := range media {
+			// 	fmt.Printf("track media: %d, %d\n", v.Position, v.TrackCount)
+			// }
 			mediaCache[t.REID] = media
 		}
 

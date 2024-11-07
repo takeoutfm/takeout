@@ -190,13 +190,13 @@ func createConfig(opts *viper.Viper) error {
 	imageCacheDir := filepath.Join(cacheDir, "imagecache")
 	httpCacheDir := filepath.Join(cacheDir, "httpcache")
 	keysDir := filepath.Join(takeoutDir, "keys")
-	mediaDir := takeoutDir
+	mediaBaseDir := takeoutDir
 
 	// create server configuration
 	writeConfig(takeoutDir, "takeout.yaml", []string{
 		"Server:",
 		"  DataDir: " + takeoutDir,
-		"  MediaDir: " + mediaDir,
+		"  MediaDir: " + mediaBaseDir,
 		"  ImageClient:",
 		"    CacheDir: " + imageCacheDir,
 		"",
@@ -216,8 +216,8 @@ func createConfig(opts *viper.Viper) error {
 
 	// create media configuration
 	mediaName := opts.GetString("name")
-	myMediaDir := filepath.Join(mediaDir, mediaName)
-	os.MkdirAll(myMediaDir, 0700)
+	mediaDir := filepath.Join(mediaBaseDir, mediaName)
+	os.MkdirAll(mediaDir, 0700)
 	config := []string{"Buckets:"}
 
 	doit := func(mediaType, uri string) {
@@ -252,7 +252,7 @@ func createConfig(opts *viper.Viper) error {
 	config = append(config,
 		"Client:",
 		"  CacheDir: "+httpCacheDir, "")
-	writeConfig(myMediaDir, "config.yaml", config)
+	writeConfig(mediaDir, "config.yaml", config)
 
 	return nil
 }
@@ -284,7 +284,7 @@ func init() {
 	runCmd.Flags().String("password", "", "Takeout password")
 	runCmd.Flags().String("dir", "/var/lib/takeout", "Takeout directory")
 	runCmd.Flags().String("cache", "/var/cache/takeout", "Takeout cache directory")
-	runCmd.Flags().String("name", "mymedia", "media name")
+	runCmd.Flags().String("name", "media", "media name")
 	runCmd.Flags().String("music", "", "dir or s3://bucket/prefix")
 	runCmd.Flags().String("video", "", "dir or s3://bucket/prefix")
 	runCmd.Flags().String("endpoint", os.Getenv("AWS_ENDPOINT_URL"), "s3 endpoint (host name)")
