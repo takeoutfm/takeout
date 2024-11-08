@@ -1,8 +1,9 @@
-## 0.21.2, 0.21.x
+## 0.21.2+
 
 - return non-nil slices when resolving events
 - added html view for activity
 - more fixes to html
+- call fix missing in music covers job
 
 ## 0.21.1
 

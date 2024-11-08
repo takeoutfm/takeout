@@ -148,6 +148,7 @@ func syncMusicCovers(config *config.Config, mediaConfig *config.Config) error {
 		return err
 	}
 	defer m.Close()
+	m.SyncMissingArtwork()
 	m.SyncCovers(config.NewGetterWith(config.Server.ImageClient))
 	return nil
 }

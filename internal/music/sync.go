@@ -162,7 +162,7 @@ func (m *Music) Sync(options SyncOptions) {
 		if options.Artwork {
 			log.CheckError(m.syncArtworkFor(artists))
 			if len(artists) > 0 {
-				log.CheckError(m.syncMissingArtwork())
+				log.CheckError(m.SyncMissingArtwork())
 			}
 		}
 		if options.Index {
@@ -974,7 +974,7 @@ func (m *Music) syncSimilarFor(artists []Artist) error {
 	return nil
 }
 
-func (m *Music) syncMissingArtwork() error {
+func (m *Music) SyncMissingArtwork() error {
 	return m.checkMissingArtwork()
 }
 
