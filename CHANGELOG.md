@@ -1,3 +1,7 @@
+## 0.22.1
+
+- increment artist/release counts by track count not one
+
 ## 0.22.0
 
 - add totals and counts to track stats

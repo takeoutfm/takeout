@@ -214,7 +214,7 @@ func (a *Activity) groupByArtist(ctx Context, tracks []ActivityTrack) []Activity
 	// count tracks by artist (ARID)
 	counts := make(map[string]int)
 	for _, t := range tracks {
-		counts[t.Track.Artist]++
+		counts[t.Track.Artist] += t.Count
 	}
 
 	keys := sortByCount(counts)
@@ -239,7 +239,7 @@ func (a *Activity) groupByRelease(ctx Context, tracks []ActivityTrack) []Activit
 	// count tracks by release (REID)
 	counts := make(map[string]int)
 	for _, t := range tracks {
-		counts[t.Track.REID]++
+		counts[t.Track.REID] += t.Count
 	}
 
 	keys := sortByCount(counts)
