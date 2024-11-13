@@ -370,12 +370,12 @@ func TrackStatsView(ctx Context, d date.DateRange) *TrackStats {
 	view.Tracks = tracks
 	view.Artists = ctx.Activity().TopArtists(ctx, tracks)
 	view.Releases = ctx.Activity().TopReleases(ctx, tracks)
-	view.TotalArtists = len(view.Artists)
-	view.TotalReleases = len(view.Releases)
-	view.TotalTracks = len(view.Tracks)
-	view.ArtistCount = int(ctx.Music().ArtistCount())
-	view.ReleaseCount = int(ctx.Music().ReleaseCount())
-	view.TrackCount = int(ctx.Music().TrackCount())
+	view.ArtistCount = len(view.Artists)
+	view.ReleaseCount = len(view.Releases)
+	view.TrackCount = len(tracks)
+	for _, t := range tracks {
+		view.ListenCount += t.Count
+	}
 	view.CoverSmall = ctx.Music().CoverSmall
 	return view
 }

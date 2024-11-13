@@ -72,7 +72,13 @@ func NewInterval(t time.Time, name string) DateRange {
 	case "all", "":
 		start, end = DayZero(), time.Now()
 	default:
-		start, end = DayZero(), DayZero()
+		d := ParseDate(name)
+		if d.IsZero() {
+			start, end = d, d
+		} else {
+			start = StartOfDay(d)
+			end = EndOfDay(d)
+		}
 	}
 	return NewDateRange(start, end)
 }

@@ -63,7 +63,8 @@ func musicStats(cfg *config.Config) error {
 		return err
 	}
 	defer m.Close()
-	fmt.Printf("artists %d\n", len(m.Artists()))
+	fmt.Printf("artists %d\n", m.ArtistCount())
+	fmt.Printf("releases %d\n", m.ReleaseCount())
 	fmt.Printf("tracks %d\n", m.TrackCount())
 	fmt.Printf("unmatched tracks %d\n", len(m.UnmatchedTracks()))
 	return nil

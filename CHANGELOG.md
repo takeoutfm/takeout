@@ -1,3 +1,7 @@
+## 0.22.2
+
+- small activity updates
+
 ## 0.22.1
 
 - increment artist/release counts by track count not one

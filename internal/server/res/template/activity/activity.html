@@ -13,7 +13,7 @@
   </div>
   <div class="three-col-grid">
     <div>
-      <h2>Artists</h2>
+      <h2>Artists ({{ .ArtistCount }})</h2>
       <table class="act-table" style="border: 1px solid; border-spacing: 15px;">
 	{{ range .Artists }}
 	<tr class="act-row">
@@ -24,7 +24,7 @@
       </table>
     </div>
     <div>
-      <h2>Releases</h2>
+      <h2>Releases ({{ .ReleaseCount }})</h2>
       <table class="act-table" style="border: 1px solid; border-spacing: 15px;">
 	{{ range .Releases }}
 	<tr class="act-row">
@@ -41,7 +41,7 @@
       </table>
     </div>
     <div>
-      <h2>Tracks</h2>
+      <h2>Tracks ({{ .TrackCount }}) &#8226 Listens ({{ .ListenCount }})</h2>
       <table class="act-table" style="border: 1px solid; border-spacing: 15px;">
 	{{ range .Tracks }}
 	<tr class="act-row">

@@ -217,12 +217,10 @@ type TrackStats struct {
 	Artists       []model.ActivityArtist
 	Releases      []model.ActivityRelease
 	Tracks        []model.ActivityTrack
-	TotalTracks   int
-	TotalArtists  int
-	TotalReleases int
 	ArtistCount   int
 	ReleaseCount  int
 	TrackCount    int
+	ListenCount   int
 	CoverSmall    CoverFunc `json:"-"`
 }
 
