@@ -1,3 +1,9 @@
+## 0.22.0
+
+- add totals and counts to track stats
+- order top activity by date also
+- adjust activity track limits
+
 ## 0.21.2+
 
 - return non-nil slices when resolving events

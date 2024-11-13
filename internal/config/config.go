@@ -24,7 +24,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -186,18 +185,19 @@ type ProgressConfig struct {
 }
 
 type ActivityConfig struct {
-	DB                DatabaseConfig
-	RecentMoviesTitle string
-	RecentTracksTitle string
-	EventLimit        int
-	TopArtistsLimit   int
-	TopArtistsTitle   string
-	TopTracksLimit    int
-	TopTracksTitle    string
-	TopReleasesLimit  int
-	TopReleasesTitle  string
-	TopMoviesLimit    int
-	TopMoviesTitle    string
+	DB                  DatabaseConfig
+	RecentMoviesTitle   string
+	RecentTracksTitle   string
+	TrackLimit          int
+	MovieLimit          int
+	TopArtistsLimit     int
+	TopArtistsTitle     string
+	TopTracksLimit      int
+	TopTracksTitle      string
+	TopReleasesLimit    int
+	TopReleasesTitle    string
+	TopMoviesLimit      int
+	TopMoviesTitle      string
 }
 
 type RecommendConfig struct {
@@ -294,7 +294,7 @@ func (mc *MusicConfig) UserArtistID(name string) (string, bool) {
 }
 
 func readJsonStringMap(file string, m *map[string]string) (err error) {
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		return
 	}
@@ -354,10 +354,11 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Activity.DB.Logger", "default")
 	v.SetDefault("Activity.RecentMoviesTitle", "Recently Watched")
 	v.SetDefault("Activity.RecentTracksTitle", "Recently Played")
-	v.SetDefault("Activity.EventLimit", "999")
+	v.SetDefault("Activity.MovieLimit", "999")
+	v.SetDefault("Activity.TrackLimit", "999")
 	v.SetDefault("Activity.TopArtistsLimit", "999")
 	v.SetDefault("Activity.TopArtistsTitle", "Top Artists")
-	v.SetDefault("Activity.TopTracksLimit", "999")
+	v.SetDefault("Activity.TopTracksLimit", "9999") // year of track listens
 	v.SetDefault("Activity.TopTracksTitle", "Top Tracks")
 	v.SetDefault("Activity.TopReleasesLimit", "999")
 	v.SetDefault("Activity.TopReleasesTitle", "Top Releases")

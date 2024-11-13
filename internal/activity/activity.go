@@ -89,7 +89,7 @@ func (a *Activity) DeleteUserEvents(ctx Context) error {
 	return nil
 }
 
-func (a *Activity) resolveMovieEvent(e MovieEvent, ctx Context) (ActivityMovie, error) {
+func (a *Activity) resolveMovieEvent(ctx Context, e MovieEvent) (ActivityMovie, error) {
 	v := ctx.Video()
 	if e.IMID == "" {
 		return ActivityMovie{}, ErrMovieNotFound
@@ -119,7 +119,7 @@ func (a *Activity) resolveEpisodeEvent(e EpisodeEvent, ctx Context) (ActivityEpi
 	return result, nil
 }
 
-func (a *Activity) resolveTrackEvent(e trackEvent, ctx Context) (ActivityTrack, error) {
+func (a *Activity) resolveTrackEvent(ctx Context, e trackEvent) (ActivityTrack, error) {
 	m := ctx.Music()
 
 	var err error
@@ -143,10 +143,10 @@ func (a *Activity) resolveTrackEvent(e trackEvent, ctx Context) (ActivityTrack, 
 	return result, nil
 }
 
-func (a *Activity) resolveMovieEvents(events []MovieEvent, ctx Context) []ActivityMovie {
+func (a *Activity) resolveMovieEvents(ctx Context, events []MovieEvent) []ActivityMovie {
 	movies := []ActivityMovie{}
 	for _, e := range events {
-		movie, err := a.resolveMovieEvent(e, ctx)
+		movie, err := a.resolveMovieEvent(ctx, e)
 		if err == nil {
 			movies = append(movies, movie)
 		}
@@ -165,10 +165,10 @@ func (a *Activity) resolveEpisodeEvents(events []EpisodeEvent, ctx Context) []Ac
 	return episodes
 }
 
-func (a *Activity) resolveTrackEvents(events []trackEvent, ctx Context) []ActivityTrack {
+func (a *Activity) resolveTrackEvents(ctx Context, events []trackEvent) []ActivityTrack {
 	tracks := []ActivityTrack{}
 	for _, e := range events {
-		track, err := a.resolveTrackEvent(e, ctx)
+		track, err := a.resolveTrackEvent(ctx, e)
 		if err == nil {
 			tracks = append(tracks, track)
 		}
@@ -178,26 +178,23 @@ func (a *Activity) resolveTrackEvents(events []trackEvent, ctx Context) []Activi
 
 func (a *Activity) Movies(ctx Context, start, end time.Time) []ActivityMovie {
 	user := ctx.User()
-	events := a.movieEventsFrom(user.Name, start, end, a.config.Activity.EventLimit)
-	return a.resolveMovieEvents(events, ctx)
+	events := a.movieEventsFrom(user.Name, start, end, a.config.Activity.MovieLimit)
+	return a.resolveMovieEvents(ctx, events)
 }
 
 func (a *Activity) Tracks(ctx Context, start, end time.Time) []ActivityTrack {
 	user := ctx.User()
-	events := a.trackEventsFrom(user.Name, start, end, a.config.Activity.EventLimit)
-	return a.resolveTrackEvents(events, ctx)
+	events := a.trackEventsFrom(user.Name, start, end, a.config.Activity.TrackLimit)
+	return a.resolveTrackEvents(ctx, events)
 }
 
 func (a *Activity) TopTracks(ctx Context, start, end time.Time) []ActivityTrack {
 	user := ctx.User()
 	events := a.topTrackEventsFrom(user.Name, start, end, a.config.Activity.TopTracksLimit)
-	return a.resolveTrackEvents(events, ctx)
+	return a.resolveTrackEvents(ctx, events)
 }
 
-func (a *Activity) TopArtists(ctx Context, start, end time.Time) []ActivityArtist {
-	user := ctx.User()
-	events := a.trackEventsFrom(user.Name, start, end, a.config.Activity.TopTracksLimit)
-	tracks := a.resolveTrackEvents(events, ctx)
+func (a *Activity) TopArtists(ctx Context, tracks []ActivityTrack) []ActivityArtist {
 	result := a.groupByArtist(ctx, tracks)
 	if len(result) > a.config.Activity.TopArtistsLimit {
 		result = result[:a.config.Activity.TopArtistsLimit]
@@ -205,10 +202,7 @@ func (a *Activity) TopArtists(ctx Context, start, end time.Time) []ActivityArtis
 	return result
 }
 
-func (a *Activity) TopReleases(ctx Context, start, end time.Time) []ActivityRelease {
-	user := ctx.User()
-	events := a.trackEventsFrom(user.Name, start, end, a.config.Activity.TopTracksLimit)
-	tracks := a.resolveTrackEvents(events, ctx)
+func (a *Activity) TopReleases(ctx Context, tracks []ActivityTrack) []ActivityRelease {
 	result := a.groupByRelease(ctx, tracks)
 	if len(result) > a.config.Activity.TopReleasesLimit {
 		result = result[:a.config.Activity.TopReleasesLimit]
@@ -331,18 +325,6 @@ func (a *Activity) CreateEvents(ctx Context, events Events) error {
 		}
 		// TODO ignore invalid events
 	}
-
-	// for _, e := range events.ReleaseEvents {
-	// 	e.User = user.Name
-	// 	e.Date = e.Date.Local()
-	// 	if e.IsValid() {
-	// 		err := a.createReleaseEvent(&e)
-	// 		if err != nil {
-	// 			return err
-	// 		}
-	// 	}
-	// 	// TODO ignore invalid events
-	// }
 
 	for _, e := range events.EpisodeEvents {
 		e.User = user.Name

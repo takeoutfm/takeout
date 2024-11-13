@@ -51,16 +51,17 @@ func NewInterval(t time.Time, name string) DateRange {
 	var start, end time.Time
 	switch name {
 	case "recent":
+		// TODO make 30 configurable
 		start, end = StartOfDay(BackDays(t, 30)), EndOfDay(t)
 	case "today", "day":
 		start, end = StartOfDay(t), EndOfDay(t)
 	case "yesterday":
 		start, end = StartOfYesterday(t), EndOfYesterday(t)
-	case "week":
+	case "week", "thisweek":
 		start, end = StartOfWeek(t), EndOfWeek(t)
-	case "month":
+	case "month", "thismonth":
 		start, end = StartOfMonth(t), EndOfMonth(t)
-	case "year":
+	case "year", "thisyear":
 		start, end = StartOfYear(t), EndOfYear(t)
 	case "lastweek":
 		start, end = StartOfPreviousWeek(t), EndOfPreviousWeek(t)

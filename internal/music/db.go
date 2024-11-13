@@ -1092,6 +1092,18 @@ func (m *Music) TrackCount() int64 {
 	return count
 }
 
+func (m *Music) ArtistCount() int64 {
+	var count int64
+	m.db.Model(&Artist{}).Count(&count)
+	return count
+}
+
+func (m *Music) ReleaseCount() int64 {
+	var count int64
+	m.db.Model(&Track{}).Distinct("re_id").Count(&count)
+	return count
+}
+
 func (m *Music) searchTracks(title, artist, album string) []Track {
 	var tracks []Track
 	var tx *gorm.DB

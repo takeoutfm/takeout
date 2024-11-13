@@ -214,10 +214,16 @@ type Offset struct {
 }
 
 type TrackStats struct {
-	Artists    []model.ActivityArtist
-	Releases   []model.ActivityRelease
-	Tracks     []model.ActivityTrack
-	CoverSmall CoverFunc `json:"-"`
+	Artists       []model.ActivityArtist
+	Releases      []model.ActivityRelease
+	Tracks        []model.ActivityTrack
+	TotalTracks   int
+	TotalArtists  int
+	TotalReleases int
+	ArtistCount   int
+	ReleaseCount  int
+	TrackCount    int
+	CoverSmall    CoverFunc `json:"-"`
 }
 
 type TrackHistory struct {

@@ -72,7 +72,7 @@ func (a *Activity) topTrackEventsFrom(user string, start, end time.Time, limit i
 		Where("user = ? and date between ? and ?", user, start, end).
 		Group("r_id").
 		Having("max(date)").
-		Order("count(r_id) desc").Limit(limit).Find(&events)
+		Order("count(r_id) desc, date desc").Limit(limit).Find(&events)
 	return events
 }
 

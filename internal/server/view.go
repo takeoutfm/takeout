@@ -366,9 +366,16 @@ func OffsetView(ctx Context, offset model.Offset) *Offset {
 
 func TrackStatsView(ctx Context, d date.DateRange) *TrackStats {
 	view := &TrackStats{}
-	view.Artists = ctx.Activity().TopArtists(ctx, d.Start, d.End)
-	view.Releases = ctx.Activity().TopReleases(ctx, d.Start, d.End)
-	view.Tracks = ctx.Activity().TopTracks(ctx, d.Start, d.End)
+	tracks := ctx.Activity().TopTracks(ctx, d.Start, d.End)
+	view.Tracks = tracks
+	view.Artists = ctx.Activity().TopArtists(ctx, tracks)
+	view.Releases = ctx.Activity().TopReleases(ctx, tracks)
+	view.TotalArtists = len(view.Artists)
+	view.TotalReleases = len(view.Releases)
+	view.TotalTracks = len(view.Tracks)
+	view.ArtistCount = int(ctx.Music().ArtistCount())
+	view.ReleaseCount = int(ctx.Music().ReleaseCount())
+	view.TrackCount = int(ctx.Music().TrackCount())
 	view.CoverSmall = ctx.Music().CoverSmall
 	return view
 }
