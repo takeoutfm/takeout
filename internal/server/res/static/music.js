@@ -492,14 +492,14 @@ Takeout.music = (function() {
     // pos is player position in seconds
     // p is percentage complete 0.0..1.0
     const updateActivity = function() {
-	if (current.has('etag') == false) {
+	if (current['etag'] == null) {
 	    return;
 	}
 
 	let now = new Date();
 	let etag = current['etag'];
 	let key = etag;
-	if (listens.has(key)) {
+	if (listens[key] != null) {
 	    let then = listens[key];
 	    let d = (now.getTime() - then.getTime()) / 1000;
 	    if (d < 900) {
