@@ -1,3 +1,8 @@
+## 0.22.3
+
+- return errors for invalid activity events
+- use listen rules in web player
+
 ## 0.22.2
 
 - small activity updates

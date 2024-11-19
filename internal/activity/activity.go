@@ -36,11 +36,14 @@ import (
 )
 
 var (
-	ErrInvalidUser     = errors.New("invalid user")
-	ErrTrackNotFound   = errors.New("track not found")
-	ErrMovieNotFound   = errors.New("movie not found")
-	ErrEpisodeNotFound = errors.New("episode not found")
-	ErrReleaseNotFound = errors.New("release not found")
+	ErrInvalidUser         = errors.New("invalid user")
+	ErrInvalidTrackEvent   = errors.New("invalid track event")
+	ErrInvalidEpisodeEvent = errors.New("invalid episode event")
+	ErrInvalidMovieEvent   = errors.New("invalid movie event")
+	ErrTrackNotFound       = errors.New("track not found")
+	ErrMovieNotFound       = errors.New("movie not found")
+	ErrEpisodeNotFound     = errors.New("episode not found")
+	ErrReleaseNotFound     = errors.New("release not found")
 )
 
 type Context interface {
@@ -317,25 +320,25 @@ func (a *Activity) CreateEvents(ctx Context, events Events) error {
 			e.IMID = video.IMID
 			e.TMID = strconv.FormatInt(video.TMID, 10)
 		}
-		if e.IsValid() {
-			err := a.createMovieEvent(&e)
-			if err != nil {
-				return err
-			}
+		if e.IsValid() == false {
+			return ErrInvalidMovieEvent
 		}
-		// TODO ignore invalid events
+		err := a.createMovieEvent(&e)
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, e := range events.EpisodeEvents {
 		e.User = user.Name
 		e.Date = e.Date.Local()
-		if e.IsValid() {
-			err := a.createEpisodeEvent(&e)
-			if err != nil {
-				return err
-			}
+		if e.IsValid() == false {
+			return ErrInvalidEpisodeEvent
 		}
-		// TODO ignore invalid events
+		err := a.createEpisodeEvent(&e)
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, e := range events.TrackEvents {
@@ -350,13 +353,13 @@ func (a *Activity) CreateEvents(ctx Context, events Events) error {
 			e.RID = track.RID
 			e.RGID = track.RGID
 		}
-		if e.IsValid() {
-			err := a.createTrackEvent(&e)
-			if err != nil {
-				return err
-			}
+		if e.IsValid() == false {
+			return ErrInvalidTrackEvent
 		}
-		// TODO ignore invalid events
+		err := a.createTrackEvent(&e)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

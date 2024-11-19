@@ -26,6 +26,7 @@ Takeout.music = (function() {
     let playing = false;
     let userPlay = false;
     let current = {};
+    let listens = {};
     let audioCtx = null;
 
     const clearTracks = function() {
@@ -132,9 +133,6 @@ Takeout.music = (function() {
 	    updateTitle(track);
 	    current = track;
 	    audioTag().load();
-	    // TODO: should call updateActivity with same listen rules as the
-	    // app (4 mins or 50%)
-	    updateActivity(track);
 	    if (audioCtx.state === "suspended") {
 		audioCtx.resume().then(function() {
 		    playNow(track);
@@ -264,6 +262,9 @@ Takeout.music = (function() {
 	let p = (audio.currentTime / audio.duration);
 	//document.getElementById("np-progress").setAttribute("value", p);
 	document.getElementById("progress").style.width = p*100 + "%";
+	if (considerListened(playPos, p)) {
+	    updateActivity();
+	}
     };
 
     const audioEnded = function() {
@@ -483,22 +484,36 @@ Takeout.music = (function() {
 	updatePlaylist();
     }
 
-    const updateActivity = function(track) {
-	if (track['etag'] == null) {
-	    return;
-	}
-	if (track['_activity'] != null) {
+    const considerListened = function(pos, p) {
+	// 4 mins or 50%
+	return pos >= 240 || p >= 0.5;
+    }
+
+    // pos is player position in seconds
+    // p is percentage complete 0.0..1.0
+    const updateActivity = function() {
+	if (current.has('etag') == false) {
 	    return;
 	}
 
-	// server wants ISO date string
-	// 2006-01-02T15:04:05Z07:00
-	let date = new Date();
+	let now = new Date();
+	let etag = current['etag'];
+	let key = etag;
+	if (listens.has(key)) {
+	    let then = listens[key];
+	    let d = (now.getTime() - then.getTime()) / 1000;
+	    if (d < 900) {
+		// wait 15 mins (60*15) until sending again
+		return;
+	    }
+	}
 
 	let events = [];
 	events.push({
-	    Date: date.toISOString(),
-	    ETag: track['etag'],
+	    // server wants ISO date string
+	    // 2006-01-02T15:04:05Z07:00
+	    Date: now.toISOString(),
+	    ETag: etag,
 	});
 
 	let body = {
@@ -506,7 +521,7 @@ Takeout.music = (function() {
 	};
 
 	doActivity(body).then(function() {
-	    track['_activity'] = 'sent';
+	    listens[key] = now;
 	});
     };
 
