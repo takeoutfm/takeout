@@ -215,7 +215,7 @@ func TestTrackStatsView(t *testing.T) {
 	ctx := NewTestContext(t)
 	start := time.Now().Add(-time.Hour * 24)
 	end := time.Now()
-	view := TrackStatsView(ctx, date.NewDateRange(start, end))
+	view := TrackStatsView(ctx, "recent", date.NewDateRange(start, end))
 	if view == nil {
 		t.Fatal("expect view")
 	}

@@ -11,6 +11,9 @@
     <a data-link="/v?activity=yesterday" class="takeout">Yesterday</a>
     <a data-link="/v?activity=today" class="takeout">Today</a>
   </div>
+  <div style="display: flex; justify-content: center; border: 1px solid; margin: 1em; padding: 1em;">
+    <canvas style="max-height: 30vh;" id="chart" data-chart="{{.|chart}}"></canvas>
+  </div>
   <div class="three-col-grid">
     <div>
       <h2>Artists ({{ .ArtistCount }})</h2>

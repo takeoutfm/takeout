@@ -116,3 +116,8 @@ type ActivityEpisode struct {
 	Episode Episode
 	Count   int
 }
+
+type ActivityCount struct {
+	Date  time.Time
+	Count int
+}

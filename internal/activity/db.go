@@ -21,6 +21,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/takeoutfm/takeout/lib/date"
 	. "github.com/takeoutfm/takeout/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -74,6 +75,36 @@ func (a *Activity) topTrackEventsFrom(user string, start, end time.Time, limit i
 		Having("max(date)").
 		Order("count(r_id) desc, date desc").Limit(limit).Find(&events)
 	return events
+}
+
+// select count(date(date)), date(date) from track_events group by date(date) order by date desc;
+func (a *Activity) trackDayCountsFrom(user string, start, end time.Time, limit int) []ActivityCount {
+	var counts []ActivityCount
+	a.db.Model(TrackEvent{}).
+		Select("count(date(date)) as count, date").
+		Where("user = ? and date between ? and ?", user, start, end).
+		Group("date(date)").
+		Order("date desc").Limit(limit).Find(&counts)
+	for i := range len(counts) {
+		// clean up the time
+		counts[i].Date = date.StartOfDay(counts[i].Date)
+	}
+	return counts
+}
+
+// select count(1), strftime("%Y-%m-01", date) from track_events group by strftime("%Y-%m", date) order by date desc;
+func (a *Activity) trackMonthCountsFrom(user string, start, end time.Time, limit int) []ActivityCount {
+	var counts []ActivityCount
+	a.db.Model(TrackEvent{}).
+		Select("count(1) as count, date").
+		Where("user = ? and date between ? and ?", user, start, end).
+		Group("strftime('%Y-%m', date)").
+		Order("date desc").Limit(limit).Find(&counts)
+	for i := range len(counts) {
+		// clean up the date
+		counts[i].Date = date.StartOfMonth(counts[i].Date)
+	}
+	return counts
 }
 
 func (a *Activity) movieEventsFrom(user string, start, end time.Time, limit int) []MovieEvent {

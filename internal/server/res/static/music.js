@@ -548,6 +548,55 @@ Takeout.music = (function() {
 	}
     };
 
+    const checkCharts = function() {
+	const charts = document.querySelectorAll("[data-chart]");
+	const backgroundColors = [
+	    'rgba(255, 205, 86, 0.2)',
+	    'rgba(75, 192, 192, 0.2)',
+	    'rgba(54, 162, 235, 0.2)',
+	    'rgba(153, 102, 255, 0.2)',
+	    'rgba(201, 203, 207, 0.2)',
+	    'rgba(255, 99, 132, 0.2)',
+	    'rgba(255, 159, 64, 0.2)',
+	];
+	const borderColors = [
+	    'rgb(255, 205, 86)',
+	    'rgb(75, 192, 192)',
+	    'rgb(54, 162, 235)',
+	    'rgb(153, 102, 255)',
+	    'rgb(201, 203, 207)',
+	    'rgb(255, 99, 132)',
+	    'rgb(255, 159, 64)',
+	];
+	var i = 0;
+	charts.forEach(e => {
+	    fetch(e.getAttribute("data-chart"), {credentials: 'include'}).
+		then(response => {
+		    return response.json();
+		}).
+		then(data => {
+		    const datasets = [];
+		    data.Charts.forEach(chart => {
+			datasets.push({
+			    label: chart.Label,
+			    data: chart.Counts,
+			    backgroundColor: backgroundColors[i],
+			    borderColor: borderColors[i],
+			    borderWidth: 1,
+			});
+			i++;
+		    });
+		    new Chart(e, {
+			      type: 'bar',
+			      data: {
+				  labels: data.Labels,
+				  datasets: datasets,
+			      }
+		    });
+		});
+	});
+    };
+
     const checkLinks = function() {
 	const refs = document.querySelectorAll("[data-playlist]");
 	refs.forEach(e => {
@@ -621,6 +670,7 @@ Takeout.music = (function() {
     		document.getElementById("main").innerHTML = text;
 		document.getElementById("main").style.display = "block";
 		checkLinks();
+		checkCharts();
     	    });
 	return false;
     };
@@ -658,6 +708,7 @@ Takeout.music = (function() {
 
 	window.onload = function() {
 	    checkLinks();
+	    checkCharts();
 	    registerEvents();
 	    setupSearch();
 	    forward("/v?home=1");

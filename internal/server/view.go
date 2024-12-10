@@ -364,9 +364,10 @@ func OffsetView(ctx Context, offset model.Offset) *Offset {
 	return view
 }
 
-func TrackStatsView(ctx Context, d date.DateRange) *TrackStats {
+func TrackStatsView(ctx Context, interval string, d date.DateRange) *TrackStats {
 	view := &TrackStats{}
 	tracks := ctx.Activity().TopTracks(ctx, d.Start, d.End)
+	view.Interval = interval
 	view.Tracks = tracks
 	view.Artists = ctx.Activity().TopArtists(ctx, tracks)
 	view.Releases = ctx.Activity().TopReleases(ctx, tracks)
@@ -384,6 +385,14 @@ func TrackHistoryView(ctx Context, d date.DateRange) *TrackHistory {
 	view := &TrackHistory{}
 	view.Tracks = ctx.Activity().Tracks(ctx, d.Start, d.End)
 	return view
+}
+
+func TrackDayCountsView(ctx Context, d date.DateRange) *TrackCounts {
+	return ctx.Activity().TrackDayCounts(ctx, d)
+}
+
+func TrackMonthCountsView(ctx Context, d date.DateRange) *TrackCounts {
+	return ctx.Activity().TrackMonthCounts(ctx, d)
 }
 
 // func ActivityMoviesView(ctx Context, start, end time.Time) *ActivityMovies {

@@ -1130,13 +1130,41 @@ func apiActivityTrackHistory(w http.ResponseWriter, r *http.Request) {
 
 // /api/activity/tracks/yesterday/stats
 func apiActivityTrackStats(w http.ResponseWriter, r *http.Request) {
+	res := r.PathValue(ParamRes)
 	d := dateRange(r)
 	if d.End.IsZero() {
 		badRequest(w, ErrInvalidParameter)
 		return
 	}
 	ctx := contextValue(r)
-	apiView(w, r, TrackStatsView(ctx, d))
+	apiView(w, r, TrackStatsView(ctx, res, d))
+}
+
+// /api/activity/tracks/yesterday/counts
+func apiActivityTrackCounts(w http.ResponseWriter, r *http.Request) {
+	d := dateRange(r)
+	if d.End.IsZero() {
+		badRequest(w, ErrInvalidParameter)
+		return
+	}
+	ctx := contextValue(r)
+	if d.IsYear() {
+		apiView(w, r, TrackMonthCountsView(ctx, d))
+	} else {
+		apiView(w, r, TrackDayCountsView(ctx, d))
+	}
+}
+
+// /api/activity/tracks/yesterday/chart
+func apiActivityTrackChart(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	d := dateRange(r)
+	if d.End.IsZero() {
+		badRequest(w, ErrInvalidParameter)
+		return
+	}
+	charts := ctx.Activity().BuildChart(ctx, d)
+	apiView(w, r, charts)
 }
 
 func doRedirect(w http.ResponseWriter, r *http.Request, u *url.URL, code int) {

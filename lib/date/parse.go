@@ -211,6 +211,20 @@ func BackYear(t time.Time) time.Time {
 	return t
 }
 
+func NextDay(t time.Time) time.Time {
+	t = t.AddDate(0, 0, 1)
+	return t
+}
+
+func NextMonth(t time.Time) time.Time {
+	t = t.AddDate(0, 1, 0)
+	return t
+}
+
+func BeforeOrEqual(t1, t2 time.Time) bool {
+	return t1.Before(t2) || t1.Equal(t2)
+}
+
 // 1996-12-19T16:39:57-08:00[America/Los_Angeles]
 func ParseRFC9557(value string) (time.Time, error) {
 	s := strings.Index(value, "[")

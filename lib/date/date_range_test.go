@@ -59,3 +59,120 @@ func TestYMD(t *testing.T) {
 		t.Errorf("expect yyyy-mm-dd got %s", YMD(now))
 	}
 }
+
+func TestDayCount(t *testing.T) {
+	l := time.Now().Location()
+
+	d := NewDateRange(
+		time.Date(2024, time.December, 1, 10, 15, 59, 0, l),
+		time.Date(2024, time.December, 9, 10, 15, 59, 0, l))
+	if d.DayCount() != 9 {
+		t.Error("expect 9 days")
+	}
+
+	d = NewDateRange(
+		time.Date(2024, time.December, 1, 0, 0, 0, 0, l),
+		time.Date(2024, time.December, 1, 23, 59, 59, 0, l))
+	if d.DayCount() != 1 {
+		t.Error("expeect 1 days")
+	}
+
+	d = NewDateRange(
+		time.Date(2024, time.December, 1, 0, 0, 0, 0, l),
+		time.Date(2025, time.January, 1, 23, 59, 59, 0, l))
+	if d.DayCount() != 32 {
+		t.Error("expeect 32 days")
+	}
+}
+
+func TestIsDay(t *testing.T) {
+	start := StartOfDay(time.Now())
+	end := EndOfDay(start)
+
+	d := NewDateRange(start, end)
+	if d.IsDay() == false {
+		t.Error("expect is day")
+	}
+
+	d = NewDateRange(time.Now(), time.Now().AddDate(0, 0, 1))
+	if d.IsDay() {
+		t.Error("expect not a day")
+	}
+}
+
+func TestIsWeek(t *testing.T) {
+	start := StartOfWeek(time.Now())
+	end := EndOfWeek(start)
+
+	d := NewDateRange(start, end)
+	if d.IsWeek() == false {
+		t.Error("expect is week")
+	}
+
+	d = NewDateRange(time.Now(), time.Now().AddDate(0, 0, 6))
+	if d.IsWeek() {
+		t.Error("expect not a week")
+	}
+}
+
+func TestIsMonth(t *testing.T) {
+	start := StartOfMonth(time.Now())
+	end := EndOfMonth(start)
+
+	d := NewDateRange(start, end)
+	if d.IsMonth() == false {
+		t.Error("expect is month")
+	}
+
+	d = NewDateRange(time.Now(), time.Now().AddDate(0, 0, 20))
+	if d.IsMonth() {
+		t.Error("expect not a month")
+	}
+}
+
+func TestIsYear(t *testing.T) {
+	start := StartOfYear(time.Now())
+	end := EndOfYear(start)
+
+	d := NewDateRange(start, end)
+	if d.IsYear() == false {
+		t.Error("expect is year")
+	}
+
+	d = NewDateRange(time.Now(), time.Now().AddDate(0, 0, 200))
+	if d.IsYear() {
+		t.Error("expect not a year")
+	}
+}
+
+func TestMonthCount(t *testing.T) {
+	l := time.Now().Location()
+
+	d := NewDateRange(
+		time.Date(2024, time.December, 1, 10, 15, 59, 0, l),
+		time.Date(2024, time.December, 31, 10, 15, 59, 0, l))
+	if d.MonthCount() != 1 {
+		t.Error("expect 1 month")
+	}
+
+	d = NewDateRange(
+		time.Date(2024, time.January, 1, 10, 15, 59, 0, l),
+		time.Date(2024, time.December, 31, 10, 15, 59, 0, l))
+	if d.MonthCount() != 12 {
+		t.Error("expect 12 months")
+	}
+
+	d = NewDateRange(
+		time.Date(2023, time.January, 1, 10, 15, 59, 0, l),
+		time.Date(2024, time.January, 31, 10, 15, 59, 0, l))
+	if d.MonthCount() != 13 {
+		t.Error("expect 13 months")
+	}
+
+	d = NewDateRange(
+		time.Date(2023, time.January, 1, 10, 15, 59, 0, l),
+		time.Date(2024, time.June, 1, 10, 15, 59, 0, l))
+	if d.MonthCount() != 18 {
+		t.Error("expect 18 months")
+	}
+}

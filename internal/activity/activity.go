@@ -26,6 +26,7 @@ import (
 	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/takeoutfm/takeout/internal/podcast"
 	"github.com/takeoutfm/takeout/internal/video"
+	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/lib/log"
 	. "github.com/takeoutfm/takeout/model"
 	"gorm.io/gorm"
@@ -191,6 +192,60 @@ func (a *Activity) Tracks(ctx Context, start, end time.Time) []ActivityTrack {
 	return a.resolveTrackEvents(ctx, events)
 }
 
+func (a *Activity) TrackCountsByDay(ctx Context, start, end time.Time) []ActivityCount {
+	user := ctx.User()
+	counts := a.trackDayCountsFrom(user.Name, start, end, a.config.Activity.TrackLimit)
+	return fillGaps(start, end, counts)
+}
+
+func (a *Activity) TrackCountsByMonth(ctx Context, start, end time.Time) []ActivityCount {
+	user := ctx.User()
+	counts := a.trackMonthCountsFrom(user.Name, start, end, a.config.Activity.TrackLimit)
+	return fillMonthGaps(start, end, counts)
+}
+
+func fillGaps(start, end time.Time, counts []ActivityCount) []ActivityCount {
+	// map of ymd -> count
+	m := make(map[string]ActivityCount)
+	for _, c := range counts {
+		m[date.YMD(c.Date)] = c
+	}
+
+	dr := date.NewDateRange(start, end)
+	result := make([]ActivityCount, dr.DayCount())
+	for i, d := 0, start; date.BeforeOrEqual(d, end); i, d = i+1, date.NextDay(d) {
+		v, ok := m[date.YMD(d)]
+		if ok {
+			result[i] = v
+		} else {
+			result[i] = ActivityCount{Date: date.StartOfDay(d)}
+		}
+	}
+
+	return result
+}
+
+func fillMonthGaps(start, end time.Time, counts []ActivityCount) []ActivityCount {
+	// map of ym1 -> count
+	m := make(map[string]ActivityCount)
+	for _, c := range counts {
+		m[date.YM1(c.Date)] = c
+	}
+
+	dr := date.NewDateRange(date.StartOfMonth(start), date.EndOfMonth(end))
+	result := make([]ActivityCount, dr.MonthCount())
+	for i, d := 0, dr.Start; date.BeforeOrEqual(d, dr.End); i, d = i+1, date.NextMonth(d) {
+		v, ok := m[date.YM1(d)]
+		if ok {
+			result[i] = v
+		} else {
+			result[i] = ActivityCount{Date: date.StartOfMonth(d)}
+		}
+	}
+
+	return result
+}
+
 func (a *Activity) TopTracks(ctx Context, start, end time.Time) []ActivityTrack {
 	user := ctx.User()
 	events := a.topTrackEventsFrom(user.Name, start, end, a.config.Activity.TopTracksLimit)
@@ -212,6 +267,8 @@ func (a *Activity) TopReleases(ctx Context, tracks []ActivityTrack) []ActivityRe
 	}
 	return result
 }
+
+// select count(strftime("%Y-%m-%d", date)), strftime("%Y-%m-%d", date) from track_events group by strftime("%Y-%m-%d", date) order by date desc limit 10000;
 
 func (a *Activity) groupByArtist(ctx Context, tracks []ActivityTrack) []ActivityArtist {
 	// count tracks by artist (ARID)

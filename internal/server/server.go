@@ -303,9 +303,12 @@ func Serve(config *config.Config) error {
 	// activity
 	// /activity/tracks/yesterday
 	// /activity/tracks/lastweek/stats
+	// /activity/tracks/lastweek/chart
 	mux.Handle("POST /api/activity", accessTokenAuthHandler(ctx, apiActivityPost))
 	mux.Handle("GET /api/activity/tracks/{res}", accessTokenAuthHandler(ctx, apiActivityTrackHistory))
 	mux.Handle("GET /api/activity/tracks/{res}/stats", accessTokenAuthHandler(ctx, apiActivityTrackStats))
+	mux.Handle("GET /api/activity/tracks/{res}/counts", accessTokenAuthHandler(ctx, apiActivityTrackCounts))
+	mux.Handle("GET /api/activity/tracks/{res}/chart", accessTokenAuthHandler(ctx, apiActivityTrackChart))
 
 	// TODO - disable for now, work in progress
 	// settings

@@ -71,6 +71,14 @@ func doFuncMap() template.FuncMap {
 		"unescapeHTML": func(s string) template.HTML {
 			return template.HTML(s)
 		},
+		"chart": func(o interface{}) string {
+			var link string
+			switch o.(type) {
+			case *view.TrackStats:
+				link = fmt.Sprintf("/api/activity/tracks/%s/chart", o.(*view.TrackStats).Interval)
+			}
+			return link
+		},
 		"link": func(o interface{}) string {
 			var link string
 			switch o.(type) {
@@ -322,7 +330,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	} else if v := r.URL.Query().Get("activity"); v != "" {
 		// v?activity={lastyear}
 		d := date.NewInterval(time.Now(), v)
-		result = TrackStatsView(ctx, d)
+		result = TrackStatsView(ctx, v, d)
 		temp = "activity.html"
 	} else {
 		result = IndexView(ctx)

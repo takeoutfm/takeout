@@ -19,6 +19,8 @@
 package view
 
 import (
+	"time"
+
 	"github.com/takeoutfm/takeout/model"
 )
 
@@ -214,18 +216,59 @@ type Offset struct {
 }
 
 type TrackStats struct {
-	Artists       []model.ActivityArtist
-	Releases      []model.ActivityRelease
-	Tracks        []model.ActivityTrack
-	ArtistCount   int
-	ReleaseCount  int
-	TrackCount    int
-	ListenCount   int
-	CoverSmall    CoverFunc `json:"-"`
+	Interval     string
+	Artists      []model.ActivityArtist
+	Releases     []model.ActivityRelease
+	Tracks       []model.ActivityTrack
+	ArtistCount  int
+	ReleaseCount int
+	TrackCount   int
+	ListenCount  int
+	CoverSmall   CoverFunc `json:"-"`
 }
 
 type TrackHistory struct {
 	Tracks []model.ActivityTrack
+}
+
+type TrackCounts struct {
+	Counts []model.ActivityCount
+}
+
+func (c *TrackCounts) Total() int {
+	total := 0
+	for _, v := range c.Counts {
+		total += v.Count
+	}
+	return total
+}
+
+func (c *TrackCounts) Values() []int {
+	result := make([]int, len(c.Counts))
+	for i, v := range c.Counts {
+		result[i] = v.Count
+	}
+	return result
+}
+
+type TrackCharts struct {
+	Labels []string
+	Charts []TrackChart
+}
+
+func (c *TrackCharts) AddCounts(label string, counts *TrackCounts) {
+	c.Charts = append(c.Charts, TrackChart{
+		Label:       label,
+		ListenCount: counts.Total(),
+		Counts:      counts.Values(),
+	})
+}
+
+type TrackChart struct {
+	Start       time.Time
+	ListenCount int
+	Label       string
+	Counts      []int
 }
 
 type Playlist struct {

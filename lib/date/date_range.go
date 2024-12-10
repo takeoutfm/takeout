@@ -43,8 +43,64 @@ func (d *DateRange) BeforeDate() string {
 	return YMD(d.End)
 }
 
+func (d *DateRange) DayCount() int {
+	diff := d.End.Sub(d.Start)
+	return int(diff.Hours() / 24) + 1;
+}
+
+func (d *DateRange) MonthCount() int {
+	count := 0
+	start, end := StartOfMonth(d.Start), EndOfMonth(d.End)
+	for i := start; BeforeOrEqual(i, end); i = NextMonth(i) {
+		count++
+	}
+	return count
+}
+
+func (d *DateRange) IsDay() bool {
+	y1, m1, d1 := d.Start.Date()
+	y2, m2, d2 := d.End.Date()
+	return y1 == y2 && m1 == m2 && d1 == d2
+}
+
+func (d *DateRange) IsWeek() bool {
+	return d.Start.Weekday() == time.Monday && d.End.Weekday() == time.Sunday && d.DayCount() == 7
+}
+
+func (d *DateRange) IsMonth() bool {
+	y1, m1, d1 := d.Start.Date()
+	y2, m2, d2 := d.End.Date()
+	return d1 == 1 && EndOfMonth(d.Start).Day() == d2 && y1 == y2 && m1 == m2
+}
+
+func (d *DateRange) IsYear() bool {
+	y1, m1, d1 := d.Start.Date()
+	y2, m2, d2 := d.End.Date()
+	return d1 == 1 && EndOfYear(d.Start).Day() == d2 && y1 == y2 && m1 == 1 && m2 == 12
+}
+
+func (d *DateRange) PreviousDay() DateRange {
+	return NewDateRange(StartOfYesterday(d.Start), EndOfYesterday(d.End))
+}
+
+func (d *DateRange) PreviousWeek() DateRange {
+	return NewDateRange(StartOfPreviousWeek(d.Start), EndOfPreviousWeek(d.End))
+}
+
+func (d *DateRange) PreviousMonth() DateRange {
+	return NewDateRange(StartOfPreviousMonth(d.Start), EndOfPreviousMonth(d.End))
+}
+
+func (d *DateRange) PreviousYear() DateRange {
+	return NewDateRange(StartOfPreviousYear(d.Start), EndOfPreviousYear(d.End))
+}
+
 func YMD(t time.Time) string {
 	return fmt.Sprintf("%04d-%02d-%02d", t.Year(), t.Month(), t.Day())
+}
+
+func YM1(t time.Time) string {
+	return fmt.Sprintf("%04d-%02d-01", t.Year(), t.Month())
 }
 
 func NewInterval(t time.Time, name string) DateRange {
