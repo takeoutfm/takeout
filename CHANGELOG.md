@@ -1,3 +1,7 @@
+## 0.23.1 
+
+- fixes for year and month charts
+
 ## 0.23.0
 
 - charts

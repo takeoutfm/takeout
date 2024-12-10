@@ -46,7 +46,7 @@ func (a *Activity) BuildChart(ctx Context, d date.DateRange) *view.TrackCharts {
 		}
 		charts.AddCounts(
 			fmt.Sprintf("%d", prev.Start.Year()),
-			a.TrackDayCounts(ctx, prev))
+			a.TrackMonthCounts(ctx, prev))
 		charts.AddCounts(
 			fmt.Sprintf("%d", d.Start.Year()),
 			a.TrackMonthCounts(ctx, d))

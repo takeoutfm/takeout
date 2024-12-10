@@ -29,7 +29,7 @@ import (
 
 type trackEvent struct {
 	TrackEvent
-	Count     int
+	Count int
 }
 
 func (a *Activity) openDB() (err error) {
@@ -94,12 +94,19 @@ func (a *Activity) trackDayCountsFrom(user string, start, end time.Time, limit i
 
 // select count(1), strftime("%Y-%m-01", date) from track_events group by strftime("%Y-%m", date) order by date desc;
 func (a *Activity) trackMonthCountsFrom(user string, start, end time.Time, limit int) []ActivityCount {
-	var counts []ActivityCount
+	var results []map[string]interface{}
 	a.db.Model(TrackEvent{}).
-		Select("count(1) as count, date").
+		Select("count(date) as count, strftime('%Y-%m-01', date) as ymd").
 		Where("user = ? and date between ? and ?", user, start, end).
 		Group("strftime('%Y-%m', date)").
-		Order("date desc").Limit(limit).Find(&counts)
+		Order("date desc").Limit(limit).Find(&results)
+	counts := make([]ActivityCount, len(results))
+	for i, v := range results {
+		counts[i] = ActivityCount{
+			Count: int(v["count"].(int64)),
+			Date:  date.ParseDate(v["ymd"].(string)),
+		}
+	}
 	for i := range len(counts) {
 		// clean up the date
 		counts[i].Date = date.StartOfMonth(counts[i].Date)
