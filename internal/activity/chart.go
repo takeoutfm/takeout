@@ -63,10 +63,14 @@ func (a *Activity) BuildChart(ctx Context, d date.DateRange) *view.TrackCharts {
 		prev := d.PreviousWeek()
 		charts.Labels = []string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
 		charts.AddCounts(
-			fmt.Sprintf("%s %d", prev.Start.Month().String(), prev.Start.Day()),
+			fmt.Sprintf("%s %d - %s %d",
+				prev.Start.Month().String()[:3], prev.Start.Day(),
+				prev.End.Month().String()[:3], prev.End.Day()),
 			a.TrackDayCounts(ctx, prev))
 		charts.AddCounts(
-			fmt.Sprintf("%s %d", d.Start.Month().String(), d.Start.Day()),
+			fmt.Sprintf("%s %d - %s %d",
+				d.Start.Month().String()[:3], d.Start.Day(),
+				d.End.Month().String()[:3], d.End.Day()),
 			a.TrackDayCounts(ctx, d))
 	} else if d.IsMonth() {
 		prev := d.PreviousMonth()
@@ -76,10 +80,10 @@ func (a *Activity) BuildChart(ctx Context, d date.DateRange) *view.TrackCharts {
 		}
 		charts.Labels = labels
 		charts.AddCounts(
-			fmt.Sprintf("%s %d", prev.Start.Month().String(), prev.Start.Year()),
+			fmt.Sprintf("%s %d", prev.Start.Month().String()[:3], prev.Start.Year()),
 			a.TrackDayCounts(ctx, prev))
 		charts.AddCounts(
-			fmt.Sprintf("%s %d", d.Start.Month().String(), d.Start.Year()),
+			fmt.Sprintf("%s %d", d.Start.Month().String()[:3], d.Start.Year()),
 			a.TrackDayCounts(ctx, d))
 	} else {
 		days := d.DayCount()

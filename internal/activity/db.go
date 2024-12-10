@@ -79,12 +79,19 @@ func (a *Activity) topTrackEventsFrom(user string, start, end time.Time, limit i
 
 // select count(date(date)), date(date) from track_events group by date(date) order by date desc;
 func (a *Activity) trackDayCountsFrom(user string, start, end time.Time, limit int) []ActivityCount {
-	var counts []ActivityCount
+	var results []map[string]interface{}
 	a.db.Model(TrackEvent{}).
-		Select("count(date(date)) as count, date").
+		Select("count(strftime('%Y-%m-%d', date)) as count, strftime('%Y-%m-%d', date) as ymd").
 		Where("user = ? and date between ? and ?", user, start, end).
-		Group("date(date)").
-		Order("date desc").Limit(limit).Find(&counts)
+		Group("strftime('%Y-%m-%d', date)").
+		Order("date desc").Limit(limit).Find(&results)
+	counts := make([]ActivityCount, len(results))
+	for i, v := range results {
+		counts[i] = ActivityCount{
+			Count: int(v["count"].(int64)),
+			Date:  date.ParseDate(v["ymd"].(string)),
+		}
+	}
 	for i := range len(counts) {
 		// clean up the time
 		counts[i].Date = date.StartOfDay(counts[i].Date)

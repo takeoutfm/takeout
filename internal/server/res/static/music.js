@@ -548,27 +548,14 @@ Takeout.music = (function() {
 	}
     };
 
+    const barColors = [
+	'#3DDC84',
+	'#f7f6e4',
+	'#9BD0F5',
+    ];
+
     const checkCharts = function() {
 	const charts = document.querySelectorAll("[data-chart]");
-	const backgroundColors = [
-	    'rgba(255, 205, 86, 0.2)',
-	    'rgba(75, 192, 192, 0.2)',
-	    'rgba(54, 162, 235, 0.2)',
-	    'rgba(153, 102, 255, 0.2)',
-	    'rgba(201, 203, 207, 0.2)',
-	    'rgba(255, 99, 132, 0.2)',
-	    'rgba(255, 159, 64, 0.2)',
-	];
-	const borderColors = [
-	    'rgb(255, 205, 86)',
-	    'rgb(75, 192, 192)',
-	    'rgb(54, 162, 235)',
-	    'rgb(153, 102, 255)',
-	    'rgb(201, 203, 207)',
-	    'rgb(255, 99, 132)',
-	    'rgb(255, 159, 64)',
-	];
-	var i = 0;
 	charts.forEach(e => {
 	    fetch(e.getAttribute("data-chart"), {credentials: 'include'}).
 		then(response => {
@@ -580,12 +567,15 @@ Takeout.music = (function() {
 			datasets.push({
 			    label: chart.Label,
 			    data: chart.Counts,
-			    backgroundColor: backgroundColors[i],
-			    borderColor: borderColors[i],
-			    borderWidth: 1,
 			});
-			i++;
 		    });
+		    let c = 0;
+		    for (let i = datasets.length - 1; i >= 0; i--) {
+			datasets[i].backgroundColor = barColors[c++];
+			if (c >= barColors.length) {
+			    c = 0;
+			}
+		    }
 		    new Chart(e, {
 			      type: 'bar',
 			      data: {
