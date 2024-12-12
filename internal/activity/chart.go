@@ -76,7 +76,7 @@ func (a *Activity) BuildChart(ctx Context, d date.DateRange) *view.TrackCharts {
 		prev := d.PreviousMonth()
 		labels := make([]string, 31)
 		for i := range 31 {
-			labels[i] = fmt.Sprintf("%02d", i)
+			labels[i] = fmt.Sprintf("%02d", i+1)
 		}
 		charts.Labels = labels
 		charts.AddCounts(

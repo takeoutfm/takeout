@@ -157,21 +157,22 @@ func EndOfMonth(t time.Time) time.Time {
 }
 
 func StartOfPreviousMonth(t time.Time) time.Time {
-	t = StartOfDay(BackMonth(t))
-	for t.Day() != 1 {
+	_, m, _ := t.Date()
+	m = t.Month()
+	for t.Month() == m {
 		t = t.AddDate(0, 0, -1)
 	}
-	return t
+	t = StartOfMonth(t)
+	return StartOfDay(t)
 }
 
 func EndOfPreviousMonth(t time.Time) time.Time {
-	t = EndOfDay(BackMonth(t))
-	m := t.Month()
+	_, m, _ := t.Date()
+	m = t.Month()
 	for t.Month() == m {
-		t = t.AddDate(0, 0, 1)
+		t = t.AddDate(0, 0, -1)
 	}
-	t = t.AddDate(0, 0, -1)
-	return t
+	return EndOfDay(t)
 }
 
 func StartOfYear(t time.Time) time.Time {
@@ -198,11 +199,6 @@ func BackDay(t time.Time) time.Time {
 
 func BackDays(t time.Time, days int) time.Time {
 	t = t.AddDate(0, 0, -days)
-	return t
-}
-
-func BackMonth(t time.Time) time.Time {
-	t = t.AddDate(0, -1, 0)
 	return t
 }
 

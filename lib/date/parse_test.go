@@ -102,6 +102,56 @@ func TestEndMonth(t *testing.T) {
 	}
 }
 
+func TestStartPreviousOfMonth(t *testing.T) {
+	d := ParseRFC1123("Fri, 25 Oct 2024 16:54:06 -0700")
+	s := StartOfMonth(d)
+	if s.Weekday() != time.Tuesday {
+		t.Errorf("expect Tuesday")
+	}
+	if s.Day() != 1 {
+		t.Errorf("expect Tuesday the 1st")
+	}
+	p := StartOfPreviousMonth(s)
+	if p.Weekday() != time.Sunday {
+		t.Errorf("expect Sunday")
+	}
+	if p.Month() != time.September {
+		t.Errorf("expect sept")
+	}
+	if p.Day() != 1 {
+		t.Errorf("expect Sunday the 1st")
+	}
+}
+
+func TestEndOfPreviousMonth(t *testing.T) {
+	d := ParseRFC1123("Fri, 25 Oct 2024 16:54:06 -0700")
+	p := EndOfPreviousMonth(d)
+	if p.Weekday() != time.Monday {
+		t.Errorf("expect Monday")
+	}
+	if p.Month() != time.September {
+		t.Error("expect sept")
+	}
+	if p.Day() != 30 {
+		t.Error("expect 30th")
+	}
+}
+
+func TestEndOfPreviousMonth2(t *testing.T) {
+	d := ParseRFC1123("Tue, 31 Dec 2024 23:59:59 -0700")
+	p := EndOfPreviousMonth(d)
+	t.Log(p)
+	if p.Weekday() != time.Saturday {
+		t.Errorf("expect Saturday")
+	}
+	if p.Month() != time.November {
+		t.Error("expect nov")
+	}
+	if p.Day() != 30 {
+		t.Error("expect 30th")
+	}
+}
+
 func TestStartOfYear(t *testing.T) {
 	d := ParseRFC1123("Fri, 25 Oct 2024 16:54:06 -0700")
 	s := StartOfYear(d)

@@ -176,3 +176,59 @@ func TestMonthCount(t *testing.T) {
 		t.Error("expect 18 months")
 	}
 }
+
+func TestPreviousYear(t *testing.T) {
+	l := time.Now().Location()
+
+	d := NewDateRange(
+		time.Date(2024, time.December, 1, 10, 15, 59, 0, l),
+		time.Date(2024, time.December, 9, 10, 15, 59, 0, l))
+
+	p := d.PreviousYear()
+	if p.Start.Year() != 2023 {
+		t.Error("expect start 2023")
+	}
+	if p.End.Year() != 2023 {
+		t.Error("expect end 2023")
+	}
+	if p.Start.Month() != time.January {
+		t.Error("expect start jan")
+	}
+	if p.End.Month() != time.December {
+		t.Error("expect end dec")
+	}
+	if p.Start.Day() != 1 {
+		t.Error("expect start 1st")
+	}
+	if p.End.Day() != 31 {
+		t.Error("expect end 31st")
+	}
+}
+
+func TestPreviousMonth(t *testing.T) {
+	l := time.Now().Location()
+
+	d := NewDateRange(
+		time.Date(2024, time.December, 1, 10, 15, 59, 0, l),
+		time.Date(2024, time.December, 9, 10, 15, 59, 0, l))
+
+	p := d.PreviousMonth()
+	if p.Start.Year() != 2024 {
+		t.Error("expect start 2024")
+	}
+	if p.End.Year() != 2024 {
+		t.Error("expect end 2024")
+	}
+	if p.Start.Month() != time.November {
+		t.Error("expect start nov")
+	}
+	if p.End.Month() != time.November {
+		t.Error("expect end nov")
+	}
+	if p.Start.Day() != 1 {
+		t.Error("expect start 1st")
+	}
+	if p.End.Day() != 30 {
+		t.Error("expect end 30th")
+	}
+}

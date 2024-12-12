@@ -460,7 +460,7 @@ func resolvePlsRef(ctx Context, url, creator, image string, entries []spiff.Entr
 // /activity/tracks
 func resolveActivityTracksRef(ctx Context, entries []spiff.Entry) ([]spiff.Entry, error) {
 	end := time.Now()
-	start := date.BackMonth(end)
+	start := end.AddDate(0, -1, 0)
 	v := TrackHistoryView(ctx, date.NewDateRange(start, end))
 	var tracks []model.Track
 	// TODO only recent is supported for now

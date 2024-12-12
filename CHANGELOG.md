@@ -1,3 +1,7 @@
+## 0.23.3
+
+- fix month math and labels
+
 ## 0.23.2 
 
 - more chart fixes and colors
