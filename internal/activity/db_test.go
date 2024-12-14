@@ -226,7 +226,7 @@ func TestTrackDayCountsFrom(t *testing.T) {
 
 	end := time.Now()
 	start := end.Add(time.Hour*-1)
-	counts := a.trackDayCountsFrom("takeout", start, end, 100)
+	counts := a.trackDayCountsFrom("takeout", start, end, start.Location(), 100)
 
 	// for _, c := range counts {
 	// 	t.Logf("%+v\n", c)

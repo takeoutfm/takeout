@@ -1,12 +1,17 @@
+## 0.23.4
+
+- use UTC for activity events
+- move date group by and counting outside of sqlite and use go instead
+
 ## 0.23.3
 
 - fix month math and labels
 
-## 0.23.2 
+## 0.23.2
 
 - more chart fixes and colors
 
-## 0.23.1 
+## 0.23.1
 
 - fixes for year and month charts
 

@@ -19,10 +19,12 @@ package activity
 
 import (
 	"errors"
+	"sort"
 	"time"
 
 	"github.com/takeoutfm/takeout/lib/date"
 	. "github.com/takeoutfm/takeout/model"
+	"golang.org/x/exp/maps"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -77,48 +79,57 @@ func (a *Activity) topTrackEventsFrom(user string, start, end time.Time, limit i
 	return events
 }
 
-// select count(date(date)), date(date) from track_events group by date(date) order by date desc;
-func (a *Activity) trackDayCountsFrom(user string, start, end time.Time, limit int) []ActivityCount {
-	var results []map[string]interface{}
-	a.db.Model(TrackEvent{}).
-		Select("count(strftime('%Y-%m-%d', date)) as count, strftime('%Y-%m-%d', date) as ymd").
-		Where("user = ? and date between ? and ?", user, start, end).
-		Group("strftime('%Y-%m-%d', date)").
-		Order("date desc").Limit(limit).Find(&results)
-	counts := make([]ActivityCount, len(results))
-	for i, v := range results {
-		counts[i] = ActivityCount{
-			Count: int(v["count"].(int64)),
-			Date:  date.ParseDate(v["ymd"].(string)),
+func (a *Activity) trackDayCountsFrom(
+	user string, start, end time.Time, location *time.Location, limit int) []*ActivityCount {
+	var events []TrackEvent
+	a.db.Where("user = ? and date between ? and ?", user, start, end).
+		Order("date desc").Limit(limit).Find(&events)
+
+	// sqlite group by and dates only works with utc, do this work here instead
+	counts := make(map[string]*ActivityCount)
+	for _, e := range events {
+		d := e.Date.In(location)
+		key := date.YMD(d)
+		_, ok := counts[key]
+		if !ok {
+			counts[key] = &ActivityCount{Date: date.StartOfDay(d), Count: 1}
+		} else {
+			counts[key].Count++
 		}
 	}
-	for i := range len(counts) {
-		// clean up the time
-		counts[i].Date = date.StartOfDay(counts[i].Date)
-	}
-	return counts
+
+	result := maps.Values(counts)
+	sort.SliceStable(result, func(i, j int) bool {
+		return result[i].Date.Before(result[j].Date)
+	})
+
+	return result
 }
 
-// select count(1), strftime("%Y-%m-01", date) from track_events group by strftime("%Y-%m", date) order by date desc;
-func (a *Activity) trackMonthCountsFrom(user string, start, end time.Time, limit int) []ActivityCount {
-	var results []map[string]interface{}
-	a.db.Model(TrackEvent{}).
-		Select("count(date) as count, strftime('%Y-%m-01', date) as ymd").
-		Where("user = ? and date between ? and ?", user, start, end).
-		Group("strftime('%Y-%m', date)").
-		Order("date desc").Limit(limit).Find(&results)
-	counts := make([]ActivityCount, len(results))
-	for i, v := range results {
-		counts[i] = ActivityCount{
-			Count: int(v["count"].(int64)),
-			Date:  date.ParseDate(v["ymd"].(string)),
+func (a *Activity) trackMonthCountsFrom(
+	user string, start, end time.Time, location *time.Location, limit int) []*ActivityCount {
+	var events []TrackEvent
+	a.db.Where("user = ? and date between ? and ?", user, start, end).
+		Order("date desc").Limit(limit).Find(&events)
+
+	counts := make(map[string]*ActivityCount)
+	for _, e := range events {
+		d := e.Date.In(location)
+		key := date.YM1(d)
+		_, ok := counts[key]
+		if !ok {
+			counts[key] = &ActivityCount{Date: date.StartOfMonth(d), Count: 1}
+		} else {
+			counts[key].Count++
 		}
 	}
-	for i := range len(counts) {
-		// clean up the date
-		counts[i].Date = date.StartOfMonth(counts[i].Date)
-	}
-	return counts
+
+	result := maps.Values(counts)
+	sort.SliceStable(result, func(i, j int) bool {
+		return result[i].Date.Before(result[j].Date)
+	})
+
+	return result
 }
 
 func (a *Activity) movieEventsFrom(user string, start, end time.Time, limit int) []MovieEvent {

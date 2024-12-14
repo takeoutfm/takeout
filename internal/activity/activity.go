@@ -182,33 +182,43 @@ func (a *Activity) resolveTrackEvents(ctx Context, events []trackEvent) []Activi
 
 func (a *Activity) Movies(ctx Context, start, end time.Time) []ActivityMovie {
 	user := ctx.User()
-	events := a.movieEventsFrom(user.Name, start, end, a.config.Activity.MovieLimit)
+	events := a.movieEventsFrom(user.Name, start.UTC(), end.UTC(), a.config.Activity.MovieLimit)
+	for i := range len(events) {
+		events[i].Date = events[i].Date.In(start.Location())
+	}
 	return a.resolveMovieEvents(ctx, events)
 }
 
 func (a *Activity) Tracks(ctx Context, start, end time.Time) []ActivityTrack {
 	user := ctx.User()
-	events := a.trackEventsFrom(user.Name, start, end, a.config.Activity.TrackLimit)
+	events := a.trackEventsFrom(user.Name, start.UTC(), end.UTC(), a.config.Activity.TrackLimit)
+	updateTrackEventDates(events, start.Location())
 	return a.resolveTrackEvents(ctx, events)
+}
+
+func updateTrackEventDates(events []trackEvent, location *time.Location) {
+	for i := range len(events) {
+		events[i].Date = events[i].Date.In(location)
+	}
 }
 
 func (a *Activity) TrackCountsByDay(ctx Context, start, end time.Time) []ActivityCount {
 	user := ctx.User()
-	counts := a.trackDayCountsFrom(user.Name, start, end, a.config.Activity.TrackLimit)
+	counts := a.trackDayCountsFrom(user.Name, start.UTC(), end.UTC(), start.Location(), a.config.Activity.TrackLimit)
 	return fillGaps(start, end, counts)
 }
 
 func (a *Activity) TrackCountsByMonth(ctx Context, start, end time.Time) []ActivityCount {
 	user := ctx.User()
-	counts := a.trackMonthCountsFrom(user.Name, start, end, a.config.Activity.TrackLimit)
+	counts := a.trackMonthCountsFrom(user.Name, start.UTC(), end.UTC(), start.Location(), a.config.Activity.TrackLimit)
 	return fillMonthGaps(start, end, counts)
 }
 
-func fillGaps(start, end time.Time, counts []ActivityCount) []ActivityCount {
+func fillGaps(start, end time.Time, counts []*ActivityCount) []ActivityCount {
 	// map of ymd -> count
 	m := make(map[string]ActivityCount)
 	for _, c := range counts {
-		m[date.YMD(c.Date)] = c
+		m[date.YMD(c.Date)] = *c
 	}
 
 	dr := date.NewDateRange(start, end)
@@ -225,11 +235,11 @@ func fillGaps(start, end time.Time, counts []ActivityCount) []ActivityCount {
 	return result
 }
 
-func fillMonthGaps(start, end time.Time, counts []ActivityCount) []ActivityCount {
+func fillMonthGaps(start, end time.Time, counts []*ActivityCount) []ActivityCount {
 	// map of ym1 -> count
 	m := make(map[string]ActivityCount)
 	for _, c := range counts {
-		m[date.YM1(c.Date)] = c
+		m[date.YM1(c.Date)] = *c
 	}
 
 	dr := date.NewDateRange(date.StartOfMonth(start), date.EndOfMonth(end))
@@ -248,7 +258,8 @@ func fillMonthGaps(start, end time.Time, counts []ActivityCount) []ActivityCount
 
 func (a *Activity) TopTracks(ctx Context, start, end time.Time) []ActivityTrack {
 	user := ctx.User()
-	events := a.topTrackEventsFrom(user.Name, start, end, a.config.Activity.TopTracksLimit)
+	events := a.topTrackEventsFrom(user.Name, start.UTC(), end.UTC(), a.config.Activity.TopTracksLimit)
+	updateTrackEventDates(events, start.Location())
 	return a.resolveTrackEvents(ctx, events)
 }
 
@@ -367,7 +378,7 @@ func (a *Activity) CreateEvents(ctx Context, events Events) error {
 	user := ctx.User()
 	for _, e := range events.MovieEvents {
 		e.User = user.Name
-		e.Date = e.Date.Local()
+		e.Date = e.Date.UTC()
 		if e.ETag != "" {
 			// resolve using ETag
 			video, err := ctx.Video().LookupETag(e.ETag)
@@ -388,7 +399,7 @@ func (a *Activity) CreateEvents(ctx Context, events Events) error {
 
 	for _, e := range events.EpisodeEvents {
 		e.User = user.Name
-		e.Date = e.Date.Local()
+		e.Date = e.Date.UTC()
 		if e.IsValid() == false {
 			return ErrInvalidEpisodeEvent
 		}
@@ -400,7 +411,7 @@ func (a *Activity) CreateEvents(ctx Context, events Events) error {
 
 	for _, e := range events.TrackEvents {
 		e.User = user.Name
-		e.Date = e.Date.Local()
+		e.Date = e.Date.UTC()
 		if e.ETag != "" {
 			// resolve using ETag
 			track, err := ctx.Music().LookupETag(e.ETag)

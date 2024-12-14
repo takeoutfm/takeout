@@ -30,7 +30,7 @@ func TestFillGaps(t *testing.T) {
 	start := time.Date(2024, time.December, 1, 0, 0, 0, 0, l)
 	end := time.Date(2024, time.December, 31, 0, 0, 0, 0, l)
 
-	counts := []model.ActivityCount{
+	counts := []*model.ActivityCount{
 		{Date: time.Date(2024, time.December, 4, 0, 0, 0, 0, l), Count: 10},
 		{Date: time.Date(2024, time.December, 8, 0, 0, 0, 0, l), Count: 5},
 		{Date: time.Date(2024, time.December, 28, 0, 0, 0, 0, l), Count: 1},
@@ -67,7 +67,7 @@ func TestFillMonthGaps(t *testing.T) {
 	start := time.Date(2024, time.January, 1, 0, 0, 0, 0, l)
 	end := time.Date(2024, time.December, 31, 0, 0, 0, 0, l)
 
-	counts := []model.ActivityCount{
+	counts := []*model.ActivityCount{
 		{Date: time.Date(2024, time.February, 2, 0, 0, 0, 0, l), Count: 10},
 		{Date: time.Date(2024, time.May, 8, 0, 0, 0, 0, l), Count: 5},
 		{Date: time.Date(2024, time.October, 28, 0, 0, 0, 0, l), Count: 1},
