@@ -1,3 +1,10 @@
+## 0.23.5
+
+- refactor activity db count grouping
+- use this sqlite statement to update existing activity dates to UTC
+
+  `update track_events set date = datetime(date, 'utc')`
+
 ## 0.23.4
 
 - use UTC for activity events

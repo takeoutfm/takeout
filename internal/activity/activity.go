@@ -29,6 +29,7 @@ import (
 	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/lib/log"
 	. "github.com/takeoutfm/takeout/model"
+	"golang.org/x/exp/maps"
 	"gorm.io/gorm"
 
 	"errors"
@@ -191,7 +192,7 @@ func (a *Activity) Movies(ctx Context, start, end time.Time) []ActivityMovie {
 
 func (a *Activity) Tracks(ctx Context, start, end time.Time) []ActivityTrack {
 	user := ctx.User()
-	events := a.trackEventsFrom(user.Name, start.UTC(), end.UTC(), a.config.Activity.TrackLimit)
+	events := a.allTrackEventsFrom(user.Name, start.UTC(), end.UTC(), a.config.Activity.TrackLimit)
 	updateTrackEventDates(events, start.Location())
 	return a.resolveTrackEvents(ctx, events)
 }
@@ -204,14 +205,54 @@ func updateTrackEventDates(events []trackEvent, location *time.Location) {
 
 func (a *Activity) TrackCountsByDay(ctx Context, start, end time.Time) []ActivityCount {
 	user := ctx.User()
-	counts := a.trackDayCountsFrom(user.Name, start.UTC(), end.UTC(), start.Location(), a.config.Activity.TrackLimit)
+	events := a.trackEventsFrom(user.Name, start.UTC(), end.UTC(), a.config.Activity.TrackLimit)
+	counts := countGroupByDay(events, start.Location())
 	return fillGaps(start, end, counts)
 }
 
 func (a *Activity) TrackCountsByMonth(ctx Context, start, end time.Time) []ActivityCount {
 	user := ctx.User()
-	counts := a.trackMonthCountsFrom(user.Name, start.UTC(), end.UTC(), start.Location(), a.config.Activity.TrackLimit)
+	events := a.trackEventsFrom(user.Name, start.UTC(), end.UTC(), a.config.Activity.TrackLimit)
+	counts := countGroupByMonth(events, start.Location())
 	return fillMonthGaps(start, end, counts)
+}
+
+func countGroupByDay(events []TrackEvent, location *time.Location) []*ActivityCount {
+	counts := make(map[string]*ActivityCount)
+	for _, e := range events {
+		d := e.Date.In(location)
+		key := date.YMD(d)
+		_, ok := counts[key]
+		if !ok {
+			counts[key] = &ActivityCount{Date: date.StartOfDay(d), Count: 1}
+		} else {
+			counts[key].Count++
+		}
+	}
+	result := maps.Values(counts)
+	sort.SliceStable(result, func(i, j int) bool {
+		return result[i].Date.Before(result[j].Date)
+	})
+	return result
+}
+
+func countGroupByMonth(events []TrackEvent, location *time.Location) []*ActivityCount {
+	counts := make(map[string]*ActivityCount)
+	for _, e := range events {
+		d := e.Date.In(location)
+		key := date.YM1(d)
+		_, ok := counts[key]
+		if !ok {
+			counts[key] = &ActivityCount{Date: date.StartOfMonth(d), Count: 1}
+		} else {
+			counts[key].Count++
+		}
+	}
+	result := maps.Values(counts)
+	sort.SliceStable(result, func(i, j int) bool {
+		return result[i].Date.Before(result[j].Date)
+	})
+	return result
 }
 
 func fillGaps(start, end time.Time, counts []*ActivityCount) []ActivityCount {

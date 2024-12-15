@@ -19,12 +19,9 @@ package activity
 
 import (
 	"errors"
-	"sort"
 	"time"
 
-	"github.com/takeoutfm/takeout/lib/date"
 	. "github.com/takeoutfm/takeout/model"
-	"golang.org/x/exp/maps"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -59,7 +56,7 @@ func (a *Activity) closeDB() {
 	conn.Close()
 }
 
-func (a *Activity) trackEventsFrom(user string, start, end time.Time, limit int) []trackEvent {
+func (a *Activity) allTrackEventsFrom(user string, start, end time.Time, limit int) []trackEvent {
 	var events []trackEvent
 	a.db.Model(TrackEvent{}).
 		Select("1 as count, *").
@@ -79,57 +76,11 @@ func (a *Activity) topTrackEventsFrom(user string, start, end time.Time, limit i
 	return events
 }
 
-func (a *Activity) trackDayCountsFrom(
-	user string, start, end time.Time, location *time.Location, limit int) []*ActivityCount {
+func (a *Activity) trackEventsFrom(user string, start, end time.Time, limit int) []TrackEvent {
 	var events []TrackEvent
 	a.db.Where("user = ? and date between ? and ?", user, start, end).
 		Order("date desc").Limit(limit).Find(&events)
-
-	// sqlite group by and dates only works with utc, do this work here instead
-	counts := make(map[string]*ActivityCount)
-	for _, e := range events {
-		d := e.Date.In(location)
-		key := date.YMD(d)
-		_, ok := counts[key]
-		if !ok {
-			counts[key] = &ActivityCount{Date: date.StartOfDay(d), Count: 1}
-		} else {
-			counts[key].Count++
-		}
-	}
-
-	result := maps.Values(counts)
-	sort.SliceStable(result, func(i, j int) bool {
-		return result[i].Date.Before(result[j].Date)
-	})
-
-	return result
-}
-
-func (a *Activity) trackMonthCountsFrom(
-	user string, start, end time.Time, location *time.Location, limit int) []*ActivityCount {
-	var events []TrackEvent
-	a.db.Where("user = ? and date between ? and ?", user, start, end).
-		Order("date desc").Limit(limit).Find(&events)
-
-	counts := make(map[string]*ActivityCount)
-	for _, e := range events {
-		d := e.Date.In(location)
-		key := date.YM1(d)
-		_, ok := counts[key]
-		if !ok {
-			counts[key] = &ActivityCount{Date: date.StartOfMonth(d), Count: 1}
-		} else {
-			counts[key].Count++
-		}
-	}
-
-	result := maps.Values(counts)
-	sort.SliceStable(result, func(i, j int) bool {
-		return result[i].Date.Before(result[j].Date)
-	})
-
-	return result
+	return events
 }
 
 func (a *Activity) movieEventsFrom(user string, start, end time.Time, limit int) []MovieEvent {

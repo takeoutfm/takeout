@@ -204,7 +204,7 @@ func TestTrackEventsFrom(t *testing.T) {
 	}
 }
 
-func TestTrackDayCountsFrom(t *testing.T) {
+func TestTopTrackEventsFrom(t *testing.T) {
 	user := "takeout"
 	rid := "7b486d22-ade1-4d61-940b-334071aad0cf"
 	rgid := "c5e5e8ad-dc89-319e-8b2d-b3ff5e59fcea"
@@ -226,11 +226,7 @@ func TestTrackDayCountsFrom(t *testing.T) {
 
 	end := time.Now()
 	start := end.Add(time.Hour*-1)
-	counts := a.trackDayCountsFrom("takeout", start, end, start.Location(), 100)
-
-	// for _, c := range counts {
-	// 	t.Logf("%+v\n", c)
-	// }
+	counts := a.topTrackEventsFrom("takeout", start, end, 100)
 
 	if len(counts) != 1 {
 		t.Error("expect 1 counts")
