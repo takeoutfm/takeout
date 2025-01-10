@@ -81,20 +81,21 @@ func (m *Music) Close() {
 	m.closeDB()
 }
 
-func Cover(r Release, size string) string {
+func Cover(art CoverArt, size string) string {
 	var url string
-	if r.GroupArtwork {
-		url = fmt.Sprintf("/img/mb/rg/%s", r.RGID)
+	reid, rgid := art.ArtworkMBIDs()
+	if art.HasGroupArtwork() {
+		url = fmt.Sprintf("/img/mb/rg/%s", rgid)
 	} else {
-		url = fmt.Sprintf("/img/mb/re/%s", r.REID)
+		url = fmt.Sprintf("/img/mb/re/%s", reid)
 	}
-	if r.Artwork && r.FrontArtwork {
+	if art.HasArtwork() && art.HasFrontArtwork() {
 		// user front-250, front-500, front-1200
 		//return fmt.Sprintf("%s/front-%s", url, size)
 		return fmt.Sprintf("%s/front", url)
-	} else if r.Artwork && r.OtherArtwork != "" {
+	} else if art.HasArtwork() && art.HasOtherArtwork() {
 		// use id-250, id-500, id-1200
-		//return fmt.Sprintf("%s/%s-%s", url, r.OtherArtwork, size)
+		//return fmt.Sprintf("%s/%s-%s", url, art.OtherArtwork, size)
 		return url
 	} else {
 		return "/static/album-white-36dp.svg"
@@ -122,12 +123,12 @@ func CoverArtArchiveImage(r Release) string {
 	}
 }
 
-func (m *Music) CoverSmall(o interface{}) string {
+func CoverSmall(o interface{}) string {
 	switch o.(type) {
 	case Release:
 		return Cover(o.(Release), "250")
 	case Track:
-		return m.TrackCover(o.(Track), "250")
+		return TrackCover(o.(Track), "250")
 	case Station:
 		img := o.(Station).Image
 		if img == "" {
@@ -139,18 +140,13 @@ func (m *Music) CoverSmall(o interface{}) string {
 }
 
 // Track cover based on assigned release.
-func (m *Music) TrackCover(t Track, size string) string {
+func TrackCover(t Track, size string) string {
 	// TODO should expire the cache
 	v, ok := coverCache[t.REID]
 	if ok {
 		return v
 	}
-	release, err := m.assignedRelease(t)
-	if err != nil {
-		v = ""
-	} else {
-		v = Cover(release, size)
-	}
+	v = Cover(t, size)
 	coverCache[t.REID] = v
 	return v
 }
@@ -169,7 +165,7 @@ func (m *Music) TrackURL(t Track) *url.URL {
 
 // URL for track cover image.
 func (m *Music) TrackImage(t Track) *url.URL {
-	url, _ := url.Parse(m.TrackCover(t, "front-250"))
+	url, _ := url.Parse(TrackCover(t, "front-250"))
 	return url
 }
 

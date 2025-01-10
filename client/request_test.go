@@ -20,7 +20,7 @@ package client
 import (
 	"bytes"
 	"net/http"
-	"io/ioutil"
+	"io"
 	"testing"
 )
 
@@ -78,21 +78,21 @@ func (s testServer) RoundTrip(r *http.Request) (*http.Response, error) {
 	if r.URL.Path == "/good" {
 		return &http.Response{
 			StatusCode: 200,
-			Body:       ioutil.NopCloser(bytes.NewBufferString(`{"a":"b"}`)),
+			Body:       io.NopCloser(bytes.NewBufferString(`{"a":"b"}`)),
 			Header:     headers,
 		}, nil
 	} else if r.URL.Path == "/simple-json" {
 		headers.Add("Content-type", "application/json")
 		return &http.Response{
 			StatusCode: 200,
-			Body:       ioutil.NopCloser(bytes.NewBufferString(`{"a":"b"}`)),
+			Body:       io.NopCloser(bytes.NewBufferString(`{"a":"b"}`)),
 			Header:     headers,
 		}, nil
 	} else if r.URL.Path == "/location" {
 		headers.Add("Location", "https://redirect.com/location")
 		return &http.Response{
 			StatusCode: 307,
-			Body:       ioutil.NopCloser(bytes.NewBufferString(``)),
+			Body:       io.NopCloser(bytes.NewBufferString(``)),
 			Header:     headers,
 		}, nil
 	} else if r.URL.Path == "/post-echo" {
@@ -106,13 +106,13 @@ func (s testServer) RoundTrip(r *http.Request) (*http.Response, error) {
 		headers.Add("Content-type", "application/json")
 		return &http.Response{
 			StatusCode: 200,
-			Body:       ioutil.NopCloser(bytes.NewBufferString(`{"a":"b"}`)),
+			Body:       io.NopCloser(bytes.NewBufferString(`{"a":"b"}`)),
 			Header:     headers,
 		}, nil
 	} else {
 		return &http.Response{
 			StatusCode: 500,
-			Body:       ioutil.NopCloser(bytes.NewBufferString(`{"a":"b"}`)),
+			Body:       io.NopCloser(bytes.NewBufferString(`{"a":"b"}`)),
 			Header:     headers,
 		}, nil
 	}

@@ -18,13 +18,14 @@
 package server
 
 import (
-	"strings"
 	"github.com/takeoutfm/takeout/internal/auth"
 	"github.com/takeoutfm/takeout/internal/config"
 	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/takeoutfm/takeout/internal/podcast"
+	"github.com/takeoutfm/takeout/internal/tv"
 	"github.com/takeoutfm/takeout/internal/video"
 	"github.com/takeoutfm/takeout/lib/log"
+	"strings"
 )
 
 type Media struct {
@@ -32,6 +33,7 @@ type Media struct {
 	music   *music.Music
 	video   *video.Video
 	podcast *podcast.Podcast
+	tv      *tv.TV
 }
 
 func (m Media) Config() *config.Config {
@@ -48,6 +50,10 @@ func (m Media) Podcast() *podcast.Podcast {
 
 func (m Media) Video() *video.Video {
 	return m.video
+}
+
+func (m Media) TV() *tv.TV {
+	return m.tv
 }
 
 func mediaConfigFor(root *config.Config, user auth.User) (string, *config.Config, error) {
@@ -85,6 +91,8 @@ func makeMedia(name string, config *config.Config) *Media {
 		log.CheckError(err)
 		media.podcast, err = media.makePodcast(config)
 		log.CheckError(err)
+		media.tv, err = media.makeTV(config)
+		log.CheckError(err)
 		mediaMap[name] = media
 	}
 	return media
@@ -115,4 +123,13 @@ func (Media) makePodcast(config *config.Config) (*podcast.Podcast, error) {
 		return nil, err
 	}
 	return p, nil
+}
+
+func (Media) makeTV(config *config.Config) (*tv.TV, error) {
+	tv := tv.NewTV(config)
+	err := tv.Open()
+	if err != nil {
+		return nil, err
+	}
+	return tv, nil
 }

@@ -35,6 +35,13 @@ h3 {
     text-align: left;
 }
 
+.heading {
+    text-transform: uppercase;
+    font-size: medium;
+    text-align: left;
+    font-weight: bold;
+}
+
 .takeout {
     font-size: small;
     opacity: 0.5;
@@ -167,4 +174,37 @@ body {
         grid-auto-rows: 1fr;
         grid-template-columns: 1fr 1fr 1fr;
     }
+}
+
+tagline {
+    font-style: italic;
+    text-align: center;
+}
+
+.specs {
+    text-align: center;
+}
+
+.cred {
+    text-align: left;
+    vertical-align: top;
+    padding-right: 20px;
+    white-space: nowrap;
+}
+
+.card {
+    max-width: 185px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    margin-right: 4px;
+    padding-bottom: 10px;
+}
+
+.person {
+    font-weight: bold;
+}
+
+.character {
+    font-weight: lighter;
 }

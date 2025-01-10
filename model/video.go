@@ -18,9 +18,10 @@
 package model
 
 import (
-	"github.com/takeoutfm/takeout/lib/gorm"
 	"github.com/google/uuid"
+	"github.com/takeoutfm/takeout/lib/gorm"
 	g "gorm.io/gorm"
+	"strings"
 	"time"
 )
 
@@ -70,24 +71,8 @@ type Genre struct {
 
 type Keyword struct {
 	gorm.Model
-	TMID int64
+	TMID int64 `gorm:"index:idx_keyword_tmid"`
 	Name string
-}
-
-type Person struct {
-	gorm.Model
-	PEID        int64 `gorm:"uniqueIndex:idx_person_peid"`
-	IMID        string
-	Name        string
-	ProfilePath string
-	Bio         string
-	Birthplace  string
-	Birthday    time.Time
-	Deathday    time.Time
-}
-
-func (Person) TableName() string {
-	return "people" // not peoples
 }
 
 type Cast struct {
@@ -103,10 +88,18 @@ func (Cast) TableName() string {
 	return "cast" // not casts
 }
 
+func (c Cast) HasJob(name string) bool {
+	return false
+}
+
+func (c Cast) GetPerson() Person {
+	return c.Person
+}
+
 type Crew struct {
 	gorm.Model
-	TMID       int64
-	PEID       int64
+	TMID       int64 `gorm:"index:idx_crew_tmid"`
+	PEID       int64 `gorm:"index:idx_crew_peid"`
 	Department string
 	Job        string
 	Person     Person `gorm:"-"`
@@ -116,44 +109,15 @@ func (Crew) TableName() string {
 	return "crew" // not crews
 }
 
+func (c Crew) HasJob(name string) bool {
+	return strings.EqualFold(c.Job, name)
+}
+
+func (c Crew) GetPerson() Person {
+	return c.Person
+}
+
 type Recommend struct {
 	Name   string
 	Movies []Movie
-}
-
-type TVShow struct {
-	gorm.Model
-	TVID             int64 `gorm:"uniqueIndex:idx_tvshow_tvid"`
-	Name             string
-	SortName         string
-	Date             time.Time
-	EndDate          time.Time
-	Tagline          string
-	OriginalName     string
-	OriginalLanguage string
-	Overview         string
-	BackdropPath     string
-	PosterPath       string
-	SeasonCount      int
-	EpisodeCount     int
-	VoteAverage      float32
-	VoteCount        int
-}
-
-type TVEpisode struct {
-	gorm.Model
-	EPID         int64 `gorm:"uniqueIndex:idx_episode_epid"`
-	TVID         int64
-	Name         string
-	Overview     string
-	Date         string
-	StillPath    string
-	Season       int
-	Episode      int
-	VoteAverage  float32
-	VoteCount    int
-	Key          string
-	Size         int64
-	ETag         string
-	LastModified time.Time
 }

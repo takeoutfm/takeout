@@ -66,11 +66,11 @@ func (p *Podcast) Close() {
 	p.closeDB()
 }
 
-func (p *Podcast) SeriesImage(series Series) string {
+func SeriesImage(series Series) string {
 	return series.Image
 }
 
-func (p *Podcast) EpisodeImage(episode Episode) string {
+func EpisodeImage(episode Episode) string {
 	return episode.Image
 }
 

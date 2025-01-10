@@ -24,7 +24,7 @@
 	       data-creator="{{.PreferredArtist}}"
 	       data-album="{{.ReleaseTitle}}"
 	       data-title="{{.Title}}"
-	       data-image="{{call $.CoverSmall .}}"
+	       data-image="{{.|cover}}"
 	       data-etag="{{.ETag}}"
 	       data-location="{{.|link}}">
 	      {{ .Title }}

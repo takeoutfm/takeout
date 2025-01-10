@@ -134,12 +134,11 @@ func (v *Video) MovieURL(m Movie) *url.URL {
 	return v.buckets[0].ObjectURL(m.Key)
 }
 
-func (v *Video) MoviePoster(m Movie) string {
+func MoviePoster(m Movie) string {
 	if m.PosterPath == "" {
 		return ""
 	}
-	url := fmt.Sprintf("/img/tm/%s%s", tmdb.Poster342, m.PosterPath)
-	return url
+	return strings.Join([]string{"/img/tm/", tmdb.Poster342, m.PosterPath}, "")
 }
 
 func (v *Video) TMDBMoviePoster(m Movie) string {
@@ -153,12 +152,11 @@ func (v *Video) TMDBMoviePoster(m Movie) string {
 	return url.String()
 }
 
-func (v *Video) MoviePosterSmall(m Movie) string {
+func MoviePosterSmall(m Movie) string {
 	if m.PosterPath == "" {
 		return ""
 	}
-	url := fmt.Sprintf("/img/tm/%s%s", tmdb.Poster154, m.PosterPath)
-	return url
+	return strings.Join([]string{"/img/tm/", tmdb.Poster154, m.PosterPath}, "")
 }
 
 func (v *Video) TMDBMoviePosterSmall(m Movie) string {
@@ -172,12 +170,11 @@ func (v *Video) TMDBMoviePosterSmall(m Movie) string {
 	return url.String()
 }
 
-func (v *Video) MovieBackdrop(m Movie) string {
+func MovieBackdrop(m Movie) string {
 	if m.BackdropPath == "" {
 		return ""
 	}
-	url := fmt.Sprintf("/img/tm/%s%s", tmdb.Backdrop1280, m.BackdropPath)
-	return url
+	return strings.Join([]string{"/img/tm/", tmdb.Backdrop1280, m.BackdropPath}, "")
 }
 
 func (v *Video) TMDBMovieBackdrop(m Movie) string {

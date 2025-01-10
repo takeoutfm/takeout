@@ -26,6 +26,7 @@ import (
 	"github.com/takeoutfm/takeout/internal/config"
 	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/takeoutfm/takeout/internal/podcast"
+	"github.com/takeoutfm/takeout/internal/tv"
 	"github.com/takeoutfm/takeout/internal/video"
 	"github.com/takeoutfm/takeout/lib/log"
 	"time"
@@ -174,6 +175,17 @@ func syncVideo(config *config.Config, mediaConfig *config.Config) error {
 	return v.SyncSince(v.LastModified())
 }
 
+func syncTV(config *config.Config, mediaConfig *config.Config) error {
+	log.Println("xxx syncTV")
+	tv := tv.NewTV(mediaConfig)
+	err := tv.Open()
+	if err != nil {
+		return err
+	}
+	defer tv.Close()
+	return tv.SyncSince(tv.LastModified())
+}
+
 func syncVideoPosters(config *config.Config, mediaConfig *config.Config) error {
 	v := video.NewVideo(mediaConfig)
 	err := v.Open()
@@ -267,6 +279,8 @@ func Job(config *config.Config, name string) error {
 			syncMusicSimilar(config, mediaConfig)
 		case "video":
 			syncVideo(config, mediaConfig)
+		case "tv":
+			syncTV(config, mediaConfig)
 		case "stations":
 			createStations(config, mediaConfig)
 		}

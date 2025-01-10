@@ -157,6 +157,7 @@ func run(opts *viper.Viper) error {
 
 	go doMusic(cfg)
 	go doVideo(cfg)
+	go doTV(cfg)
 	go doPodcasts(cfg)
 
 	if added && newPassword {
@@ -174,6 +175,11 @@ func doMusic(cfg *config.Config) {
 
 func doVideo(cfg *config.Config) {
 	server.Job(cfg, "video")
+}
+
+func doTV(cfg *config.Config) {
+	fmt.Println("xxx doTV")
+	server.Job(cfg, "tv")
 }
 
 func doPodcasts(cfg *config.Config) {
@@ -247,6 +253,7 @@ func createConfig(opts *viper.Viper) error {
 		}
 	}
 	doit("music", opts.GetString("music"))
+	doit("tv", opts.GetString("tv"))
 	doit("video", opts.GetString("video"))
 
 	config = append(config,
@@ -287,6 +294,7 @@ func init() {
 	runCmd.Flags().String("name", "media", "media name")
 	runCmd.Flags().String("music", "", "dir or s3://bucket/prefix")
 	runCmd.Flags().String("video", "", "dir or s3://bucket/prefix")
+	runCmd.Flags().String("tv", "", "dir or s3://bucket/prefix")
 	runCmd.Flags().String("endpoint", os.Getenv("AWS_ENDPOINT_URL"), "s3 endpoint (host name)")
 	runCmd.Flags().String("region", os.Getenv("AWS_DEFAULT_REGION"), "s3 region")
 	runCmd.Flags().String("access_key_id", os.Getenv("AWS_ACCESS_KEY_ID"), "s3 access key id")

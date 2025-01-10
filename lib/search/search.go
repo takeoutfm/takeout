@@ -128,6 +128,10 @@ func CloneFields(fields FieldMap) FieldMap {
 	return target
 }
 
+func (fields FieldMap) AddField(key string, value interface{}) FieldMap {
+	return AddField(fields, key, value)
+}
+
 func AddField(fields FieldMap, key string, value interface{}) FieldMap {
 	key = strings.ToLower(key)
 	keys := []string{key}

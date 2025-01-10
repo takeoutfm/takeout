@@ -743,7 +743,7 @@ func ResolveSeriesEpisodePlaylist(ctx Context, series *view.Series,
 	plist.Spiff.Location = path
 	plist.Spiff.Creator = series.Series.Author
 	plist.Spiff.Title = v.Episode.Title
-	plist.Spiff.Image = v.EpisodeImage(v.Episode)
+	plist.Spiff.Image = ctx.EpisodeImage(v.Episode)
 	plist.Spiff.Date = date.FormatJson(v.Episode.Date)
 	plist.Spiff.Entries = []spiff.Entry{
 		episodeEntry(ctx, series.Series, v.Episode),

@@ -8,7 +8,7 @@
       {{ range .AddedReleases }}
       <div style="padding: 10px; max-width: 110px; display: inline-block;">
 	<a data-link="{{.|link}}" style="text-decoration: none;">
-	  <img width="110" height="110" src="{{call $.CoverSmall .}}" style="border-radius: 10px;">
+	  <img width="110" height="110" src="{{.|cover}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="release-small-title">{{ .Name }}</div>
 	  <br style="display: none"/>
@@ -26,7 +26,7 @@
       {{ range .NewReleases }}
       <div style="padding: 10px; max-width: 110px; display: inline-block;">
 	<a data-link="{{.|link}}" style="text-decoration: none;">
-	  <img width="110" height="110" src="{{call $.CoverSmall .}}" style="border-radius: 10px;">
+	  <img width="110" height="110" src="{{.|cover}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="release-small-title">{{ .Name }}</div>
 	  <br style="display: none"/>
@@ -50,7 +50,7 @@
       {{ range .Movies }}
       <div style="padding: 10px; max-width: 154px; display: inline-block;">
 	<a data-link="{{.|link}}" style="text-decoration: none;">
-	  <img src="{{call $.PosterSmall .}}" style="border-radius: 10px;">
+	  <img src="{{.|poster_small}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="movie-small-title">{{ .Title }}</div>
 	  <br style="display: none"/>
@@ -69,7 +69,7 @@
       {{ range .AddedMovies }}
       <div style="padding: 10px; max-width: 154px; display: inline-block;">
 	<a data-link="{{.|link}}" style="text-decoration: none;">
-	  <img src="{{call $.PosterSmall .}}" style="border-radius: 10px;">
+	  <img src="{{.|poster_small}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="movie-small-title">{{ .Title }}</div>
 	  <br style="display: none"/>
@@ -87,7 +87,7 @@
       {{ range .NewMovies }}
       <div style="padding: 10px; max-width: 154px; display: inline-block;">
 	<a data-link="{{.|link}}" style="text-decoration: none;">
-	  <img src="{{call $.PosterSmall .}}" style="border-radius: 10px;">
+	  <img src="{{.|poster_small}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="movie-small-title">{{ .Title }}</div>
 	  <br style="display: none"/>
@@ -110,7 +110,7 @@
       {{ range .NewSeries }}
       <div style="padding: 10px; max-width: 154px; display: inline-block;">
 	<a data-link="{{.|link}}" style="text-decoration: none;">
-	  <img width="144" height="144" src="{{call $.SeriesImage .}}" style="border-radius: 10px;">
+	  <img width="144" height="144" src="{{.|image}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="series-small-title">{{ .Title }}</div>
 	  <br style="display: none"/>
@@ -128,7 +128,7 @@
       {{ range .NewEpisodes }}
       <div style="padding: 10px; max-width: 154px; display: inline-block;">
 	<a data-link="{{.|link}}" style="text-decoration: none;">
-	  <img width="144" height="144" src="{{call $.EpisodeImage .}}" style="border-radius: 10px;">
+	  <img width="144" height="144" src="{{.|image}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="series-small-title">{{ .Title }}</div>
 	  <br style="display: none"/>

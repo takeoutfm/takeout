@@ -24,12 +24,6 @@ import (
 	"github.com/takeoutfm/takeout/model"
 )
 
-type CoverFunc func(interface{}) string
-type PosterFunc func(model.Movie) string
-type BackdropFunc func(model.Movie) string
-type ProfileFunc func(model.Person) string
-type SeriesImageFunc func(model.Series) string
-type EpisodeImageFunc func(model.Episode) string
 type TracksFunc func() []model.Track
 
 type TrackList struct {
@@ -41,6 +35,7 @@ type Index struct {
 	Time         int64
 	HasMusic     bool
 	HasMovies    bool
+	HasTVShows   bool
 	HasPodcasts  bool
 	HasPlaylists bool
 }
@@ -53,15 +48,10 @@ type Home struct {
 	RecommendMovies []model.Recommend
 	NewEpisodes     []model.Episode
 	NewSeries       []model.Series
-	CoverSmall      CoverFunc        `json:"-"`
-	PosterSmall     PosterFunc       `json:"-"`
-	SeriesImage     SeriesImageFunc  `json:"-"`
-	EpisodeImage    EpisodeImageFunc `json:"-"`
 }
 
 type Artists struct {
-	Artists    []model.Artist
-	CoverSmall CoverFunc `json:"-"`
+	Artists []model.Artist
 }
 
 type Artist struct {
@@ -70,7 +60,6 @@ type Artist struct {
 	Background string
 	Releases   []model.Release
 	Similar    []model.Artist
-	CoverSmall CoverFunc `json:"-"`
 	Deep       TrackList `json:"-"`
 	Popular    TrackList `json:"-"`
 	Radio      TrackList `json:"-"`
@@ -80,131 +69,146 @@ type Artist struct {
 }
 
 type Popular struct {
-	Artist     model.Artist
-	Popular    []model.Track
-	CoverSmall CoverFunc `json:"-"`
+	Artist  model.Artist
+	Popular []model.Track
 }
 
 type Singles struct {
-	Artist     model.Artist
-	Singles    []model.Track
-	CoverSmall CoverFunc `json:"-"`
+	Artist  model.Artist
+	Singles []model.Track
 }
 
 type WantList struct {
-	Artist     model.Artist
-	Releases   []model.Release
-	CoverSmall CoverFunc `json:"-"`
+	Artist   model.Artist
+	Releases []model.Release
 }
 
 type Release struct {
-	Artist     model.Artist
-	Release    model.Release
-	Image      string
-	Tracks     []model.Track
-	Singles    []model.Track
-	Popular    []model.Track
-	Similar    []model.Release
-	CoverSmall CoverFunc `json:"-"`
+	Artist  model.Artist
+	Release model.Release
+	Image   string
+	Tracks  []model.Track
+	Singles []model.Track
+	Popular []model.Track
+	Similar []model.Release
 }
 
 type Search struct {
-	Artists     []model.Artist
-	Releases    []model.Release
-	Tracks      []model.Track
-	Stations    []model.Station
-	Movies      []model.Movie
-	Series      []model.Series
-	Episodes    []model.Episode
-	Query       string
-	Hits        int
-	CoverSmall  CoverFunc  `json:"-"`
-	PosterSmall PosterFunc `json:"-"`
+	Artists  []model.Artist
+	Releases []model.Release
+	Tracks   []model.Track
+	Stations []model.Station
+	Movies   []model.Movie
+	Series   []model.Series
+	Episodes []model.Episode
+	Query    string
+	Hits     int
 }
 
 type Radio struct {
-	Artist     []model.Station
-	Genre      []model.Station
-	Similar    []model.Station
-	Period     []model.Station
-	Series     []model.Station
-	Other      []model.Station
-	Stream     []model.Station
-	CoverSmall CoverFunc `json:"-"`
+	Artist  []model.Station
+	Genre   []model.Station
+	Similar []model.Station
+	Period  []model.Station
+	Series  []model.Station
+	Other   []model.Station
+	Stream  []model.Station
 }
 
 type Movies struct {
-	Movies      []model.Movie
-	PosterSmall PosterFunc   `json:"-"`
-	Backdrop    BackdropFunc `json:"-"`
+	Movies []model.Movie
 }
 
 type Movie struct {
-	Movie       model.Movie
-	Location    string
-	Collection  model.Collection
-	Other       []model.Movie
-	Cast        []model.Cast
-	Crew        []model.Crew
-	Starring    []model.Person
-	Directing   []model.Person
-	Writing     []model.Person
-	Genres      []string
-	Keywords    []string
-	Vote        int
-	VoteCount   int
-	Poster      PosterFunc   `json:"-"`
-	PosterSmall PosterFunc   `json:"-"`
-	Backdrop    BackdropFunc `json:"-"`
-	Profile     ProfileFunc  `json:"-"`
+	Movie      model.Movie
+	Location   string
+	Collection model.Collection
+	Other      []model.Movie
+	Cast       []model.Cast
+	Crew       []model.Crew
+	Starring   []model.Person
+	Directing  []model.Person
+	Writing    []model.Person
+	Genres     []string
+	Keywords   []string
+	Vote       int
+	VoteCount  int
 }
 
 type Profile struct {
-	Person      model.Person
-	Starring    []model.Movie
-	Directing   []model.Movie
-	Writing     []model.Movie
-	PosterSmall PosterFunc   `json:"-"`
-	Backdrop    BackdropFunc `json:"-"`
-	Profile     ProfileFunc  `json:"-"`
+	Person model.Person
+	Movies MovieCredits
+	Shows  TVCredits
+}
+
+type MovieCredits struct {
+	Starring  []model.Movie
+	Directing []model.Movie
+	Writing   []model.Movie
+}
+
+type TVCredits struct {
+	Starring  []model.TVSeries
+	Directing []model.TVSeries
+	Writing   []model.TVSeries
 }
 
 type Genre struct {
-	Name        string
-	Movies      []model.Movie
-	PosterSmall PosterFunc   `json:"-"`
-	Backdrop    BackdropFunc `json:"-"`
+	Name   string
+	Movies []model.Movie
 }
 
 type Keyword struct {
-	Name        string
-	Movies      []model.Movie
-	PosterSmall PosterFunc   `json:"-"`
-	Backdrop    BackdropFunc `json:"-"`
+	Name   string
+	Movies []model.Movie
 }
 
 type Watch struct {
-	Movie       model.Movie
-	Location    string
-	PosterSmall PosterFunc   `json:"-"`
-	Backdrop    BackdropFunc `json:"-"`
+	Movie    model.Movie
+	Location string
+}
+
+type TVShows struct {
+	Series []model.TVSeries
+}
+
+type TVSeries struct {
+	Series    model.TVSeries
+	Episodes  []model.TVEpisode
+	Genres    []string
+	Keywords  []string
+	Cast      []model.TVSeriesCast
+	Crew      []model.TVSeriesCrew
+	Directing []model.Person
+	Starring  []model.Person
+	Writing   []model.Person
+	Vote      int
+	VoteCount int
+}
+
+type TVEpisode struct {
+	Series    model.TVSeries
+	Episode   model.TVEpisode
+	Cast      []model.TVEpisodeCast
+	Crew      []model.TVEpisodeCrew
+	Directing []model.Person
+	Starring  []model.Person
+	Writing   []model.Person
+	Vote      int
+	VoteCount int
 }
 
 type Podcasts struct {
-	Series      []model.Series
-	SeriesImage SeriesImageFunc `json:"-"`
+	Series []model.Series
 }
 
 type Series struct {
-	Series       model.Series
-	Episodes     []model.Episode
-	SeriesImage  SeriesImageFunc  `json:"-"`
-	EpisodeImage EpisodeImageFunc `json:"-"`
+	Series   model.Series
+	Episodes []model.Episode
 }
 
 type Episode struct {
-	Episode      model.Episode
-	EpisodeImage EpisodeImageFunc `json:"-"`
+	Episode model.Episode
 }
 
 type Progress struct {
@@ -224,7 +228,6 @@ type TrackStats struct {
 	ReleaseCount int
 	TrackCount   int
 	ListenCount  int
-	CoverSmall   CoverFunc `json:"-"`
 }
 
 type TrackHistory struct {

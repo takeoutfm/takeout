@@ -22,6 +22,7 @@ import (
 	"time"
 
 	. "github.com/takeoutfm/takeout/model"
+	"github.com/takeoutfm/takeout/internal/people"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
@@ -29,9 +30,9 @@ import (
 )
 
 func (v *Video) openDB() (err error) {
-	cfg := v.config.Music.DB.GormConfig()
+	cfg := v.config.Video.DB.GormConfig()
 
-	switch v.config.Music.DB.Driver {
+	switch v.config.Video.DB.Driver {
 	case "sqlite3":
 		v.db, err = gorm.Open(sqlite.Open(v.config.Video.DB.Source), cfg)
 	case "mysql":
@@ -163,22 +164,6 @@ func (v *Video) deleteMovie(tmid int) {
 	}
 }
 
-func (v *Video) deleteTVShow(tvid int) {
-	var list []TVShow
-	v.db.Where("tv_id = ?", tvid).Find(&list)
-	for _, o := range list {
-		v.db.Unscoped().Delete(o)
-	}
-}
-
-func (v *Video) deleteEpisode(epid int) {
-	var list []Episode
-	v.db.Where("ep_id = ?", epid).Find(&list)
-	for _, o := range list {
-		v.db.Unscoped().Delete(o)
-	}
-}
-
 func (v *Video) deleteCast(tmid int) {
 	var list []Cast
 	v.db.Where("tm_id = ?", tmid).Find(&list)
@@ -220,13 +205,7 @@ func (v *Video) deleteKeywords(tmid int) {
 }
 
 func (v *Video) Person(peid int) (Person, error) {
-	var person Person
-	// TODO fix this logs an error every time and it's not an error
-	err := v.db.Where("pe_id = ?", peid).First(&person).Error
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return Person{}, errors.New("person not found")
-	}
-	return person, err
+	return people.Person(v.db, peid)
 }
 
 func (v *Video) UpdateMovie(m *Movie) error {
@@ -284,15 +263,6 @@ func (v *Video) lookupIMIDs(imids []string) []Movie {
 	return movies
 }
 
-func (v *Video) LookupPerson(id int) (Person, error) {
-	var person Person
-	err := v.db.First(&person, id).Error
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return Person{}, errors.New("person not found")
-	}
-	return person, err
-}
-
 func (v *Video) Starring(p Person) []Movie {
 	var movies []Movie
 	v.db.Where(`movies.tm_id in (select tm_id from "cast" where pe_id = ?)`, p.PEID).
@@ -339,7 +309,7 @@ func (v *Video) RecentlyReleased() []Movie {
 	var movies []Movie
 	v.db.Where("movies.date >= ?", time.Now().Add(v.config.Video.Recent*-1)).
 		Order("movies.date desc, sort_title").
-		Limit(v.config.Music.RecentLimit).
+		Limit(v.config.Video.RecentLimit).
 		Find(&movies)
 	return movies
 }
@@ -391,13 +361,5 @@ func (v *Video) createMovie(m *Movie) error {
 }
 
 func (v *Video) createPerson(p *Person) error {
-	return v.db.Create(p).Error
-}
-
-func (v *Video) createTVShow(tv *TVShow) error {
-	return v.db.Create(tv).Error
-}
-
-func (v *Video) createEpisode(episode *Episode) error {
-	return v.db.Create(episode).Error
+	return people.CreatePerson(v.db, p)
 }

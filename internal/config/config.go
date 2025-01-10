@@ -55,6 +55,8 @@ var (
 const (
 	MediaMusic = "music"
 	MediaVideo = "video"
+	MediaMovies = "movies"
+	MediaTV = "tv"
 )
 
 type DatabaseConfig struct {
@@ -169,6 +171,36 @@ type VideoConfig struct {
 	DuplicateResolution  string
 }
 
+func (c VideoConfig) SortedCast(credits tmdb.Credits) []tmdb.Cast {
+	return sortedCast(credits, c.CastLimit)
+}
+
+func (c VideoConfig) RelevantCrew(credits tmdb.Credits) []tmdb.Crew {
+	return relevantCrew(credits, c.CrewJobs)
+}
+
+type TVConfig struct {
+	DB                   DatabaseConfig
+	ReleaseCountries     []string
+	CastLimit            int
+	CrewJobs             []string
+	Recent               time.Duration
+	RecentLimit          int
+	SearchIndexName      string
+	SearchLimit          int
+	SyncInterval         time.Duration
+	PosterSyncInterval   time.Duration
+	BackdropSyncInterval time.Duration
+}
+
+func (c TVConfig) SortedCast(credits tmdb.Credits) []tmdb.Cast {
+	return sortedCast(credits, c.CastLimit)
+}
+
+func (c TVConfig) RelevantCrew(credits tmdb.Credits) []tmdb.Crew {
+	return relevantCrew(credits, c.CrewJobs)
+}
+
 type PodcastConfig struct {
 	DB              DatabaseConfig
 	Series          []string
@@ -264,6 +296,7 @@ type Config struct {
 	Search    search.Config
 	Server    ServerConfig
 	Video     VideoConfig
+	TV        TVConfig
 	Assistant AssistantConfig
 	Podcast   PodcastConfig
 	Progress  ProgressConfig
@@ -441,6 +474,29 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Video.PosterSyncInterval", "24h")
 	v.SetDefault("Video.BackdropSyncInterval", "24h")
 	v.SetDefault("Video.DuplicateResolution", "largest")
+
+	v.SetDefault("TV.DB.Driver", "sqlite3")
+	v.SetDefault("TV.DB.Source", "tv.db")
+	v.SetDefault("TV.DB.Logger", "default")
+	v.SetDefault("TV.ReleaseCountries", []string{
+		"US",
+	})
+	v.SetDefault("TV.CastLimit", "25")
+	v.SetDefault("TV.CrewJobs", []string{
+		"Director",
+		"Executive Producer",
+		"Novel",
+		"Producer",
+		"Screenplay",
+		"Story",
+	})
+	v.SetDefault("TV.Recent", "8760h") // 1 year
+	v.SetDefault("TV.RecentLimit", "50")
+	v.SetDefault("TV.SearchIndexName", "tv")
+	v.SetDefault("TV.SearchLimit", "100")
+	v.SetDefault("TV.SyncInterval", "1h")
+	v.SetDefault("TV.PosterSyncInterval", "24h")
+	v.SetDefault("TV.BackdropSyncInterval", "24h")
 
 	// see https://musicbrainz.org/search (series)
 	v.SetDefault("Music.RadioSeries", []string{
@@ -782,4 +838,16 @@ func (c Config) Write(w io.Writer) error {
 	}
 	_, err = w.Write(buf)
 	return err
+}
+
+func sortedCast(credits tmdb.Credits, limit int) []tmdb.Cast {
+	cast := credits.SortedCast()
+	if len(cast) > limit {
+		cast = cast[:limit]
+	}
+	return cast
+}
+
+func relevantCrew(credits tmdb.Credits, jobs []string) []tmdb.Crew {
+	return credits.CrewWithJobs(jobs)
 }
