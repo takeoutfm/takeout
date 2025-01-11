@@ -219,6 +219,22 @@ func (tv *TV) deleteSeries(tvid int) {
 	}
 }
 
+func (tv *TV) deleteSeriesCast(tvid int) {
+	var list []TVSeriesCast
+	tv.db.Where("tv_id = ?", tvid).Find(&list)
+	for _, o := range list {
+		tv.db.Unscoped().Delete(o)
+	}
+}
+
+func (tv *TV) deleteSeriesCrew(tvid int) {
+	var list []TVSeriesCrew
+	tv.db.Where("tv_id = ?", tvid).Find(&list)
+	for _, o := range list {
+		tv.db.Unscoped().Delete(o)
+	}
+}
+
 func (tv *TV) deleteEpisode(tvid, season, episode int) {
 	var list []TVEpisode
 	tv.db.Where("tv_id = ? and season = ? and episode = ?", tvid, season, episode).Find(&list)
@@ -326,25 +342,10 @@ func (tv *TV) EpisodeWriting(p Person) []TVEpisode {
 	return tv.episodeDepartment("Writing", p)
 }
 
-// func (v *Video) moviesFor(keys []string) []Movie {
-// 	var movies []Movie
-// 	v.db.Where("key in (?)", keys).Find(&movies)
-// 	return movies
-// }
-
-func (tv *TV) RecentlyAdded() []TVEpisode {
+func (tv *TV) AddedTVEpisodes() []TVEpisode {
 	var episodes []TVEpisode
 	tv.db.Where("episodes.last_modified >= ?", time.Now().Add(tv.config.TV.Recent*-1)).
 		Order("episodes.last_modified desc").
-		Limit(tv.config.TV.RecentLimit).
-		Find(&episodes)
-	return episodes
-}
-
-func (tv *TV) RecentlyReleased() []TVEpisode {
-	var episodes []TVEpisode
-	tv.db.Where("episodes.date >= ?", time.Now().Add(tv.config.TV.Recent*-1)).
-		Order("episode.date desc").
 		Limit(tv.config.TV.RecentLimit).
 		Find(&episodes)
 	return episodes

@@ -19,7 +19,6 @@
 package video
 
 import (
-	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -188,13 +187,13 @@ func (v *Video) TMDBMovieBackdrop(m Movie) string {
 	return url.String()
 }
 
-func (v *Video) PersonProfile(p Person) string {
-	if p.ProfilePath == "" {
-		return ""
-	}
-	url := fmt.Sprintf("/img/tm/%s%s", tmdb.Profile185, p.ProfilePath)
-	return url
-}
+// func (v *Video) PersonProfile(p Person) string {
+// 	if p.ProfilePath == "" {
+// 		return ""
+// 	}
+// 	url := fmt.Sprintf("/img/tm/%s%s", tmdb.Profile185, p.ProfilePath)
+// 	return url
+// }
 
 func (v *Video) TMDBPersonProfile(p Person) string {
 	if p.ProfilePath == "" {

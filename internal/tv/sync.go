@@ -25,6 +25,7 @@ import (
 
 	"github.com/takeoutfm/takeout/internal/people"
 	"github.com/takeoutfm/takeout/lib/bucket"
+	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/takeoutfm/takeout/lib/search"
@@ -188,6 +189,8 @@ func parseEpisode(s string) (int, int, error) {
 // sync the series with genries & keywords
 func (tv *TV) syncSeries(tvid int) (search.FieldMap, error) {
 	tv.deleteSeries(tvid)
+	tv.deleteSeriesCast(tvid)
+	tv.deleteSeriesCrew(tvid)
 	tv.deleteGenres(tvid)
 	tv.deleteKeywords(tvid)
 
@@ -451,5 +454,79 @@ func newSeriesCrew(s TVSeries, p Person, crew tmdb.Crew) TVSeriesCrew {
 		PEID:       p.PEID,
 		Department: crew.Department,
 		Job:        crew.Job,
+	}
+}
+
+
+func (tv *TV) SyncPosters(client client.Getter) {
+	for _, s := range tv.Series() {
+		// sync poster
+		img := tv.TMDBSeriesPoster(s)
+		if img != "" {
+			log.Printf("sync %s poster %s\n", s.Name, img)
+			client.Get(img)
+		}
+
+		// sync small poster
+		img = tv.TMDBSeriesPosterSmall(s)
+		if img != "" {
+			log.Printf("sync %s small poster %s\n", s.Name, img)
+			client.Get(img)
+		}
+	}
+}
+
+func (tv *TV) SyncBackdrops(client client.Getter) {
+	for _, s := range tv.Series() {
+		// sync backdrop
+		img := tv.TMDBSeriesBackdrop(s)
+		if img != "" {
+			log.Printf("sync %s backdrop %s\n", s.Name, img)
+			client.Get(img)
+		}
+	}
+}
+
+func (tv *TV) SyncStills(client client.Getter) {
+	for _, s := range tv.Series() {
+		for _, e := range tv.Episodes(s) {
+			// sync still
+			img := tv.TMDBEpisodeStill(e)
+			if img != "" {
+				log.Printf("sync %s s%de%d still %s\n", s.Name, e.Season, e.Episode, img)
+				client.Get(img)
+			}
+
+			// sync still small
+			img = tv.TMDBEpisodeStillSmall(e)
+			if img != "" {
+				log.Printf("sync %s s%de%d still small %s\n", s.Name, e.Season, e.Episode, img)
+				client.Get(img)
+			}
+		}
+	}
+}
+
+func (tv *TV) SyncProfileImages(client client.Getter) {
+	for _, s := range tv.Series() {
+		// cast images
+		cast := tv.SeriesCast(s)
+		for _, p := range cast {
+			img := tv.TMDBPersonProfile(p.Person)
+			if img != "" {
+				log.Printf("sync %s cast profile %s\n", p.Person.Name, img)
+				client.Get(img)
+			}
+		}
+
+		// crew images
+		crew := tv.SeriesCrew(s)
+		for _, p := range crew {
+			img := tv.TMDBPersonProfile(p.Person)
+			if img != "" {
+				log.Printf("sync %s crew profile %s\n", p.Person.Name, img)
+				client.Get(img)
+			}
+		}
 	}
 }

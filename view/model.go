@@ -35,7 +35,7 @@ type Index struct {
 	Time         int64
 	HasMusic     bool
 	HasMovies    bool
-	HasTVShows   bool
+	HasShows     bool
 	HasPodcasts  bool
 	HasPlaylists bool
 }
@@ -48,6 +48,7 @@ type Home struct {
 	RecommendMovies []model.Recommend
 	NewEpisodes     []model.Episode
 	NewSeries       []model.Series
+	AddedTVEpisodes []model.TVEpisode
 }
 
 type Artists struct {

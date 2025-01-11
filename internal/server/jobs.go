@@ -79,6 +79,12 @@ func schedule(config *config.Config) {
 	mediaSync(config.Video.PosterSyncInterval, syncVideoPosters, false)
 	mediaSync(config.Video.BackdropSyncInterval, syncVideoBackdrops, false)
 
+	// tv
+	mediaSync(config.TV.SyncInterval, syncTV, false)
+	mediaSync(config.TV.PosterSyncInterval, syncTVPosters, false)
+	mediaSync(config.TV.BackdropSyncInterval, syncTVBackdrops, false)
+	mediaSync(config.TV.StillSyncInterval, syncTVStills, false)
+
 	scheduler.Every(time.Minute * 5).WaitForSchedule().Do(func() {
 		a := auth.NewAuth(config)
 		err := a.Open()
@@ -219,6 +225,50 @@ func syncVideoProfileImages(config *config.Config, mediaConfig *config.Config) e
 	return nil
 }
 
+func syncTVProfileImages(config *config.Config, mediaConfig *config.Config) error {
+	tv := tv.NewTV(mediaConfig)
+	err := tv.Open()
+	if err != nil {
+		return err
+	}
+	defer tv.Close()
+	tv.SyncProfileImages(config.NewGetterWith(config.Server.ImageClient))
+	return nil
+}
+
+func syncTVBackdrops(config *config.Config, mediaConfig *config.Config) error {
+	tv := tv.NewTV(mediaConfig)
+	err := tv.Open()
+	if err != nil {
+		return err
+	}
+	defer tv.Close()
+	tv.SyncBackdrops(config.NewGetterWith(config.Server.ImageClient))
+	return nil
+}
+
+func syncTVPosters(config *config.Config, mediaConfig *config.Config) error {
+	tv := tv.NewTV(mediaConfig)
+	err := tv.Open()
+	if err != nil {
+		return err
+	}
+	defer tv.Close()
+	tv.SyncPosters(config.NewGetterWith(config.Server.ImageClient))
+	return nil
+}
+
+func syncTVStills(config *config.Config, mediaConfig *config.Config) error {
+	tv := tv.NewTV(mediaConfig)
+	err := tv.Open()
+	if err != nil {
+		return err
+	}
+	defer tv.Close()
+	tv.SyncStills(config.NewGetterWith(config.Server.ImageClient))
+	return nil
+}
+
 func syncPodcasts(config *config.Config, mediaConfig *config.Config) error {
 	p := podcast.NewPodcast(mediaConfig)
 	err := p.Open()
@@ -253,6 +303,7 @@ func Job(config *config.Config, name string) error {
 		}
 		switch name {
 		case "backdrops":
+			syncTVBackdrops(config, mediaConfig)
 			syncVideoBackdrops(config, mediaConfig)
 		case "covers":
 			syncMusicCovers(config, mediaConfig)
@@ -272,11 +323,15 @@ func Job(config *config.Config, name string) error {
 		case "podcasts":
 			syncPodcasts(config, mediaConfig)
 		case "posters":
+			syncTVPosters(config, mediaConfig)
 			syncVideoPosters(config, mediaConfig)
 		case "profiles":
+			syncTVProfileImages(config, mediaConfig)
 			syncVideoProfileImages(config, mediaConfig)
 		case "similar":
 			syncMusicSimilar(config, mediaConfig)
+		case "stills":
+			syncTVStills(config, mediaConfig)
 		case "video":
 			syncVideo(config, mediaConfig)
 		case "tv":

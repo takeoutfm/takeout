@@ -702,6 +702,19 @@ func (m *TMDB) Backdrop(backdropPath string, size string) *url.URL {
 	return url
 }
 
+func (m *TMDB) Still(stillPath string, size string) *url.URL {
+	err := m.checkApiConfig()
+	if err != nil {
+		return nil
+	}
+	v := still(m.apiConfig, size, stillPath)
+	url, err := url.Parse(v)
+	if err != nil {
+		return nil
+	}
+	return url
+}
+
 func (m *TMDB) PersonProfile(profilePath string, size string) *url.URL {
 	err := m.checkApiConfig()
 	if err != nil {

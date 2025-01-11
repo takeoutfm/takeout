@@ -191,6 +191,7 @@ type TVConfig struct {
 	SyncInterval         time.Duration
 	PosterSyncInterval   time.Duration
 	BackdropSyncInterval time.Duration
+	StillSyncInterval    time.Duration
 }
 
 func (c TVConfig) SortedCast(credits tmdb.Credits) []tmdb.Cast {
@@ -497,6 +498,7 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("TV.SyncInterval", "1h")
 	v.SetDefault("TV.PosterSyncInterval", "24h")
 	v.SetDefault("TV.BackdropSyncInterval", "24h")
+	v.SetDefault("TV.StillSyncInterval", "24h")
 
 	// see https://musicbrainz.org/search (series)
 	v.SetDefault("Music.RadioSeries", []string{

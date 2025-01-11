@@ -100,6 +100,27 @@
   {{ end }}
 </div>
 {{ end }}
+{{ if .AddedTVEpisodes }}
+<div>
+  <h1>TV Shows</h1>
+  <div>
+    <h2>Recently Added</h2>
+    <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
+      {{ range .AddedTVEpisodes }}
+      <div style="padding: 10px; max-width: 185px; display: inline-block;">
+	<a data-link="{{.|link}}" style="text-decoration: none;">
+	  <img src="{{.|still_small}}" style="border-radius: 10px;">
+	  <br/>
+	  <div class="movie-small-title">{{ .Name }}</div>
+	  <br style="display: none"/>
+	  <div class="movie-small-year">{{ .Date.Year }}</div>
+	</a>
+      </div>
+      {{ end }}
+    </div>
+  </div>
+</div>
+{{ end }}
 {{ if or .NewEpisodes .NewSeries }}
 <div>
   <h1>Podcasts</h1>

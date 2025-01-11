@@ -197,8 +197,74 @@ func EpisodeStillLarge(e TVEpisode) string {
 	return strings.Join([]string{"/img/tm/", tmdb.StillOriginal, e.StillPath}, "")
 }
 
-func (tv *TV) HasTVShows() bool {
+func (tv *TV) HasShows() bool {
 	return tv.SeriesCount() > 0
+}
+
+func (tv *TV) TMDBSeriesPoster(s TVSeries) string {
+	if s.PosterPath == "" {
+		return ""
+	}
+	url := tv.tmdb.Poster(s.PosterPath, tmdb.Poster342)
+	if url == nil {
+		return ""
+	}
+	return url.String()
+}
+
+func (tv *TV) TMDBSeriesPosterSmall(s TVSeries) string {
+	if s.PosterPath == "" {
+		return ""
+	}
+	url := tv.tmdb.Poster(s.PosterPath, tmdb.Poster154)
+	if url == nil {
+		return ""
+	}
+	return url.String()
+}
+
+func (tv *TV) TMDBSeriesBackdrop(s TVSeries) string {
+	if s.BackdropPath == "" {
+		return ""
+	}
+	url := tv.tmdb.Backdrop(s.BackdropPath, tmdb.Backdrop1280)
+	if url == nil {
+		return ""
+	}
+	return url.String()
+}
+
+func (tv *TV) TMDBEpisodeStill(e TVEpisode) string {
+	if e.StillPath == "" {
+		return ""
+	}
+	url := tv.tmdb.Still(e.StillPath, tmdb.Still300)
+	if url == nil {
+		return ""
+	}
+	return url.String()
+}
+
+func (tv *TV) TMDBEpisodeStillSmall(e TVEpisode) string {
+	if e.StillPath == "" {
+		return ""
+	}
+	url := tv.tmdb.Still(e.StillPath, tmdb.Still185)
+	if url == nil {
+		return ""
+	}
+	return url.String()
+}
+
+func (tv *TV) TMDBPersonProfile(p Person) string {
+	if p.ProfilePath == "" {
+		return ""
+	}
+	url := tv.tmdb.PersonProfile(p.ProfilePath, tmdb.Profile185)
+	if url == nil {
+		return ""
+	}
+	return url.String()
 }
 
 // func (v *Video) Recommend() []Recommend {

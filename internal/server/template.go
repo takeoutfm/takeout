@@ -265,7 +265,7 @@ func doFuncMap() template.FuncMap {
 			switch o.(type) {
 			case model.Movie:
 				img = video.MoviePosterSmall(o.(model.Movie))
-			case model.TVSeries:
+			case model.TVSeries, model.TVEpisode:
 				img = tv.SeriesPosterSmall(o.(model.TVSeries))
 			}
 			return img

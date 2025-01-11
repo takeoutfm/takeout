@@ -34,7 +34,7 @@ func IndexView(ctx Context) *Index {
 	view.Time = time.Now().UnixMilli()
 	view.HasMusic = ctx.Music().HasMusic()
 	view.HasMovies = ctx.Video().HasMovies()
-	view.HasTVShows = ctx.TV().HasTVShows()
+	view.HasShows = ctx.TV().HasShows()
 	view.HasPodcasts = ctx.Podcast().HasPodcasts()
 	view.HasPlaylists = ctx.Music().HasPlaylists(ctx.User())
 	return view
@@ -45,6 +45,7 @@ func HomeView(ctx Context) *Home {
 	m := ctx.Music()
 	v := ctx.Video()
 	p := ctx.Podcast()
+	tv := ctx.TV()
 
 	view.AddedReleases = m.RecentlyAdded()
 	view.NewReleases = m.RecentlyReleased()
@@ -52,7 +53,8 @@ func HomeView(ctx Context) *Home {
 	view.NewMovies = v.RecentlyReleased()
 	view.RecommendMovies = v.Recommend()
 	view.NewEpisodes = p.RecentEpisodes()
-	view.NewSeries = p.RecentSeries()
+	view.AddedTVEpisodes = tv.AddedTVEpisodes()
+
 	return view
 }
 
