@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-package video
+package film
 
 import (
 	"errors"
@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/takeoutfm/takeout/internal/people"
 	"github.com/takeoutfm/takeout/lib/bucket"
 	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/takeoutfm/takeout/lib/date"
@@ -30,7 +31,6 @@ import (
 	"github.com/takeoutfm/takeout/lib/search"
 	"github.com/takeoutfm/takeout/lib/str"
 	"github.com/takeoutfm/takeout/lib/tmdb"
-	"github.com/takeoutfm/takeout/internal/people"
 	. "github.com/takeoutfm/takeout/model"
 )
 
@@ -62,21 +62,21 @@ var (
 )
 
 type SyncContext interface {
-	Video() *Video
+	Film() *Film
 	Object() *bucket.Object
 	Client() *tmdb.TMDB
 	Searcher() search.Searcher
 }
 
 type syncContext struct {
-	video    *Video
+	film     *Film
 	object   *bucket.Object
 	client   *tmdb.TMDB
 	searcher search.Searcher
 }
 
-func (c *syncContext) Video() *Video {
-	return c.video
+func (c *syncContext) Film() *Film {
+	return c.film
 }
 
 func (c *syncContext) Object() *bucket.Object {
@@ -91,17 +91,17 @@ func (c *syncContext) Searcher() search.Searcher {
 	return c.searcher
 }
 
-func newSyncContext(v *Video, o *bucket.Object, client *tmdb.TMDB, searcher search.Searcher) SyncContext {
-	return &syncContext{video: v, object: o, client: client, searcher: searcher}
+func newSyncContext(f *Film, o *bucket.Object, client *tmdb.TMDB, searcher search.Searcher) SyncContext {
+	return &syncContext{film: f, object: o, client: client, searcher: searcher}
 }
 
-func (v *Video) Sync() error {
-	return v.SyncSince(time.Time{})
+func (f *Film) Sync() error {
+	return f.SyncSince(time.Time{})
 }
 
-func (v *Video) SyncSince(lastSync time.Time) error {
-	for _, bucket := range v.buckets {
-		err := v.syncBucket(bucket, lastSync)
+func (f *Film) SyncSince(lastSync time.Time) error {
+	for _, bucket := range f.buckets {
+		err := f.syncBucket(bucket, lastSync)
 		if err != nil {
 			return err
 		}
@@ -115,26 +115,17 @@ var (
 	// Movies/Thriller/Zero Dark Thirty (2012).mkv
 	// Movies/Thriller/Zero Dark Thirty (2012) - HD.mkv
 	movieRegexp = regexp.MustCompile(`.*/(.+?)\s*\(([\d]+)\)(\s-\s(.+))?\.(mkv|mp4)$`)
-
-	// The Shining
-	// Doctor Who (1963) - S01E01 - An Unearthly Child.mkv
-	// Sopranos - S05E21.mkv
-	// Sopranos - S05E21 - Made in America.mkv
-	// Sopranos (1999) - S05E21 - Made in America.mkv
-	// Sopranos (2007) - S05E21 - Made in America.mkv
-	// Name (Date) - SXXEYY[ - Optional].mkv
-	tvRegexp = regexp.MustCompile(`.*/(.+?)\s*\(([\d]+)\)\s+[^\d]*(S\d\dE\d\d)[^\d]*?(?:\s-\s(.+))?\.(mkv|mp4)$`)
 )
 
-func (v *Video) syncBucket(bucket bucket.Bucket, lastSync time.Time) error {
+func (f *Film) syncBucket(bucket bucket.Bucket, lastSync time.Time) error {
 	objectCh, err := bucket.List(lastSync)
 	if err != nil {
 		return err
 	}
 
-	client := tmdb.NewTMDB(v.config.TMDB.Config, v.config.NewGetter())
+	client := tmdb.NewTMDB(f.config.TMDB.Config, f.config.NewGetter())
 
-	s, err := v.newSearch()
+	s, err := f.newSearch()
 	if err != nil {
 		return err
 	}
@@ -146,7 +137,7 @@ func (v *Video) syncBucket(bucket bucket.Bucket, lastSync time.Time) error {
 		if matches != nil {
 			title := matches[1]
 			year := matches[2]
-			err := v.doMovie(o, client, s, title, year)
+			err := f.doMovie(o, client, s, title, year)
 			if err != nil {
 				log.Println(err)
 			}
@@ -160,7 +151,7 @@ func fuzzyName(name string) string {
 	return fuzzyNameRegexp.ReplaceAllString(name, "")
 }
 
-func (v *Video) doMovie(o *bucket.Object, client *tmdb.TMDB, s search.Searcher, title, year string) error {
+func (f *Film) doMovie(o *bucket.Object, client *tmdb.TMDB, s search.Searcher, title, year string) error {
 	results, err := client.MovieSearch(title)
 	if err != nil {
 		return err
@@ -173,7 +164,7 @@ func (v *Video) doMovie(o *bucket.Object, client *tmdb.TMDB, s search.Searcher, 
 		if fuzzyName(title) == fuzzyName(r.Title) &&
 			strings.Contains(r.ReleaseDate, year) {
 			log.Println("matched", r.Title, r.ReleaseDate)
-			fields, err := v.syncMovie(client, r.ID,
+			fields, err := f.syncMovie(client, r.ID,
 				o.Key, o.Size, o.ETag, o.LastModified)
 			if err != nil {
 				if err != ErrDuplicateFound {
@@ -191,13 +182,13 @@ func (v *Video) doMovie(o *bucket.Object, client *tmdb.TMDB, s search.Searcher, 
 	return nil
 }
 
-func (v *Video) syncMovie(client *tmdb.TMDB, tmid int,
+func (f *Film) syncMovie(client *tmdb.TMDB, tmid int,
 	key string, size int64, etag string, lastModified time.Time) (search.FieldMap, error) {
 
 	// check for duplicates and resolve
-	m, err := v.LookupTMID(tmid)
+	m, err := f.LookupTMID(tmid)
 	if err == nil {
-		switch v.config.Video.DuplicateResolution {
+		switch f.config.Film.DuplicateResolution {
 		case PreferLargest:
 			if m.Size >= size {
 				// ignore the smaller movie
@@ -210,16 +201,16 @@ func (v *Video) syncMovie(client *tmdb.TMDB, tmid int,
 			}
 		default:
 			log.Panicf("unsupported DuplicateResolution '%s'",
-				v.config.Video.DuplicateResolution)
+				f.config.Film.DuplicateResolution)
 		}
 	}
 
-	v.deleteMovie(tmid)
-	v.deleteCast(tmid)
-	v.deleteCollections(tmid)
-	v.deleteCrew(tmid)
-	v.deleteGenres(tmid)
-	v.deleteKeywords(tmid)
+	f.deleteMovie(tmid)
+	f.deleteCast(tmid)
+	f.deleteCollections(tmid)
+	f.deleteCrew(tmid)
+	f.deleteGenres(tmid)
+	f.deleteKeywords(tmid)
 
 	fields := make(search.FieldMap)
 
@@ -252,8 +243,8 @@ func (v *Video) syncMovie(client *tmdb.TMDB, tmid int,
 	}
 
 	// rating / certification
-	for _, country := range v.config.Video.ReleaseCountries {
-		release, err := v.certification(client, tmid, country)
+	for _, country := range f.config.Film.ReleaseCountries {
+		release, err := f.certification(client, tmid, country)
 		if err == tmdb.ErrReleaseTypeNotFound {
 			continue
 		} else if err != nil {
@@ -273,7 +264,7 @@ func (v *Video) syncMovie(client *tmdb.TMDB, tmid int,
 	fields.AddField(FieldVote, int(m.VoteAverage*10))
 	fields.AddField(FieldVoteCount, m.VoteCount)
 
-	err = v.createMovie(&m)
+	err = f.createMovie(&m)
 	if err != nil {
 		return fields, err
 	}
@@ -285,7 +276,7 @@ func (v *Video) syncMovie(client *tmdb.TMDB, tmid int,
 			Name:     detail.Collection.Name,
 			SortName: str.SortTitle(detail.Collection.Name),
 		}
-		err = v.createCollection(&c)
+		err = f.createCollection(&c)
 		if err != nil {
 			return fields, err
 		}
@@ -293,14 +284,14 @@ func (v *Video) syncMovie(client *tmdb.TMDB, tmid int,
 	}
 
 	// genres
-	err = v.processGenres(m.TMID, detail.Genres, fields)
+	err = f.processGenres(m.TMID, detail.Genres, fields)
 	if err != nil {
 		return fields, err
 	}
 
 	// keywords
 	keywords, err := client.MovieKeywordNames(tmid)
-	err = v.processKeywords(m.TMID, keywords, fields)
+	err = f.processKeywords(m.TMID, keywords, fields)
 	if err != nil {
 		return fields, err
 	}
@@ -310,12 +301,12 @@ func (v *Video) syncMovie(client *tmdb.TMDB, tmid int,
 	if err != nil {
 		return fields, err
 	}
-	err = v.processCredits(m, client, credits, fields)
+	err = f.processCredits(m, client, credits, fields)
 
 	return fields, err
 }
 
-func (v *Video) certification(client *tmdb.TMDB, tmid int, country string) (tmdb.Release, error) {
+func (f *Film) certification(client *tmdb.TMDB, tmid int, country string) (tmdb.Release, error) {
 	types := []int{tmdb.TypeTheatrical, tmdb.TypeDigital}
 	for _, t := range types {
 		release, err := client.MovieReleaseType(tmid, country, t)
@@ -327,13 +318,13 @@ func (v *Video) certification(client *tmdb.TMDB, tmid int, country string) (tmdb
 	return tmdb.Release{}, tmdb.ErrReleaseTypeNotFound
 }
 
-func (v *Video) processGenres(tmid int64, genres []tmdb.Genre, fields search.FieldMap) error {
+func (f *Film) processGenres(tmid int64, genres []tmdb.Genre, fields search.FieldMap) error {
 	for _, o := range genres {
 		g := Genre{
 			Name: o.Name,
 			TMID: tmid, // as TMID
 		}
-		err := v.createGenre(&g)
+		err := f.createGenre(&g)
 		if err != nil {
 			return err
 		}
@@ -342,13 +333,13 @@ func (v *Video) processGenres(tmid int64, genres []tmdb.Genre, fields search.Fie
 	return nil
 }
 
-func (v *Video) processKeywords(tmid int64, keywords []string, fields search.FieldMap) error {
+func (f *Film) processKeywords(tmid int64, keywords []string, fields search.FieldMap) error {
 	for _, keyword := range keywords {
 		k := Keyword{
 			Name: keyword,
 			TMID: tmid,
 		}
-		err := v.createKeyword(&k)
+		err := f.createKeyword(&k)
 		if err != nil {
 			return err
 		}
@@ -357,8 +348,8 @@ func (v *Video) processKeywords(tmid int64, keywords []string, fields search.Fie
 	return nil
 }
 
-func (v *Video) sortedCast(credits tmdb.Credits) []tmdb.Cast {
-	limit := v.config.Video.CastLimit
+func (f *Film) sortedCast(credits tmdb.Credits) []tmdb.Cast {
+	limit := f.config.Film.CastLimit
 	cast := credits.SortedCast()
 	if len(cast) > limit {
 		cast = cast[:limit]
@@ -366,29 +357,29 @@ func (v *Video) sortedCast(credits tmdb.Credits) []tmdb.Cast {
 	return cast
 }
 
-func (v *Video) relevantCrew(credits tmdb.Credits) []tmdb.Crew {
-	return credits.CrewWithJobs(v.config.Video.CrewJobs)
+func (f *Film) relevantCrew(credits tmdb.Credits) []tmdb.Crew {
+	return credits.CrewWithJobs(f.config.Film.CrewJobs)
 }
 
-func (v *Video) processCredits(m Movie, client *tmdb.TMDB, credits tmdb.Credits, fields search.FieldMap) error {
-	for _, c := range v.sortedCast(credits) {
-		p, err := people.EnsurePerson(c.ID, client, v.db)
+func (f *Film) processCredits(m Movie, client *tmdb.TMDB, credits tmdb.Credits, fields search.FieldMap) error {
+	for _, c := range f.sortedCast(credits) {
+		p, err := people.EnsurePerson(c.ID, client, f.db)
 		if err != nil {
 			return err
 		}
-		cast, err := v.createCastMember(m, p, c)
+		cast, err := f.createCastMember(m, p, c)
 		if err != nil {
 			return err
 		}
 		fields.AddField(FieldCast, p.Name)
 		fields.AddField(FieldCharacter, cast.Character)
 	}
-	for _, c := range v.relevantCrew(credits) {
-		p, err := people.EnsurePerson(c.ID, client, v.db)
+	for _, c := range f.relevantCrew(credits) {
+		p, err := people.EnsurePerson(c.ID, client, f.db)
 		if err != nil {
 			return err
 		}
-		crew, err := v.createCrewMember(m, p, c)
+		crew, err := f.createCrewMember(m, p, c)
 		if err != nil {
 			return err
 		}
@@ -399,45 +390,45 @@ func (v *Video) processCredits(m Movie, client *tmdb.TMDB, credits tmdb.Credits,
 	return nil
 }
 
-func (v *Video) createCastMember(m Movie, p Person, cast tmdb.Cast) (Cast, error) {
+func (f *Film) createCastMember(m Movie, p Person, cast tmdb.Cast) (Cast, error) {
 	c := Cast{
 		TMID:      m.TMID,
 		PEID:      p.PEID,
 		Character: cast.Character,
 		Rank:      cast.Order,
 	}
-	err := v.createCast(&c)
+	err := f.createCast(&c)
 	if err != nil {
 		return Cast{}, err
 	}
 	return c, err
 }
 
-func (v *Video) createCrewMember(m Movie, p Person, crew tmdb.Crew) (Crew, error) {
+func (f *Film) createCrewMember(m Movie, p Person, crew tmdb.Crew) (Crew, error) {
 	c := Crew{
 		TMID:       m.TMID,
 		PEID:       p.PEID,
 		Department: crew.Department,
 		Job:        crew.Job,
 	}
-	err := v.createCrew(&c)
+	err := f.createCrew(&c)
 	if err != nil {
 		return Crew{}, err
 	}
 	return c, nil
 }
 
-func (v *Video) SyncPosters(client client.Getter) {
-	for _, m := range v.Movies() {
+func (f *Film) SyncPosters(client client.Getter) {
+	for _, m := range f.Movies() {
 		// sync poster
-		img := v.TMDBMoviePoster(m)
+		img := f.TMDBMoviePoster(m)
 		if img != "" {
 			log.Printf("sync %s poster %s\n", m.Title, img)
 			client.Get(img)
 		}
 
 		// sync small poster
-		img = v.TMDBMoviePosterSmall(m)
+		img = f.TMDBMoviePosterSmall(m)
 		if img != "" {
 			log.Printf("sync %s small poster %s\n", m.Title, img)
 			client.Get(img)
@@ -445,10 +436,10 @@ func (v *Video) SyncPosters(client client.Getter) {
 	}
 }
 
-func (v *Video) SyncBackdrops(client client.Getter) {
-	for _, m := range v.Movies() {
+func (f *Film) SyncBackdrops(client client.Getter) {
+	for _, m := range f.Movies() {
 		// sync backdrop
-		img := v.TMDBMovieBackdrop(m)
+		img := f.TMDBMovieBackdrop(m)
 		if img != "" {
 			log.Printf("sync %s backdrop %s\n", m.Title, img)
 			client.Get(img)
@@ -456,12 +447,12 @@ func (v *Video) SyncBackdrops(client client.Getter) {
 	}
 }
 
-func (v *Video) SyncProfileImages(client client.Getter) {
-	for _, m := range v.Movies() {
+func (f *Film) SyncProfileImages(client client.Getter) {
+	for _, m := range f.Movies() {
 		// cast images
-		cast := v.Cast(m)
+		cast := f.Cast(m)
 		for _, p := range cast {
-			img := v.TMDBPersonProfile(p.Person)
+			img := f.TMDBPersonProfile(p.Person)
 			if img != "" {
 				log.Printf("sync %s cast profile %s\n", p.Person.Name, img)
 				client.Get(img)
@@ -469,9 +460,9 @@ func (v *Video) SyncProfileImages(client client.Getter) {
 		}
 
 		// crew images
-		crew := v.Crew(m)
+		crew := f.Crew(m)
 		for _, p := range crew {
-			img := v.TMDBPersonProfile(p.Person)
+			img := f.TMDBPersonProfile(p.Person)
 			if img != "" {
 				log.Printf("sync %s crew profile %s\n", p.Person.Name, img)
 				client.Get(img)

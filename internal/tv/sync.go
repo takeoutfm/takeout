@@ -103,7 +103,6 @@ func (tv *TV) syncBucket(bucket bucket.Bucket, lastSync time.Time) error {
 
 	var matches []string
 	for o := range objectCh {
-		log.Println("xxx", o)
 		matches = tvRegexp.FindStringSubmatch(o.Path)
 		if matches != nil && len(matches) >= 4 {
 			series := matches[1]

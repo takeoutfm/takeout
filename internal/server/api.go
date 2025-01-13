@@ -1059,7 +1059,7 @@ func apiMovieLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url := ctx.Video().MovieURL(movie)
+	url := ctx.Film().MovieURL(movie)
 	doRedirect(w, r, url, http.StatusTemporaryRedirect)
 }
 

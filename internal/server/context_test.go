@@ -27,11 +27,11 @@ import (
 	"github.com/takeoutfm/takeout/internal/activity"
 	"github.com/takeoutfm/takeout/internal/auth"
 	"github.com/takeoutfm/takeout/internal/config"
+	"github.com/takeoutfm/takeout/internal/film"
 	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/takeoutfm/takeout/internal/podcast"
 	"github.com/takeoutfm/takeout/internal/progress"
 	"github.com/takeoutfm/takeout/internal/tv"
-	"github.com/takeoutfm/takeout/internal/video"
 	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/takeoutfm/takeout/lib/gorm"
 	"github.com/takeoutfm/takeout/lib/str"
@@ -63,7 +63,7 @@ type TestContext struct {
 	m    *music.Music
 	pod  *podcast.Podcast
 	p    *progress.Progress
-	v    *video.Video
+	f    *film.Film
 	tv   *tv.TV
 }
 
@@ -153,15 +153,15 @@ func (c *TestContext) Session() auth.Session {
 	}
 }
 
-func (c *TestContext) Video() *video.Video {
-	if c.v == nil {
-		c.v = video.NewVideo(c.Config())
-		err := c.v.Open()
+func (c *TestContext) Film() *film.Film {
+	if c.f == nil {
+		c.f = film.NewFilm(c.Config())
+		err := c.f.Open()
 		if err != nil {
 			c.t.Fatal(err)
 		}
 	}
-	return c.v
+	return c.f
 }
 
 func (c *TestContext) TV() *tv.TV {
@@ -174,7 +174,6 @@ func (c *TestContext) TV() *tv.TV {
 	}
 	return c.tv
 }
-
 
 func (c *TestContext) ImageClient() client.Getter {
 	return nil
@@ -203,7 +202,7 @@ func (c *TestContext) FindRelease(id string) (model.Release, error) {
 	if id == TestReleaseID {
 		return model.Release{
 			Model: gorm.Model{ID: uint(str.Atoi(TestReleaseID))},
-			Name: "test release",
+			Name:  "test release",
 		}, nil
 	}
 	return model.Release{}, errors.New("release not found")

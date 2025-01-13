@@ -134,7 +134,7 @@ func doSeries(config *config.Config, query string, year, season, episode int) {
 				if err != nil {
 					panic(err)
 				}
-				vars["Name"] = e.Name
+				vars["Name"] = fixColon(e.Name)
 				found = true
 				break
 			}

@@ -329,7 +329,7 @@ func Serve(config *config.Config) error {
 	mux.Handle("GET /img/mb/rg/{rgid}/{side}", imageHandler(ctx, imgReleaseGroup, client))
 	mux.Handle("GET /img/mb/re/{reid}", imageHandler(ctx, imgReleaseFront, client))
 	mux.Handle("GET /img/mb/re/{reid}/{side}", imageHandler(ctx, imgRelease, client))
-	mux.Handle("GET /img/tm/{size}/{path}", imageHandler(ctx, imgVideo, client))
+	mux.Handle("GET /img/tm/{size}/{path}", imageHandler(ctx, imgTMDB, client))
 	mux.Handle("GET /img/fa/{arid}/t/{path}", imageHandler(ctx, imgArtistThumb, client))
 	mux.Handle("GET /img/fa/{arid}/b/{path}", imageHandler(ctx, imgArtistBackground, client))
 

@@ -40,8 +40,9 @@ RES_STATIC = $(wildcard ${RES_DIR}/static/*.css ${RES_DIR}/static/*.html \
 RES_ROOT = $(wildcard ${RES_DIR}/template/*.html)
 RES_MUSIC = $(wildcard ${RES_DIR}/template/music/*.html)
 RES_PODCAST = $(wildcard ${RES_DIR}/template/podcast/*.html)
-RES_VIDEO = $(wildcard ${RES_DIR}/template/video/*.html)
-RES_TEMPLATE = ${RES_ROOT} ${RES_MUSIC} ${RES_PODCAST} ${RES_VIDEO}
+RES_FILM = $(wildcard ${RES_DIR}/template/film/*.html)
+RES_TV = $(wildcard ${RES_DIR}/template/tv/*.html)
+RES_TEMPLATE = ${RES_ROOT} ${RES_MUSIC} ${RES_PODCAST} ${RES_FILM} ${RES_TV}
 SERVER_RESOURCES = ${RES_STATIC} ${RES_TEMPLATE}
 
 # server

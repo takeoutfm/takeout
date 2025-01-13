@@ -35,7 +35,7 @@ import (
 	"github.com/takeoutfm/takeout/internal/people"
 	"github.com/takeoutfm/takeout/internal/podcast"
 	"github.com/takeoutfm/takeout/internal/tv"
-	"github.com/takeoutfm/takeout/internal/video"
+	"github.com/takeoutfm/takeout/internal/film"
 	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/takeoutfm/takeout/model"
@@ -68,7 +68,7 @@ func getTemplates(config *config.Config) *template.Template {
 		"res/template/people/*.html",
 		"res/template/podcast/*.html",
 		"res/template/tv/*.html",
-		"res/template/video/*.html"))
+		"res/template/film/*.html"))
 }
 
 func doFuncMap() template.FuncMap {
@@ -254,7 +254,7 @@ func doFuncMap() template.FuncMap {
 			var img string
 			switch o.(type) {
 			case model.Movie:
-				img = video.MoviePoster(o.(model.Movie))
+				img = film.MoviePoster(o.(model.Movie))
 			case model.TVSeries:
 				img = tv.SeriesPoster(o.(model.TVSeries))
 			}
@@ -264,7 +264,7 @@ func doFuncMap() template.FuncMap {
 			var img string
 			switch o.(type) {
 			case model.Movie:
-				img = video.MoviePosterSmall(o.(model.Movie))
+				img = film.MoviePosterSmall(o.(model.Movie))
 			case model.TVSeries, model.TVEpisode:
 				img = tv.SeriesPosterSmall(o.(model.TVSeries))
 			}
@@ -274,7 +274,7 @@ func doFuncMap() template.FuncMap {
 			var img string
 			switch o.(type) {
 			case model.Movie:
-				img = video.MovieBackdrop(o.(model.Movie))
+				img = film.MovieBackdrop(o.(model.Movie))
 			case model.TVSeries:
 				img = tv.SeriesBackdrop(o.(model.TVSeries))
 			}
@@ -374,9 +374,9 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 		temp = "movies.html"
 	} else if v := r.URL.Query().Get("movie"); v != "" {
 		// /v?movie={movie-id}
-		vid := ctx.Video()
+		f := ctx.Film()
 		id, _ := strconv.Atoi(v)
-		movie, _ := vid.LookupMovie(id)
+		movie, _ := f.LookupMovie(id)
 		result = MovieView(ctx, movie)
 		temp = "movie.html"
 	} else if v := r.URL.Query().Get("profile"); v != "" {
@@ -396,9 +396,9 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 		temp = "keyword.html"
 	} else if v := r.URL.Query().Get("watch"); v != "" {
 		// /v?watch={movie-id}
-		vid := ctx.Video()
+		f := ctx.Film()
 		id, _ := strconv.Atoi(v)
-		movie, _ := vid.LookupMovie(id)
+		movie, _ := f.LookupMovie(id)
 		result = WatchView(ctx, movie)
 		temp = "watch.html"
 	} else if v := r.URL.Query().Get("tv"); v != "" {

@@ -26,11 +26,11 @@ import (
 	"github.com/takeoutfm/takeout/internal/activity"
 	"github.com/takeoutfm/takeout/internal/auth"
 	"github.com/takeoutfm/takeout/internal/config"
+	"github.com/takeoutfm/takeout/internal/film"
 	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/takeoutfm/takeout/internal/podcast"
 	"github.com/takeoutfm/takeout/internal/progress"
 	"github.com/takeoutfm/takeout/internal/tv"
-	"github.com/takeoutfm/takeout/internal/video"
 	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/takeoutfm/takeout/lib/str"
 	"github.com/takeoutfm/takeout/model"
@@ -60,7 +60,7 @@ type Context interface {
 	Template() *template.Template
 	User() auth.User
 	Session() auth.Session
-	Video() *video.Video
+	Film() *film.Film
 	TV() *tv.TV
 	ImageClient() client.Getter
 
@@ -162,8 +162,8 @@ func (ctx RequestContext) Session() auth.Session {
 	return ctx.session
 }
 
-func (ctx RequestContext) Video() *video.Video {
-	return ctx.media.video
+func (ctx RequestContext) Film() *film.Film {
+	return ctx.media.film
 }
 
 func (ctx RequestContext) TV() *tv.TV {
@@ -207,7 +207,7 @@ func (ctx RequestContext) FindPlaylist(id string) (model.Playlist, error) {
 }
 
 func (ctx RequestContext) FindMovie(id string) (model.Movie, error) {
-	return ctx.Video().FindMovie(id)
+	return ctx.Film().FindMovie(id)
 }
 
 func (ctx RequestContext) FindTVSeries(id string) (model.TVSeries, error) {
@@ -232,7 +232,7 @@ func (ctx RequestContext) FindEpisode(id string) (model.Episode, error) {
 
 func (ctx RequestContext) FindPerson(id string) (model.Person, error) {
 	peid := str.Atoi(id)
-	person, err := ctx.Video().Person(peid)
+	person, err := ctx.Film().Person(peid)
 	if err != nil {
 		person, err = ctx.TV().Person(peid)
 		if err != nil {
@@ -255,7 +255,7 @@ func (ctx RequestContext) ArtistBackground(a model.Artist) string {
 }
 
 func (ctx RequestContext) MovieImage(m model.Movie) string {
-	return video.MoviePoster(m)
+	return film.MoviePoster(m)
 }
 
 func (ctx RequestContext) EpisodeImage(e model.Episode) string {

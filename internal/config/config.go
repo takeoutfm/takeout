@@ -53,10 +53,9 @@ var (
 )
 
 const (
-	MediaMusic  = "music"
-	MediaVideo  = "video"
-	MediaMovies = "movies"
-	MediaTV     = "tv"
+	MediaMusic = "music"
+	MediaFilm  = "film"
+	MediaTV    = "tv"
 )
 
 type DatabaseConfig struct {
@@ -155,7 +154,7 @@ type MusicConfig struct {
 	RelatedArtists       time.Duration
 }
 
-type VideoConfig struct {
+type FilmConfig struct {
 	DB                   DatabaseConfig
 	ReleaseCountries     []string
 	CastLimit            int
@@ -171,11 +170,11 @@ type VideoConfig struct {
 	DuplicateResolution  string
 }
 
-func (c VideoConfig) SortedCast(credits tmdb.Credits) []tmdb.Cast {
+func (c FilmConfig) SortedCast(credits tmdb.Credits) []tmdb.Cast {
 	return sortedCast(credits, c.CastLimit)
 }
 
-func (c VideoConfig) RelevantCrew(credits tmdb.Credits) []tmdb.Crew {
+func (c FilmConfig) RelevantCrew(credits tmdb.Credits) []tmdb.Crew {
 	return relevantCrew(credits, c.CrewJobs)
 }
 
@@ -297,7 +296,7 @@ type Config struct {
 	TMDB      TMDBAPIConfig
 	Search    search.Config
 	Server    ServerConfig
-	Video     VideoConfig
+	Film      FilmConfig
 	TV        TVConfig
 	Assistant AssistantConfig
 	Podcast   PodcastConfig
@@ -455,14 +454,14 @@ func configDefaults(v *viper.Viper) {
 
 	v.SetDefault("Search.IndexDir", ".")
 
-	v.SetDefault("Video.DB.Driver", "sqlite3")
-	v.SetDefault("Video.DB.Source", "video.db")
-	v.SetDefault("Video.DB.Logger", "default")
-	v.SetDefault("Video.ReleaseCountries", []string{
+	v.SetDefault("Film.DB.Driver", "sqlite3")
+	v.SetDefault("Film.DB.Source", "film.db")
+	v.SetDefault("Film.DB.Logger", "default")
+	v.SetDefault("Film.ReleaseCountries", []string{
 		"US",
 	})
-	v.SetDefault("Video.CastLimit", "25")
-	v.SetDefault("Video.CrewJobs", []string{
+	v.SetDefault("Film.CastLimit", "25")
+	v.SetDefault("Film.CrewJobs", []string{
 		"Director",
 		"Executive Producer",
 		"Novel",
@@ -470,14 +469,14 @@ func configDefaults(v *viper.Viper) {
 		"Screenplay",
 		"Story",
 	})
-	v.SetDefault("Video.Recent", "8760h") // 1 year
-	v.SetDefault("Video.RecentLimit", "50")
-	v.SetDefault("Video.SearchIndexName", "video")
-	v.SetDefault("Video.SearchLimit", "100")
-	v.SetDefault("Video.SyncInterval", "1h")
-	v.SetDefault("Video.PosterSyncInterval", "24h")
-	v.SetDefault("Video.BackdropSyncInterval", "24h")
-	v.SetDefault("Video.DuplicateResolution", "largest")
+	v.SetDefault("Film.Recent", "8760h") // 1 year
+	v.SetDefault("Film.RecentLimit", "50")
+	v.SetDefault("Film.SearchIndexName", "film")
+	v.SetDefault("Film.SearchLimit", "100")
+	v.SetDefault("Film.SyncInterval", "1h")
+	v.SetDefault("Film.PosterSyncInterval", "24h")
+	v.SetDefault("Film.BackdropSyncInterval", "24h")
+	v.SetDefault("Film.DuplicateResolution", "largest")
 
 	v.SetDefault("TV.DB.Driver", "sqlite3")
 	v.SetDefault("TV.DB.Source", "tv.db")
@@ -747,7 +746,7 @@ func TestingConfig() (*Config, error) {
 	v.SetDefault("Music.DB.Source", "${Activity.DB.Source}")
 	v.SetDefault("Podcast.DB.Source", "${Activity.DB.Source}")
 	v.SetDefault("Progress.DB.Source", "${Activity.DB.Source}")
-	v.SetDefault("Video.DB.Source", "${Activity.DB.Source}")
+	v.SetDefault("Film.DB.Source", "${Activity.DB.Source}")
 
 	v.SetDefault("Auth.AccessToken.Issuer", "takeout.test")
 	v.SetDefault("Auth.AccessToken.Age", "5m")
@@ -765,7 +764,7 @@ func TestingConfig() (*Config, error) {
 	v.SetDefault("Search.IndexDir", "")
 	v.SetDefault("Music.SearchIndexName", "")
 	v.SetDefault("Podcast.SearchIndexName", "")
-	v.SetDefault("Video.SearchIndexName", "")
+	v.SetDefault("Film.SearchIndexName", "")
 
 	return makeConfig(v, "/tmp")
 }
@@ -826,7 +825,7 @@ func LoadConfig(dir string) (*Config, error) {
 		// cache the loaded config and don't load again
 		dirConfigCache[dir] = c
 		// TODO revisit watching and rebuilding all services (music,
-		// video, podcast) would need to be reconstructed and not sure
+		// film, podcast) would need to be reconstructed and not sure
 		// if that's desired.
 	}
 	return c, err

@@ -101,10 +101,6 @@ func (tv *TV) FindPerson(identifier string) (Person, error) {
 	return people.FindPerson(tv.db, identifier)
 }
 
-// func (v *Video) FindMovies(identifiers []string) []Movie {
-// 	return v.lookupIMIDs(identifiers)
-// }
-
 func (tv *TV) newSearch() (search.Searcher, error) {
 	keywords := []string{
 		FieldGenre,
@@ -266,19 +262,3 @@ func (tv *TV) TMDBPersonProfile(p Person) string {
 	}
 	return url.String()
 }
-
-// func (v *Video) Recommend() []Recommend {
-// 	var recommend []Recommend
-// 	for _, r := range v.config.Video.Recommend.When {
-// 		if date.Match(r.Layout, r.Match) {
-// 			movies := v.Search(r.Query)
-// 			if len(movies) > 0 {
-// 				recommend = append(recommend, Recommend{
-// 					Name:   r.Name,
-// 					Movies: movies,
-// 				})
-// 			}
-// 		}
-// 	}
-// 	return recommend
-// }

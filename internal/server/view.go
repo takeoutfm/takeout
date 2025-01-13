@@ -33,7 +33,7 @@ func IndexView(ctx Context) *Index {
 	view := &Index{}
 	view.Time = time.Now().UnixMilli()
 	view.HasMusic = ctx.Music().HasMusic()
-	view.HasMovies = ctx.Video().HasMovies()
+	view.HasMovies = ctx.Film().HasMovies()
 	view.HasShows = ctx.TV().HasShows()
 	view.HasPodcasts = ctx.Podcast().HasPodcasts()
 	view.HasPlaylists = ctx.Music().HasPlaylists(ctx.User())
@@ -43,15 +43,15 @@ func IndexView(ctx Context) *Index {
 func HomeView(ctx Context) *Home {
 	view := &Home{}
 	m := ctx.Music()
-	v := ctx.Video()
+	f := ctx.Film()
 	p := ctx.Podcast()
 	tv := ctx.TV()
 
 	view.AddedReleases = m.RecentlyAdded()
 	view.NewReleases = m.RecentlyReleased()
-	view.AddedMovies = v.RecentlyAdded()
-	view.NewMovies = v.RecentlyReleased()
-	view.RecommendMovies = v.Recommend()
+	view.AddedMovies = f.RecentlyAdded()
+	view.NewMovies = f.RecentlyReleased()
+	view.RecommendMovies = f.Recommend()
 	view.NewEpisodes = p.RecentEpisodes()
 	view.AddedTVEpisodes = tv.AddedTVEpisodes()
 
@@ -163,7 +163,7 @@ func ReleaseView(ctx Context, release model.Release) *Release {
 
 func SearchView(ctx Context, query string) *Search {
 	m := ctx.Music()
-	v := ctx.Video()
+	f := ctx.Film()
 	p := ctx.Podcast()
 	tv := ctx.TV()
 	view := &Search{}
@@ -177,7 +177,7 @@ func SearchView(ctx Context, query string) *Search {
 	}
 	view.Query = query
 	view.Tracks = m.Search(query)
-	view.Movies = v.Search(query)
+	view.Movies = f.Search(query)
 	view.Series, view.Episodes = p.Search(query)
 	view.TVEpisodes = tv.Search(query)
 	view.Hits = len(view.Artists) +
@@ -216,48 +216,48 @@ func RadioView(ctx Context) *Radio {
 }
 
 func MoviesView(ctx Context) *Movies {
-	v := ctx.Video()
+	f := ctx.Film()
 	view := &Movies{}
-	view.Movies = v.Movies()
+	view.Movies = f.Movies()
 	return view
 }
 
 func MovieView(ctx Context, m model.Movie) *Movie {
-	v := ctx.Video()
+	f := ctx.Film()
 	view := &Movie{}
 	view.Movie = m
 	view.Location = ctx.LocateMovie(m)
-	collections := v.MovieCollections(m)
+	collections := f.MovieCollections(m)
 	if len(collections) > 0 {
 		view.Collection = collections[0]
-		view.Other = v.CollectionMovies(collections[0])
+		view.Other = f.CollectionMovies(collections[0])
 		if len(view.Other) == 1 && view.Other[0].ID == m.ID {
 			// collection is just this movie so remove
 			view.Other = view.Other[1:]
 		}
 	}
-	view.Cast = v.Cast(m)
-	view.Crew = v.Crew(m)
+	view.Cast = f.Cast(m)
+	view.Crew = f.Crew(m)
 
 	billing := people.NewBilling(view.Cast, view.Crew)
 	view.Directing = billing.Directors
 	view.Starring = billing.Actors
 
-	view.Genres = v.Genres(m)
-	view.Keywords = v.Keywords(m)
+	view.Genres = f.Genres(m)
+	view.Keywords = f.Keywords(m)
 	view.Vote = int(m.VoteAverage * 10)
 	view.VoteCount = m.VoteCount
 	return view
 }
 
 func ProfileView(ctx Context, p model.Person) *Profile {
-	v := ctx.Video()
+	f := ctx.Film()
 	tv := ctx.TV()
 	view := &Profile{}
 	view.Person = p
-	view.Movies.Directing = v.Directing(p)
-	view.Movies.Starring = v.Starring(p)
-	view.Movies.Writing = v.Writing(p)
+	view.Movies.Directing = f.Directing(p)
+	view.Movies.Starring = f.Starring(p)
+	view.Movies.Writing = f.Writing(p)
 	view.Shows.Directing = tv.SeriesDirecting(p)
 	view.Shows.Starring = tv.SeriesStarring(p)
 	view.Shows.Writing = tv.SeriesWriting(p)
@@ -266,18 +266,18 @@ func ProfileView(ctx Context, p model.Person) *Profile {
 }
 
 func GenreView(ctx Context, name string) *Genre {
-	v := ctx.Video()
+	f := ctx.Film()
 	view := &Genre{}
 	view.Name = name
-	view.Movies = v.Genre(name)
+	view.Movies = f.Genre(name)
 	return view
 }
 
 func KeywordView(ctx Context, name string) *Keyword {
-	v := ctx.Video()
+	f := ctx.Film()
 	view := &Keyword{}
 	view.Name = name
-	view.Movies = v.Keyword(name)
+	view.Movies = f.Keyword(name)
 	return view
 }
 

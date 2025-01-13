@@ -25,7 +25,7 @@ import (
 	"github.com/takeoutfm/takeout/internal/config"
 	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/takeoutfm/takeout/internal/podcast"
-	"github.com/takeoutfm/takeout/internal/video"
+	"github.com/takeoutfm/takeout/internal/film"
 	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/lib/log"
 	. "github.com/takeoutfm/takeout/model"
@@ -52,7 +52,7 @@ type Context interface {
 	Music() *music.Music
 	Podcast() *podcast.Podcast
 	User() auth.User
-	Video() *video.Video
+	Film() *film.Film
 }
 
 type Activity struct {
@@ -95,11 +95,11 @@ func (a *Activity) DeleteUserEvents(ctx Context) error {
 }
 
 func (a *Activity) resolveMovieEvent(ctx Context, e MovieEvent) (ActivityMovie, error) {
-	v := ctx.Video()
+	f := ctx.Film()
 	if e.IMID == "" {
 		return ActivityMovie{}, ErrMovieNotFound
 	}
-	movie, err := v.FindMovie(e.IMID)
+	movie, err := f.FindMovie(e.IMID)
 	if err != nil {
 		return ActivityMovie{}, err
 	}
@@ -422,12 +422,12 @@ func (a *Activity) CreateEvents(ctx Context, events Events) error {
 		e.Date = e.Date.UTC()
 		if e.ETag != "" {
 			// resolve using ETag
-			video, err := ctx.Video().LookupETag(e.ETag)
+			movie, err := ctx.Film().LookupETag(e.ETag)
 			if err != nil {
 				return err
 			}
-			e.IMID = video.IMID
-			e.TMID = strconv.FormatInt(video.TMID, 10)
+			e.IMID = movie.IMID
+			e.TMID = strconv.FormatInt(movie.TMID, 10)
 		}
 		if e.IsValid() == false {
 			return ErrInvalidMovieEvent

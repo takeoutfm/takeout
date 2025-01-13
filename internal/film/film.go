@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-// Package video provides support for all movie media.
-package video
+// Package film provides support for all movie media.
+package film
 
 import (
 	"net/url"
@@ -32,78 +32,78 @@ import (
 	"gorm.io/gorm"
 )
 
-type Video struct {
+type Film struct {
 	config  *config.Config
 	db      *gorm.DB
 	tmdb    *tmdb.TMDB
 	buckets []bucket.Bucket
 }
 
-func NewVideo(config *config.Config) *Video {
-	return &Video{
+func NewFilm(config *config.Config) *Film {
+	return &Film{
 		config: config,
 		tmdb:   tmdb.NewTMDB(config.TMDB.Config, config.NewGetter()),
 	}
 }
 
-func (v *Video) Open() (err error) {
-	err = v.openDB()
+func (f *Film) Open() (err error) {
+	err = f.openDB()
 	if err == nil {
-		v.buckets, err = bucket.OpenMedia(v.config.Buckets, config.MediaVideo)
+		f.buckets, err = bucket.OpenMedia(f.config.Buckets, config.MediaFilm)
 	}
 	return
 }
 
-func (v *Video) Close() {
-	v.closeDB()
+func (f *Film) Close() {
+	f.closeDB()
 }
 
-func (v *Video) FindMovie(identifier string) (Movie, error) {
+func (f *Film) FindMovie(identifier string) (Movie, error) {
 	id, err := strconv.Atoi(identifier)
 	if err != nil {
 		if strings.HasPrefix(identifier, "uuid:") {
-			return v.LookupUUID(identifier[5:])
+			return f.LookupUUID(identifier[5:])
 		} else if strings.HasPrefix(identifier, "imid:") {
-			return v.LookupIMID(identifier[5:])
+			return f.LookupIMID(identifier[5:])
 		} else if strings.HasPrefix(identifier, "tmid:") {
 			id, err := strconv.Atoi(identifier[5:])
 			if err != nil {
 				return Movie{}, err
 			}
-			return v.LookupTMID(id)
+			return f.LookupTMID(id)
 		} else {
-			return v.LookupIMID(identifier)
+			return f.LookupIMID(identifier)
 		}
 	} else {
-		return v.LookupMovie(id)
+		return f.LookupMovie(id)
 	}
 }
 
-func (v *Video) FindMovies(identifiers []string) []Movie {
-	return v.lookupIMIDs(identifiers)
+func (f *Film) FindMovies(identifiers []string) []Movie {
+	return f.lookupIMIDs(identifiers)
 }
 
-func (v *Video) newSearch() (search.Searcher, error) {
+func (f *Film) newSearch() (search.Searcher, error) {
 	keywords := []string{
 		FieldGenre,
 		FieldKeyword,
 	}
-	s := v.config.NewSearcher()
-	err := s.Open(v.config.Video.SearchIndexName, keywords)
+	s := f.config.NewSearcher()
+	err := s.Open(f.config.Film.SearchIndexName, keywords)
 	if err != nil {
 		return nil, err
 	}
 	return s, nil
 }
 
-func (v *Video) Search(q string, limit ...int) []Movie {
-	s, err := v.newSearch()
+func (f *Film) Search(q string, limit ...int) []Movie {
+	s, err := f.newSearch()
 	if err != nil {
 		return []Movie{}
 	}
 	defer s.Close()
 
-	l := v.config.Video.SearchLimit
+	l := f.config.Film.SearchLimit
 	if len(limit) == 1 {
 		l = limit[0]
 	}
@@ -122,15 +122,15 @@ func (v *Video) Search(q string, limit ...int) []Movie {
 			end = len(keys)
 		}
 		chunk := keys[i:end]
-		movies = append(movies, v.moviesFor(chunk)...)
+		movies = append(movies, f.moviesFor(chunk)...)
 	}
 
 	return movies
 }
 
-func (v *Video) MovieURL(m Movie) *url.URL {
+func (f *Film) MovieURL(m Movie) *url.URL {
 	// FIXME assume first bucket!!!
-	return v.buckets[0].ObjectURL(m.Key)
+	return f.buckets[0].ObjectURL(m.Key)
 }
 
 func MoviePoster(m Movie) string {
@@ -140,11 +140,11 @@ func MoviePoster(m Movie) string {
 	return strings.Join([]string{"/img/tm/", tmdb.Poster342, m.PosterPath}, "")
 }
 
-func (v *Video) TMDBMoviePoster(m Movie) string {
+func (f *Film) TMDBMoviePoster(m Movie) string {
 	if m.PosterPath == "" {
 		return ""
 	}
-	url := v.tmdb.Poster(m.PosterPath, tmdb.Poster342)
+	url := f.tmdb.Poster(m.PosterPath, tmdb.Poster342)
 	if url == nil {
 		return ""
 	}
@@ -158,11 +158,11 @@ func MoviePosterSmall(m Movie) string {
 	return strings.Join([]string{"/img/tm/", tmdb.Poster154, m.PosterPath}, "")
 }
 
-func (v *Video) TMDBMoviePosterSmall(m Movie) string {
+func (f *Film) TMDBMoviePosterSmall(m Movie) string {
 	if m.PosterPath == "" {
 		return ""
 	}
-	url := v.tmdb.Poster(m.PosterPath, tmdb.Poster154)
+	url := f.tmdb.Poster(m.PosterPath, tmdb.Poster154)
 	if url == nil {
 		return ""
 	}
@@ -176,18 +176,18 @@ func MovieBackdrop(m Movie) string {
 	return strings.Join([]string{"/img/tm/", tmdb.Backdrop1280, m.BackdropPath}, "")
 }
 
-func (v *Video) TMDBMovieBackdrop(m Movie) string {
+func (f *Film) TMDBMovieBackdrop(m Movie) string {
 	if m.BackdropPath == "" {
 		return ""
 	}
-	url := v.tmdb.Backdrop(m.BackdropPath, tmdb.Backdrop1280)
+	url := f.tmdb.Backdrop(m.BackdropPath, tmdb.Backdrop1280)
 	if url == nil {
 		return ""
 	}
 	return url.String()
 }
 
-// func (v *Video) PersonProfile(p Person) string {
+// func (f *Film) PersonProfile(p Person) string {
 // 	if p.ProfilePath == "" {
 // 		return ""
 // 	}
@@ -195,26 +195,26 @@ func (v *Video) TMDBMovieBackdrop(m Movie) string {
 // 	return url
 // }
 
-func (v *Video) TMDBPersonProfile(p Person) string {
+func (f *Film) TMDBPersonProfile(p Person) string {
 	if p.ProfilePath == "" {
 		return ""
 	}
-	url := v.tmdb.PersonProfile(p.ProfilePath, tmdb.Profile185)
+	url := f.tmdb.PersonProfile(p.ProfilePath, tmdb.Profile185)
 	if url == nil {
 		return ""
 	}
 	return url.String()
 }
 
-func (v *Video) HasMovies() bool {
-	return v.MovieCount() > 0
+func (f *Film) HasMovies() bool {
+	return f.MovieCount() > 0
 }
 
-func (v *Video) Recommend() []Recommend {
+func (f *Film) Recommend() []Recommend {
 	var recommend []Recommend
-	for _, r := range v.config.Video.Recommend.When {
+	for _, r := range f.config.Film.Recommend.When {
 		if date.Match(r.Layout, r.Match) {
-			movies := v.Search(r.Query)
+			movies := f.Search(r.Query)
 			if len(movies) > 0 {
 				recommend = append(recommend, Recommend{
 					Name:   r.Name,
