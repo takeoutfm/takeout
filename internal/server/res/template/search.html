@@ -123,6 +123,33 @@
     {{ end }}
   </div>
   {{ end }}
+  {{ if .TVEpisodes }}
+  <div>
+    <div class="parent">
+      <div class="left">
+	<h2>TV Shows</h2>
+      </div>
+      <div class="right">
+      </div>
+    </div>
+    {{ range .TVEpisodes }}
+    <div class="parent">
+      <div class="left" style="cursor: pointer;">
+	<div class="parent2">
+	  <div class="movie-title">
+	    <a data-link="/v?tvepisode={{.ID}}">{{ .Name }}</a>
+	  </div>
+	  <div class="movie-detail">
+	    S{{ .Season }}E{{ .Episode}} ~ {{ .Date.Year }} ~ {{ .Runtime }} mins
+	  </div>
+	</div>
+      </div>
+      <div class="right">
+      </div>
+    </div>
+    {{ end }}
+  </div>
+  {{ end }}
   {{ if .Series }}
   <div>
     <div class="parent">

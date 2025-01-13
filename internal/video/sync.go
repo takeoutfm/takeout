@@ -52,11 +52,6 @@ const (
 	FieldVote       = "vote"
 	FieldVoteCount  = "vote_count"
 
-	// JobDirector   = "Director"
-	// JobNovel      = "Novel"
-	// JobScreenplay = "Screenplay"
-	// JobStory      = "Story"
-
 	PreferLargest  = "largest"
 	PreferSmallest = "smallest"
 )

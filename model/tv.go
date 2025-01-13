@@ -63,6 +63,7 @@ type TVEpisode struct {
 	Episode      int `gorm:"index:idx_episode_episode"`
 	VoteAverage  float32
 	VoteCount    int
+	Runtime      int
 	Key          string
 	Size         int64
 	ETag         string

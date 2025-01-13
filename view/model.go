@@ -95,15 +95,16 @@ type Release struct {
 }
 
 type Search struct {
-	Artists  []model.Artist
-	Releases []model.Release
-	Tracks   []model.Track
-	Stations []model.Station
-	Movies   []model.Movie
-	Series   []model.Series
-	Episodes []model.Episode
-	Query    string
-	Hits     int
+	Artists    []model.Artist
+	Releases   []model.Release
+	Tracks     []model.Track
+	Stations   []model.Station
+	Movies     []model.Movie
+	Series     []model.Series
+	Episodes   []model.Episode
+	TVEpisodes []model.TVEpisode
+	Query      string
+	Hits       int
 }
 
 type Radio struct {

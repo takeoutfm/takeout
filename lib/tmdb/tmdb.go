@@ -172,6 +172,7 @@ type Episode struct {
 	EpisodeNumber int     `json:"episode_number"`
 	VoteAverage   float32 `json:"vote_average"`
 	VoteCount     int     `json:"vote_count"`
+	Runtime       int     `json:"runtime"`
 }
 
 type ContentRatings struct {

@@ -53,10 +53,10 @@ var (
 )
 
 const (
-	MediaMusic = "music"
-	MediaVideo = "video"
+	MediaMusic  = "music"
+	MediaVideo  = "video"
 	MediaMovies = "movies"
-	MediaTV = "tv"
+	MediaTV     = "tv"
 )
 
 type DatabaseConfig struct {
@@ -218,19 +218,19 @@ type ProgressConfig struct {
 }
 
 type ActivityConfig struct {
-	DB                  DatabaseConfig
-	RecentMoviesTitle   string
-	RecentTracksTitle   string
-	TrackLimit          int
-	MovieLimit          int
-	TopArtistsLimit     int
-	TopArtistsTitle     string
-	TopTracksLimit      int
-	TopTracksTitle      string
-	TopReleasesLimit    int
-	TopReleasesTitle    string
-	TopMoviesLimit      int
-	TopMoviesTitle      string
+	DB                DatabaseConfig
+	RecentMoviesTitle string
+	RecentTracksTitle string
+	TrackLimit        int
+	MovieLimit        int
+	TopArtistsLimit   int
+	TopArtistsTitle   string
+	TopTracksLimit    int
+	TopTracksTitle    string
+	TopReleasesLimit  int
+	TopReleasesTitle  string
+	TopMoviesLimit    int
+	TopMoviesTitle    string
 }
 
 type RecommendConfig struct {
@@ -245,8 +245,9 @@ type DateRecommend struct {
 }
 
 type TMDBAPIConfig struct {
-	tmdb.Config  `mapstructure:",squash"`
-	FileTemplate Template
+	tmdb.Config    `mapstructure:",squash"`
+	FileTemplate   Template
+	SeriesTemplate Template
 }
 
 type SetlistAPIConfig struct {
@@ -449,6 +450,8 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("TMDB.Language", "en-US")
 	v.SetDefault("TMDB.FileTemplate.Text",
 		"{{.Title}} ({{.Year}}){{if .Definition}} - {{.Definition}}{{end}}{{.Extension}}")
+	v.SetDefault("TMDB.SeriesTemplate.Text",
+		"{{.Series}} ({{.Year}}) - S{{.Season}}E{{.Episode}} - {{.Name}}{{.Extension}}")
 
 	v.SetDefault("Search.IndexDir", ".")
 

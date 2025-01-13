@@ -165,6 +165,7 @@ func SearchView(ctx Context, query string) *Search {
 	m := ctx.Music()
 	v := ctx.Video()
 	p := ctx.Podcast()
+	tv := ctx.TV()
 	view := &Search{}
 	artists, releases, _, stations := m.Query(query)
 	view.Artists = artists
@@ -178,13 +179,15 @@ func SearchView(ctx Context, query string) *Search {
 	view.Tracks = m.Search(query)
 	view.Movies = v.Search(query)
 	view.Series, view.Episodes = p.Search(query)
+	view.TVEpisodes = tv.Search(query)
 	view.Hits = len(view.Artists) +
 		len(view.Releases) +
 		len(view.Stations) +
 		len(view.Tracks) +
 		len(view.Movies) +
 		len(view.Series) +
-		len(view.Episodes)
+		len(view.Episodes) +
+		len(view.TVEpisodes)
 	return view
 }
 

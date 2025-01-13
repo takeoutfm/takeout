@@ -35,27 +35,23 @@ import (
 )
 
 const (
-	FieldBudget     = "budget"
-	FieldCast       = "cast"
-	FieldCharacter  = "character"
-	FieldCollection = "collection"
-	FieldCrew       = "crew"
-	FieldDate       = "date"
-	FieldGenre      = "genre"
-	FieldKeyword    = "keyword"
-	FieldName       = "name"
-	FieldRating     = "rating"
-	FieldRevenue    = "revenue"
-	FieldRuntime    = "runtime"
-	FieldTagline    = "tagline"
-	FieldTitle      = "title"
-	FieldVote       = "vote"
-	FieldVoteCount  = "vote_count"
-
-	JobDirector   = "Director"
-	JobNovel      = "Novel"
-	JobScreenplay = "Screenplay"
-	JobStory      = "Story"
+	FieldCast          = "cast"
+	FieldCharacter     = "character"
+	FieldCrew          = "crew"
+	FieldDate          = "date"
+	FieldEpisode       = "episode"
+	FieldGenre         = "genre"
+	FieldKeyword       = "keyword"
+	FieldName          = "name"
+	FieldRating        = "rating"
+	FieldRevenue       = "revenue"
+	FieldRuntime       = "runtime"
+	FieldSeason        = "season"
+	FieldSeries        = "series"
+	FieldTagline       = "tagline"
+	FieldTitle         = "title"
+	FieldVote          = "vote"
+	FieldVoteCount     = "vote_count"
 )
 
 type syncContext struct {
@@ -83,11 +79,8 @@ var (
 	// S##E##
 	episodeRegexp = regexp.MustCompile(`(?i)S(\d\d)E(\d\d)`)
 
-	// The Shining
 	// Doctor Who (1963) - S01E01 - An Unearthly Child.mkv
-	// Sopranos - S06E21.mkv
-	// Sopranos - S06E21 - Made in America.mkv
-	// Sopranos (1999) - S06E21 - Made in America.mkv
+	// Sopranos (1999) - S06E21.mkv
 	// Sopranos (2007) - S06E21 - Made in America.mkv
 	// Name (Date) - SXXEYY[ - Optional].mkv
 	tvRegexp = regexp.MustCompile(`.*/(.+?)\s*\(([\d]+)\)\s+[^\d]*(S\d\dE\d\d)[^\d]*?(?:\s-\s(.+))?\.(mkv|mp4)$`)
@@ -160,6 +153,8 @@ func (tv *TV) doEpisode(context *syncContext, o *bucket.Object, s search.Searche
 				log.Println(err)
 				continue
 			}
+
+			// only episode fields are stored in the index
 			index[o.Key] = fields
 			break
 		}
@@ -301,14 +296,20 @@ func (tv *TV) syncEpisode(o *bucket.Object, tvid, season, episode int) (search.F
 		StillPath:    detail.StillPath,
 		VoteAverage:  detail.VoteAverage,
 		VoteCount:    detail.VoteCount,
+		Runtime:      detail.Runtime,
 		Key:          o.Key,
 		Size:         o.Size,
 		ETag:         o.ETag,
 		LastModified: o.LastModified,
 	}
 
+	fields.AddField(FieldSeries, series.Name)
+	fields.AddField(FieldSeason, ep.Season)
+	fields.AddField(FieldEpisode, ep.Episode)
 	fields.AddField(FieldName, ep.Name)
+	fields.AddField(FieldTitle, ep.Name)
 	fields.AddField(FieldDate, ep.Date)
+	fields.AddField(FieldRuntime, ep.Runtime)
 	fields.AddField(FieldVote, int(ep.VoteAverage*10))
 	fields.AddField(FieldVoteCount, ep.VoteCount)
 
@@ -456,7 +457,6 @@ func newSeriesCrew(s TVSeries, p Person, crew tmdb.Crew) TVSeriesCrew {
 		Job:        crew.Job,
 	}
 }
-
 
 func (tv *TV) SyncPosters(client client.Getter) {
 	for _, s := range tv.Series() {
