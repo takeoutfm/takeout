@@ -135,6 +135,7 @@ type Movie struct {
 	Keywords   []string
 	Vote       int
 	VoteCount  int
+	Trailers   []model.Trailer
 }
 
 type Profile struct {

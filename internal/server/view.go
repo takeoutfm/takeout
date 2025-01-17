@@ -247,6 +247,7 @@ func MovieView(ctx Context, m model.Movie) *Movie {
 	view.Keywords = f.Keywords(m)
 	view.Vote = int(m.VoteAverage * 10)
 	view.VoteCount = m.VoteCount
+	view.Trailers = f.MovieTrailers(m)
 	return view
 }
 

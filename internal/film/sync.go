@@ -211,6 +211,7 @@ func (f *Film) syncMovie(client *tmdb.TMDB, tmid int,
 	f.deleteCrew(tmid)
 	f.deleteGenres(tmid)
 	f.deleteKeywords(tmid)
+	f.deleteTrailers(tmid)
 
 	fields := make(search.FieldMap)
 
@@ -302,6 +303,32 @@ func (f *Film) syncMovie(client *tmdb.TMDB, tmid int,
 		return fields, err
 	}
 	err = f.processCredits(m, client, credits, fields)
+
+	// trailers
+	var trailers []Trailer
+	videos, err := client.MovieVideos(tmid)
+	for _, v := range videos.Results {
+		if v.Official && v.Trailer() && v.YouTube() {
+			// collect official trailers on youtube
+			log.Println(v.PublishDate)
+			trailers = append(trailers, Trailer{
+				TMID:     m.TMID,
+				Name:     v.Name,
+				Official: v.Official,
+				Site:     v.Site,
+				Size:     v.Size,
+				Date:     date.ParseJson(v.PublishDate),
+				Key:      v.Key,
+				URL:      v.YouTubeLink(),
+			})
+		}
+	}
+	for _, t := range trailers {
+		err := f.createTrailer(&t)
+		if err != nil {
+			return fields, err
+		}
+	}
 
 	return fields, err
 }

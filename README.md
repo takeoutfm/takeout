@@ -12,9 +12,9 @@ local media files are supported as well. See
 The TakeoutFM server, known as Takeout, indexes organized media files in S3 (or
 local) using MusicBrainz, Last.fm, Fanart.tv, and TMDB. Media is browsed using
 Takeout and securely streamed directly from S3 or local storage. Music, movies,
-podcasts, and radio are supported. Takeout is built as a single binary that
-includes all server functionality including media syncing, streaming, REST
-APIs, and a builtin web UI.
+TV shows, podcasts, and radio are supported. Takeout is built as a single
+binary that includes all server functionality including media syncing,
+streaming, REST APIs, and a builtin web UI.
 
 ## Features
 
@@ -28,7 +28,7 @@ APIs, and a builtin web UI.
 * Album covers from the [Cover Art Archive](https://coverartarchive.org/)
 * Artist artwork from [Fanart.tv](https://fanart.tv/)
 * Powerful [search](doc/search.md) and playlists
-* Movie metadata and artwork from [The Movie Database (TMDB)](https://www.themoviedb.org/)
+* Movie & TV metadata and artwork from [The Movie Database (TMDB)](https://www.themoviedb.org/)
 * Podcasts with series and episode metadata
 * Internet radio stations (pls)
 * Media streaming directly from S3 using pre-signed time-based URLs

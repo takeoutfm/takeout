@@ -121,3 +121,15 @@ type Recommend struct {
 	Name   string
 	Movies []Movie
 }
+
+type Trailer struct {
+	gorm.Model
+	TMID     int64
+	Name     string
+	Site     string
+	Key      string
+	Size     int
+	Date     time.Time
+	Official bool
+	URL      string
+}

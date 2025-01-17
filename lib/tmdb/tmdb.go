@@ -344,6 +344,43 @@ type Keyword struct {
 	Name string `json:"name"`
 }
 
+type Videos struct {
+	ID      int     `json:"id"`
+	Results []Video `json:"results"`
+}
+
+const (
+	TypeTrailer = "Trailer"
+
+	SiteYouTube = "YouTube"
+)
+
+type Video struct {
+	ID          string `json:"id"`
+	Language    string `json:"iso_639_1"`
+	Country     string `json:"iso_3166_1"`
+	Name        string `json:"name"`
+	Key         string `json:"key"`
+	Site        string `json:"site"`
+	Size        int    `json:"size"`
+	Type        string `json:"type"`
+	Official    bool   `json:"official"`
+	PublishDate string `json:"published_at"`
+}
+
+func (v Video) YouTube() bool {
+	return v.Site == SiteYouTube
+}
+
+// https://www.youtube.com/watch?v={key}
+func (v Video) YouTubeLink() string {
+	return strings.Join([]string{"https://www.youtube.com/watch?v=", v.Key}, "")
+}
+
+func (v Video) Trailer() bool {
+	return v.Type == TypeTrailer
+}
+
 type imagesConfig struct {
 	BaseURL       string   `json:"base_url"`
 	SecureBaseURL string   `json:"secure_base_url"`
@@ -445,6 +482,17 @@ func (m *TMDB) MovieReleaseType(tmid int, country string, releaseType int) (Rele
 		}
 	}
 	return Release{}, ErrReleaseTypeNotFound
+}
+
+func (m *TMDB) MovieVideos(tmid int) (Videos, error) {
+	url := fmt.Sprintf(
+		"https://%s/3/movie/%d/videos?api_key=%s&language=%s",
+		endpoint, tmid,
+		m.config.Key,
+		m.config.Language)
+	var result Videos
+	err := m.client.GetJson(url, &result)
+	return result, err
 }
 
 func (m *TMDB) PersonDetail(peid int) (Person, error) {

@@ -48,7 +48,7 @@ func (f *Film) openDB() (err error) {
 		return
 	}
 
-	f.db.AutoMigrate(&Cast{}, &Collection{}, &Crew{}, &Genre{}, &Keyword{}, &Movie{}, &Person{})
+	f.db.AutoMigrate(&Cast{}, &Collection{}, &Crew{}, &Genre{}, &Keyword{}, &Movie{}, &Person{}, &Trailer{})
 	return
 }
 
@@ -119,6 +119,12 @@ func (f *Film) CollectionMovies(c Collection) []Movie {
 	return movies
 }
 
+func (f *Film) MovieTrailers(m Movie) []Trailer {
+	var trailers []Trailer
+	f.db.Where("tm_id = ?", m.TMID).Find(&trailers)
+	return trailers
+}
+
 func (f *Film) Cast(m Movie) []Cast {
 	var cast []Cast
 	var people []Person
@@ -174,6 +180,14 @@ func (f *Film) deleteCast(tmid int) {
 
 func (f *Film) deleteCollections(tmid int) {
 	var list []Collection
+	f.db.Where("tm_id = ?", tmid).Find(&list)
+	for _, o := range list {
+		f.db.Unscoped().Delete(o)
+	}
+}
+
+func (f *Film) deleteTrailers(tmid int) {
+	var list []Trailer
 	f.db.Where("tm_id = ?", tmid).Find(&list)
 	for _, o := range list {
 		f.db.Unscoped().Delete(o)
@@ -362,4 +376,8 @@ func (f *Film) createMovie(m *Movie) error {
 
 func (f *Film) createPerson(p *Person) error {
 	return people.CreatePerson(f.db, p)
+}
+
+func (f *Film) createTrailer(t *Trailer) error {
+	return f.db.Create(t).Error
 }

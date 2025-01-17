@@ -74,9 +74,9 @@ tokens.
 The Takeout server requires access to your S3 bucket to obtain a listing of
 media stored within the S3 bucket. The bucket object names are used to obtain
 further metadata related to music and video files. These object names are
-stored in the corresponding *music*, *video* and *search* databases to enable
-media streaming or downloading directly from your S3 bucket using time-based
-pre-signed URLs.
+stored in the corresponding *music*, *film*, *tv*, and *search* databases to
+enable media streaming or downloading directly from your S3 bucket using
+time-based pre-signed URLs.
 
 The Takeout server does not access your S3 media, it does not parse your S3
 media containers, and it does not parse any embedded tags or related
@@ -111,9 +111,9 @@ relate the media to a unique IP address. No other information is directly
 provided to these third-party services.
 
 Metadata related to your object/file names is stored in the respective *music*,
-*video*, and *search* databases to improve performance and reduce the overall
-impact on third-party services. Similarly, API responses can also be cached to
-avoid repeated or duplicate requests for the same information.
+*film*, *tv*, and *search* databases to improve performance and reduce the
+overall impact on third-party services. Similarly, API responses can also be
+cached to avoid repeated or duplicate requests for the same information.
 
 Metadata includes links or URLs to images such as covers, posters, and
 profiles. The Takeout server includes such URLs or information to construct

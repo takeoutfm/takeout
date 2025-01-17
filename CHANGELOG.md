@@ -1,3 +1,8 @@
+## 0.24.0
+
+- support for TV shows
+- refactor video to film
+
 ## 0.23.5
 
 - refactor activity db count grouping
