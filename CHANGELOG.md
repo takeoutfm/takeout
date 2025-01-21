@@ -1,4 +1,4 @@
-## 0.24.0
+## 0.24.1
 
 - support for TV shows
 - refactor video to film
