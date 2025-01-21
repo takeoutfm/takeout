@@ -2,6 +2,7 @@
 
 - support for TV shows
 - refactor video to film
+- support movie trailers
 
 ## 0.23.5
 

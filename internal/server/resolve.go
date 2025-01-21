@@ -63,6 +63,19 @@ func movieEntry(ctx Context, m model.Movie) spiff.Entry {
 	}
 }
 
+func tvEpisodeEntry(ctx Context, series model.TVSeries, e model.TVEpisode) spiff.Entry {
+	return spiff.Entry{
+		Creator:    "TV", // TODO need better creator
+		Album:      series.Name,
+		Title:      e.Name,
+		Image:      ctx.TVEpisodeImage(e),
+		Location:   []string{ctx.LocateTVEpisode(e)},
+		Identifier: []string{e.ETag},
+		Size:       []int64{e.Size},
+		Date:       date.FormatJson(e.Date),
+	}
+}
+
 func episodeEntry(ctx Context, series model.Series, e model.Episode) spiff.Entry {
 	author := e.Author
 	if author == "" {
@@ -90,6 +103,14 @@ func addTrackEntries(ctx Context, tracks []model.Track, entries []spiff.Entry) [
 func addMovieEntries(ctx Context, movies []model.Movie, entries []spiff.Entry) []spiff.Entry {
 	for _, m := range movies {
 		entries = append(entries, movieEntry(ctx, m))
+	}
+	return entries
+}
+
+func addTVEpisodeEntries(ctx Context, series model.TVSeries, episodes []model.TVEpisode,
+	entries []spiff.Entry) []spiff.Entry {
+	for _, e := range episodes {
+		entries = append(entries, tvEpisodeEntry(ctx, series, e))
 	}
 	return entries
 }
@@ -185,6 +206,37 @@ func resolveMovieRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.Ent
 		return entries, err
 	}
 	entries = addMovieEntries(ctx, []model.Movie{m}, entries)
+	return entries, nil
+}
+
+// /tv/series/{id}
+func resolveTVSeriesRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.Entry, error) {
+	series, err := ctx.FindTVSeries(id)
+	if err != nil {
+		return entries, err
+	}
+	v := TVSeriesView(ctx, series)
+	episodes := v.Episodes
+	if err != nil {
+		return entries, err
+	}
+	entries = addTVEpisodeEntries(ctx, series, episodes, entries)
+	return entries, nil
+}
+
+// /tv/episodes/{id}
+func resolveTVEpisodeRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.Entry, error) {
+	episode, err := ctx.FindTVEpisode(id)
+	if err != nil {
+		return entries, err
+	}
+	tvid := fmt.Sprintf("tvid:%d", episode.TVID)
+	series, err := ctx.FindTVSeries(tvid)
+	if err != nil {
+		return entries, err
+	}
+	episodes := []model.TVEpisode{episode}
+	entries = addTVEpisodeEntries(ctx, series, episodes, entries)
 	return entries, nil
 }
 
@@ -540,6 +592,8 @@ var (
 	stationsRegexp     = regexp.MustCompile(`^/music/stations/([\w ]+)$`)
 	playlistsRegexp    = regexp.MustCompile(`^/music/playlists/([\w ]+)$`)
 	moviesRegexp       = regexp.MustCompile(`^/movies/([\d]+)$`)
+	tvSeriesRegexp     = regexp.MustCompile(`^/tv/series/([\d]+)$`)
+	tvEpisodesRegexp   = regexp.MustCompile(`^/tv/episodes/([\d]+)$`)
 	seriesRegexp       = regexp.MustCompile(`^/podcasts/series/([\d]+)$`)
 	episodesRegexp     = regexp.MustCompile(`^/podcasts/episodes/([\d]+)$`)
 	recentTracksRegexp = regexp.MustCompile(`^/activity/tracks$`)
@@ -620,6 +674,24 @@ func Resolve(ctx Context, plist *spiff.Playlist) (err error) {
 		matches = moviesRegexp.FindStringSubmatch(pathRef)
 		if matches != nil {
 			entries, err = resolveMovieRef(ctx, matches[1], entries)
+			if err != nil {
+				return err
+			}
+			continue
+		}
+
+		matches = tvSeriesRegexp.FindStringSubmatch(pathRef)
+		if matches != nil {
+			entries, err = resolveTVSeriesRef(ctx, matches[1], entries)
+			if err != nil {
+				return err
+			}
+			continue
+		}
+
+		matches = tvEpisodesRegexp.FindStringSubmatch(pathRef)
+		if matches != nil {
+			entries, err = resolveTVEpisodeRef(ctx, matches[1], entries)
 			if err != nil {
 				return err
 			}
@@ -724,6 +796,33 @@ func ResolveMoviePlaylist(ctx Context, v *view.Movie, path string) *spiff.Playli
 	return plist
 }
 
+func ResolveTVSeriesPlaylist(ctx Context, v *view.TVSeries, path string) *spiff.Playlist {
+	// /tv/series/{id}
+	plist := spiff.NewPlaylist(spiff.TypeVideo)
+	plist.Spiff.Location = path
+	plist.Spiff.Creator = "TBD directors"
+	plist.Spiff.Title = v.Series.Name
+	plist.Spiff.Image = ctx.TVSeriesImage(v.Series)
+	plist.Spiff.Date = date.FormatJson(v.Series.Date)
+	plist.Spiff.Entries = addTVEpisodeEntries(ctx, v.Series, v.Episodes, plist.Spiff.Entries)
+	return plist
+}
+
+func ResolveTVSeriesEpisodePlaylist(ctx Context, series *view.TVSeries,
+	v *view.TVEpisode, path string) *spiff.Playlist {
+	// /tv/episodes/{id}
+	plist := spiff.NewPlaylist(spiff.TypeVideo)
+	plist.Spiff.Location = path
+	plist.Spiff.Creator = "TBD directors"
+	plist.Spiff.Title = v.Episode.Name
+	plist.Spiff.Image = ctx.TVEpisodeImage(v.Episode)
+	plist.Spiff.Date = date.FormatJson(v.Episode.Date)
+	plist.Spiff.Entries = []spiff.Entry{
+		tvEpisodeEntry(ctx, series.Series, v.Episode),
+	}
+	return plist
+}
+
 func ResolveSeriesPlaylist(ctx Context, v *view.Series, path string) *spiff.Playlist {
 	// /podcasts/series/{id}
 	plist := spiff.NewPlaylist(spiff.TypePodcast)
@@ -738,7 +837,7 @@ func ResolveSeriesPlaylist(ctx Context, v *view.Series, path string) *spiff.Play
 
 func ResolveSeriesEpisodePlaylist(ctx Context, series *view.Series,
 	v *view.Episode, path string) *spiff.Playlist {
-	// /podcasts/episode/{id}
+	// /podcasts/episodes/{id}
 	plist := spiff.NewPlaylist(spiff.TypePodcast)
 	plist.Spiff.Location = path
 	plist.Spiff.Creator = series.Series.Author

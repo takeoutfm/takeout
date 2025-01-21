@@ -807,6 +807,19 @@ func apiTVSeriesGet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func apiTVSeriesGetPlaylist(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	id := r.PathValue(ParamID)
+	series, err := ctx.FindTVSeries(id)
+	if err != nil {
+		notFoundErr(w)
+	} else {
+		view := TVSeriesView(ctx, series)
+		plist := ResolveTVSeriesPlaylist(ctx, view, r.URL.Path)
+		writePlaylist(w, r, plist)
+	}
+}
+
 func apiTVEpisodeGet(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	id := r.PathValue(ParamID)
@@ -815,6 +828,26 @@ func apiTVEpisodeGet(w http.ResponseWriter, r *http.Request) {
 		notFoundErr(w)
 	} else {
 		apiView(w, r, TVEpisodeView(ctx, episode))
+	}
+}
+
+func apiTVEpisodeGetPlaylist(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	id := r.PathValue(ParamID)
+	episode, err := ctx.FindTVEpisode(id)
+	if err != nil {
+		notFoundErr(w)
+	} else {
+		tvid := fmt.Sprintf("tvid:%d", episode.TVID)
+		series, err := ctx.FindTVSeries(tvid)
+		if err != nil {
+			notFoundErr(w)
+			return
+		}
+		plist := ResolveTVSeriesEpisodePlaylist(ctx,
+			TVSeriesView(ctx, series),
+			TVEpisodeView(ctx, episode), r.URL.Path)
+		writePlaylist(w, r, plist)
 	}
 }
 

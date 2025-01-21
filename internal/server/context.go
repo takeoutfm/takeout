@@ -67,6 +67,7 @@ type Context interface {
 	LocateTrack(model.Track) string
 	LocateMovie(model.Movie) string
 	LocateEpisode(model.Episode) string
+	LocateTVEpisode(model.TVEpisode) string
 
 	FindArtist(string) (model.Artist, error)
 	FindRelease(string) (model.Release, error)
@@ -87,6 +88,8 @@ type Context interface {
 	ArtistBackground(model.Artist) string
 	MovieImage(model.Movie) string
 	EpisodeImage(model.Episode) string
+	TVSeriesImage(model.TVSeries) string
+	TVEpisodeImage(model.TVEpisode) string
 }
 
 type RequestContext struct {
@@ -182,6 +185,10 @@ func (RequestContext) LocateEpisode(e model.Episode) string {
 	return locateEpisode(e)
 }
 
+func (RequestContext) LocateTVEpisode(e model.TVEpisode) string {
+	return locateTVEpisode(e)
+}
+
 func (ctx RequestContext) FindArtist(id string) (model.Artist, error) {
 	return ctx.Music().FindArtist(id)
 }
@@ -258,6 +265,14 @@ func (ctx RequestContext) MovieImage(m model.Movie) string {
 	return film.MoviePoster(m)
 }
 
+func (ctx RequestContext) TVSeriesImage(s model.TVSeries) string {
+	return tv.SeriesPoster(s)
+}
+
+func (ctx RequestContext) TVEpisodeImage(e model.TVEpisode) string {
+	return tv.EpisodeStillImage(e)
+}
+
 func (ctx RequestContext) EpisodeImage(e model.Episode) string {
 	return podcast.EpisodeImage(e)
 }
@@ -276,4 +291,8 @@ func locateMovie(v model.Movie) string {
 
 func locateEpisode(e model.Episode) string {
 	return fmt.Sprintf("/api/episodes/%d/location", e.ID)
+}
+
+func locateTVEpisode(e model.TVEpisode) string {
+	return fmt.Sprintf("/api/tv/episodes/%s/location", e.UUID)
 }

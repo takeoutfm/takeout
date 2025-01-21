@@ -278,7 +278,9 @@ func Serve(config *config.Config) error {
 	// tv shows
 	mux.Handle("GET /api/tv", accessTokenAuthHandler(ctx, apiTV))
 	mux.Handle("GET /api/tv/series/{id}", accessTokenAuthHandler(ctx, apiTVSeriesGet))
+	mux.Handle("GET /api/tv/series/{id}/playlist", accessTokenAuthHandler(ctx, apiTVSeriesGetPlaylist))
 	mux.Handle("GET /api/tv/episodes/{id}", accessTokenAuthHandler(ctx, apiTVEpisodeGet))
+	mux.Handle("GET /api/tv/episodes/{id}/playlist", accessTokenAuthHandler(ctx, apiTVEpisodeGetPlaylist))
 	// //api/tv/genres/{name}
 	// //api/tv/keywords/{name}
 

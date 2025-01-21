@@ -192,6 +192,7 @@ type TVSeries struct {
 type TVEpisode struct {
 	Series    model.TVSeries
 	Episode   model.TVEpisode
+	Location  string
 	Cast      []model.TVEpisodeCast
 	Crew      []model.TVEpisodeCrew
 	Directing []model.Person

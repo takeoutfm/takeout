@@ -320,6 +320,7 @@ func TVEpisodeView(ctx Context, e model.TVEpisode) *TVEpisode {
 	tv := ctx.TV()
 	view := &TVEpisode{}
 	view.Episode = e
+	view.Location = ctx.LocateTVEpisode(e)
 	series, _ := tv.LookupTVID(int(e.TVID))
 	view.Series = series
 	view.Cast = tv.EpisodeCast(e)
