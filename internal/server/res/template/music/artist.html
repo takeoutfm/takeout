@@ -12,7 +12,7 @@
     {{ range .Releases }}
     <div style="float: left; padding: 10px; max-width: 110px;">
       <a data-link="{{.|link}}" style="text-decoration: none;">
-	<img width="110" height="110" src="{{call $.CoverSmall .}}" style="border-radius: 10px;">
+	<img width="110" height="110" src="{{.|cover}}" style="border-radius: 10px;">
 	<br/>
 	<div class="release-small-title">{{ .Name }}</div>
 	<br style="display: none"/>
@@ -45,7 +45,7 @@
 		 data-creator="{{.PreferredArtist}}"
 		 data-album="{{.Release}}"
 		 data-title="{{.Title}}"
-		 data-image="{{call $.CoverSmall .}}"
+		 data-image="{{.|cover}}"
 		 data-etag="{{.ETag}}"
 		 data-location="{{.|link}}">
 		{{ .Title }}
@@ -89,7 +89,7 @@
 		 data-creator="{{.PreferredArtist}}"
 		 data-album="{{.Release}}"
 		 data-title="{{.Title}}"
-		 data-image="{{call $.CoverSmall .}}"
+		 data-image="{{.|cover}}"
 		 data-etag="{{.ETag}}"
 		 data-location="{{.|link}}">
 		{{ .Title }}

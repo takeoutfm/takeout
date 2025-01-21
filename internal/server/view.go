@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/takeoutfm/takeout/internal/music"
-	"github.com/takeoutfm/takeout/internal/video"
+	"github.com/takeoutfm/takeout/internal/people"
 	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/model"
 
@@ -33,7 +33,8 @@ func IndexView(ctx Context) *Index {
 	view := &Index{}
 	view.Time = time.Now().UnixMilli()
 	view.HasMusic = ctx.Music().HasMusic()
-	view.HasMovies = ctx.Video().HasMovies()
+	view.HasMovies = ctx.Film().HasMovies()
+	view.HasShows = ctx.TV().HasShows()
 	view.HasPodcasts = ctx.Podcast().HasPodcasts()
 	view.HasPlaylists = ctx.Music().HasPlaylists(ctx.User())
 	return view
@@ -42,28 +43,24 @@ func IndexView(ctx Context) *Index {
 func HomeView(ctx Context) *Home {
 	view := &Home{}
 	m := ctx.Music()
-	v := ctx.Video()
+	f := ctx.Film()
 	p := ctx.Podcast()
+	tv := ctx.TV()
 
 	view.AddedReleases = m.RecentlyAdded()
 	view.NewReleases = m.RecentlyReleased()
-	view.AddedMovies = v.RecentlyAdded()
-	view.NewMovies = v.RecentlyReleased()
-	view.RecommendMovies = v.Recommend()
+	view.AddedMovies = f.RecentlyAdded()
+	view.NewMovies = f.RecentlyReleased()
+	view.RecommendMovies = f.Recommend()
 	view.NewEpisodes = p.RecentEpisodes()
-	view.NewSeries = p.RecentSeries()
+	view.AddedTVEpisodes = tv.AddedTVEpisodes()
 
-	view.CoverSmall = m.CoverSmall
-	view.PosterSmall = v.MoviePosterSmall
-	view.EpisodeImage = p.EpisodeImage
-	view.SeriesImage = p.SeriesImage
 	return view
 }
 
 func ArtistsView(ctx Context) *Artists {
 	view := &Artists{}
 	view.Artists = ctx.Music().Artists()
-	view.CoverSmall = ctx.Music().CoverSmall
 	return view
 }
 
@@ -75,7 +72,6 @@ func ArtistView(ctx Context, artist model.Artist) *Artist {
 	view.Similar = m.SimilarArtists(artist)
 	view.Image = m.ArtistImage(artist)
 	view.Background = m.ArtistBackground(artist)
-	view.CoverSmall = m.CoverSmall
 	view.Popular = TrackList{
 		Title: fmt.Sprintf("%s \u2013 Popular", artist.Name),
 		Tracks: func() []model.Track {
@@ -126,7 +122,6 @@ func PopularView(ctx Context, artist model.Artist) *Popular {
 	if len(view.Popular) > limit {
 		view.Popular = view.Popular[:limit]
 	}
-	view.CoverSmall = m.CoverSmall
 	return view
 }
 
@@ -139,7 +134,6 @@ func SinglesView(ctx Context, artist model.Artist) *Singles {
 	if len(view.Singles) > limit {
 		view.Singles = view.Singles[:limit]
 	}
-	view.CoverSmall = m.CoverSmall
 	return view
 }
 
@@ -148,7 +142,6 @@ func WantListView(ctx Context, artist model.Artist) *WantList {
 	view := &WantList{}
 	view.Artist = artist
 	view.Releases = m.WantArtistReleases(artist)
-	view.CoverSmall = m.CoverSmall
 	return view
 }
 
@@ -164,15 +157,15 @@ func ReleaseView(ctx Context, release model.Release) *Release {
 	view.Singles = m.ReleaseSingles(release)
 	view.Popular = m.ReleasePopular(release)
 	view.Similar = m.SimilarReleases(view.Artist, release)
-	view.Image = m.CoverSmall(release)
-	view.CoverSmall = m.CoverSmall
+	view.Image = music.CoverSmall(release)
 	return view
 }
 
 func SearchView(ctx Context, query string) *Search {
 	m := ctx.Music()
-	v := ctx.Video()
+	f := ctx.Film()
 	p := ctx.Podcast()
+	tv := ctx.TV()
 	view := &Search{}
 	artists, releases, _, stations := m.Query(query)
 	view.Artists = artists
@@ -184,17 +177,17 @@ func SearchView(ctx Context, query string) *Search {
 	}
 	view.Query = query
 	view.Tracks = m.Search(query)
-	view.Movies = v.Search(query)
+	view.Movies = f.Search(query)
 	view.Series, view.Episodes = p.Search(query)
+	view.TVEpisodes = tv.Search(query)
 	view.Hits = len(view.Artists) +
 		len(view.Releases) +
 		len(view.Stations) +
 		len(view.Tracks) +
 		len(view.Movies) +
 		len(view.Series) +
-		len(view.Episodes)
-	view.CoverSmall = m.CoverSmall
-	view.PosterSmall = v.MoviePosterSmall
+		len(view.Episodes) +
+		len(view.TVEpisodes)
 	return view
 }
 
@@ -223,95 +216,123 @@ func RadioView(ctx Context) *Radio {
 }
 
 func MoviesView(ctx Context) *Movies {
-	v := ctx.Video()
+	f := ctx.Film()
 	view := &Movies{}
-	view.Movies = v.Movies()
-	view.PosterSmall = v.MoviePosterSmall
-	view.Backdrop = v.MovieBackdrop
+	view.Movies = f.Movies()
 	return view
 }
 
 func MovieView(ctx Context, m model.Movie) *Movie {
-	v := ctx.Video()
+	f := ctx.Film()
 	view := &Movie{}
 	view.Movie = m
 	view.Location = ctx.LocateMovie(m)
-	collections := v.MovieCollections(m)
+	collections := f.MovieCollections(m)
 	if len(collections) > 0 {
 		view.Collection = collections[0]
-		view.Other = v.CollectionMovies(collections[0])
+		view.Other = f.CollectionMovies(collections[0])
 		if len(view.Other) == 1 && view.Other[0].ID == m.ID {
 			// collection is just this movie so remove
 			view.Other = view.Other[1:]
 		}
 	}
-	view.Cast = v.Cast(m)
-	view.Crew = v.Crew(m)
-	for _, c := range view.Crew {
-		switch c.Job {
-		case video.JobDirector:
-			view.Directing = append(view.Directing, c.Person)
-		case video.JobNovel, video.JobScreenplay, video.JobStory:
-			view.Writing = append(view.Writing, c.Person)
-		}
-	}
-	for i, c := range view.Cast {
-		if i == 3 {
-			break
-		}
-		view.Starring = append(view.Starring, c.Person)
-	}
-	view.Genres = v.Genres(m)
-	view.Keywords = v.Keywords(m)
+	view.Cast = f.Cast(m)
+	view.Crew = f.Crew(m)
+
+	billing := people.NewBilling(view.Cast, view.Crew)
+	view.Directing = billing.Directors
+	view.Starring = billing.Actors
+
+	view.Genres = f.Genres(m)
+	view.Keywords = f.Keywords(m)
 	view.Vote = int(m.VoteAverage * 10)
 	view.VoteCount = m.VoteCount
-	view.Poster = v.MoviePoster
-	view.PosterSmall = v.MoviePosterSmall
-	view.Backdrop = v.MovieBackdrop
-	view.Profile = v.PersonProfile
+	view.Trailers = f.MovieTrailers(m)
 	return view
 }
 
 func ProfileView(ctx Context, p model.Person) *Profile {
-	v := ctx.Video()
+	f := ctx.Film()
+	tv := ctx.TV()
 	view := &Profile{}
 	view.Person = p
-	view.Starring = v.Starring(p)
-	view.Writing = v.Writing(p)
-	view.Directing = v.Directing(p)
-	view.PosterSmall = v.MoviePosterSmall
-	view.Backdrop = v.MovieBackdrop
-	view.Profile = v.PersonProfile
+	view.Movies.Directing = f.Directing(p)
+	view.Movies.Starring = f.Starring(p)
+	view.Movies.Writing = f.Writing(p)
+	view.Shows.Directing = tv.SeriesDirecting(p)
+	view.Shows.Starring = tv.SeriesStarring(p)
+	view.Shows.Writing = tv.SeriesWriting(p)
+	fmt.Printf("%+v\n", view)
 	return view
 }
 
 func GenreView(ctx Context, name string) *Genre {
-	v := ctx.Video()
+	f := ctx.Film()
 	view := &Genre{}
 	view.Name = name
-	view.Movies = v.Genre(name)
-	view.PosterSmall = v.MoviePosterSmall
-	view.Backdrop = v.MovieBackdrop
+	view.Movies = f.Genre(name)
 	return view
 }
 
 func KeywordView(ctx Context, name string) *Keyword {
-	v := ctx.Video()
+	f := ctx.Film()
 	view := &Keyword{}
 	view.Name = name
-	view.Movies = v.Keyword(name)
-	view.PosterSmall = v.MoviePosterSmall
-	view.Backdrop = v.MovieBackdrop
+	view.Movies = f.Keyword(name)
 	return view
 }
 
 func WatchView(ctx Context, m model.Movie) *Watch {
-	v := ctx.Video()
 	view := &Watch{}
 	view.Movie = m
 	view.Location = ctx.LocateMovie(m)
-	view.PosterSmall = v.MoviePosterSmall
-	view.Backdrop = v.MovieBackdrop
+	return view
+}
+
+func TVShowsView(ctx Context) *TVShows {
+	tv := ctx.TV()
+	view := &TVShows{}
+	view.Series = tv.Series()
+	return view
+}
+
+func TVSeriesView(ctx Context, s model.TVSeries) *TVSeries {
+	tv := ctx.TV()
+	view := &TVSeries{}
+	view.Series = s
+	view.Episodes = tv.Episodes(s)
+	view.Cast = tv.SeriesCast(s)
+	view.Crew = tv.SeriesCrew(s)
+
+	billing := people.NewBilling(view.Cast, view.Crew)
+	view.Directing = billing.Directors
+	view.Starring = billing.Actors
+	view.Writing = billing.Writers
+
+	view.Keywords = tv.Keywords(s)
+	view.Genres = tv.Genres(s)
+	view.Vote = int(s.VoteAverage * 10)
+	view.VoteCount = s.VoteCount
+	return view
+}
+
+func TVEpisodeView(ctx Context, e model.TVEpisode) *TVEpisode {
+	tv := ctx.TV()
+	view := &TVEpisode{}
+	view.Episode = e
+	view.Location = ctx.LocateTVEpisode(e)
+	series, _ := tv.LookupTVID(int(e.TVID))
+	view.Series = series
+	view.Cast = tv.EpisodeCast(e)
+	view.Crew = tv.EpisodeCrew(e)
+
+	billing := people.NewBilling(view.Cast, view.Crew)
+	view.Directing = billing.Directors
+	view.Starring = billing.Actors
+	view.Writing = billing.Writers
+
+	view.Vote = int(e.VoteAverage * 10)
+	view.VoteCount = e.VoteCount
 	return view
 }
 
@@ -319,7 +340,6 @@ func PodcastsView(ctx Context) *Podcasts {
 	p := ctx.Podcast()
 	view := &Podcasts{}
 	view.Series = p.Series()
-	view.SeriesImage = p.SeriesImage
 	return view
 }
 
@@ -327,12 +347,10 @@ func PodcastsSubscribedView(ctx Context) *Podcasts {
 	p := ctx.Podcast()
 	view := &Podcasts{}
 	view.Series = p.SeriesFor(ctx.User().Name)
-	view.SeriesImage = p.SeriesImage
 	return view
 }
 
 func SeriesView(ctx Context, s model.Series) *Series {
-	p := ctx.Podcast()
 	view := &Series{}
 	view.Series = s
 	view.Episodes = ctx.FindSeriesEpisodes(s)
@@ -340,15 +358,12 @@ func SeriesView(ctx Context, s model.Series) *Series {
 	if len(view.Episodes) > limit {
 		view.Episodes = view.Episodes[:limit]
 	}
-	view.SeriesImage = p.SeriesImage
-	view.EpisodeImage = p.EpisodeImage
 	return view
 }
 
 func EpisodeView(ctx Context, e model.Episode) *Episode {
 	view := &Episode{}
 	view.Episode = e
-	view.EpisodeImage = ctx.Podcast().EpisodeImage
 	return view
 }
 
@@ -377,7 +392,6 @@ func TrackStatsView(ctx Context, interval string, d date.DateRange) *TrackStats 
 	for _, t := range tracks {
 		view.ListenCount += t.Count
 	}
-	view.CoverSmall = ctx.Music().CoverSmall
 	return view
 }
 

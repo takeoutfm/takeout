@@ -31,6 +31,11 @@ import (
 	"strings"
 
 	"github.com/takeoutfm/takeout/internal/config"
+	"github.com/takeoutfm/takeout/internal/music"
+	"github.com/takeoutfm/takeout/internal/people"
+	"github.com/takeoutfm/takeout/internal/podcast"
+	"github.com/takeoutfm/takeout/internal/tv"
+	"github.com/takeoutfm/takeout/internal/film"
 	"github.com/takeoutfm/takeout/lib/date"
 	"github.com/takeoutfm/takeout/lib/log"
 	"github.com/takeoutfm/takeout/model"
@@ -60,8 +65,10 @@ func getTemplates(config *config.Config) *template.Template {
 		"res/template/*.html",
 		"res/template/activity/*.html",
 		"res/template/music/*.html",
+		"res/template/people/*.html",
 		"res/template/podcast/*.html",
-		"res/template/video/*.html"))
+		"res/template/tv/*.html",
+		"res/template/film/*.html"))
 }
 
 func doFuncMap() template.FuncMap {
@@ -96,6 +103,10 @@ func doFuncMap() template.FuncMap {
 				link = fmt.Sprintf("/v?episode=%d", o.(model.Episode).ID)
 			case model.Station:
 				link = fmt.Sprintf("/v?station=%d", o.(model.Station).ID)
+			case model.TVSeries:
+				link = fmt.Sprintf("/v?tvseries=%d", o.(model.TVSeries).ID)
+			case model.TVEpisode:
+				link = fmt.Sprintf("/v?tvepisode=%d", o.(model.TVEpisode).ID)
 			}
 			return link
 		},
@@ -210,6 +221,89 @@ func doFuncMap() template.FuncMap {
 		"letter": func(a model.Artist) string {
 			return a.SortName[0:1]
 		},
+		"cover": func(o interface{}) string {
+			return music.CoverSmall(o)
+		},
+		"image": func(o interface{}) string {
+			var img string
+			switch o.(type) {
+			case model.Series:
+				img = podcast.SeriesImage(o.(model.Series))
+			case model.Episode:
+				img = podcast.EpisodeImage(o.(model.Episode))
+			}
+			return img
+		},
+		"profile": func(o interface{}) string {
+			var img string
+			switch o.(type) {
+			case model.Person:
+				img = people.PersonProfile(o.(model.Person))
+			}
+			return img
+		},
+		"profile_small": func(o interface{}) string {
+			var img string
+			switch o.(type) {
+			case model.Person:
+				img = people.PersonProfileSmall(o.(model.Person))
+			}
+			return img
+		},
+		"poster": func(o interface{}) string {
+			var img string
+			switch o.(type) {
+			case model.Movie:
+				img = film.MoviePoster(o.(model.Movie))
+			case model.TVSeries:
+				img = tv.SeriesPoster(o.(model.TVSeries))
+			}
+			return img
+		},
+		"poster_small": func(o interface{}) string {
+			var img string
+			switch o.(type) {
+			case model.Movie:
+				img = film.MoviePosterSmall(o.(model.Movie))
+			case model.TVSeries, model.TVEpisode:
+				img = tv.SeriesPosterSmall(o.(model.TVSeries))
+			}
+			return img
+		},
+		"backdrop": func(o interface{}) string {
+			var img string
+			switch o.(type) {
+			case model.Movie:
+				img = film.MovieBackdrop(o.(model.Movie))
+			case model.TVSeries:
+				img = tv.SeriesBackdrop(o.(model.TVSeries))
+			}
+			return img
+		},
+		"still": func(o interface{}) string {
+			var img string
+			switch o.(type) {
+			case model.TVEpisode:
+				img = tv.EpisodeStillImage(o.(model.TVEpisode))
+			}
+			return img
+		},
+		"still_small": func(o interface{}) string {
+			var img string
+			switch o.(type) {
+			case model.TVEpisode:
+				img = tv.EpisodeStillSmall(o.(model.TVEpisode))
+			}
+			return img
+		},
+		"still_large": func(o interface{}) string {
+			var img string
+			switch o.(type) {
+			case model.TVEpisode:
+				img = tv.EpisodeStillLarge(o.(model.TVEpisode))
+			}
+			return img
+		},
 	}
 }
 
@@ -280,16 +374,14 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 		temp = "movies.html"
 	} else if v := r.URL.Query().Get("movie"); v != "" {
 		// /v?movie={movie-id}
-		vid := ctx.Video()
+		f := ctx.Film()
 		id, _ := strconv.Atoi(v)
-		movie, _ := vid.LookupMovie(id)
+		movie, _ := f.LookupMovie(id)
 		result = MovieView(ctx, movie)
 		temp = "movie.html"
 	} else if v := r.URL.Query().Get("profile"); v != "" {
-		// /v?profile={person-id}
-		vid := ctx.Video()
-		id, _ := strconv.Atoi(v)
-		person, _ := vid.LookupPerson(id)
+		// /v?profile={peid}
+		person, _ := ctx.FindPerson(v)
 		result = ProfileView(ctx, person)
 		temp = "profile.html"
 	} else if v := r.URL.Query().Get("genre"); v != "" {
@@ -304,11 +396,29 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 		temp = "keyword.html"
 	} else if v := r.URL.Query().Get("watch"); v != "" {
 		// /v?watch={movie-id}
-		vid := ctx.Video()
+		f := ctx.Film()
 		id, _ := strconv.Atoi(v)
-		movie, _ := vid.LookupMovie(id)
+		movie, _ := f.LookupMovie(id)
 		result = WatchView(ctx, movie)
 		temp = "watch.html"
+	} else if v := r.URL.Query().Get("tv"); v != "" {
+		// /v?tv=x
+		result = TVShowsView(ctx)
+		temp = "shows.html"
+	} else if v := r.URL.Query().Get("tvseries"); v != "" {
+		// /v?tvseries={series-id}
+		tv := ctx.TV()
+		id, _ := strconv.Atoi(v)
+		series, _ := tv.LookupSeries(id)
+		result = TVSeriesView(ctx, series)
+		temp = "tvseries.html"
+	} else if v := r.URL.Query().Get("tvepisode"); v != "" {
+		// /v?tvepisode={episode-id}
+		tv := ctx.TV()
+		id, _ := strconv.Atoi(v)
+		episode, _ := tv.LookupEpisode(id)
+		result = TVEpisodeView(ctx, episode)
+		temp = "tvepisode.html"
 	} else if v := r.URL.Query().Get("podcasts"); v != "" {
 		// /v?podcasts=x
 		result = PodcastsView(ctx)

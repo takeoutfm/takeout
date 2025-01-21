@@ -265,16 +265,24 @@ func Serve(config *config.Config) error {
 	mux.Handle("GET /api/releases/{id}/playlist.xspf", accessTokenAuthHandler(ctx, apiReleaseGetPlaylist))
 	mux.Handle("GET /api/tracks/{id}/playlist", accessTokenAuthHandler(ctx, apiTrackPlaylist))
 
-	// video
+	// people
+	mux.Handle("GET /api/profiles/{peid}", accessTokenAuthHandler(ctx, apiProfileGet))
+
+	// movies
 	mux.Handle("GET /api/movies", accessTokenAuthHandler(ctx, apiMovies))
 	mux.Handle("GET /api/movies/{id}", accessTokenAuthHandler(ctx, apiMovieGet))
 	mux.Handle("GET /api/movies/{id}/playlist", accessTokenAuthHandler(ctx, apiMovieGetPlaylist))
 	mux.Handle("GET /api/movie-genres/{name}", accessTokenAuthHandler(ctx, apiMovieGenreGet))
 	mux.Handle("GET /api/movie-keywords/{name}", accessTokenAuthHandler(ctx, apiMovieKeywordGet))
-	mux.Handle("GET /api/profiles/{id}", accessTokenAuthHandler(ctx, apiMovieProfileGet))
-	// mux.Handle("GET /api/tv", apiTVShows)
-	// mux.Handle("GET /api/tv/{id}", apiTVShowGet)
-	// mux.Handle("GET /api/tv/{id}/episodes/{eid}", apiTVShowEpisodeGet)
+
+	// tv shows
+	mux.Handle("GET /api/tv", accessTokenAuthHandler(ctx, apiTV))
+	mux.Handle("GET /api/tv/series/{id}", accessTokenAuthHandler(ctx, apiTVSeriesGet))
+	mux.Handle("GET /api/tv/series/{id}/playlist", accessTokenAuthHandler(ctx, apiTVSeriesGetPlaylist))
+	mux.Handle("GET /api/tv/episodes/{id}", accessTokenAuthHandler(ctx, apiTVEpisodeGet))
+	mux.Handle("GET /api/tv/episodes/{id}/playlist", accessTokenAuthHandler(ctx, apiTVEpisodeGetPlaylist))
+	// //api/tv/genres/{name}
+	// //api/tv/keywords/{name}
 
 	// podcast
 	mux.Handle("GET /api/podcasts", accessTokenAuthHandler(ctx, apiPodcasts))
@@ -292,6 +300,7 @@ func Serve(config *config.Config) error {
 	mux.Handle("GET /api/tracks/{uuid}/location", mediaTokenAuthHandler(ctx, apiTrackLocation))
 	mux.Handle("GET /api/movies/{uuid}/location", mediaTokenAuthHandler(ctx, apiMovieLocation))
 	mux.Handle("GET /api/episodes/{id}/location", mediaTokenAuthHandler(ctx, apiEpisodeLocation))
+	mux.Handle("GET /api/tv/episodes/{uuid}/location", mediaTokenAuthHandler(ctx, apiTVEpisodeLocation))
 
 	// download
 	mux.Handle("GET /d/", fileAuthHandler(ctx, apiDownload, "/d"))
@@ -322,7 +331,7 @@ func Serve(config *config.Config) error {
 	mux.Handle("GET /img/mb/rg/{rgid}/{side}", imageHandler(ctx, imgReleaseGroup, client))
 	mux.Handle("GET /img/mb/re/{reid}", imageHandler(ctx, imgReleaseFront, client))
 	mux.Handle("GET /img/mb/re/{reid}/{side}", imageHandler(ctx, imgRelease, client))
-	mux.Handle("GET /img/tm/{size}/{path}", imageHandler(ctx, imgVideo, client))
+	mux.Handle("GET /img/tm/{size}/{path}", imageHandler(ctx, imgTMDB, client))
 	mux.Handle("GET /img/fa/{arid}/t/{path}", imageHandler(ctx, imgArtistThumb, client))
 	mux.Handle("GET /img/fa/{arid}/b/{path}", imageHandler(ctx, imgArtistBackground, client))
 

@@ -32,7 +32,6 @@ import (
 	"github.com/takeoutfm/takeout/lib/encoding/xspf"
 	"github.com/takeoutfm/takeout/lib/header"
 	"github.com/takeoutfm/takeout/lib/log"
-	"github.com/takeoutfm/takeout/lib/str"
 	"github.com/takeoutfm/takeout/model"
 	"github.com/takeoutfm/takeout/spiff"
 )
@@ -45,6 +44,7 @@ const (
 	ParamName = "name"
 	ParamEID  = "eid"
 	ParamUUID = "uuid"
+	ParamPEID = "peid"
 
 	QuerySearch = "q"
 	QueryStart  = "start"
@@ -766,10 +766,10 @@ func apiMovieGetPlaylist(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func apiMovieProfileGet(w http.ResponseWriter, r *http.Request) {
+func apiProfileGet(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	id := r.PathValue(ParamID)
-	person, err := ctx.Video().LookupPerson(str.Atoi(id))
+	peid := r.PathValue(ParamPEID)
+	person, err := ctx.FindPerson(peid)
 	if err != nil {
 		notFoundErr(w)
 	} else {
@@ -789,6 +789,66 @@ func apiMovieKeywordGet(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue(ParamName)
 	// TODO sanitize
 	apiView(w, r, KeywordView(ctx, name))
+}
+
+func apiTV(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	apiView(w, r, TVShowsView(ctx))
+}
+
+func apiTVSeriesGet(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	id := r.PathValue(ParamID)
+	series, err := ctx.FindTVSeries(id)
+	if err != nil {
+		notFoundErr(w)
+	} else {
+		apiView(w, r, TVSeriesView(ctx, series))
+	}
+}
+
+func apiTVSeriesGetPlaylist(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	id := r.PathValue(ParamID)
+	series, err := ctx.FindTVSeries(id)
+	if err != nil {
+		notFoundErr(w)
+	} else {
+		view := TVSeriesView(ctx, series)
+		plist := ResolveTVSeriesPlaylist(ctx, view, r.URL.Path)
+		writePlaylist(w, r, plist)
+	}
+}
+
+func apiTVEpisodeGet(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	id := r.PathValue(ParamID)
+	episode, err := ctx.FindTVEpisode(id)
+	if err != nil {
+		notFoundErr(w)
+	} else {
+		apiView(w, r, TVEpisodeView(ctx, episode))
+	}
+}
+
+func apiTVEpisodeGetPlaylist(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	id := r.PathValue(ParamID)
+	episode, err := ctx.FindTVEpisode(id)
+	if err != nil {
+		notFoundErr(w)
+	} else {
+		tvid := fmt.Sprintf("tvid:%d", episode.TVID)
+		series, err := ctx.FindTVSeries(tvid)
+		if err != nil {
+			notFoundErr(w)
+			return
+		}
+		plist := ResolveTVSeriesEpisodePlaylist(ctx,
+			TVSeriesView(ctx, series),
+			TVEpisodeView(ctx, episode), r.URL.Path)
+		writePlaylist(w, r, plist)
+	}
 }
 
 func apiPodcasts(w http.ResponseWriter, r *http.Request) {
@@ -1032,7 +1092,7 @@ func apiMovieLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url := ctx.Video().MovieURL(movie)
+	url := ctx.Film().MovieURL(movie)
 	doRedirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
@@ -1046,6 +1106,23 @@ func apiEpisodeLocation(w http.ResponseWriter, r *http.Request) {
 		url := ctx.Podcast().EpisodeURL(episode)
 		doRedirect(w, r, url, http.StatusTemporaryRedirect)
 	}
+}
+
+func apiTVEpisodeLocation(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	uuid := r.PathValue(ParamUUID)
+	episode, err := ctx.FindTVEpisode("uuid:" + uuid)
+	if err != nil {
+		notFoundErr(w)
+		return
+	}
+	if episode.UUID != uuid {
+		accessDenied(w)
+		return
+	}
+
+	url := ctx.TV().EpisodeURL(episode)
+	doRedirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
 // func apiActivityGet(w http.ResponseWriter, r *http.Request) {

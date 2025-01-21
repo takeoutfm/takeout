@@ -23,6 +23,9 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"regexp"
+	"sort"
+	"strings"
 
 	"github.com/takeoutfm/takeout/lib/client"
 )
@@ -54,6 +57,13 @@ const (
 	Profile185      = "w185"
 	Profile632      = "h632"
 	ProfileOriginal = "original"
+)
+
+const (
+	Still92       = "w92"
+	Still185      = "w185"
+	Still300      = "w300"
+	StillOriginal = "original"
 )
 
 var (
@@ -162,6 +172,17 @@ type Episode struct {
 	EpisodeNumber int     `json:"episode_number"`
 	VoteAverage   float32 `json:"vote_average"`
 	VoteCount     int     `json:"vote_count"`
+	Runtime       int     `json:"runtime"`
+}
+
+type ContentRatings struct {
+	ID      int             `json:"id"`
+	Results []ContentRating `json:"results"`
+}
+
+type ContentRating struct {
+	Country string `json:"iso_3166_1"`
+	Rating  string `json:"rating"`
 }
 
 type Cast struct {
@@ -187,6 +208,37 @@ type Credits struct {
 	Cast   []Cast `json:"cast"`
 	Crew   []Crew `json:"crew"`
 	Guests []Cast `json:"guest_stars"` // only tv
+}
+
+func (c *Credits) SortedCast() []Cast {
+	cast := make([]Cast, len(c.Cast))
+	copy(cast, c.Cast)
+	sort.Slice(cast, func(i, j int) bool {
+		// sort by order
+		return cast[i].Order < cast[j].Order
+	})
+	return cast
+}
+
+func (c *Credits) SortedGuests() []Cast {
+	guests := make([]Cast, len(c.Cast))
+	copy(guests, c.Guests)
+	sort.Slice(guests, func(i, j int) bool {
+		return guests[i].Order < guests[j].Order
+	})
+	return guests
+}
+
+func (c *Credits) CrewWithJobs(jobs []string) []Crew {
+	var crew []Crew
+	jobRegexp := regexp.MustCompile("^(" + strings.Join(jobs, "|") + ")$")
+	for _, c := range c.Crew {
+		matches := jobRegexp.FindStringSubmatch(c.Job)
+		if matches != nil {
+			crew = append(crew, c)
+		}
+	}
+	return crew
 }
 
 type Person struct {
@@ -292,6 +344,43 @@ type Keyword struct {
 	Name string `json:"name"`
 }
 
+type Videos struct {
+	ID      int     `json:"id"`
+	Results []Video `json:"results"`
+}
+
+const (
+	TypeTrailer = "Trailer"
+
+	SiteYouTube = "YouTube"
+)
+
+type Video struct {
+	ID          string `json:"id"`
+	Language    string `json:"iso_639_1"`
+	Country     string `json:"iso_3166_1"`
+	Name        string `json:"name"`
+	Key         string `json:"key"`
+	Site        string `json:"site"`
+	Size        int    `json:"size"`
+	Type        string `json:"type"`
+	Official    bool   `json:"official"`
+	PublishDate string `json:"published_at"`
+}
+
+func (v Video) YouTube() bool {
+	return v.Site == SiteYouTube
+}
+
+// https://www.youtube.com/watch?v={key}
+func (v Video) YouTubeLink() string {
+	return strings.Join([]string{"https://www.youtube.com/watch?v=", v.Key}, "")
+}
+
+func (v Video) Trailer() bool {
+	return v.Type == TypeTrailer
+}
+
 type imagesConfig struct {
 	BaseURL       string   `json:"base_url"`
 	SecureBaseURL string   `json:"secure_base_url"`
@@ -393,6 +482,17 @@ func (m *TMDB) MovieReleaseType(tmid int, country string, releaseType int) (Rele
 		}
 	}
 	return Release{}, ErrReleaseTypeNotFound
+}
+
+func (m *TMDB) MovieVideos(tmid int) (Videos, error) {
+	url := fmt.Sprintf(
+		"https://%s/3/movie/%d/videos?api_key=%s&language=%s",
+		endpoint, tmid,
+		m.config.Key,
+		m.config.Language)
+	var result Videos
+	err := m.client.GetJson(url, &result)
+	return result, err
 }
 
 func (m *TMDB) PersonDetail(peid int) (Person, error) {
@@ -550,6 +650,17 @@ func (m *TMDB) EpisodeDetail(tvid, season, episode int) (Episode, error) {
 	return result, err
 }
 
+func (m *TMDB) SeriesCredits(tvid int) (Credits, error) {
+	url := fmt.Sprintf(
+		"https://%s/3/tv/%d/credits?api_key=%s&language=%s",
+		endpoint, tvid,
+		m.config.Key,
+		m.config.Language)
+	var result Credits
+	err := m.client.GetJson(url, &result)
+	return result, err
+}
+
 func (m *TMDB) EpisodeCredits(tvid, season, episode int) (Credits, error) {
 	url := fmt.Sprintf(
 		"https://%s/3/tv/%d/season/%d/episode/%d/credits?api_key=%s&language=%s",
@@ -557,6 +668,17 @@ func (m *TMDB) EpisodeCredits(tvid, season, episode int) (Credits, error) {
 		m.config.Key,
 		m.config.Language)
 	var result Credits
+	err := m.client.GetJson(url, &result)
+	return result, err
+}
+
+func (m *TMDB) TVContentRatings(tvid int) (ContentRatings, error) {
+	url := fmt.Sprintf(
+		"https://%s/3/tv/%d/content_ratings?api_key=%s&language=%s",
+		endpoint, tvid,
+		m.config.Key,
+		m.config.Language)
+	var result ContentRatings
 	err := m.client.GetJson(url, &result)
 	return result, err
 }
@@ -622,6 +744,19 @@ func (m *TMDB) Backdrop(backdropPath string, size string) *url.URL {
 		return nil
 	}
 	v := backdrop(m.apiConfig, size, backdropPath)
+	url, err := url.Parse(v)
+	if err != nil {
+		return nil
+	}
+	return url
+}
+
+func (m *TMDB) Still(stillPath string, size string) *url.URL {
+	err := m.checkApiConfig()
+	if err != nil {
+		return nil
+	}
+	v := still(m.apiConfig, size, stillPath)
 	url, err := url.Parse(v)
 	if err != nil {
 		return nil

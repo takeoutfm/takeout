@@ -22,9 +22,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/takeoutfm/takeout/internal/config"
+	"github.com/takeoutfm/takeout/internal/film"
 	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/takeoutfm/takeout/internal/podcast"
-	"github.com/takeoutfm/takeout/internal/video"
 )
 
 var syncCmd = &cobra.Command{
@@ -39,7 +39,7 @@ var syncCmd = &cobra.Command{
 var syncBack time.Duration
 var syncAll bool
 var mediaMusic bool
-var mediaVideo bool
+var mediaFilm bool
 var mediaPodcast bool
 var artist string
 var resolve bool
@@ -67,8 +67,8 @@ func sync() error {
 			return err
 		}
 	}
-	if mediaVideo {
-		err = syncVideo(cfg)
+	if mediaFilm {
+		err = syncFilm(cfg)
 		if err != nil {
 			return err
 		}
@@ -101,14 +101,14 @@ func syncMusic(cfg *config.Config) error {
 	return nil
 }
 
-func syncVideo(cfg *config.Config) error {
-	v := video.NewVideo(cfg)
-	err := v.Open()
+func syncFilm(cfg *config.Config) error {
+	f := film.NewFilm(cfg)
+	err := f.Open()
 	if err != nil {
 		return err
 	}
-	defer v.Close()
-	v.SyncSince(since(v.LastModified()))
+	defer f.Close()
+	f.SyncSince(since(f.LastModified()))
 	return nil
 }
 
@@ -128,7 +128,7 @@ func init() {
 	syncCmd.Flags().DurationVarP(&syncBack, "back", "b", 0, "Back duration")
 	syncCmd.Flags().BoolVarP(&syncAll, "all", "a", false, "Re(sync) all ignoring timestamps")
 	syncCmd.Flags().BoolVarP(&mediaMusic, "music", "m", true, "Sync music")
-	syncCmd.Flags().BoolVarP(&mediaVideo, "video", "v", true, "Sync video")
+	syncCmd.Flags().BoolVarP(&mediaFilm, "film", "f", true, "Sync film")
 	syncCmd.Flags().BoolVarP(&mediaPodcast, "podcast", "p", false, "Sync podcasts")
 	syncCmd.Flags().BoolVarP(&resolve, "resolve", "x", false, "Resolve")
 	syncCmd.Flags().StringVarP(&artist, "artist", "r", "", "Music artist")

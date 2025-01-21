@@ -24,9 +24,10 @@ import (
 
 	"github.com/takeoutfm/takeout/internal/auth"
 	"github.com/takeoutfm/takeout/internal/config"
+	"github.com/takeoutfm/takeout/internal/film"
 	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/takeoutfm/takeout/internal/podcast"
-	"github.com/takeoutfm/takeout/internal/video"
+	"github.com/takeoutfm/takeout/internal/tv"
 	"github.com/takeoutfm/takeout/lib/log"
 	"time"
 )
@@ -73,10 +74,16 @@ func schedule(config *config.Config) {
 	// podcasts
 	mediaSync(config.Podcast.SyncInterval, syncPodcasts, false)
 
-	// video
-	mediaSync(config.Video.SyncInterval, syncVideo, false)
-	mediaSync(config.Video.PosterSyncInterval, syncVideoPosters, false)
-	mediaSync(config.Video.BackdropSyncInterval, syncVideoBackdrops, false)
+	// film
+	mediaSync(config.Film.SyncInterval, syncFilm, false)
+	mediaSync(config.Film.PosterSyncInterval, syncFilmPosters, false)
+	mediaSync(config.Film.BackdropSyncInterval, syncFilmBackdrops, false)
+
+	// tv
+	mediaSync(config.TV.SyncInterval, syncTV, false)
+	mediaSync(config.TV.PosterSyncInterval, syncTVPosters, false)
+	mediaSync(config.TV.BackdropSyncInterval, syncTVBackdrops, false)
+	mediaSync(config.TV.StillSyncInterval, syncTVStills, false)
 
 	scheduler.Every(time.Minute * 5).WaitForSchedule().Do(func() {
 		a := auth.NewAuth(config)
@@ -164,46 +171,101 @@ func syncMusicFanArt(config *config.Config, mediaConfig *config.Config) error {
 	return nil
 }
 
-func syncVideo(config *config.Config, mediaConfig *config.Config) error {
-	v := video.NewVideo(mediaConfig)
-	err := v.Open()
+func syncFilm(config *config.Config, mediaConfig *config.Config) error {
+	f := film.NewFilm(mediaConfig)
+	err := f.Open()
 	if err != nil {
 		return err
 	}
-	defer v.Close()
-	return v.SyncSince(v.LastModified())
+	defer f.Close()
+	return f.SyncSince(f.LastModified())
 }
 
-func syncVideoPosters(config *config.Config, mediaConfig *config.Config) error {
-	v := video.NewVideo(mediaConfig)
-	err := v.Open()
+func syncTV(config *config.Config, mediaConfig *config.Config) error {
+	log.Println("xxx syncTV")
+	tv := tv.NewTV(mediaConfig)
+	err := tv.Open()
 	if err != nil {
 		return err
 	}
-	defer v.Close()
-	v.SyncPosters(config.NewGetterWith(config.Server.ImageClient))
+	defer tv.Close()
+	return tv.SyncSince(tv.LastModified())
+}
+
+func syncFilmPosters(config *config.Config, mediaConfig *config.Config) error {
+	f := film.NewFilm(mediaConfig)
+	err := f.Open()
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	f.SyncPosters(config.NewGetterWith(config.Server.ImageClient))
 	return nil
 }
 
-func syncVideoBackdrops(config *config.Config, mediaConfig *config.Config) error {
-	v := video.NewVideo(mediaConfig)
-	err := v.Open()
+func syncFilmBackdrops(config *config.Config, mediaConfig *config.Config) error {
+	f := film.NewFilm(mediaConfig)
+	err := f.Open()
 	if err != nil {
 		return err
 	}
-	defer v.Close()
-	v.SyncBackdrops(config.NewGetterWith(config.Server.ImageClient))
+	defer f.Close()
+	f.SyncBackdrops(config.NewGetterWith(config.Server.ImageClient))
 	return nil
 }
 
-func syncVideoProfileImages(config *config.Config, mediaConfig *config.Config) error {
-	v := video.NewVideo(mediaConfig)
-	err := v.Open()
+func syncFilmProfileImages(config *config.Config, mediaConfig *config.Config) error {
+	f := film.NewFilm(mediaConfig)
+	err := f.Open()
 	if err != nil {
 		return err
 	}
-	defer v.Close()
-	v.SyncProfileImages(config.NewGetterWith(config.Server.ImageClient))
+	defer f.Close()
+	f.SyncProfileImages(config.NewGetterWith(config.Server.ImageClient))
+	return nil
+}
+
+func syncTVProfileImages(config *config.Config, mediaConfig *config.Config) error {
+	tv := tv.NewTV(mediaConfig)
+	err := tv.Open()
+	if err != nil {
+		return err
+	}
+	defer tv.Close()
+	tv.SyncProfileImages(config.NewGetterWith(config.Server.ImageClient))
+	return nil
+}
+
+func syncTVBackdrops(config *config.Config, mediaConfig *config.Config) error {
+	tv := tv.NewTV(mediaConfig)
+	err := tv.Open()
+	if err != nil {
+		return err
+	}
+	defer tv.Close()
+	tv.SyncBackdrops(config.NewGetterWith(config.Server.ImageClient))
+	return nil
+}
+
+func syncTVPosters(config *config.Config, mediaConfig *config.Config) error {
+	tv := tv.NewTV(mediaConfig)
+	err := tv.Open()
+	if err != nil {
+		return err
+	}
+	defer tv.Close()
+	tv.SyncPosters(config.NewGetterWith(config.Server.ImageClient))
+	return nil
+}
+
+func syncTVStills(config *config.Config, mediaConfig *config.Config) error {
+	tv := tv.NewTV(mediaConfig)
+	err := tv.Open()
+	if err != nil {
+		return err
+	}
+	defer tv.Close()
+	tv.SyncStills(config.NewGetterWith(config.Server.ImageClient))
 	return nil
 }
 
@@ -241,7 +303,8 @@ func Job(config *config.Config, name string) error {
 		}
 		switch name {
 		case "backdrops":
-			syncVideoBackdrops(config, mediaConfig)
+			syncTVBackdrops(config, mediaConfig)
+			syncFilmBackdrops(config, mediaConfig)
 		case "covers":
 			syncMusicCovers(config, mediaConfig)
 		case "fanart":
@@ -251,7 +314,7 @@ func Job(config *config.Config, name string) error {
 			syncMusicSimilar(config, mediaConfig)
 		case "media":
 			syncMusic(config, mediaConfig)
-			syncVideo(config, mediaConfig)
+			syncFilm(config, mediaConfig)
 			syncPodcasts(config, mediaConfig)
 		case "music":
 			syncMusic(config, mediaConfig)
@@ -260,13 +323,19 @@ func Job(config *config.Config, name string) error {
 		case "podcasts":
 			syncPodcasts(config, mediaConfig)
 		case "posters":
-			syncVideoPosters(config, mediaConfig)
+			syncTVPosters(config, mediaConfig)
+			syncFilmPosters(config, mediaConfig)
 		case "profiles":
-			syncVideoProfileImages(config, mediaConfig)
+			syncTVProfileImages(config, mediaConfig)
+			syncFilmProfileImages(config, mediaConfig)
 		case "similar":
 			syncMusicSimilar(config, mediaConfig)
-		case "video":
-			syncVideo(config, mediaConfig)
+		case "stills":
+			syncTVStills(config, mediaConfig)
+		case "film":
+			syncFilm(config, mediaConfig)
+		case "tv":
+			syncTV(config, mediaConfig)
 		case "stations":
 			createStations(config, mediaConfig)
 		}

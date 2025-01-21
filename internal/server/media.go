@@ -18,20 +18,22 @@
 package server
 
 import (
-	"strings"
 	"github.com/takeoutfm/takeout/internal/auth"
 	"github.com/takeoutfm/takeout/internal/config"
+	"github.com/takeoutfm/takeout/internal/film"
 	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/takeoutfm/takeout/internal/podcast"
-	"github.com/takeoutfm/takeout/internal/video"
+	"github.com/takeoutfm/takeout/internal/tv"
 	"github.com/takeoutfm/takeout/lib/log"
+	"strings"
 )
 
 type Media struct {
 	config  *config.Config
 	music   *music.Music
-	video   *video.Video
+	film    *film.Film
 	podcast *podcast.Podcast
+	tv      *tv.TV
 }
 
 func (m Media) Config() *config.Config {
@@ -46,8 +48,12 @@ func (m Media) Podcast() *podcast.Podcast {
 	return m.podcast
 }
 
-func (m Media) Video() *video.Video {
-	return m.video
+func (m Media) Film() *film.Film {
+	return m.film
+}
+
+func (m Media) TV() *tv.TV {
+	return m.tv
 }
 
 func mediaConfigFor(root *config.Config, user auth.User) (string, *config.Config, error) {
@@ -81,9 +87,11 @@ func makeMedia(name string, config *config.Config) *Media {
 		media = &Media{}
 		media.music, err = media.makeMusic(config)
 		log.CheckError(err)
-		media.video, err = media.makeVideo(config)
+		media.film, err = media.makeFilm(config)
 		log.CheckError(err)
 		media.podcast, err = media.makePodcast(config)
+		log.CheckError(err)
+		media.tv, err = media.makeTV(config)
 		log.CheckError(err)
 		mediaMap[name] = media
 	}
@@ -99,13 +107,13 @@ func (Media) makeMusic(config *config.Config) (*music.Music, error) {
 	return m, nil
 }
 
-func (Media) makeVideo(config *config.Config) (*video.Video, error) {
-	v := video.NewVideo(config)
-	err := v.Open()
+func (Media) makeFilm(config *config.Config) (*film.Film, error) {
+	f := film.NewFilm(config)
+	err := f.Open()
 	if err != nil {
 		return nil, err
 	}
-	return v, nil
+	return f, nil
 }
 
 func (Media) makePodcast(config *config.Config) (*podcast.Podcast, error) {
@@ -115,4 +123,13 @@ func (Media) makePodcast(config *config.Config) (*podcast.Podcast, error) {
 		return nil, err
 	}
 	return p, nil
+}
+
+func (Media) makeTV(config *config.Config) (*tv.TV, error) {
+	tv := tv.NewTV(config)
+	err := tv.Open()
+	if err != nil {
+		return nil, err
+	}
+	return tv, nil
 }

@@ -22,9 +22,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/takeoutfm/takeout/internal/config"
+	"github.com/takeoutfm/takeout/internal/film"
 	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/takeoutfm/takeout/internal/podcast"
-	"github.com/takeoutfm/takeout/internal/video"
 )
 
 var statsCmd = &cobra.Command{
@@ -45,7 +45,7 @@ func stats() error {
 	if err != nil {
 		return err
 	}
-	err = videoStats(cfg)
+	err = filmStats(cfg)
 	if err != nil {
 		return err
 	}
@@ -70,14 +70,14 @@ func musicStats(cfg *config.Config) error {
 	return nil
 }
 
-func videoStats(cfg *config.Config) error {
-	v := video.NewVideo(cfg)
-	err := v.Open()
+func filmStats(cfg *config.Config) error {
+	f := film.NewFilm(cfg)
+	err := f.Open()
 	if err != nil {
 		return err
 	}
-	defer v.Close()
-	fmt.Printf("movies %d\n", v.MovieCount())
+	defer f.Close()
+	fmt.Printf("movies %d\n", f.MovieCount())
 	return nil
 }
 

@@ -71,9 +71,9 @@ type Entry struct {
 
 const (
 	TypeMusic   = "music"
-	TypeVideo   = "video"
+	TypeVideo   = "video" // film/movie or tv show
 	TypePodcast = "podcast"
-	TypeStream  = "stream"
+	TypeStream  = "stream" // icy/icecast stream
 )
 
 func NewPlaylist(listType string) *Playlist {

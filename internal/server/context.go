@@ -26,11 +26,13 @@ import (
 	"github.com/takeoutfm/takeout/internal/activity"
 	"github.com/takeoutfm/takeout/internal/auth"
 	"github.com/takeoutfm/takeout/internal/config"
+	"github.com/takeoutfm/takeout/internal/film"
 	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/takeoutfm/takeout/internal/podcast"
 	"github.com/takeoutfm/takeout/internal/progress"
-	"github.com/takeoutfm/takeout/internal/video"
+	"github.com/takeoutfm/takeout/internal/tv"
 	"github.com/takeoutfm/takeout/lib/client"
+	"github.com/takeoutfm/takeout/lib/str"
 	"github.com/takeoutfm/takeout/model"
 )
 
@@ -58,12 +60,14 @@ type Context interface {
 	Template() *template.Template
 	User() auth.User
 	Session() auth.Session
-	Video() *video.Video
+	Film() *film.Film
+	TV() *tv.TV
 	ImageClient() client.Getter
 
 	LocateTrack(model.Track) string
 	LocateMovie(model.Movie) string
 	LocateEpisode(model.Episode) string
+	LocateTVEpisode(model.TVEpisode) string
 
 	FindArtist(string) (model.Artist, error)
 	FindRelease(string) (model.Release, error)
@@ -72,15 +76,20 @@ type Context interface {
 	FindStation(string) (model.Station, error)
 	FindPlaylist(string) (model.Playlist, error)
 	FindMovie(string) (model.Movie, error)
+	FindTVSeries(string) (model.TVSeries, error)
+	FindTVEpisode(string) (model.TVEpisode, error)
 	FindSeries(string) (model.Series, error)
 	FindSeriesEpisodes(model.Series) []model.Episode
 	FindEpisode(string) (model.Episode, error)
+	FindPerson(string) (model.Person, error)
 
 	TrackImage(model.Track) string
 	ArtistImage(model.Artist) string
 	ArtistBackground(model.Artist) string
 	MovieImage(model.Movie) string
 	EpisodeImage(model.Episode) string
+	TVSeriesImage(model.TVSeries) string
+	TVEpisodeImage(model.TVEpisode) string
 }
 
 type RequestContext struct {
@@ -156,8 +165,12 @@ func (ctx RequestContext) Session() auth.Session {
 	return ctx.session
 }
 
-func (ctx RequestContext) Video() *video.Video {
-	return ctx.media.video
+func (ctx RequestContext) Film() *film.Film {
+	return ctx.media.film
+}
+
+func (ctx RequestContext) TV() *tv.TV {
+	return ctx.media.tv
 }
 
 func (RequestContext) LocateTrack(t model.Track) string {
@@ -170,6 +183,10 @@ func (RequestContext) LocateMovie(v model.Movie) string {
 
 func (RequestContext) LocateEpisode(e model.Episode) string {
 	return locateEpisode(e)
+}
+
+func (RequestContext) LocateTVEpisode(e model.TVEpisode) string {
+	return locateTVEpisode(e)
 }
 
 func (ctx RequestContext) FindArtist(id string) (model.Artist, error) {
@@ -197,7 +214,15 @@ func (ctx RequestContext) FindPlaylist(id string) (model.Playlist, error) {
 }
 
 func (ctx RequestContext) FindMovie(id string) (model.Movie, error) {
-	return ctx.Video().FindMovie(id)
+	return ctx.Film().FindMovie(id)
+}
+
+func (ctx RequestContext) FindTVSeries(id string) (model.TVSeries, error) {
+	return ctx.TV().FindSeries(id)
+}
+
+func (ctx RequestContext) FindTVEpisode(id string) (model.TVEpisode, error) {
+	return ctx.TV().FindEpisode(id)
 }
 
 func (ctx RequestContext) FindSeries(id string) (model.Series, error) {
@@ -210,6 +235,18 @@ func (ctx RequestContext) FindSeriesEpisodes(series model.Series) []model.Episod
 
 func (ctx RequestContext) FindEpisode(id string) (model.Episode, error) {
 	return ctx.Podcast().FindEpisode(id)
+}
+
+func (ctx RequestContext) FindPerson(id string) (model.Person, error) {
+	peid := str.Atoi(id)
+	person, err := ctx.Film().Person(peid)
+	if err != nil {
+		person, err = ctx.TV().Person(peid)
+		if err != nil {
+			return model.Person{}, err
+		}
+	}
+	return person, nil
 }
 
 func (ctx RequestContext) TrackImage(t model.Track) string {
@@ -225,11 +262,19 @@ func (ctx RequestContext) ArtistBackground(a model.Artist) string {
 }
 
 func (ctx RequestContext) MovieImage(m model.Movie) string {
-	return ctx.Video().MoviePoster(m)
+	return film.MoviePoster(m)
+}
+
+func (ctx RequestContext) TVSeriesImage(s model.TVSeries) string {
+	return tv.SeriesPoster(s)
+}
+
+func (ctx RequestContext) TVEpisodeImage(e model.TVEpisode) string {
+	return tv.EpisodeStillImage(e)
 }
 
 func (ctx RequestContext) EpisodeImage(e model.Episode) string {
-	return ctx.Podcast().EpisodeImage(e)
+	return podcast.EpisodeImage(e)
 }
 
 func (ctx RequestContext) ImageClient() client.Getter {
@@ -246,4 +291,8 @@ func locateMovie(v model.Movie) string {
 
 func locateEpisode(e model.Episode) string {
 	return fmt.Sprintf("/api/episodes/%d/location", e.ID)
+}
+
+func locateTVEpisode(e model.TVEpisode) string {
+	return fmt.Sprintf("/api/tv/episodes/%s/location", e.UUID)
 }

@@ -27,10 +27,11 @@ import (
 	"github.com/takeoutfm/takeout/internal/activity"
 	"github.com/takeoutfm/takeout/internal/auth"
 	"github.com/takeoutfm/takeout/internal/config"
+	"github.com/takeoutfm/takeout/internal/film"
 	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/takeoutfm/takeout/internal/podcast"
 	"github.com/takeoutfm/takeout/internal/progress"
-	"github.com/takeoutfm/takeout/internal/video"
+	"github.com/takeoutfm/takeout/internal/tv"
 	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/takeoutfm/takeout/lib/gorm"
 	"github.com/takeoutfm/takeout/lib/str"
@@ -54,7 +55,7 @@ const TestSeriesID = "105"
 const TestEpisodeID = "106"
 const TestPlaylistID = "107"
 
-type TextContext struct {
+type TestContext struct {
 	t *testing.T
 
 	a    *activity.Activity
@@ -62,14 +63,15 @@ type TextContext struct {
 	m    *music.Music
 	pod  *podcast.Podcast
 	p    *progress.Progress
-	v    *video.Video
+	f    *film.Film
+	tv   *tv.TV
 }
 
-func NewTestContext(t *testing.T) *TextContext {
-	return &TextContext{t: t}
+func NewTestContext(t *testing.T) *TestContext {
+	return &TestContext{t: t}
 }
 
-func (c *TextContext) Activity() *activity.Activity {
+func (c *TestContext) Activity() *activity.Activity {
 	if c.a == nil {
 		c.a = activity.NewActivity(c.Config())
 		err := c.a.Open()
@@ -80,7 +82,7 @@ func (c *TextContext) Activity() *activity.Activity {
 	return c.a
 }
 
-func (c *TextContext) Auth() *auth.Auth {
+func (c *TestContext) Auth() *auth.Auth {
 	if c.auth == nil {
 		c.auth = auth.NewAuth(c.Config())
 		err := c.auth.Open()
@@ -91,7 +93,7 @@ func (c *TextContext) Auth() *auth.Auth {
 	return c.auth
 }
 
-func (c *TextContext) Config() *config.Config {
+func (c *TestContext) Config() *config.Config {
 	config, err := config.TestingConfig()
 	if err != nil {
 		c.t.Fatal(err)
@@ -99,7 +101,7 @@ func (c *TextContext) Config() *config.Config {
 	return config
 }
 
-func (c *TextContext) Music() *music.Music {
+func (c *TestContext) Music() *music.Music {
 	if c.m == nil {
 		c.m = music.NewMusic(c.Config())
 		err := c.m.Open()
@@ -110,7 +112,7 @@ func (c *TextContext) Music() *music.Music {
 	return c.m
 }
 
-func (c *TextContext) Podcast() *podcast.Podcast {
+func (c *TestContext) Podcast() *podcast.Podcast {
 	if c.pod == nil {
 		c.pod = podcast.NewPodcast(c.Config())
 		err := c.pod.Open()
@@ -121,7 +123,7 @@ func (c *TextContext) Podcast() *podcast.Podcast {
 	return c.pod
 }
 
-func (c *TextContext) Progress() *progress.Progress {
+func (c *TestContext) Progress() *progress.Progress {
 	if c.p == nil {
 		c.p = progress.NewProgress(c.Config())
 		err := c.p.Open()
@@ -132,18 +134,18 @@ func (c *TextContext) Progress() *progress.Progress {
 	return c.p
 }
 
-func (c *TextContext) Template() *template.Template {
+func (c *TestContext) Template() *template.Template {
 	return &template.Template{}
 }
 
-func (c *TextContext) User() auth.User {
+func (c *TestContext) User() auth.User {
 	return auth.User{
 		Name:  TestUserID,
 		Media: "test",
 	}
 }
 
-func (c *TextContext) Session() auth.Session {
+func (c *TestContext) Session() auth.Session {
 	return auth.Session{
 		User:    TestUserID,
 		Token:   "2c52d8aa-e37e-4ed6-884b-1a565f18bbfc",
@@ -151,56 +153,67 @@ func (c *TextContext) Session() auth.Session {
 	}
 }
 
-func (c *TextContext) Video() *video.Video {
-	if c.v == nil {
-		c.v = video.NewVideo(c.Config())
-		err := c.v.Open()
+func (c *TestContext) Film() *film.Film {
+	if c.f == nil {
+		c.f = film.NewFilm(c.Config())
+		err := c.f.Open()
 		if err != nil {
 			c.t.Fatal(err)
 		}
 	}
-	return c.v
+	return c.f
 }
 
-func (c *TextContext) ImageClient() client.Getter {
+func (c *TestContext) TV() *tv.TV {
+	if c.tv == nil {
+		c.tv = tv.NewTV(c.Config())
+		err := c.tv.Open()
+		if err != nil {
+			c.t.Fatal(err)
+		}
+	}
+	return c.tv
+}
+
+func (c *TestContext) ImageClient() client.Getter {
 	return nil
 }
 
-func (c *TextContext) LocateTrack(t model.Track) string {
+func (c *TestContext) LocateTrack(t model.Track) string {
 	return "/api/tracks/4e3f3533-5f1a-4899-b44b-83268e0b2b39/location"
 }
 
-func (c *TextContext) LocateMovie(model.Movie) string {
+func (c *TestContext) LocateMovie(model.Movie) string {
 	return "/api/movies/77d9513d-33d0-47ba-ab16-f19fc5e5200b/location"
 }
 
-func (c *TextContext) LocateEpisode(model.Episode) string {
+func (c *TestContext) LocateEpisode(model.Episode) string {
 	return "/api/episodes/2dc5f8f66003e208da5b801e38e27818/location"
 }
 
-func (c *TextContext) FindArtist(id string) (model.Artist, error) {
+func (c *TestContext) FindArtist(id string) (model.Artist, error) {
 	if id == TestArtistID {
 		return model.Artist{Name: "test artist"}, nil
 	}
 	return model.Artist{}, errors.New("artist not found")
 }
 
-func (c *TextContext) FindRelease(id string) (model.Release, error) {
+func (c *TestContext) FindRelease(id string) (model.Release, error) {
 	if id == TestReleaseID {
 		return model.Release{
 			Model: gorm.Model{ID: uint(str.Atoi(TestReleaseID))},
-			Name: "test release",
+			Name:  "test release",
 		}, nil
 	}
 	return model.Release{}, errors.New("release not found")
 }
 
-func (c *TextContext) FindReleaseTracks(release model.Release) []model.Track {
+func (c *TestContext) FindReleaseTracks(release model.Release) []model.Track {
 	t, _ := c.FindTrack(TestTrackID)
 	return []model.Track{t}
 }
 
-func (c *TextContext) FindTrack(id string) (model.Track, error) {
+func (c *TestContext) FindTrack(id string) (model.Track, error) {
 	if id == TestTrackID {
 		return model.Track{
 			Model: gorm.Model{ID: uint(str.Atoi(TestTrackID))},
@@ -214,14 +227,14 @@ func (c *TextContext) FindTrack(id string) (model.Track, error) {
 	return model.Track{}, errors.New("track not found")
 }
 
-func (c *TextContext) FindStation(id string) (model.Station, error) {
+func (c *TestContext) FindStation(id string) (model.Station, error) {
 	if id == TestStationID {
 		return model.Station{Name: "test station", Shared: true}, nil
 	}
 	return model.Station{}, errors.New("station not found")
 }
 
-func (c *TextContext) FindPlaylist(id string) (model.Playlist, error) {
+func (c *TestContext) FindPlaylist(id string) (model.Playlist, error) {
 	if id == TestPlaylistID {
 		return model.Playlist{Name: "test playlist", User: TestUserID}, nil
 	}
@@ -232,50 +245,62 @@ func (c *TextContext) FindPlaylist(id string) (model.Playlist, error) {
 	return model.Playlist{}, errors.New("playlist not found")
 }
 
-func (c *TextContext) FindMovie(id string) (model.Movie, error) {
+func (c *TestContext) FindMovie(id string) (model.Movie, error) {
 	if id == TestMovieID {
 		return model.Movie{Title: "test movie"}, nil
 	}
 	return model.Movie{}, errors.New("movie not found")
 }
 
-func (c *TextContext) FindSeries(id string) (model.Series, error) {
+func (c *TestContext) FindSeries(id string) (model.Series, error) {
 	if id == TestSeriesID {
 		return model.Series{Title: "test series"}, nil
 	}
 	return model.Series{}, errors.New("series not found")
 }
 
-func (c *TextContext) FindSeriesEpisodes(series model.Series) []model.Episode {
+func (c *TestContext) FindSeriesEpisodes(series model.Series) []model.Episode {
 	e, _ := c.FindEpisode(TestEpisodeID)
 	return []model.Episode{e}
 }
 
-func (c *TextContext) FindEpisode(id string) (model.Episode, error) {
+func (c *TestContext) FindEpisode(id string) (model.Episode, error) {
 	if id == TestEpisodeID {
 		return model.Episode{Title: "test episode", SID: TestSeriesID}, nil
 	}
 	return model.Episode{}, errors.New("episode not found")
 }
 
-func (c *TextContext) TrackImage(model.Track) string {
+func (c *TestContext) TrackImage(model.Track) string {
 	return ""
 }
 
-func (c *TextContext) ArtistImage(model.Artist) string {
+func (c *TestContext) ArtistImage(model.Artist) string {
 	return ""
 }
 
-func (c *TextContext) ArtistBackground(model.Artist) string {
+func (c *TestContext) ArtistBackground(model.Artist) string {
 	return ""
 }
 
-func (c *TextContext) MovieImage(model.Movie) string {
+func (c *TestContext) MovieImage(model.Movie) string {
 	return ""
 }
 
-func (c *TextContext) EpisodeImage(model.Episode) string {
+func (c *TestContext) EpisodeImage(model.Episode) string {
 	return ""
+}
+
+func (c *TestContext) FindTVSeries(string) (model.TVSeries, error) {
+	return model.TVSeries{}, nil
+}
+
+func (c *TestContext) FindTVEpisode(string) (model.TVEpisode, error) {
+	return model.TVEpisode{}, nil
+}
+
+func (c *TestContext) FindPerson(string) (model.Person, error) {
+	return model.Person{}, nil
 }
 
 //

@@ -54,7 +54,8 @@ var (
 
 const (
 	MediaMusic = "music"
-	MediaVideo = "video"
+	MediaFilm  = "film"
+	MediaTV    = "tv"
 )
 
 type DatabaseConfig struct {
@@ -153,7 +154,7 @@ type MusicConfig struct {
 	RelatedArtists       time.Duration
 }
 
-type VideoConfig struct {
+type FilmConfig struct {
 	DB                   DatabaseConfig
 	ReleaseCountries     []string
 	CastLimit            int
@@ -167,6 +168,37 @@ type VideoConfig struct {
 	PosterSyncInterval   time.Duration
 	BackdropSyncInterval time.Duration
 	DuplicateResolution  string
+}
+
+func (c FilmConfig) SortedCast(credits tmdb.Credits) []tmdb.Cast {
+	return sortedCast(credits, c.CastLimit)
+}
+
+func (c FilmConfig) RelevantCrew(credits tmdb.Credits) []tmdb.Crew {
+	return relevantCrew(credits, c.CrewJobs)
+}
+
+type TVConfig struct {
+	DB                   DatabaseConfig
+	ReleaseCountries     []string
+	CastLimit            int
+	CrewJobs             []string
+	Recent               time.Duration
+	RecentLimit          int
+	SearchIndexName      string
+	SearchLimit          int
+	SyncInterval         time.Duration
+	PosterSyncInterval   time.Duration
+	BackdropSyncInterval time.Duration
+	StillSyncInterval    time.Duration
+}
+
+func (c TVConfig) SortedCast(credits tmdb.Credits) []tmdb.Cast {
+	return sortedCast(credits, c.CastLimit)
+}
+
+func (c TVConfig) RelevantCrew(credits tmdb.Credits) []tmdb.Crew {
+	return relevantCrew(credits, c.CrewJobs)
 }
 
 type PodcastConfig struct {
@@ -185,19 +217,19 @@ type ProgressConfig struct {
 }
 
 type ActivityConfig struct {
-	DB                  DatabaseConfig
-	RecentMoviesTitle   string
-	RecentTracksTitle   string
-	TrackLimit          int
-	MovieLimit          int
-	TopArtistsLimit     int
-	TopArtistsTitle     string
-	TopTracksLimit      int
-	TopTracksTitle      string
-	TopReleasesLimit    int
-	TopReleasesTitle    string
-	TopMoviesLimit      int
-	TopMoviesTitle      string
+	DB                DatabaseConfig
+	RecentMoviesTitle string
+	RecentTracksTitle string
+	TrackLimit        int
+	MovieLimit        int
+	TopArtistsLimit   int
+	TopArtistsTitle   string
+	TopTracksLimit    int
+	TopTracksTitle    string
+	TopReleasesLimit  int
+	TopReleasesTitle  string
+	TopMoviesLimit    int
+	TopMoviesTitle    string
 }
 
 type RecommendConfig struct {
@@ -212,8 +244,9 @@ type DateRecommend struct {
 }
 
 type TMDBAPIConfig struct {
-	tmdb.Config  `mapstructure:",squash"`
-	FileTemplate Template
+	tmdb.Config    `mapstructure:",squash"`
+	FileTemplate   Template
+	SeriesTemplate Template
 }
 
 type SetlistAPIConfig struct {
@@ -263,7 +296,8 @@ type Config struct {
 	TMDB      TMDBAPIConfig
 	Search    search.Config
 	Server    ServerConfig
-	Video     VideoConfig
+	Film      FilmConfig
+	TV        TVConfig
 	Assistant AssistantConfig
 	Podcast   PodcastConfig
 	Progress  ProgressConfig
@@ -415,17 +449,19 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("TMDB.Language", "en-US")
 	v.SetDefault("TMDB.FileTemplate.Text",
 		"{{.Title}} ({{.Year}}){{if .Definition}} - {{.Definition}}{{end}}{{.Extension}}")
+	v.SetDefault("TMDB.SeriesTemplate.Text",
+		"{{.Series}} ({{.Year}}) - S{{.Season}}E{{.Episode}} - {{.Name}}{{.Extension}}")
 
 	v.SetDefault("Search.IndexDir", ".")
 
-	v.SetDefault("Video.DB.Driver", "sqlite3")
-	v.SetDefault("Video.DB.Source", "video.db")
-	v.SetDefault("Video.DB.Logger", "default")
-	v.SetDefault("Video.ReleaseCountries", []string{
+	v.SetDefault("Film.DB.Driver", "sqlite3")
+	v.SetDefault("Film.DB.Source", "film.db")
+	v.SetDefault("Film.DB.Logger", "default")
+	v.SetDefault("Film.ReleaseCountries", []string{
 		"US",
 	})
-	v.SetDefault("Video.CastLimit", "25")
-	v.SetDefault("Video.CrewJobs", []string{
+	v.SetDefault("Film.CastLimit", "25")
+	v.SetDefault("Film.CrewJobs", []string{
 		"Director",
 		"Executive Producer",
 		"Novel",
@@ -433,14 +469,38 @@ func configDefaults(v *viper.Viper) {
 		"Screenplay",
 		"Story",
 	})
-	v.SetDefault("Video.Recent", "8760h") // 1 year
-	v.SetDefault("Video.RecentLimit", "50")
-	v.SetDefault("Video.SearchIndexName", "video")
-	v.SetDefault("Video.SearchLimit", "100")
-	v.SetDefault("Video.SyncInterval", "1h")
-	v.SetDefault("Video.PosterSyncInterval", "24h")
-	v.SetDefault("Video.BackdropSyncInterval", "24h")
-	v.SetDefault("Video.DuplicateResolution", "largest")
+	v.SetDefault("Film.Recent", "8760h") // 1 year
+	v.SetDefault("Film.RecentLimit", "50")
+	v.SetDefault("Film.SearchIndexName", "film")
+	v.SetDefault("Film.SearchLimit", "100")
+	v.SetDefault("Film.SyncInterval", "1h")
+	v.SetDefault("Film.PosterSyncInterval", "24h")
+	v.SetDefault("Film.BackdropSyncInterval", "24h")
+	v.SetDefault("Film.DuplicateResolution", "largest")
+
+	v.SetDefault("TV.DB.Driver", "sqlite3")
+	v.SetDefault("TV.DB.Source", "tv.db")
+	v.SetDefault("TV.DB.Logger", "default")
+	v.SetDefault("TV.ReleaseCountries", []string{
+		"US",
+	})
+	v.SetDefault("TV.CastLimit", "25")
+	v.SetDefault("TV.CrewJobs", []string{
+		"Director",
+		"Executive Producer",
+		"Novel",
+		"Producer",
+		"Screenplay",
+		"Story",
+	})
+	v.SetDefault("TV.Recent", "8760h") // 1 year
+	v.SetDefault("TV.RecentLimit", "50")
+	v.SetDefault("TV.SearchIndexName", "tv")
+	v.SetDefault("TV.SearchLimit", "100")
+	v.SetDefault("TV.SyncInterval", "1h")
+	v.SetDefault("TV.PosterSyncInterval", "24h")
+	v.SetDefault("TV.BackdropSyncInterval", "24h")
+	v.SetDefault("TV.StillSyncInterval", "24h")
 
 	// see https://musicbrainz.org/search (series)
 	v.SetDefault("Music.RadioSeries", []string{
@@ -686,7 +746,7 @@ func TestingConfig() (*Config, error) {
 	v.SetDefault("Music.DB.Source", "${Activity.DB.Source}")
 	v.SetDefault("Podcast.DB.Source", "${Activity.DB.Source}")
 	v.SetDefault("Progress.DB.Source", "${Activity.DB.Source}")
-	v.SetDefault("Video.DB.Source", "${Activity.DB.Source}")
+	v.SetDefault("Film.DB.Source", "${Activity.DB.Source}")
 
 	v.SetDefault("Auth.AccessToken.Issuer", "takeout.test")
 	v.SetDefault("Auth.AccessToken.Age", "5m")
@@ -704,7 +764,7 @@ func TestingConfig() (*Config, error) {
 	v.SetDefault("Search.IndexDir", "")
 	v.SetDefault("Music.SearchIndexName", "")
 	v.SetDefault("Podcast.SearchIndexName", "")
-	v.SetDefault("Video.SearchIndexName", "")
+	v.SetDefault("Film.SearchIndexName", "")
 
 	return makeConfig(v, "/tmp")
 }
@@ -765,7 +825,7 @@ func LoadConfig(dir string) (*Config, error) {
 		// cache the loaded config and don't load again
 		dirConfigCache[dir] = c
 		// TODO revisit watching and rebuilding all services (music,
-		// video, podcast) would need to be reconstructed and not sure
+		// film, podcast) would need to be reconstructed and not sure
 		// if that's desired.
 	}
 	return c, err
@@ -782,4 +842,16 @@ func (c Config) Write(w io.Writer) error {
 	}
 	_, err = w.Write(buf)
 	return err
+}
+
+func sortedCast(credits tmdb.Credits, limit int) []tmdb.Cast {
+	cast := credits.SortedCast()
+	if len(cast) > limit {
+		cast = cast[:limit]
+	}
+	return cast
+}
+
+func relevantCrew(credits tmdb.Credits, jobs []string) []tmdb.Crew {
+	return credits.CrewWithJobs(jobs)
 }

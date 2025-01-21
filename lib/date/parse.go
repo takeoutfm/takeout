@@ -83,6 +83,14 @@ func ParseRFC1123(date string) (t time.Time) {
 // 	return t.Format(Simple12)
 // }
 
+func ParseJson(s string) time.Time {
+	t, err := time.Parse(time.RFC3339, s)
+	if err != nil {
+		return time.Time{}
+	}
+	return t
+}
+
 func FormatJson(t time.Time) string {
 	return t.Format(time.RFC3339)
 }

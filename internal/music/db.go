@@ -377,44 +377,44 @@ func (m *Music) trackRelease(t Track) (Release, error) {
 // an media specific release from a multi-disc set like: Eagles/Legacy or The
 // Beatles/The Beatles in Mono. These each have media with titles that
 // themselves were previous releases so check them too.
-func (m *Music) trackFirstReleaseDate(t Track) (result time.Time, err error) {
-	var releases []Release
-	names := []string{t.Release}
-	if t.MediaTitle != "" {
-		// names would be "Legacy" and "Hotel California"
-		names = append(names, t.MediaTitle)
-	}
-	m.db.Where("artist = ? and name in (?)",
-		t.Artist, names).
-		Having("date = min(date)").
-		Group("name").
-		Order("date").Find(&releases)
-	if len(releases) > 0 {
-		result = releases[0].Date
-		err = nil
-	} else {
-		// could be disambiguation like "Weezer (Blue Album)" so just
-		// use release date for now
-		r, err := m.assignedRelease(t)
-		if err == nil {
-			result = r.Date
-		}
-	}
-	return result, err
-}
+// func (m *Music) trackFirstReleaseDate(t Track) (result time.Time, err error) {
+// 	var releases []Release
+// 	names := []string{t.Release}
+// 	if t.MediaTitle != "" {
+// 		// names would be "Legacy" and "Hotel California"
+// 		names = append(names, t.MediaTitle)
+// 	}
+// 	m.db.Where("artist = ? and name in (?)",
+// 		t.Artist, names).
+// 		Having("date = min(date)").
+// 		Group("name").
+// 		Order("date").Find(&releases)
+// 	if len(releases) > 0 {
+// 		result = releases[0].Date
+// 		err = nil
+// 	} else {
+// 		// could be disambiguation like "Weezer (Blue Album)" so just
+// 		// use release date for now
+// 		r, err := m.assignedRelease(t)
+// 		if err == nil {
+// 			result = r.Date
+// 		}
+// 	}
+// 	return result, err
+// }
 
 // When there's artwork but no front, other_cover will be the ID of the image
 // used for some type of artwork.
-func (m *Music) updateOtherArtwork(r Release, id string) error {
+func (m *Music) updateOtherArtwork(r *Release, id string) error {
 	return m.db.Model(r).Update("other_artwork", id).Error
 }
 
-func (m *Music) updateArtwork(r Release, front, back, fromGroup bool) error {
+func (m *Music) updateArtwork(r *Release) error {
 	return m.db.Model(r).
-		Update("artwork", front || back).
-		Update("front_artwork", front).
-		Update("back_artwork", back).
-		Update("group_artwork", fromGroup).Error
+		Update("artwork", r.FrontArtwork || r.BackArtwork).
+		Update("front_artwork", r.FrontArtwork).
+		Update("back_artwork", r.BackArtwork).
+		Update("group_artwork", r.GroupArtwork).Error
 }
 
 // select count(*) from releases where artwork = false and re_id in (select distinct re_id from tracks);

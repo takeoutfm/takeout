@@ -38,6 +38,15 @@ type Artist struct {
 	Genre          string
 }
 
+type CoverArt interface {
+	HasArtwork() bool
+ 	HasFrontArtwork() bool
+ 	HasBackArtwork() bool
+ 	HasOtherArtwork() bool
+ 	HasGroupArtwork() bool
+	ArtworkMBIDs() (string, string)
+}
+
 // Release info from MusicBrainz.
 type Release struct {
 	gorm.Model
@@ -65,17 +74,33 @@ type Release struct {
 	GroupName      string  `gorm:"index:idx_release_group_name"`
 }
 
+func (r Release) HasArtwork() bool {
+	return r.Artwork
+}
+
+func (r Release) HasFrontArtwork() bool {
+	return r.FrontArtwork
+}
+
+func (r Release) HasBackArtwork() bool {
+	return r.BackArtwork
+}
+
+func (r Release) HasOtherArtwork() bool {
+	return r.OtherArtwork != ""
+}
+
+func (r Release) HasGroupArtwork() bool {
+	return r.GroupArtwork
+}
+
+func (r Release) ArtworkMBIDs() (string, string) {
+	return r.REID, r.RGID
+}
+
 func (r Release) Official() bool {
 	return r.Status == "Official"
 }
-
-// func (r Release) Cover(size string) string {
-// 	return Cover(r, size)
-// }
-
-// func (r Release) CoverSmall() string {
-// 	return Cover(r, "250")
-// }
 
 // Release Media from MusicBrainz.
 type Media struct {
@@ -162,6 +187,30 @@ func (t Track) PreferredArtist() string {
 		return t.TrackArtist
 	}
 	return t.Artist
+}
+
+func (t Track) HasArtwork() bool {
+	return t.Artwork
+}
+
+func (t Track) HasFrontArtwork() bool {
+	return t.FrontArtwork
+}
+
+func (t Track) HasBackArtwork() bool {
+	return t.BackArtwork
+}
+
+func (t Track) HasOtherArtwork() bool {
+	return t.OtherArtwork != ""
+}
+
+func (t Track) HasGroupArtwork() bool {
+	return t.GroupArtwork
+}
+
+func (t Track) ArtworkMBIDs() (string, string) {
+	return t.REID, t.RGID
 }
 
 type Playlist struct {

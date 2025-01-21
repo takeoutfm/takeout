@@ -2,7 +2,7 @@
   <h1>{{ .Series.Title }}</h1>
 </div>
 <div>
-  <img height="144" src="{{call $.SeriesImage .Series}}">
+  <img height="144" src="{{.Series|image}}">
 </div>
 <div>
   {{ range .Episodes }}

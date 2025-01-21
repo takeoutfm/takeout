@@ -270,49 +270,54 @@ func (m *Music) syncReleasesFor(artists []Artist) error {
 			}
 		}
 		for _, r := range releases {
-			r.Name = fixName(r.Name)
-			r.SingleName = fixName(r.SingleName)
-			for i := range r.Media {
-				r.Media[i].Name = fixName(r.Media[i].Name)
-			}
+			m.syncRelease(r)
+		}
+	}
+	return nil
+}
 
-			curr, err := m.release(r.REID)
+func (m *Music) syncRelease(r Release) error {
+	r.Name = fixName(r.Name)
+	r.SingleName = fixName(r.SingleName)
+	for i := range r.Media {
+		r.Media[i].Name = fixName(r.Media[i].Name)
+	}
+
+	curr, err := m.release(r.REID)
+	if err != nil {
+		err := m.createRelease(&r)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		for _, d := range r.Media {
+			err := m.createMedia(&d)
 			if err != nil {
-				err := m.createRelease(&r)
-				if err != nil {
-					log.Println(err)
-					return err
-				}
-				for _, d := range r.Media {
-					err := m.createMedia(&d)
-					if err != nil {
-						log.Println(err)
-						return err
-					}
-				}
-			} else {
-				if curr.Artist != r.Artist {
-					log.Printf("release artist conflict '%s' vs. '%s'\n", curr.Artist, r.Artist)
-				}
-				err := m.replaceRelease(curr, r)
-				if err != nil {
-					log.Println(err)
-					return err
-				}
-				// update any assigned tracks
-				tracks := m.ReleaseTracks(r)
-				for _, t := range tracks {
-					m.assignTrackRelease(t, r)
-				}
-				// delete existing release and (re)add new
-				m.deleteReleaseMedia(r.REID)
-				for _, d := range r.Media {
-					err := m.createMedia(&d)
-					if err != nil {
-						log.Println(err)
-						return err
-					}
-				}
+				log.Println(err)
+				return err
+			}
+		}
+	} else {
+		if curr.Artist != r.Artist {
+			log.Printf("release artist conflict '%s' vs. '%s'\n", curr.Artist, r.Artist)
+		}
+		err := m.replaceRelease(curr, r)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		// update any assigned tracks
+		tracks := m.ReleaseTracks(r)
+		for _, t := range tracks {
+			m.assignTrackRelease(t, r)
+		}
+		// delete existing release and (re)add new
+		m.deleteReleaseMedia(r.REID)
+		for _, d := range r.Media {
+			err := m.createMedia(&d)
+			if err != nil {
+				log.Println(err)
+				return err
 			}
 		}
 	}
@@ -322,7 +327,7 @@ func (m *Music) syncReleasesFor(artists []Artist) error {
 func (m *Music) checkMissingArtwork() error {
 	missing := m.releasesWithoutArtwork()
 	for _, r := range missing {
-		err := m.checkReleaseArtwork(r)
+		err := m.checkReleaseArtwork(&r)
 		if err != nil {
 			log.Printf("err was %s\n", err)
 		}
@@ -330,7 +335,7 @@ func (m *Music) checkMissingArtwork() error {
 	return nil
 }
 
-func (m *Music) checkReleaseArtwork(r Release) error {
+func (m *Music) checkReleaseArtwork(r *Release) error {
 	if r.Artwork && r.FrontArtwork == false {
 		log.Printf("need artwork for %s / %s\n", r.Artist, r.Name)
 		// have artwork but no front cover
@@ -352,16 +357,17 @@ func (m *Music) checkReleaseArtwork(r Release) error {
 		if err != nil {
 			return err
 		}
-		front, back := false, false
+		r.FrontArtwork, r.BackArtwork = false, false
 		for _, img := range art.Images {
 			if img.Front {
-				front = true
+				r.FrontArtwork = true
 			}
 			if img.Back {
-				back = true
+				r.BackArtwork = true
 			}
 		}
-		err = m.updateArtwork(r, front, back, art.FromGroup)
+		r.GroupArtwork = art.FromGroup
+		err = m.updateArtwork(r)
 		if err != nil {
 			return err
 		}
@@ -465,21 +471,20 @@ func (m *Music) assignTrackReleases() (bool, error) {
 			releaseCache[cacheKey] = r
 		}
 
-		//log.Printf("assign track release %s\n", cacheKey)
-		err := m.assignTrackRelease(t, r)
-		modified = true
-		if err != nil {
-			return modified, err
-		}
-
 		// ensure releases assigned to tracks have artwork
 		if _, ok := artChecked[r.REID]; !ok {
-			err := m.checkReleaseArtwork(r)
+			err := m.checkReleaseArtwork(&r)
 			if err != nil {
 				log.Println(err)
 				// could be 404 continue
 			}
 			artChecked[r.REID] = struct{}{}
+		}
+
+		err := m.assignTrackRelease(t, r)
+		modified = true
+		if err != nil {
+			return modified, err
 		}
 	}
 
@@ -496,6 +501,7 @@ func (m *Music) assignTrackReleaseDates() (bool, error) {
 	mediaCache := make(map[string][]Media)
 
 	for _, t := range tracks {
+	tryAgain:
 		media, ok := mediaCache[t.REID]
 		if !ok {
 			var err error
@@ -514,17 +520,44 @@ func (m *Music) assignTrackReleaseDates() (bool, error) {
 		if !ok {
 			r, err = m.release(t.REID)
 			if err != nil {
-				log.Println("REID not found for", t.Artist, t.Release, t.REID)
+				log.Println("REID not found for", t.REID, t.Artist, t.Release, t.Title)
 				// REID not found, find new one
 				r, err = m.findTrackRelease(t, media)
 				if err != nil {
 					// still not found, try harder
 					r, err = m.findTrackReleaseDisambiguate(t, media)
 					if err != nil {
-						return false, err
+						// see if the REID redirects to another
+						release, err := m.mbz.Release(t.REID)
+						if err != nil {
+							// REID doesn't appear to exist anywhere
+							log.Println(err)
+							continue
+						}
+						if release.ID != t.REID {
+							// likely a redirect to a different release
+							// so use this one instead
+							t.REID = release.ID
+
+							// TODO clear REID, RGID, RID
+
+							goto tryAgain
+						} else {
+							// could be a brand new release
+							// TODO
+							log.Println("ignoring track for", t.Artist, t.Release, t.REID)
+							continue
+						}
 					}
 				}
 			}
+
+			err := m.checkReleaseArtwork(&r)
+			if err != nil {
+				log.Println(err)
+				// could be 404 continue
+			}
+
 			releaseCache[t.REID] = r
 		}
 		// this will reassign REID & RGID as needed

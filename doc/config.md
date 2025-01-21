@@ -60,7 +60,7 @@ much.
 
 See the included [config.yaml](config.yaml) example configuration. This
 configuration file must be included in each media sub-directory. The file
-specifies the bucket details along with movie and video metadata configuration.
+specifies the bucket details along with movie and TV metadata configuration.
 
 ## Music Configuration
 

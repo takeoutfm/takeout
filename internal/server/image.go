@@ -83,7 +83,7 @@ func imgReleaseGroupFront(w http.ResponseWriter, r *http.Request) {
 	checkImageCache(w, r, url)
 }
 
-func imgVideo(w http.ResponseWriter, r *http.Request) {
+func imgTMDB(w http.ResponseWriter, r *http.Request) {
 	size := r.PathValue("size")
 	path := r.PathValue("path")
 	url := fmt.Sprintf("%s/t/p/%s/%s", TMDBPrefix, size, path)

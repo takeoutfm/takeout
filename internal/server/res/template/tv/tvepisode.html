@@ -1,0 +1,45 @@
+<div>
+  <h1>{{.Episode.Name}}</h1>
+  <div class="parent3">
+    <div class="middle">
+      <a data-link="{{.Series|link}}">{{ .Series.Name }}</a>
+    </div>
+    <div class="middle">
+      <img src="{{.Episode|still}}">
+    </div>
+    <div class="middle">
+      Season {{.Episode.Season}}, Episode {{.Episode.Episode}}
+      &mdash;
+      {{ if .Series.Rating }}
+      <span class="rating">{{.Series.Rating}}</span>
+      {{ else }}
+      <span class="rating">NR</span>
+      {{ end }}
+      &mdash;
+      {{ .Episode.Date|ymd }}
+    </div>
+  </div>
+  <h2 style="padding-left: 25px; padding-top: 25px;">Overview</h2>
+  <div style="display: flex; padding-left: 25px;">
+    {{ .Episode.Overview }}
+    <a data-link="/v?watch={{ .Series.ID }}">watch it</a>
+  </div>
+  {{ if .Cast }}
+  <h2 style="padding-left: 25px; padding-top: 25px;">Cast</h2>
+  <div style="display: flex; padding-left: 25px;">
+    {{ range $i, $c := .Cast }}
+    {{ if lt $i 5 }}
+    <div class="card">
+      <a data-link="/v?profile={{ $c.Person.ID }}"><img src="{{$c.Person|profile}}"></a>
+      <p class="person">{{ $c.Person.Name }}</p>
+      <p class="character">{{ $c.Character }}</p>
+    </div>
+    {{ end }}
+    {{ end }}
+  </div>
+  {{ end }}
+  <div style="padding-left: 25px;">
+    <h2>External Links</h2>
+    <a target="_blank" href="https://www.themoviedb.org/tv/{{ .Series.TVID }}">TMDB</a>,
+  </div>
+</div>

@@ -23,9 +23,9 @@ Music:
     - Epic 20+ Minute Tracks: +length:>1200 -silence
 
 # Bucket configuration
-# - This example has buckets for music and video
-# - This example uses the same bucket for music and video but they can be different
-# - Multiple music and/or video buckets are supported
+# - This example has buckets for music and movies
+# - This example uses the same bucket for music and movies but they can be different
+# - Multiple music and/or film buckets are supported
 # - Change endpoint and region to match your bucket provider (Wasabi used as an example)
 #   Any S3 compatible service should work (AWS, Backblaze, Wasabi, Minio)
 # - Change AccessKeyID to your bucket AccessKeyID
@@ -50,7 +50,7 @@ Buckets:
       - Pattern: "^(.+/White Zombie/La Sexorcisto_ Devil Music, )Volume One(.+/.+)$"
         Replace: "$1Vol. 1$2"
 
-  - Media: video
+  - Media: film
     S3:
       Endpoint: s3.us-west-1.wasabisys.com
       Region: us-west-1

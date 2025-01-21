@@ -23,7 +23,7 @@
     {{ range .Releases }}
     <div style="float: left; padding: 10px; max-width: 110px;">
       <a data-link="{{.|link}}" style="text-decoration: none;">
-	<img width="110" height="110" src="{{call $.CoverSmall .}}" style="border-radius: 10px;">
+	<img width="110" height="110" src="{{.|cover}}" style="border-radius: 10px;">
 	<br/>
 	<div class="release-small-title">{{ .Name }}</div>
 	<br style="display: none"/>
@@ -40,7 +40,7 @@
     {{ range .Stations }}
     <div style="float: left; padding: 10px; max-width: 110px;">
       <a class="nodecor" data-playlist="add-ref" data-ref='{{.|ref}}'>
-	<img width="110" height="110" src="{{call $.CoverSmall .}}" style="border-radius: 10px;">
+	<img width="110" height="110" src="{{.|cover}}" style="border-radius: 10px;">
 	<br/>
 	<div class="release-small-title">{{ .Name }}</div>
 	<br style="display: none"/>
@@ -76,7 +76,7 @@
 	       data-creator="{{.Artist}}"
 	       data-album="{{.ReleaseTitle}}"
 	       data-title="{{.Title}}"
-	       data-image="{{call $.CoverSmall .}}"
+	       data-image="{{.|cover}}"
 	       data-etag="{{.ETag}}"
 	       data-location="{{.|link}}">
 	      {{ .Title }}
@@ -114,6 +114,33 @@
 	  </div>
 	  <div class="movie-detail">
 	    {{ .Rating }} ~ {{ .Date.Year }} ~ {{ .Runtime }} mins
+	  </div>
+	</div>
+      </div>
+      <div class="right">
+      </div>
+    </div>
+    {{ end }}
+  </div>
+  {{ end }}
+  {{ if .TVEpisodes }}
+  <div>
+    <div class="parent">
+      <div class="left">
+	<h2>TV Shows</h2>
+      </div>
+      <div class="right">
+      </div>
+    </div>
+    {{ range .TVEpisodes }}
+    <div class="parent">
+      <div class="left" style="cursor: pointer;">
+	<div class="parent2">
+	  <div class="movie-title">
+	    <a data-link="/v?tvepisode={{.ID}}">{{ .Name }}</a>
+	  </div>
+	  <div class="movie-detail">
+	    S{{ .Season }}E{{ .Episode}} ~ {{ .Date.Year }} ~ {{ .Runtime }} mins
 	  </div>
 	</div>
       </div>
