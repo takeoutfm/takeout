@@ -1,3 +1,9 @@
+## 0.24.2
+
+- fix people links
+- test fixes
+- added "images" job
+
 ## 0.24.1
 
 - support for TV shows

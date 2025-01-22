@@ -30,7 +30,7 @@
     {{ range $i, $c := .Cast }}
     {{ if lt $i 5 }}
     <div class="card">
-      <a data-link="/v?profile={{ $c.Person.ID }}"><img src="{{$c.Person|profile}}"></a>
+      <a data-link="/v?profile={{ $c.Person.PEID }}"><img src="{{$c.Person|profile}}"></a>
       <p class="person">{{ $c.Person.Name }}</p>
       <p class="character">{{ $c.Character }}</p>
     </div>

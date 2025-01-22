@@ -33,7 +33,7 @@
 	    <td class="cred"><span class="heading">Starring</span></td>
 	    <td class="cred">
 	      {{ range .Starring }}
-	      <a data-link="/v?profile={{.ID}}">{{.Name}}</a>
+	      <a data-link="/v?profile={{.PEID}}">{{.Name}}</a>
 	      {{ end }}
 	    </td>
 	    <td rowspan="3" width="100%" align="right">
@@ -48,7 +48,7 @@
 	    <td class="cred"><span class="heading">Directing</span></td>
 	    <td class="cred">
 	      {{ range .Directing }}
-	      <a data-link="/v?profile={{.ID}}">{{.Name}}</a>
+	      <a data-link="/v?profile={{.PEID}}">{{.Name}}</a>
 	      {{ end }}
 	    </td>
 	  </tr>
@@ -58,7 +58,7 @@
 	    <td class="cred"><span class="heading">Writing</span></td>
 	    <td class="cred">
 	      {{ range .Writing }}
-	      <a data-link="/v?profile={{.ID}}">{{.Name}}</a>
+	      <a data-link="/v?profile={{.PEID}}">{{.Name}}</a>
 	      {{ end }}
 	    </td>
 	  </tr>

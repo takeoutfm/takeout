@@ -56,8 +56,7 @@ const TestEpisodeID = "106"
 const TestPlaylistID = "107"
 
 type TestContext struct {
-	t *testing.T
-
+	t    *testing.T
 	a    *activity.Activity
 	auth *auth.Auth
 	m    *music.Music
@@ -191,6 +190,11 @@ func (c *TestContext) LocateEpisode(model.Episode) string {
 	return "/api/episodes/2dc5f8f66003e208da5b801e38e27818/location"
 }
 
+func (c *TestContext) LocateTVEpisode(model.TVEpisode) string {
+	return "/api/tv/episodes/24eb51db-a4b3-4b23-9d8b-6ccb97150f2c/location"
+}
+
+
 func (c *TestContext) FindArtist(id string) (model.Artist, error) {
 	if id == TestArtistID {
 		return model.Artist{Name: "test artist"}, nil
@@ -288,6 +292,14 @@ func (c *TestContext) MovieImage(model.Movie) string {
 }
 
 func (c *TestContext) EpisodeImage(model.Episode) string {
+	return ""
+}
+
+func (c *TestContext) TVEpisodeImage(model.TVEpisode) string {
+	return ""
+}
+
+func (c *TestContext) TVSeriesImage(model.TVSeries) string {
 	return ""
 }
 

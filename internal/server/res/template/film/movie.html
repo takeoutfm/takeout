@@ -32,7 +32,7 @@
 	    <td class="cred"><h2>Starring</h2></td>
 	    <td class="cred">
 	      {{ range .Starring }}
-	      <a data-link="/v?profile={{.ID}}">{{.Name}}</a>
+	      <a data-link="/v?profile={{.PEID}}">{{.Name}}</a>
 	      {{ end }}
 	    </td>
 	    <td rowspan="3" width="100%" align="right">
@@ -47,7 +47,7 @@
 	    <td class="cred"><h2>Directing</h2></td>
 	    <td class="cred">
 	      {{ range .Directing }}
-	      <a data-link="/v?profile={{.ID}}">{{.Name}}</a>
+	      <a data-link="/v?profile={{.PEID}}">{{.Name}}</a>
 	      {{ end }}
 	    </td>
 	  </tr>
@@ -57,7 +57,7 @@
 	    <td class="cred"><h2>Writing</h2></td>
 	    <td class="cred">
 	      {{ range .Writing }}
-	      <a data-link="/v?profile={{.ID}}">{{.Name}}</a>
+	      <a data-link="/v?profile={{.PEID}}">{{.Name}}</a>
 	      {{ end }}
 	    </td>
 	  </tr>
@@ -85,7 +85,7 @@
     {{ range $i, $c := .Cast }}
     {{ if lt $i 5 }}
     <div class="card">
-      <a data-link="/v?profile={{ $c.Person.ID }}"><img src="{{$c.Person|profile}}"></a>
+      <a data-link="/v?profile={{ $c.Person.PEID }}"><img src="{{$c.Person|profile}}"></a>
       <p class="person">{{ $c.Person.Name }}</p>
       <p class="character">{{ $c.Character }}</p>
     </div>

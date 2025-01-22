@@ -315,7 +315,18 @@ func Job(config *config.Config, name string) error {
 		case "media":
 			syncMusic(config, mediaConfig)
 			syncFilm(config, mediaConfig)
+			syncTV(config, mediaConfig)
 			syncPodcasts(config, mediaConfig)
+		case "images":
+			syncMusicCovers(config, mediaConfig)
+			syncMusicFanArt(config, mediaConfig)
+			syncFilmPosters(config, mediaConfig)
+			syncFilmBackdrops(config, mediaConfig)
+			syncFilmProfileImages(config, mediaConfig)
+			syncTVPosters(config, mediaConfig)
+			syncTVBackdrops(config, mediaConfig)
+			syncTVStills(config, mediaConfig)
+			syncTVProfileImages(config, mediaConfig)
 		case "music":
 			syncMusic(config, mediaConfig)
 		case "popular":
