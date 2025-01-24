@@ -178,7 +178,6 @@ func doFilm(cfg *config.Config) {
 }
 
 func doTV(cfg *config.Config) {
-	fmt.Println("xxx doTV")
 	server.Job(cfg, "tv")
 }
 

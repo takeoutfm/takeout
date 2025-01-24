@@ -1,3 +1,7 @@
+## 0.24.3
+
+- preserve TV series & episode IDs during resync
+
 ## 0.24.2
 
 - fix people links

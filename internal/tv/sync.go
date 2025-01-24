@@ -35,23 +35,23 @@ import (
 )
 
 const (
-	FieldCast          = "cast"
-	FieldCharacter     = "character"
-	FieldCrew          = "crew"
-	FieldDate          = "date"
-	FieldEpisode       = "episode"
-	FieldGenre         = "genre"
-	FieldKeyword       = "keyword"
-	FieldName          = "name"
-	FieldRating        = "rating"
-	FieldRevenue       = "revenue"
-	FieldRuntime       = "runtime"
-	FieldSeason        = "season"
-	FieldSeries        = "series"
-	FieldTagline       = "tagline"
-	FieldTitle         = "title"
-	FieldVote          = "vote"
-	FieldVoteCount     = "vote_count"
+	FieldCast      = "cast"
+	FieldCharacter = "character"
+	FieldCrew      = "crew"
+	FieldDate      = "date"
+	FieldEpisode   = "episode"
+	FieldGenre     = "genre"
+	FieldKeyword   = "keyword"
+	FieldName      = "name"
+	FieldRating    = "rating"
+	FieldRevenue   = "revenue"
+	FieldRuntime   = "runtime"
+	FieldSeason    = "season"
+	FieldSeries    = "series"
+	FieldTagline   = "tagline"
+	FieldTitle     = "title"
+	FieldVote      = "vote"
+	FieldVoteCount = "vote_count"
 )
 
 type syncContext struct {
@@ -182,12 +182,6 @@ func parseEpisode(s string) (int, int, error) {
 
 // sync the series with genries & keywords
 func (tv *TV) syncSeries(tvid int) (search.FieldMap, error) {
-	tv.deleteSeries(tvid)
-	tv.deleteSeriesCast(tvid)
-	tv.deleteSeriesCrew(tvid)
-	tv.deleteGenres(tvid)
-	tv.deleteKeywords(tvid)
-
 	fields := make(search.FieldMap)
 
 	detail, err := tv.tmdb.TVDetail(tvid)
@@ -195,37 +189,48 @@ func (tv *TV) syncSeries(tvid int) (search.FieldMap, error) {
 		return fields, err
 	}
 
-	series := TVSeries{
-		TVID:             int64(detail.ID),
-		Name:             detail.Name,
-		SortName:         str.SortTitle(detail.Name),
-		OriginalName:     detail.OriginalName,
-		OriginalLanguage: detail.OriginalLanguage,
-		BackdropPath:     detail.BackdropPath,
-		PosterPath:       detail.PosterPath,
-		Overview:         detail.Overview,
-		Tagline:          detail.Tagline,
-		VoteAverage:      detail.VoteAverage,
-		VoteCount:        detail.VoteCount,
-		Date:             date.ParseDate(detail.FirstAirDate), // 2013-02-06
-		EndDate:          date.ParseDate(detail.LastAirDate),  // 2013-02-06
+	series, err := tv.LookupSeries(tvid)
+	if err != nil {
+		if err != ErrSeriesNotFound {
+			return fields, err
+		}
+		// series doesn't exist, create it with tvid
+		series = TVSeries{TVID: int64(detail.ID)}
+		err = tv.createSeries(&series)
+		if err != nil {
+			return fields, err
+		}
 	}
+	series.Name = detail.Name
+	series.SortName = str.SortTitle(detail.Name)
+	series.OriginalName = detail.OriginalName
+	series.OriginalLanguage = detail.OriginalLanguage
+	series.BackdropPath = detail.BackdropPath
+	series.PosterPath = detail.PosterPath
+	series.Overview = detail.Overview
+	series.Tagline = detail.Tagline
+	series.SeasonCount = detail.NumberOfSeasons
+	series.EpisodeCount = detail.NumberOfEpisodes
+	series.VoteAverage = detail.VoteAverage
+	series.VoteCount = detail.VoteCount
+	series.Date = date.ParseDate(detail.FirstAirDate)   // 2013-02-06
+	series.EndDate = date.ParseDate(detail.LastAirDate) // 2013-02-06
 
-	ratings, err := tv.tmdb.TVContentRatings(tvid)
+	// get rating
+	rating, err := tv.rating(tvid)
 	if err != nil {
 		return fields, err
 	}
-	ratingMap := make(map[string]tmdb.ContentRating)
-	for _, r := range ratings.Results {
-		ratingMap[r.Country] = r
+	series.Rating = rating
+
+	// update existing series detail
+	err = tv.updateSeries(&series)
+	if err != nil {
+		return fields, err
 	}
-	for _, country := range tv.config.TV.ReleaseCountries {
-		r, ok := ratingMap[country]
-		if ok {
-			series.Rating = r.Rating
-			break
-		}
-	}
+
+	// TODO additional season metadata is ignored but things like name, air
+	// date, overview, and poster could be useful later.
 
 	fields.AddField(FieldDate, series.Date)
 	fields.AddField(FieldName, series.Name)
@@ -234,10 +239,11 @@ func (tv *TV) syncSeries(tvid int) (search.FieldMap, error) {
 	fields.AddField(FieldVoteCount, series.VoteCount)
 	fields.AddField(FieldRating, series.Rating)
 
-	err = tv.createSeries(&series)
-	if err != nil {
-		return fields, err
-	}
+	// delete and repopulate all other related detail
+	tv.deleteSeriesCast(tvid)
+	tv.deleteSeriesCrew(tvid)
+	tv.deleteGenres(tvid)
+	tv.deleteKeywords(tvid)
 
 	credits, err := tv.tmdb.SeriesCredits(tvid)
 	if err != nil {
@@ -247,12 +253,10 @@ func (tv *TV) syncSeries(tvid int) (search.FieldMap, error) {
 	if err != nil {
 		return fields, err
 	}
-
 	err = tv.syncProcessGenres(series.TVID, detail.Genres, fields)
 	if err != nil {
 		return fields, err
 	}
-
 	keywords, err := tv.tmdb.TVKeywordNames(tvid)
 	if err != nil {
 		return fields, err
@@ -265,41 +269,66 @@ func (tv *TV) syncSeries(tvid int) (search.FieldMap, error) {
 	return fields, nil
 }
 
-func (tv *TV) syncEpisode(o *bucket.Object, tvid, season, episode int) (search.FieldMap, error) {
-	series, err := tv.LookupTVID(tvid)
-	if err == nil {
-		episodes := tv.Episodes(series)
-		for _, e := range episodes {
-			if e.Season == season && e.Episode == episode {
-				tv.deleteEpisodeCast(e)
-				tv.deleteEpisodeCrew(e)
-				tv.deleteEpisode(tvid, season, episode)
-			}
+func (tv *TV) rating(tvid int) (string, error) {
+	ratings, err := tv.tmdb.TVContentRatings(tvid)
+	if err != nil {
+		return "", err
+	}
+	ratingMap := make(map[string]tmdb.ContentRating)
+	for _, r := range ratings.Results {
+		ratingMap[r.Country] = r
+	}
+	for _, country := range tv.config.TV.ReleaseCountries {
+		r, ok := ratingMap[country]
+		if ok {
+			return r.Rating, nil
 		}
 	}
+	return "", ErrRatingNotFound
+}
 
+func (tv *TV) syncEpisode(o *bucket.Object, tvid, season, episode int) (search.FieldMap, error) {
 	fields := make(search.FieldMap)
+
+	series, err := tv.LookupTVID(tvid)
+	if err != nil {
+		// series must exist
+		return fields, err
+	}
+
+	ep, err := tv.FindSeasonEpisode(series, season, episode)
+	if err != nil {
+		if err != ErrEpisodeNotFound {
+			return fields, err
+		}
+		ep = TVEpisode{TVID: int64(tvid), Season: season, Episode: episode}
+		err = tv.createEpisode(&ep)
+		if err != nil {
+			return fields, err
+		}
+	}
 
 	detail, err := tv.tmdb.EpisodeDetail(tvid, season, episode)
 	if err != nil {
 		return fields, err
 	}
 
-	ep := TVEpisode{
-		TVID:         int64(tvid),
-		Name:         detail.Name,
-		Overview:     detail.Overview,
-		Date:         date.ParseDate(detail.AirDate), // 2013-02-06
-		Season:       detail.SeasonNumber,
-		Episode:      detail.EpisodeNumber,
-		StillPath:    detail.StillPath,
-		VoteAverage:  detail.VoteAverage,
-		VoteCount:    detail.VoteCount,
-		Runtime:      detail.Runtime,
-		Key:          o.Key,
-		Size:         o.Size,
-		ETag:         o.ETag,
-		LastModified: o.LastModified,
+	ep.Name = detail.Name
+	ep.Overview = detail.Overview
+	ep.Date = date.ParseDate(detail.AirDate) // 2013-02-0
+	ep.StillPath = detail.StillPath
+	ep.VoteAverage = detail.VoteAverage
+	ep.VoteCount = detail.VoteCount
+	ep.Runtime = detail.Runtime
+	ep.Key = o.Key
+	ep.Size = o.Size
+	ep.ETag = o.ETag
+	ep.LastModified = o.LastModified
+
+	// updating existing episode detail
+	err = tv.updateEpisode(&ep)
+	if err != nil {
+		return fields, err
 	}
 
 	fields.AddField(FieldSeries, series.Name)
@@ -312,10 +341,9 @@ func (tv *TV) syncEpisode(o *bucket.Object, tvid, season, episode int) (search.F
 	fields.AddField(FieldVote, int(ep.VoteAverage*10))
 	fields.AddField(FieldVoteCount, ep.VoteCount)
 
-	err = tv.createEpisode(&ep)
-	if err != nil {
-		return fields, err
-	}
+	// delete and repopulate all other stuff
+	tv.deleteEpisodeCast(ep)
+	tv.deleteEpisodeCrew(ep)
 
 	credits, err := tv.tmdb.EpisodeCredits(tvid, season, episode)
 	if err != nil {

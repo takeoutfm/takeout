@@ -182,7 +182,6 @@ func syncFilm(config *config.Config, mediaConfig *config.Config) error {
 }
 
 func syncTV(config *config.Config, mediaConfig *config.Config) error {
-	log.Println("xxx syncTV")
 	tv := tv.NewTV(mediaConfig)
 	err := tv.Open()
 	if err != nil {

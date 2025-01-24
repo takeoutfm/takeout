@@ -76,6 +76,17 @@ func (tv *TV) Episodes(series TVSeries) []TVEpisode {
 	return episodes
 }
 
+func (tv *TV) FindSeasonEpisode(series TVSeries, season, episode int) (TVEpisode, error) {
+	var ep TVEpisode
+	err := tv.db.First(&ep, `episodes.tv_id = ? and episodes.season = ? and episodes.episode = ?`,
+		series.TVID, season, episode).Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return TVEpisode{}, ErrEpisodeNotFound
+	}
+	return ep, err
+
+}
+
 func (tv *TV) Genre(name string) []TVSeries {
 	var series []TVSeries
 	tv.db.Where("series.tv_id in (select tv_id from genres where name = ?)", name).
@@ -118,7 +129,7 @@ func (tv *TV) SeriesCast(series TVSeries) []TVSeriesCast {
 		Where("series.tv_id = ?", series.TVID).Find(&cast)
 	tv.db.Joins(`inner join "series_cast" on people.pe_id = "series_cast".pe_id`).
 		Joins(`inner join series on series.tv_id = "series_cast".tv_id`).
-		Where("series.tv_id = ?",series.TVID).Find(&people)
+		Where("series.tv_id = ?", series.TVID).Find(&people)
 	pmap := make(map[int64]Person)
 	for _, p := range people {
 		pmap[p.PEID] = p
@@ -416,6 +427,14 @@ func (tv *TV) createSeries(s *TVSeries) error {
 	return tv.db.Create(s).Error
 }
 
+func (tv *TV) updateSeries(s *TVSeries) error {
+	return tv.db.Save(s).Error
+}
+
 func (tv *TV) createEpisode(e *TVEpisode) error {
 	return tv.db.Create(e).Error
+}
+
+func (tv *TV) updateEpisode(e *TVEpisode) error {
+	return tv.db.Save(e).Error
 }

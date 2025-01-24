@@ -61,40 +61,6 @@ var (
 	ErrInvalidEpisode = errors.New("invalid episode pattern")
 )
 
-type SyncContext interface {
-	Film() *Film
-	Object() *bucket.Object
-	Client() *tmdb.TMDB
-	Searcher() search.Searcher
-}
-
-type syncContext struct {
-	film     *Film
-	object   *bucket.Object
-	client   *tmdb.TMDB
-	searcher search.Searcher
-}
-
-func (c *syncContext) Film() *Film {
-	return c.film
-}
-
-func (c *syncContext) Object() *bucket.Object {
-	return c.object
-}
-
-func (c *syncContext) Client() *tmdb.TMDB {
-	return c.client
-}
-
-func (c *syncContext) Searcher() search.Searcher {
-	return c.searcher
-}
-
-func newSyncContext(f *Film, o *bucket.Object, client *tmdb.TMDB, searcher search.Searcher) SyncContext {
-	return &syncContext{film: f, object: o, client: client, searcher: searcher}
-}
-
 func (f *Film) Sync() error {
 	return f.SyncSince(time.Time{})
 }

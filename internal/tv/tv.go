@@ -28,7 +28,6 @@ import (
 	"github.com/takeoutfm/takeout/lib/bucket"
 	"github.com/takeoutfm/takeout/lib/search"
 	"github.com/takeoutfm/takeout/lib/tmdb"
-	"github.com/takeoutfm/takeout/lib/log"
 	. "github.com/takeoutfm/takeout/model"
 	"gorm.io/gorm"
 )
@@ -37,6 +36,7 @@ var (
 	ErrEpisodeNotFound = errors.New("episode not found")
 	ErrInvalidEpisode  = errors.New("invalid episode")
 	ErrSeriesNotFound  = errors.New("series not found")
+	ErrRatingNotFound  = errors.New("rating not found")
 )
 
 type TV struct {
@@ -57,7 +57,6 @@ func (tv *TV) Open() (err error) {
 	err = tv.openDB()
 	if err == nil {
 		tv.buckets, err = bucket.OpenMedia(tv.config.Buckets, config.MediaTV)
-		log.Println("xxx", tv, tv.buckets, err)
 	}
 	return
 }
