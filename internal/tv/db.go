@@ -71,7 +71,7 @@ func (tv *TV) Series() []TVSeries {
 
 func (tv *TV) Episodes() []TVEpisode {
 	var episodes []TVEpisode
-	tv.db.Order("tvid asc, season asc, episode asc").Find(&episodes)
+	tv.db.Order("tv_id asc, season asc, episode asc").Find(&episodes)
 	return episodes
 }
 
