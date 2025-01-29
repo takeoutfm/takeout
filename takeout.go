@@ -19,6 +19,6 @@ package takeout
 
 const (
 	AppName = "Takeout"
-	Version = "0.24.3"
+	Version = "0.24.4"
 	Contact = "takeoutfm.com"
 )

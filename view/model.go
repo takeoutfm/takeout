@@ -171,6 +171,11 @@ type Watch struct {
 	Location string
 }
 
+type TVList struct {
+	Series   []model.TVSeries
+	Episodes []model.TVEpisode
+}
+
 type TVShows struct {
 	Series []model.TVSeries
 }

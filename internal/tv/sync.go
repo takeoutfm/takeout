@@ -516,7 +516,7 @@ func (tv *TV) SyncBackdrops(client client.Getter) {
 
 func (tv *TV) SyncStills(client client.Getter) {
 	for _, s := range tv.Series() {
-		for _, e := range tv.Episodes(s) {
+		for _, e := range tv.SeriesEpisodes(s) {
 			// sync still
 			img := tv.TMDBEpisodeStill(e)
 			if img != "" {

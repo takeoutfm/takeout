@@ -791,7 +791,12 @@ func apiMovieKeywordGet(w http.ResponseWriter, r *http.Request) {
 	apiView(w, r, KeywordView(ctx, name))
 }
 
-func apiTV(w http.ResponseWriter, r *http.Request) {
+func apiTVList(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	apiView(w, r, TVListView(ctx))
+}
+
+func apiTVShows(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	apiView(w, r, TVShowsView(ctx))
 }

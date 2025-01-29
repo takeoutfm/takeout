@@ -69,7 +69,13 @@ func (tv *TV) Series() []TVSeries {
 	return series
 }
 
-func (tv *TV) Episodes(series TVSeries) []TVEpisode {
+func (tv *TV) Episodes() []TVEpisode {
+	var episodes []TVEpisode
+	tv.db.Order("tvid asc, season asc, episode asc").Find(&episodes)
+	return episodes
+}
+
+func (tv *TV) SeriesEpisodes(series TVSeries) []TVEpisode {
 	var episodes []TVEpisode
 	tv.db.Where(`episodes.tv_id = ?`, series.TVID).
 		Order("season asc, episode asc").Find(&episodes)

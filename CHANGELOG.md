@@ -1,3 +1,7 @@
+## 0.24.4
+
+- support TV list and TV series calls
+
 ## 0.24.3
 
 - preserve TV series & episode IDs during resync

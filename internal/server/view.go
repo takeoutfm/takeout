@@ -289,6 +289,14 @@ func WatchView(ctx Context, m model.Movie) *Watch {
 	return view
 }
 
+func TVListView(ctx Context) *TVList {
+	tv := ctx.TV()
+	view := &TVList{}
+	view.Series = tv.Series()
+	view.Episodes = tv.Episodes()
+	return view
+}
+
 func TVShowsView(ctx Context) *TVShows {
 	tv := ctx.TV()
 	view := &TVShows{}
@@ -300,7 +308,7 @@ func TVSeriesView(ctx Context, s model.TVSeries) *TVSeries {
 	tv := ctx.TV()
 	view := &TVSeries{}
 	view.Series = s
-	view.Episodes = tv.Episodes(s)
+	view.Episodes = tv.SeriesEpisodes(s)
 	view.Cast = tv.SeriesCast(s)
 	view.Crew = tv.SeriesCrew(s)
 
