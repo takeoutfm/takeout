@@ -1,3 +1,9 @@
+## 0.24.6
+
+- HTML unescape RSS title and author
+- ensure good password entropy
+- fix users and code unique index
+
 ## 0.24.4-5
 
 - support TV list and TV series calls

@@ -31,6 +31,7 @@ import (
 	"github.com/takeoutfm/takeout"
 	"github.com/takeoutfm/takeout/internal/config"
 	"github.com/takeoutfm/takeout/lib/log"
+	passwordvalidator "github.com/wagslane/go-password-validator"
 	"golang.org/x/crypto/scrypt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -69,7 +70,7 @@ var (
 
 type User struct {
 	gorm.Model
-	Name  string `gorm:"unique_index:idx_user_name"`
+	Name  string `gorm:"uniqueIndex:idx_user_name"`
 	Key   []byte
 	Salt  []byte
 	Media string
@@ -80,8 +81,8 @@ type User struct {
 // expiration date.
 type Session struct {
 	gorm.Model
-	User    string    `gorm:"unique_index:idx_session_user"`
-	Token   string    `gorm:"unique_index:idx_session_token"`
+	User    string    `gorm:"uniqueIndex:idx_session_user"`
+	Token   string    `gorm:"uniqueIndex:idx_session_token"`
 	Expires time.Time `gorm:"index:idx_session_expires"`
 }
 
@@ -161,8 +162,13 @@ func (a *Auth) Close() {
 
 // AddUser adds a new user to the user database.
 func (a *Auth) AddUser(userid, pass string) error {
+	err := a.validatePassword(pass)
+	if err != nil {
+		return err
+	}
+
 	salt := make([]byte, 8)
-	_, err := rand.Read(salt)
+	_, err = rand.Read(salt)
 	if err != nil {
 		return err
 	}
@@ -175,6 +181,10 @@ func (a *Auth) AddUser(userid, pass string) error {
 	u := User{Name: userid, Key: key, Salt: salt}
 
 	return a.createUser(&u)
+}
+
+func (a *Auth) validatePassword(password string) error {
+	return passwordvalidator.Validate(password, float64(a.config.Auth.PasswordEntropy))
 }
 
 // User returns the user found with the provded userid.
@@ -305,6 +315,11 @@ func (a *Auth) passcodeLoginCheck(userid, pass, passcode string) (User, error) {
 //
 // TODO this should trigger a TOTP change as well.
 func (a *Auth) ChangePass(userid, newpass string) error {
+	err := a.validatePassword(newpass)
+	if err != nil {
+		return err
+	}
+
 	u, err := a.User(userid)
 	if err != nil {
 		return ErrUserNotFound

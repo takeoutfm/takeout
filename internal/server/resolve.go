@@ -462,9 +462,11 @@ func resolveSourceRef(ctx Context, ref string, s *model.Station, entries []spiff
 		for i := 0; i < count; i++ {
 			select {
 			case result := <-results:
-				// TODO use the first pls entry for now
-				locations = append(locations, result.Entries[0].File)
-				sizes = append(sizes, int64(result.Entries[0].Length))
+				if len(result.Entries) > 0 {
+					// TODO use the first pls entry for now
+					locations = append(locations, result.Entries[0].File)
+					sizes = append(sizes, int64(result.Entries[0].Length))
+				}
 			case err := <-errors:
 				log.Printf("GetPLS err %s\n", err)
 			}

@@ -20,6 +20,7 @@ package rss
 
 import (
 	"encoding/xml"
+	"html"
 	"strings"
 	"time"
 
@@ -44,12 +45,16 @@ func (rss *RSS) Fetch(url string) (Channel, error) {
 	return result.Channel, err
 }
 
+func unescape(s string) string {
+	return html.UnescapeString(s)
+}
+
 func (rss *RSS) FetchPodcast(url string) (Podcast, error) {
 	result, err := rss.Fetch(url)
 	podcast := Podcast{
-		Title:         result.Title,
+		Title:         unescape(result.Title),
 		Description:   result.Description,
-		Author:        result.Author,
+		Author:        unescape(result.Author),
 		Link:          result.Link(),
 		Image:         result.Image.Link,
 		Copyright:     result.Copyright,
@@ -58,8 +63,8 @@ func (rss *RSS) FetchPodcast(url string) (Podcast, error) {
 	}
 	for _, i := range result.Items {
 		episode := Episode{
-			Title:       i.ItemTitle(),
-			Author:      i.Author,
+			Title:       unescape(i.ItemTitle()),
+			Author:      unescape(i.Author),
 			Link:        i.Link,
 			Description: i.Description,
 			ContentType: i.ContentType(),

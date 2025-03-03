@@ -265,15 +265,16 @@ type TokenConfig struct {
 }
 
 type AuthConfig struct {
-	DB            DatabaseConfig
-	SessionAge    time.Duration
-	CodeAge       time.Duration
-	SecureCookies bool
-	AccessToken   TokenConfig
-	MediaToken    TokenConfig
-	CodeToken     TokenConfig
-	FileToken     TokenConfig
-	TOTP          TOTPConfig
+	DB              DatabaseConfig
+	SessionAge      time.Duration
+	CodeAge         time.Duration
+	SecureCookies   bool
+	AccessToken     TokenConfig
+	MediaToken      TokenConfig
+	CodeToken       TokenConfig
+	FileToken       TokenConfig
+	TOTP            TOTPConfig
+	PasswordEntropy int
 }
 
 type ServerConfig struct {
@@ -378,6 +379,7 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Auth.FileToken.Issuer", "takeout")
 	v.SetDefault("Auth.FileToken.Secret", "")     // must be assigned in config file
 	v.SetDefault("Auth.FileToken.SecretFile", "") // must be assigned in config file
+	v.SetDefault("Auth.PasswordEntropy", "60")    // 50-70 bits is reasonable
 
 	v.SetDefault("Progress.DB.Driver", "sqlite3")
 	v.SetDefault("Progress.DB.Source", "${Server.DataDir}/progress.db")

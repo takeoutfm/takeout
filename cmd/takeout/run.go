@@ -47,14 +47,14 @@ var runCmd = &cobra.Command{
 }
 
 const (
-	passwordSize = 12
+	passwordSize = 14
 	tokenSize    = 16
 	secretChars  = "0123456789abcdefghijklmnpqrstuvwxyzABCDEFGHILKMNOPQRSTUVWXYZ~`!@#$%^&*()_-+={[}];:,<.>/?"
 )
 
 func generateSecret(size int) string {
 	var secret string
-	rando.Seed(time.Now().UnixNano())
+	//rando.Seed(time.Now().UnixNano())
 	for i := 0; i < size; i++ {
 		n := rando.Intn(len(secretChars))
 		secret += string(secretChars[n])
