@@ -25,14 +25,13 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/takeoutfm/takeout/internal/auth"
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/internal/server"
-	"github.com/takeoutfm/takeout/lib/log"
+	"takeoutfm.dev/takeout/internal/auth"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/internal/server"
+	"takeoutfm.dev/takeout/lib/log"
 )
 
 var options *viper.Viper

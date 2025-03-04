@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-package lastfm
+package lastfm // import "takeoutfm.dev/takeout/lib/lastfm"
 
 import (
 	lfm "github.com/shkh/lastfm-go/lastfm"
 	"sort"
 	"strconv"
 
-	"github.com/takeoutfm/takeout/lib/client"
+	"takeoutfm.dev/takeout/lib/client"
 )
 
 type Config struct {

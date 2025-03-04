@@ -20,9 +20,9 @@ package podcast
 import (
 	"errors"
 
-	. "github.com/takeoutfm/takeout/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	. "takeoutfm.dev/takeout/model"
 )
 
 var (

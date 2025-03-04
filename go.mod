@@ -1,4 +1,4 @@
-module github.com/takeoutfm/takeout
+module takeoutfm.dev/takeout
 
 require (
 	github.com/aws/aws-sdk-go v1.50.20

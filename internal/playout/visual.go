@@ -26,8 +26,8 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/mattn/go-runewidth"
 	"github.com/qeesung/image2ascii/ascii"
-	"github.com/takeoutfm/takeout/lib/log"
-	"github.com/takeoutfm/takeout/player"
+	"takeoutfm.dev/takeout/lib/log"
+	"takeoutfm.dev/takeout/player"
 )
 
 type VisualView struct {

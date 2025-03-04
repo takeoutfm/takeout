@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-package setlist
+package setlist // import "takeoutfm.dev/takeout/lib/setlist"
 
 import (
 	"bytes"
@@ -26,7 +26,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/takeoutfm/takeout/lib/client"
+	"takeoutfm.dev/takeout/lib/client"
 )
 
 //go:embed test/*.json

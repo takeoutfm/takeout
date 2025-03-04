@@ -20,8 +20,8 @@ package playout
 import (
 	"strings"
 
-	"github.com/takeoutfm/takeout/lib/log"
-	"github.com/takeoutfm/takeout/player"
+	"takeoutfm.dev/takeout/lib/log"
+	"takeoutfm.dev/takeout/player"
 )
 
 type Viewer interface {

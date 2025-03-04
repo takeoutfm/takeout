@@ -17,16 +17,16 @@
 
 // Package client provides an (partial) implementation of Takeout API with
 // support for authentication and tokens.
-package client
+package client // import "takeoutfm.dev/takeout/client"
 
 import (
 	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/takeoutfm/takeout/model"
-	"github.com/takeoutfm/takeout/spiff"
-	"github.com/takeoutfm/takeout/view"
+	"takeoutfm.dev/takeout/model"
+	"takeoutfm.dev/takeout/spiff"
+	"takeoutfm.dev/takeout/view"
 )
 
 const (

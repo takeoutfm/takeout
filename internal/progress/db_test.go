@@ -21,8 +21,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/model"
 )
 
 func makeProgress(t *testing.T) *Progress {

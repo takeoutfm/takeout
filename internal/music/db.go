@@ -22,12 +22,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/takeoutfm/takeout/internal/auth"
-	. "github.com/takeoutfm/takeout/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"takeoutfm.dev/takeout/internal/auth"
+	. "takeoutfm.dev/takeout/model"
 )
 
 var (

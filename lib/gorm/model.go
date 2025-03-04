@@ -18,7 +18,7 @@
 // Package gorm provides an alternative gorm.Model that excludes the time
 // fields from serialization, reducing some API bandwidth usage. There's also a
 // logger with adjusted timing/configuration.
-package gorm
+package gorm // import "takeoutfm.dev/takeout/lib/gorm"
 
 import (
 	g "gorm.io/gorm"

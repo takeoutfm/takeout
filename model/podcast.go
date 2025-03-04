@@ -15,10 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-package model
+package model // import "takeoutfm.dev/takeout/model"
 
 import (
-	"github.com/takeoutfm/takeout/lib/gorm"
+	"takeoutfm.dev/takeout/lib/gorm"
 	"time"
 )
 

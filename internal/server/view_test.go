@@ -21,8 +21,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/takeoutfm/takeout/lib/date"
-	"github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/model"
 )
 
 func TestIndexView(t *testing.T) {

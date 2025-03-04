@@ -23,17 +23,17 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/takeoutfm/takeout/internal/activity"
-	"github.com/takeoutfm/takeout/internal/auth"
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/internal/film"
-	"github.com/takeoutfm/takeout/internal/music"
-	"github.com/takeoutfm/takeout/internal/podcast"
-	"github.com/takeoutfm/takeout/internal/progress"
-	"github.com/takeoutfm/takeout/internal/tv"
-	"github.com/takeoutfm/takeout/lib/client"
-	"github.com/takeoutfm/takeout/lib/str"
-	"github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/internal/activity"
+	"takeoutfm.dev/takeout/internal/auth"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/internal/film"
+	"takeoutfm.dev/takeout/internal/music"
+	"takeoutfm.dev/takeout/internal/podcast"
+	"takeoutfm.dev/takeout/internal/progress"
+	"takeoutfm.dev/takeout/internal/tv"
+	"takeoutfm.dev/takeout/lib/client"
+	"takeoutfm.dev/takeout/lib/str"
+	"takeoutfm.dev/takeout/model"
 )
 
 type contextKey string

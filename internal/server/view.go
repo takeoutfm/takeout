@@ -21,12 +21,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/takeoutfm/takeout/internal/music"
-	"github.com/takeoutfm/takeout/internal/people"
-	"github.com/takeoutfm/takeout/lib/date"
-	"github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/internal/music"
+	"takeoutfm.dev/takeout/internal/people"
+	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/model"
 
-	. "github.com/takeoutfm/takeout/view"
+	. "takeoutfm.dev/takeout/view"
 )
 
 func IndexView(ctx Context) *Index {

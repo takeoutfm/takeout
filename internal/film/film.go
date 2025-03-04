@@ -23,13 +23,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/lib/bucket"
-	"github.com/takeoutfm/takeout/lib/date"
-	"github.com/takeoutfm/takeout/lib/search"
-	"github.com/takeoutfm/takeout/lib/tmdb"
-	. "github.com/takeoutfm/takeout/model"
 	"gorm.io/gorm"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/lib/bucket"
+	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/lib/search"
+	"takeoutfm.dev/takeout/lib/tmdb"
+	. "takeoutfm.dev/takeout/model"
 )
 
 type Film struct {

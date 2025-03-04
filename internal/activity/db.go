@@ -21,9 +21,9 @@ import (
 	"errors"
 	"time"
 
-	. "github.com/takeoutfm/takeout/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	. "takeoutfm.dev/takeout/model"
 )
 
 type trackEvent struct {

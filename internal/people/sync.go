@@ -18,10 +18,10 @@
 package people
 
 import (
-	"github.com/takeoutfm/takeout/lib/date"
-	"github.com/takeoutfm/takeout/lib/tmdb"
-	"github.com/takeoutfm/takeout/model"
 	"gorm.io/gorm"
+	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/lib/tmdb"
+	"takeoutfm.dev/takeout/model"
 )
 
 func PersonDetail(client *tmdb.TMDB, peid int) (model.Person, error) {

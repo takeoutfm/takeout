@@ -20,7 +20,7 @@ package music
 import (
 	"testing"
 
-	"github.com/takeoutfm/takeout/lib/search"
+	"takeoutfm.dev/takeout/lib/search"
 )
 
 func TestAddField(t *testing.T) {

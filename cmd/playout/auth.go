@@ -1,4 +1,3 @@
-
 // Copyright 2023 defsub
 //
 // This file is part of TakeoutFM.
@@ -21,7 +20,7 @@ package main
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/takeoutfm/takeout/client"
+	"takeoutfm.dev/takeout/client"
 )
 
 var authCmd = &cobra.Command{

@@ -20,9 +20,9 @@ package playout
 import (
 	"time"
 
-	"github.com/takeoutfm/takeout/client"
-	"github.com/takeoutfm/takeout/model"
-	"github.com/takeoutfm/takeout/player"
+	"takeoutfm.dev/takeout/client"
+	"takeoutfm.dev/takeout/model"
+	"takeoutfm.dev/takeout/player"
 )
 
 func (playout *Playout) activityTrackListen(p *player.Player) {

@@ -23,13 +23,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/internal/people"
-	"github.com/takeoutfm/takeout/lib/bucket"
-	"github.com/takeoutfm/takeout/lib/search"
-	"github.com/takeoutfm/takeout/lib/tmdb"
-	. "github.com/takeoutfm/takeout/model"
 	"gorm.io/gorm"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/internal/people"
+	"takeoutfm.dev/takeout/lib/bucket"
+	"takeoutfm.dev/takeout/lib/search"
+	"takeoutfm.dev/takeout/lib/tmdb"
+	. "takeoutfm.dev/takeout/model"
 )
 
 var (

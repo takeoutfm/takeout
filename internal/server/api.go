@@ -27,13 +27,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/takeoutfm/takeout/internal/auth"
-	"github.com/takeoutfm/takeout/lib/date"
-	"github.com/takeoutfm/takeout/lib/encoding/xspf"
-	"github.com/takeoutfm/takeout/lib/header"
-	"github.com/takeoutfm/takeout/lib/log"
-	"github.com/takeoutfm/takeout/model"
-	"github.com/takeoutfm/takeout/spiff"
+	"takeoutfm.dev/takeout/internal/auth"
+	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/lib/encoding/xspf"
+	"takeoutfm.dev/takeout/lib/header"
+	"takeoutfm.dev/takeout/lib/log"
+	"takeoutfm.dev/takeout/model"
+	"takeoutfm.dev/takeout/spiff"
 )
 
 const (

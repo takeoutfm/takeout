@@ -18,8 +18,8 @@
 package main
 
 import (
-	"github.com/takeoutfm/takeout/internal/server"
 	"github.com/spf13/cobra"
+	"takeoutfm.dev/takeout/internal/server"
 )
 
 var serveCmd = &cobra.Command{

@@ -22,11 +22,11 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/lib/client"
-	"github.com/takeoutfm/takeout/lib/search"
-	. "github.com/takeoutfm/takeout/model"
 	"gorm.io/gorm"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/lib/client"
+	"takeoutfm.dev/takeout/lib/search"
+	. "takeoutfm.dev/takeout/model"
 )
 
 type Podcast struct {

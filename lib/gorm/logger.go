@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-package gorm
+package gorm // import "takeoutfm.dev/takeout/lib/gorm"
 
 import (
 	"time"
 
 	"gorm.io/gorm/logger"
-	"github.com/takeoutfm/takeout/lib/log"
+	"takeoutfm.dev/takeout/lib/log"
 )
 
 var (

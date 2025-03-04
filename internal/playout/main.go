@@ -24,11 +24,11 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/takeoutfm/takeout/client"
-	"github.com/takeoutfm/takeout/lib/log"
-	"github.com/takeoutfm/takeout/model"
-	"github.com/takeoutfm/takeout/player"
-	"github.com/takeoutfm/takeout/spiff"
+	"takeoutfm.dev/takeout/client"
+	"takeoutfm.dev/takeout/lib/log"
+	"takeoutfm.dev/takeout/model"
+	"takeoutfm.dev/takeout/player"
+	"takeoutfm.dev/takeout/spiff"
 )
 
 type PlayOptions struct {

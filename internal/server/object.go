@@ -23,8 +23,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/takeoutfm/takeout/lib/header"
-	"github.com/takeoutfm/takeout/lib/str"
+	"takeoutfm.dev/takeout/lib/header"
+	"takeoutfm.dev/takeout/lib/str"
 )
 
 type object struct {

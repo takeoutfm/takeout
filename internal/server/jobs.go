@@ -22,13 +22,13 @@ import (
 
 	"github.com/go-co-op/gocron"
 
-	"github.com/takeoutfm/takeout/internal/auth"
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/internal/film"
-	"github.com/takeoutfm/takeout/internal/music"
-	"github.com/takeoutfm/takeout/internal/podcast"
-	"github.com/takeoutfm/takeout/internal/tv"
-	"github.com/takeoutfm/takeout/lib/log"
+	"takeoutfm.dev/takeout/internal/auth"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/internal/film"
+	"takeoutfm.dev/takeout/internal/music"
+	"takeoutfm.dev/takeout/internal/podcast"
+	"takeoutfm.dev/takeout/internal/tv"
+	"takeoutfm.dev/takeout/lib/log"
 	"time"
 )
 

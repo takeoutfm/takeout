@@ -18,7 +18,7 @@
 package music
 
 import (
-	. "github.com/takeoutfm/takeout/model"
+	. "takeoutfm.dev/takeout/model"
 )
 
 func (m *Music) WantArtistReleases(a Artist) []Release {

@@ -22,10 +22,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/takeoutfm/takeout/lib/hash"
-	"github.com/takeoutfm/takeout/lib/rss"
-	"github.com/takeoutfm/takeout/lib/search"
-	. "github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/lib/hash"
+	"takeoutfm.dev/takeout/lib/rss"
+	"takeoutfm.dev/takeout/lib/search"
+	. "takeoutfm.dev/takeout/model"
 )
 
 const (

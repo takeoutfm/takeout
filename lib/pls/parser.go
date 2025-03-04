@@ -16,7 +16,7 @@
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
 // Package pls provide support for pls files as used in Internet radio streams.
-package pls
+package pls // import "takeoutfm.dev/takeout/lib/pls"
 
 import (
 	"bufio"
@@ -25,7 +25,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/takeoutfm/takeout/lib/str"
+	"takeoutfm.dev/takeout/lib/str"
 )
 
 const (

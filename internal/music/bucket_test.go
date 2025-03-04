@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/model"
 )
 
 func TestMatchRelease(t *testing.T) {

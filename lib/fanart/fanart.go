@@ -17,11 +17,11 @@
 
 // Package fanart provides an interface to obtain artist artwork from
 // Fanart.tv.
-package fanart
+package fanart // import "takeoutfm.dev/takeout/lib/fanart"
 
 import (
 	"fmt"
-	"github.com/takeoutfm/takeout/lib/client"
+	"takeoutfm.dev/takeout/lib/client"
 )
 
 type Config struct {

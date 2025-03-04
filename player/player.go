@@ -19,7 +19,7 @@
 // playlists. There's support for FLAC, OGG, MP3 and WAV audio decoding, along
 // with Internet radio and ICY metadata. Internally Beep and Oto are used which
 // are known to work on Linux, BSDs, macOS, Windows, and more.
-package player
+package player // import "takeoutfm.dev/takeout/player"
 
 import (
 	"errors"
@@ -37,9 +37,9 @@ import (
 	"github.com/faiface/beep/speaker"
 	"github.com/faiface/beep/vorbis"
 	"github.com/faiface/beep/wav"
-	"github.com/takeoutfm/takeout/client"
-	"github.com/takeoutfm/takeout/lib/log"
-	"github.com/takeoutfm/takeout/spiff"
+	"takeoutfm.dev/takeout/client"
+	"takeoutfm.dev/takeout/lib/log"
+	"takeoutfm.dev/takeout/spiff"
 )
 
 type playing struct {

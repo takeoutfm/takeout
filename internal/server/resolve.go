@@ -26,15 +26,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/internal/music"
-	"github.com/takeoutfm/takeout/lib/date"
-	"github.com/takeoutfm/takeout/lib/log"
-	"github.com/takeoutfm/takeout/lib/pls"
-	"github.com/takeoutfm/takeout/lib/str"
-	"github.com/takeoutfm/takeout/model"
-	"github.com/takeoutfm/takeout/spiff"
-	"github.com/takeoutfm/takeout/view"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/internal/music"
+	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/lib/log"
+	"takeoutfm.dev/takeout/lib/pls"
+	"takeoutfm.dev/takeout/lib/str"
+	"takeoutfm.dev/takeout/model"
+	"takeoutfm.dev/takeout/spiff"
+	"takeoutfm.dev/takeout/view"
 )
 
 func trackEntry(ctx Context, t model.Track) spiff.Entry {

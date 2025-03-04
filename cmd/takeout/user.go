@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"github.com/mdp/qrterminal/v3"
 	"github.com/spf13/cobra"
-	"github.com/takeoutfm/takeout/internal/auth"
 	"os"
+	"takeoutfm.dev/takeout/internal/auth"
 )
 
 var userCmd = &cobra.Command{

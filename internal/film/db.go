@@ -21,12 +21,12 @@ import (
 	"errors"
 	"time"
 
-	. "github.com/takeoutfm/takeout/model"
-	"github.com/takeoutfm/takeout/internal/people"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"takeoutfm.dev/takeout/internal/people"
+	. "takeoutfm.dev/takeout/model"
 )
 
 func (f *Film) openDB() (err error) {

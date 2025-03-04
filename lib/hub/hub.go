@@ -15,19 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-package hub
+package hub // import "takeoutfm.dev/takeout/lib/hub"
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
-	"github.com/takeoutfm/takeout/lib/log"
 	"net"
 	"net/http"
-	"time"
-	"errors"
 	"os"
 	"strings"
+	"takeoutfm.dev/takeout/lib/log"
+	"time"
 )
 
 type Authenticator interface {

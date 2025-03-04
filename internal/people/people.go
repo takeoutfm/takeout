@@ -21,9 +21,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/takeoutfm/takeout/lib/tmdb"
-	"github.com/takeoutfm/takeout/model"
 	"gorm.io/gorm"
+	"takeoutfm.dev/takeout/lib/tmdb"
+	"takeoutfm.dev/takeout/model"
 )
 
 var (

@@ -24,8 +24,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/takeoutfm/takeout/spiff"
-	"github.com/takeoutfm/takeout/view"
+	"takeoutfm.dev/takeout/spiff"
+	"takeoutfm.dev/takeout/view"
 )
 
 func TestApiPlaylistsCreate(t *testing.T) {

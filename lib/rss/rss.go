@@ -16,7 +16,7 @@
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
 // Package rss provide support for parsing RSS files as used in podcast feeds.
-package rss
+package rss // import "takeoutfm.dev/takeout/lib/rss"
 
 import (
 	"encoding/xml"
@@ -24,9 +24,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/takeoutfm/takeout/lib/client"
-	"github.com/takeoutfm/takeout/lib/date"
-	"github.com/takeoutfm/takeout/lib/hash"
+	"takeoutfm.dev/takeout/lib/client"
+	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/lib/hash"
 )
 
 type RSS struct {

@@ -19,8 +19,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/takeoutfm/takeout/client"
 	"github.com/spf13/cobra"
+	"takeoutfm.dev/takeout/client"
 )
 
 var playlistCmd = &cobra.Command{

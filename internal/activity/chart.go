@@ -20,8 +20,8 @@ package activity
 import (
 	"fmt"
 
-	"github.com/takeoutfm/takeout/lib/date"
-	"github.com/takeoutfm/takeout/view"
+	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/view"
 )
 
 func (a *Activity) TrackDayCounts(ctx Context, d date.DateRange) *view.TrackCounts {

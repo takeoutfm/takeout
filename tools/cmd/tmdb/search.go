@@ -23,11 +23,11 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/lib/date"
-	"github.com/takeoutfm/takeout/lib/str"
-	"github.com/takeoutfm/takeout/lib/tmdb"
 	"gopkg.in/alessio/shellescape.v1"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/lib/str"
+	"takeoutfm.dev/takeout/lib/tmdb"
 )
 
 var searchCmd = &cobra.Command{

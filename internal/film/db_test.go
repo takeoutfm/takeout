@@ -21,9 +21,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/lib/str"
-	"github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/lib/str"
+	"takeoutfm.dev/takeout/model"
 )
 
 func makeFilm(t *testing.T) *Film {

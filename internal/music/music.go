@@ -28,17 +28,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/takeoutfm/takeout/internal/auth"
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/lib/bucket"
-	"github.com/takeoutfm/takeout/lib/fanart"
-	"github.com/takeoutfm/takeout/lib/lastfm"
-	"github.com/takeoutfm/takeout/lib/listenbrainz"
-	"github.com/takeoutfm/takeout/lib/log"
-	"github.com/takeoutfm/takeout/lib/musicbrainz"
-	"github.com/takeoutfm/takeout/lib/search"
-	. "github.com/takeoutfm/takeout/model"
 	"gorm.io/gorm"
+	"takeoutfm.dev/takeout/internal/auth"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/lib/bucket"
+	"takeoutfm.dev/takeout/lib/fanart"
+	"takeoutfm.dev/takeout/lib/lastfm"
+	"takeoutfm.dev/takeout/lib/listenbrainz"
+	"takeoutfm.dev/takeout/lib/log"
+	"takeoutfm.dev/takeout/lib/musicbrainz"
+	"takeoutfm.dev/takeout/lib/search"
+	. "takeoutfm.dev/takeout/model"
 )
 
 const (

@@ -21,8 +21,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/takeoutfm/takeout/internal/people"
-	. "github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/internal/people"
+	. "takeoutfm.dev/takeout/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"

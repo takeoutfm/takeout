@@ -25,13 +25,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/takeoutfm/takeout/lib/client"
-	"github.com/takeoutfm/takeout/lib/date"
-	"github.com/takeoutfm/takeout/lib/log"
-	"github.com/takeoutfm/takeout/lib/musicbrainz"
-	"github.com/takeoutfm/takeout/lib/search"
-	"github.com/takeoutfm/takeout/lib/str"
-	. "github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/lib/client"
+	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/lib/log"
+	"takeoutfm.dev/takeout/lib/musicbrainz"
+	"takeoutfm.dev/takeout/lib/search"
+	"takeoutfm.dev/takeout/lib/str"
+	. "takeoutfm.dev/takeout/model"
 )
 
 type SyncOptions struct {

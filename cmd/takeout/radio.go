@@ -18,8 +18,8 @@
 package main
 
 import (
-	"github.com/takeoutfm/takeout/internal/music"
 	"github.com/spf13/cobra"
+	"takeoutfm.dev/takeout/internal/music"
 )
 
 var radioCreate bool

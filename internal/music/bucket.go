@@ -26,9 +26,9 @@ import (
 
 	"github.com/dhowden/tag"
 	"github.com/dhowden/tag/mbz"
-	"github.com/takeoutfm/takeout/lib/bucket"
-	"github.com/takeoutfm/takeout/lib/str"
-	. "github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/lib/bucket"
+	"takeoutfm.dev/takeout/lib/str"
+	. "takeoutfm.dev/takeout/model"
 )
 
 // Asynchronously obtain all tracks from the bucket.

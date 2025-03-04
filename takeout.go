@@ -15,10 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-package takeout
+package takeout // import "takeoutfm.dev/takeout"
 
 const (
 	AppName = "Takeout"
-	Version = "0.24.6"
+	Version = "0.25.0"
 	Contact = "takeoutfm.com"
 )

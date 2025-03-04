@@ -20,7 +20,7 @@ package music
 import (
 	"testing"
 
-	"github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/model"
 )
 
 func TestPickDisamiguation(t *testing.T) {

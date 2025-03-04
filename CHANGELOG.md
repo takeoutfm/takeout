@@ -1,3 +1,7 @@
+## 0.25.0
+
+- use takeoutfm.dev
+
 ## 0.24.6
 
 - HTML unescape RSS title and author

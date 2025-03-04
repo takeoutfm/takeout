@@ -20,8 +20,8 @@ package people
 import (
 	"errors"
 
-	"github.com/takeoutfm/takeout/model"
 	"gorm.io/gorm"
+	"takeoutfm.dev/takeout/model"
 )
 
 func Person(db *gorm.DB, peid int) (model.Person, error) {

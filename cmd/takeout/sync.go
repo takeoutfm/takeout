@@ -21,10 +21,10 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/internal/film"
-	"github.com/takeoutfm/takeout/internal/music"
-	"github.com/takeoutfm/takeout/internal/podcast"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/internal/film"
+	"takeoutfm.dev/takeout/internal/music"
+	"takeoutfm.dev/takeout/internal/podcast"
 )
 
 var syncCmd = &cobra.Command{

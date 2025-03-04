@@ -25,7 +25,7 @@ import (
 
 	"github.com/spf13/viper"
 
-	"github.com/takeoutfm/takeout"
+	"takeoutfm.dev/takeout"
 )
 
 const (

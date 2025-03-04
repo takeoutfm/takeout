@@ -21,7 +21,7 @@ import (
 	"time"
 
 	lbz "github.com/kori/go-listenbrainz"
-	"github.com/takeoutfm/takeout/player"
+	"takeoutfm.dev/takeout/player"
 )
 
 func lbzTrack(p *player.Player) lbz.Track {

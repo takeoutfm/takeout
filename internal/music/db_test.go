@@ -21,10 +21,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/takeoutfm/takeout/internal/auth"
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/lib/date"
-	"github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/internal/auth"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/model"
 )
 
 func makeMusic(t *testing.T) *Music {

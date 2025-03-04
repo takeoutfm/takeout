@@ -20,8 +20,8 @@ package server
 import (
 	"testing"
 
-	"github.com/takeoutfm/takeout/model"
-	"github.com/takeoutfm/takeout/spiff"
+	"takeoutfm.dev/takeout/model"
+	"takeoutfm.dev/takeout/spiff"
 )
 
 func TestTrackEntry(t *testing.T) {

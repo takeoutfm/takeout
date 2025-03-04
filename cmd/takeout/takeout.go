@@ -21,8 +21,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/lib/log"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/lib/log"
 )
 
 var rootCmd = &cobra.Command{

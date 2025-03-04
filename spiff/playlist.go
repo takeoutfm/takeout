@@ -19,7 +19,7 @@
 // spiff is a container for one or more media tracks with basic media metadata.
 // TakeoutFM also uses json patch to manipulate spiffs for remote playlist
 // management.
-package spiff
+package spiff // import "takeoutfm.dev/takeout/spiff"
 
 import (
 	"encoding/json"

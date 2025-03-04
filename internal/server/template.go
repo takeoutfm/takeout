@@ -30,16 +30,16 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/internal/music"
-	"github.com/takeoutfm/takeout/internal/people"
-	"github.com/takeoutfm/takeout/internal/podcast"
-	"github.com/takeoutfm/takeout/internal/tv"
-	"github.com/takeoutfm/takeout/internal/film"
-	"github.com/takeoutfm/takeout/lib/date"
-	"github.com/takeoutfm/takeout/lib/log"
-	"github.com/takeoutfm/takeout/model"
-	"github.com/takeoutfm/takeout/view"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/internal/music"
+	"takeoutfm.dev/takeout/internal/people"
+	"takeoutfm.dev/takeout/internal/podcast"
+	"takeoutfm.dev/takeout/internal/tv"
+	"takeoutfm.dev/takeout/internal/film"
+	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/lib/log"
+	"takeoutfm.dev/takeout/model"
+	"takeoutfm.dev/takeout/view"
 )
 
 //go:embed res/static

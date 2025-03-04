@@ -22,7 +22,7 @@ import (
 
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
-	"github.com/takeoutfm/takeout/internal/config"
+	"takeoutfm.dev/takeout/internal/config"
 )
 
 func GenerateTOTP(config config.TOTPConfig, userid string) (string, error) {

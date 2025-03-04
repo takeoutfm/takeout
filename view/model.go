@@ -16,12 +16,12 @@
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
 // Package view is the TakeoutFM API viewmodel.
-package view
+package view // import "takeoutfm.dev/takeout/view"
 
 import (
 	"time"
 
-	"github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/model"
 )
 
 type TracksFunc func() []model.Track

@@ -20,7 +20,7 @@ package main
 import (
 	"errors"
 	"github.com/spf13/cobra"
-	"github.com/takeoutfm/takeout/internal/server"
+	"takeoutfm.dev/takeout/internal/server"
 )
 
 var jobCmd = &cobra.Command{

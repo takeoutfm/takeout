@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-package bucket
+package bucket // import "takeoutfm.dev/takeout/lib/bucket"
 
 import (
 	"testing"

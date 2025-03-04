@@ -15,15 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-package model
+package model // import "takeoutfm.dev/takeout/model"
 
 import (
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/takeoutfm/takeout/lib/gorm"
 	g "gorm.io/gorm"
+	"takeoutfm.dev/takeout/lib/gorm"
 )
 
 type TVSeries struct {

@@ -21,7 +21,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/takeoutfm/takeout/lib/log"
+	"takeoutfm.dev/takeout/lib/log"
 )
 
 var (

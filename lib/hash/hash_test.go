@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-package hash
+package hash // import "takeoutfm.dev/takeout/lib/hash"
 
 import (
 	"testing"

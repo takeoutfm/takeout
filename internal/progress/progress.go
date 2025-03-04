@@ -22,10 +22,10 @@ package progress
 
 import (
 	"errors"
-	"github.com/takeoutfm/takeout/internal/auth"
-	"github.com/takeoutfm/takeout/internal/config"
-	. "github.com/takeoutfm/takeout/model"
 	"gorm.io/gorm"
+	"takeoutfm.dev/takeout/internal/auth"
+	"takeoutfm.dev/takeout/internal/config"
+	. "takeoutfm.dev/takeout/model"
 )
 
 var (

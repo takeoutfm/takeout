@@ -18,7 +18,7 @@
 // Package musicbrainz provides fairly good support for the MusicBrainz API
 // with focus on the TakeoutFM needs for media syncing and building search
 // metadata.
-package musicbrainz
+package musicbrainz // import "takeoutfm.dev/takeout/lib/musicbrainz"
 
 import (
 	"encoding/json"
@@ -30,8 +30,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/takeoutfm/takeout/lib/client"
-	"github.com/takeoutfm/takeout/lib/date"
+	"takeoutfm.dev/takeout/lib/client"
+	"takeoutfm.dev/takeout/lib/date"
 )
 
 var (

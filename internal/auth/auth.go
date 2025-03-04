@@ -28,13 +28,13 @@ import (
 	"github.com/gokyle/filecache"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
-	"github.com/takeoutfm/takeout"
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/lib/log"
 	passwordvalidator "github.com/wagslane/go-password-validator"
 	"golang.org/x/crypto/scrypt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"takeoutfm.dev/takeout"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/lib/log"
 )
 
 const (

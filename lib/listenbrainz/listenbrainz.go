@@ -15,13 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-package listenbrainz
+package listenbrainz // import "takeoutfm.dev/takeout/lib/listenbrainz"
 
 import (
-	// "sort"
-	// "strconv"
-
-	"github.com/takeoutfm/takeout/lib/client"
+	"takeoutfm.dev/takeout/lib/client"
 )
 
 type ListenBrainz struct {

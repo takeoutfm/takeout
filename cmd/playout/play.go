@@ -22,8 +22,8 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/takeoutfm/takeout/internal/playout"
-	"github.com/takeoutfm/takeout/lib/date"
+	"takeoutfm.dev/takeout/internal/playout"
+	"takeoutfm.dev/takeout/lib/date"
 )
 
 var playCmd = &cobra.Command{

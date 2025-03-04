@@ -17,7 +17,7 @@
 
 // Package search provides a wrapper for bleve search, building a search
 // database for an index of fields.
-package search
+package search // import "takeoutfm.dev/takeout/lib/search"
 
 import (
 	"github.com/blevesearch/bleve/v2"

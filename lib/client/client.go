@@ -18,7 +18,7 @@
 // Package client provides an http client used extensively by Takeout for
 // syncing media. There's support for local file-based caching and cache-only
 // usage.
-package client
+package client // import "takeoutfm.dev/takeout/lib/client"
 
 import (
 	"encoding/json"
@@ -35,9 +35,9 @@ import (
 
 	"github.com/gregjones/httpcache"
 	"github.com/gregjones/httpcache/diskcache"
-	"github.com/takeoutfm/takeout/lib/header"
-	"github.com/takeoutfm/takeout/lib/log"
-	"github.com/takeoutfm/takeout/lib/pls"
+	"takeoutfm.dev/takeout/lib/header"
+	"takeoutfm.dev/takeout/lib/log"
+	"takeoutfm.dev/takeout/lib/pls"
 )
 
 const (

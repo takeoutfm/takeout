@@ -26,12 +26,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/takeoutfm/takeout/internal/activity"
-	"github.com/takeoutfm/takeout/internal/auth"
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/internal/progress"
-	"github.com/takeoutfm/takeout/lib/client"
-	"github.com/takeoutfm/takeout/lib/log"
+	"takeoutfm.dev/takeout/internal/activity"
+	"takeoutfm.dev/takeout/internal/auth"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/internal/progress"
+	"takeoutfm.dev/takeout/lib/client"
+	"takeoutfm.dev/takeout/lib/log"
 )
 
 const (

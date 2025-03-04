@@ -23,15 +23,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/takeoutfm/takeout/internal/people"
-	"github.com/takeoutfm/takeout/lib/bucket"
-	"github.com/takeoutfm/takeout/lib/client"
-	"github.com/takeoutfm/takeout/lib/date"
-	"github.com/takeoutfm/takeout/lib/log"
-	"github.com/takeoutfm/takeout/lib/search"
-	"github.com/takeoutfm/takeout/lib/str"
-	"github.com/takeoutfm/takeout/lib/tmdb"
-	. "github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/internal/people"
+	"takeoutfm.dev/takeout/lib/bucket"
+	"takeoutfm.dev/takeout/lib/client"
+	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/lib/log"
+	"takeoutfm.dev/takeout/lib/search"
+	"takeoutfm.dev/takeout/lib/str"
+	"takeoutfm.dev/takeout/lib/tmdb"
+	. "takeoutfm.dev/takeout/model"
 )
 
 const (

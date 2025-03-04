@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-package token
+package token // import "takeoutfm.dev/takeout/lib/token"
 
 import (
 	"crypto/rsa"
@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/takeoutfm/takeout/lib/client"
 	"github.com/golang-jwt/jwt"
+	"takeoutfm.dev/takeout/lib/client"
 )
 
 var (

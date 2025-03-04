@@ -17,7 +17,7 @@
 
 // Package tmdb provides a good coverage for the TMDB API, supporting movies,
 // shows, people and images.
-package tmdb
+package tmdb // import "takeoutfm.dev/takeout/lib/tmdb"
 
 import (
 	"errors"
@@ -27,7 +27,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/takeoutfm/takeout/lib/client"
+	"takeoutfm.dev/takeout/lib/client"
 )
 
 const (

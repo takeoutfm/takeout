@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/model"
 )
 
 func TestFillGaps(t *testing.T) {

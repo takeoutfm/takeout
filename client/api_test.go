@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with TakeoutFM.  If not, see <https://www.gnu.org/licenses/>.
 
-package client
+package client // import "takeoutfm.dev/takeout/client"
 
 import (
 	"bytes"
@@ -25,9 +25,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/takeoutfm/takeout/model"
-	"github.com/takeoutfm/takeout/spiff"
-	"github.com/takeoutfm/takeout/view"
+	"takeoutfm.dev/takeout/model"
+	"takeoutfm.dev/takeout/spiff"
+	"takeoutfm.dev/takeout/view"
 )
 
 type testApiContext struct {

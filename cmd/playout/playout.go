@@ -20,8 +20,8 @@ package main
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/takeoutfm/takeout/internal/playout"
-	"github.com/takeoutfm/takeout/lib/log"
+	"takeoutfm.dev/takeout/internal/playout"
+	"takeoutfm.dev/takeout/lib/log"
 )
 
 func systemConfig() *viper.Viper {

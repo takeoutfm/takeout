@@ -21,8 +21,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/takeoutfm/takeout/internal/config"
-	"github.com/takeoutfm/takeout/model"
+	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/model"
 )
 
 func makeActivity(t *testing.T) *Activity {
@@ -152,7 +152,7 @@ func TestTopTrackEvents(t *testing.T) {
 	}
 
 	end := time.Now()
-	start := end.Add(time.Hour*-1)
+	start := end.Add(time.Hour * -1)
 	events := a.topTrackEventsFrom("takeout", start, end, 10)
 
 	if len(events) != 1 {
@@ -191,7 +191,7 @@ func TestTrackEventsFrom(t *testing.T) {
 	}
 
 	end := time.Now()
-	start := end.Add(time.Hour*-1)
+	start := end.Add(time.Hour * -1)
 	events := a.trackEventsFrom("takeout", start, end, 10)
 
 	if len(events) != 1 {
@@ -225,7 +225,7 @@ func TestTopTrackEventsFrom(t *testing.T) {
 	}
 
 	end := time.Now()
-	start := end.Add(time.Hour*-1)
+	start := end.Add(time.Hour * -1)
 	counts := a.topTrackEventsFrom("takeout", start, end, 100)
 
 	if len(counts) != 1 {

@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/takeoutfm/takeout/lib/header"
+	"takeoutfm.dev/takeout/lib/header"
 )
 
 const (

@@ -27,8 +27,8 @@ import (
 
 	"github.com/qeesung/image2ascii/ascii"
 	"github.com/qeesung/image2ascii/convert"
-	"github.com/takeoutfm/takeout/client"
-	"github.com/takeoutfm/takeout/lib/header"
+	"takeoutfm.dev/takeout/client"
+	"takeoutfm.dev/takeout/lib/header"
 )
 
 func asciiImage(context client.Context, url *url.URL, w, h int) ([][]ascii.CharPixel, error) {

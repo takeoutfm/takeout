@@ -19,7 +19,7 @@
 // presigned URLs for fetching media. The AWS SDK is used to provide S3
 // functionality, however, any S3 compatible backend service is supported.
 
-package bucket
+package bucket // import "takeoutfm.dev/takeout/lib/bucket"
 
 import (
 	"net/url"
@@ -27,8 +27,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/takeoutfm/takeout/lib/hash"
-	"github.com/takeoutfm/takeout/lib/log"
+	"takeoutfm.dev/takeout/lib/hash"
+	"takeoutfm.dev/takeout/lib/log"
 )
 
 type FSConfig struct {
