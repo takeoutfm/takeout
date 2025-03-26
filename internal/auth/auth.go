@@ -81,8 +81,8 @@ type User struct {
 // expiration date.
 type Session struct {
 	gorm.Model
-	User    string    `gorm:"uniqueIndex:idx_session_user"`
-	Token   string    `gorm:"uniqueIndex:idx_session_token"`
+	User    string    `gorm:"uniqueIndex:idx_session;index:idx_session_user"`
+	Token   string    `gorm:"uniqueIndex:idx_session;index:idx_session_token"`
 	Expires time.Time `gorm:"index:idx_session_expires"`
 }
 
