@@ -45,6 +45,3 @@ streaming, REST APIs, and a builtin web UI.
 More details are available in the *doc* directory, including [quick
 start](doc/run.md), [setup documentation](doc/setup.md), [security
 design](doc/security.md), and [media naming conventions](doc/bucket.md).
-
-Visit the GitHub [organization page](https://github.com/takeoutfm) for all
-project source code repositories.
