@@ -1,3 +1,7 @@
+## 0.25.1
+
+- fix auth indices
+
 ## 0.25.0
 
 - use takeoutfm.dev
