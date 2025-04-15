@@ -62,7 +62,7 @@ func generateSecret(size int) string {
 }
 
 func writeSecret(dir, file, secret string) error {
-	path := strings.Join([]string{dir, file}, "/")
+	path := filepath.Join(dir, file)
 	return os.WriteFile(path, []byte(secret), 0600)
 }
 

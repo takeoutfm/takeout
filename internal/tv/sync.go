@@ -337,6 +337,7 @@ func (tv *TV) syncEpisode(o *bucket.Object, tvid, season, episode int) (search.F
 	fields.AddField(FieldName, ep.Name)
 	fields.AddField(FieldTitle, ep.Name)
 	fields.AddField(FieldDate, ep.Date)
+	fields.AddField(FieldRating, series.Rating)
 	fields.AddField(FieldRuntime, ep.Runtime)
 	fields.AddField(FieldVote, int(ep.VoteAverage*10))
 	fields.AddField(FieldVoteCount, ep.VoteCount)
@@ -424,6 +425,20 @@ func (tv *TV) processEpisodeCredits(e TVEpisode, credits tmdb.Credits, fields se
 		if err != nil {
 			return err
 		}
+		cast := newEpisodeCast(e, p, c)
+		err = tv.createEpisodeCast(&cast)
+		if err != nil {
+			return err
+		}
+		fields.AddField(FieldCast, p.Name)
+		fields.AddField(FieldCharacter, cast.Character)
+	}
+	for _, c := range tv.config.TV.SortedGuests(credits) {
+		p, err := people.EnsurePerson(c.ID, tv.tmdb, tv.db)
+		if err != nil {
+			return err
+		}
+		// add guest stars with regular cast
 		cast := newEpisodeCast(e, p, c)
 		err = tv.createEpisodeCast(&cast)
 		if err != nil {

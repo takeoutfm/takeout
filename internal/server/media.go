@@ -18,7 +18,7 @@
 package server
 
 import (
-	"strings"
+	"path/filepath"
 	"takeoutfm.dev/takeout/internal/auth"
 	"takeoutfm.dev/takeout/internal/config"
 	"takeoutfm.dev/takeout/internal/film"
@@ -67,9 +67,12 @@ func mediaConfigFor(root *config.Config, user auth.User) (string, *config.Config
 }
 
 func mediaConfig(root *config.Config, mediaName string) (*config.Config, error) {
-	path := strings.Join([]string{root.Server.MediaDir, mediaName}, "/")
+	path := filepath.Join(root.Server.MediaDir, mediaName)
 	// load relative media configuration
 	userConfig, err := config.LoadConfig(path)
+	if err != nil {
+		return nil, err
+	}
 	// XXX merge, copy server config for now
 	userConfig.Server = root.Server
 	if err != nil {

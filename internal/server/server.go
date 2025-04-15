@@ -24,14 +24,17 @@ import (
 	"net/http/pprof"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
+	"takeoutfm.dev/takeout"
 	"takeoutfm.dev/takeout/internal/activity"
 	"takeoutfm.dev/takeout/internal/auth"
 	"takeoutfm.dev/takeout/internal/config"
 	"takeoutfm.dev/takeout/internal/progress"
 	"takeoutfm.dev/takeout/lib/client"
 	"takeoutfm.dev/takeout/lib/log"
+	"takeoutfm.dev/takeout/lib/systemd"
 )
 
 const (
@@ -163,6 +166,11 @@ func makeProgress(config *config.Config) (*progress.Progress, error) {
 
 // Serve configures and starts the Takeout web, websocket, and API services.
 func Serve(config *config.Config) error {
+	if systemd.HasSystemd() {
+		// no need for timestamps with systemd
+		log.SetFlags(log.FlagsNone)
+	}
+
 	auth, err := makeAuth(config)
 	log.CheckError(err)
 
@@ -369,7 +377,8 @@ func Serve(config *config.Config) error {
 		ctrl.Handle("GET /debug/pprof/goroutine", pprof.Handler("goroutine"))
 		ctrl.Handle("GET /debug/pprof/threadcreate", pprof.Handler("threadcreate"))
 
-		socketPath := "/tmp/takeout.sock"
+		runtimeDirectory := systemd.GetRuntimeDirectory("/tmp")
+		socketPath := filepath.Join(runtimeDirectory, "takeout.sock")
 		sock, err := net.Listen("unix", socketPath)
 		log.CheckError(err)
 		log.CheckError(os.Chmod(socketPath, 0600))
@@ -384,6 +393,8 @@ func Serve(config *config.Config) error {
 		log.CheckError(err)
 	}()
 
-	log.Println("listening on", config.Server.Listen)
+	systemd.StartWatchdogNotify()
+
+	log.Printf("%s v%s listening on %s", takeout.AppName, takeout.Version, config.Server.Listen)
 	return http.ListenAndServe(config.Server.Listen, mux)
 }

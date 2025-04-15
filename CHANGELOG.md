@@ -1,3 +1,10 @@
+## 0.26.0
+
+- removed docs, now on takeoutfm.com
+- include guest stars in tv credits
+- systemd support
+- updated all dependencies
+
 ## 0.25.1
 
 - fix auth indices

@@ -19,18 +19,18 @@ package main
 
 import (
 	"os"
-
+	"path/filepath"
 	"github.com/spf13/cobra"
 	"takeoutfm.dev/takeout/internal/config"
 	"takeoutfm.dev/takeout/lib/log"
+	"takeoutfm.dev/takeout/lib/systemd"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "takeout",
-	Short: "Takeout is a media service",
-	Long:  `https://takeout.fm/`,
+	Short: "TakeoutFM server",
+	Long:  `https://takeoutfm.com/`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO
 	},
 }
 
@@ -63,6 +63,27 @@ func getConfig() (*config.Config, error) {
 }
 
 func main() {
+	if systemd.HasSystemd() {
+		// allow systemd to run takeout w/o any args
+		stateDir := systemd.GetStateDirectory("")
+		if stateDir != "" {
+			os.Chdir(stateDir)
+		}
+		if configFile == "" {
+			// try /etc followed by /var/lib
+			configDir := systemd.GetConfigDirectory("")
+			if configDir == "" {
+				configDir = systemd.GetStateDirectory("")
+			}
+			if configDir != "" {
+				configFile = filepath.Join(configDir, "takeout.yaml")
+			}
+		}
+		// use serve by default
+		args := append([]string{serveCmd.Use}, os.Args[1:]...)
+		rootCmd.SetArgs(args)
+	}
+
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalln(err)
 	}

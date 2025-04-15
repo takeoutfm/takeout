@@ -41,6 +41,7 @@ import (
 	g "takeoutfm.dev/takeout/lib/gorm"
 	"takeoutfm.dev/takeout/lib/lastfm"
 	"takeoutfm.dev/takeout/lib/log"
+	"takeoutfm.dev/takeout/lib/systemd"
 	"takeoutfm.dev/takeout/lib/search"
 	"takeoutfm.dev/takeout/lib/tmdb"
 
@@ -197,6 +198,10 @@ func (c TVConfig) SortedCast(credits tmdb.Credits) []tmdb.Cast {
 	return sortedCast(credits, c.CastLimit)
 }
 
+func (c TVConfig) SortedGuests(credits tmdb.Credits) []tmdb.Cast {
+	return sortedGuests(credits, c.CastLimit)
+}
+
 func (c TVConfig) RelevantCrew(credits tmdb.Credits) []tmdb.Crew {
 	return relevantCrew(credits, c.CrewJobs)
 }
@@ -279,8 +284,8 @@ type AuthConfig struct {
 
 type ServerConfig struct {
 	Listen      string
-	KeyDir      string
-	DataDir     string
+	KeyDir      string // exists for dollar expansion
+	DataDir     string // exsists for dollar expansion
 	MediaDir    string
 	ImageClient client.Config
 	IncludeDirs []string
@@ -345,9 +350,9 @@ func (mc *MusicConfig) readMaps() {
 
 func configDefaults(v *viper.Viper) {
 	v.SetDefault("Server.Listen", "127.0.0.1:3000")
-	v.SetDefault("Server.DataDir", ".")
-	v.SetDefault("Server.MediaDir", ".")
-	v.SetDefault("Server.ImageClient.CacheDir", "imagecache")
+	v.SetDefault("Server.DataDir", systemd.GetStateDirectory("."))
+	v.SetDefault("Server.MediaDir", systemd.GetStateDirectory("."))
+	v.SetDefault("Server.ImageClient.CacheDir", filepath.Join(systemd.GetCacheDirectory("."), "imagecache"))
 	v.SetDefault("Server.ImageClient.UserAgent", userAgent())
 	v.SetDefault("Server.ImageClient.MaxAge", "720h") // 30 days
 	// potential include could be /media, /mnt, /opt, /srv
@@ -404,7 +409,7 @@ func configDefaults(v *viper.Viper) {
 	// TODO apply as default
 	// v.SetDefault("Bucket.URLExpiration", "15m")
 
-	v.SetDefault("Client.CacheDir", ".httpcache")
+	v.SetDefault("Client.CacheDir", filepath.Join(systemd.GetCacheDirectory("."), "httpcache"))
 	v.SetDefault("Client.MaxAge", "720h") // 30 days
 	v.SetDefault("Client.UserAgent", userAgent())
 
@@ -636,7 +641,7 @@ func resolvePathRef(v *viper.Viper, rootDir, key, val string) string {
 		if strings.HasPrefix(val, "/") == false &&
 			strings.Contains(val, "@") == false &&
 			strings.Contains(val, "::") == false {
-			val = strings.Join([]string{rootDir, val}, "/")
+			val = filepath.Join(rootDir, val)
 		}
 	}
 	return val
@@ -690,15 +695,15 @@ func postProcessKey(v *viper.Viper, rootDir, key string) {
 //   - https://host/path/to/file.yaml
 //
 // include: file.yaml # or any of the above
-func doInclude(v *viper.Viper, path, rootDir string) {
-	if strings.Contains(path, "://") == false &&
-		strings.HasPrefix(path, "/") == false {
+func doInclude(v *viper.Viper, inc, rootDir string) {
+	if strings.Contains(inc, "://") == false &&
+		strings.HasPrefix(inc, "/") == false {
 		// resolve relative paths
-		path = strings.Join([]string{rootDir, path}, "/")
+		inc = filepath.Join(rootDir, inc)
 	}
-	vv, err := includeConfig(path)
+	vv, err := includeConfig(inc)
 	if err != nil {
-		log.Panicf("include '%s': %s", path, err)
+		log.Panicf("include '%s': %s", inc, err)
 	}
 	// use included config to (re)set this value in the parent config
 	for _, k := range vv.AllKeys() {
@@ -848,6 +853,14 @@ func (c Config) Write(w io.Writer) error {
 
 func sortedCast(credits tmdb.Credits, limit int) []tmdb.Cast {
 	cast := credits.SortedCast()
+	if len(cast) > limit {
+		cast = cast[:limit]
+	}
+	return cast
+}
+
+func sortedGuests(credits tmdb.Credits, limit int) []tmdb.Cast {
+	cast := credits.SortedGuests()
 	if len(cast) > limit {
 		cast = cast[:limit]
 	}

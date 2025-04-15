@@ -60,12 +60,15 @@ func (a *Auth) AssignedMedia() []string {
 	if err != nil {
 		return list
 	}
-	uniqueMedia := make(map[string]bool)
+	uniqueMedia := make(map[string]struct{})
 	for rows.Next() {
 		var v string
 		rows.Scan(&v)
+		if v == "" {
+			continue
+		}
 		for _, media := range mediaList(v) {
-			uniqueMedia[media] = true
+			uniqueMedia[media] = struct{}{}
 		}
 	}
 	rows.Close()

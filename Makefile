@@ -16,7 +16,7 @@
 # along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
 
 GO = go
-DOCKER = sudo docker
+DOCKER = docker
 
 DOCKER_USER ?= defsub
 DOCKER_IMAGE ?= takeout
@@ -106,7 +106,7 @@ clean:
 	rm -f ${TMDB_CMD_TARGET}
 
 docker docker-build: clean
-	${DOCKER} build --rm -t ${DOCKER_IMAGE} build
+	${DOCKER} buildx build --rm -t ${DOCKER_IMAGE} build
 
 docker-push:
 	${DOCKER} tag ${DOCKER_IMAGE} ${DOCKER_USER}/${DOCKER_IMAGE}:latest
@@ -121,3 +121,7 @@ push:
 	@git tag --list | grep -q v${TAKEOUT_VERSION} || git tag v${TAKEOUT_VERSION}
 	@git push origin
 	@git push origin v${TAKEOUT_VERSION}
+
+update:
+	${GO} get -u ./...
+	${GO} mod tidy

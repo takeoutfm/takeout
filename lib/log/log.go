@@ -18,13 +18,20 @@
 package log // import "takeoutfm.dev/takeout/lib/log"
 
 import (
-	l "log"
 	"io"
+	l "log"
 	"os"
+)
+
+const (
+	FlagsNone = 0
+	FlagsStd  = l.LstdFlags
+	FlagsFile = l.Lshortfile
 )
 
 type logger interface {
 	SetOutput(io.Writer)
+	SetFlags(int)
 	// Print followed by Panic
 	Panicf(format string, v ...interface{})
 	Panicln(v ...interface{})
@@ -39,11 +46,15 @@ type logger interface {
 var Logger = defaultLogger()
 
 func defaultLogger() logger {
-	return l.New(os.Stdout, "", l.LstdFlags)
+	return l.New(os.Stdout, "", FlagsStd)
 }
 
 func SetOutput(w io.Writer) {
 	Logger.SetOutput(w)
+}
+
+func SetFlags(flags int) {
+	Logger.SetFlags(flags)
 }
 
 // Panic if err

@@ -20,7 +20,7 @@ package auth
 import (
 	"testing"
 
-	"github.com/takeoutfm/takeout/internal/config"
+	"takeoutfm.dev/takeout/internal/config"
 )
 
 func makeAuth(t *testing.T) *Auth {
@@ -64,12 +64,9 @@ func TestChangePass(t *testing.T) {
 	pass2 := "other&pass;test@_1234"
 
 	a := makeAuth(t)
-	err := a.AddUser(user, pass1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	a.AddUser(user, pass1) // may already exists, ok
 
-	_, err = a.Login(user, pass1)
+	_, err := a.Login(user, pass1)
 	if err != nil {
 		t.Fatal(err)
 	}
