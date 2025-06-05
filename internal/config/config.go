@@ -396,7 +396,7 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Activity.RecentMoviesTitle", "Recently Watched")
 	v.SetDefault("Activity.RecentTracksTitle", "Recently Played")
 	v.SetDefault("Activity.MovieLimit", "999")
-	v.SetDefault("Activity.TrackLimit", "999")
+	v.SetDefault("Activity.TrackLimit", "9999")
 	v.SetDefault("Activity.TopArtistsLimit", "999")
 	v.SetDefault("Activity.TopArtistsTitle", "Top Artists")
 	v.SetDefault("Activity.TopTracksLimit", "9999") // year of track listens

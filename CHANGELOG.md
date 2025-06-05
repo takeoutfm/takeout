@@ -1,3 +1,11 @@
+## 0.26.1
+
+- increase default track limit for moderate 1 year of tracks (9999)
+- really fix the RSS title and author decoding
+- use gopxl/beep in player
+- mod updates
+- use go 1.24.2
+
 ## 0.26.0
 
 - removed docs, now on takeoutfm.com

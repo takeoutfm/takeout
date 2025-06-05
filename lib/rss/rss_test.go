@@ -20,7 +20,7 @@ package rss // import "takeoutfm.dev/takeout/lib/pls"
 import (
 	"bytes"
 	"embed"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -51,7 +51,7 @@ func (s rssServer) RoundTrip(r *http.Request) (*http.Response, error) {
 	}
 	return &http.Response{
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewBufferString(body)),
+		Body:       io.NopCloser(bytes.NewBufferString(body)),
 		Header:     make(http.Header),
 	}, nil
 }
@@ -110,5 +110,28 @@ func TestFetch(t *testing.T) {
 		if len(i.ItemImage()) == 0 {
 			t.Error("expect item image")
 		}
+	}
+}
+
+func TestFixEncoding(t *testing.T) {
+	var rss Rss
+	rss.Channel.Title = "June 3, 2025 &#8211; PBS News Hour full episode"
+	rss.Channel.Author = "Test &amp; Test"
+	rss.Channel.Items = []Item{{
+		Title:  "June 3, 2025 &#8211; PBS News Hour full episode",
+		Author: "Foo &amp; Bar",
+	}}
+	fixEncoding(&rss)
+	if strings.Index(rss.Channel.Title, "&#") != -1 {
+		t.Error("expect title decoded")
+	}
+	if strings.Index(rss.Channel.Author, "&amp;") != -1 {
+		t.Error("expect author decoded")
+	}
+	if strings.Index(rss.Channel.Items[0].Title, "&#") != -1 {
+		t.Error("expect item title decoded")
+	}
+	if strings.Index(rss.Channel.Items[0].Author, "&amp;") != -1 {
+		t.Error("expect item author decoded")
 	}
 }

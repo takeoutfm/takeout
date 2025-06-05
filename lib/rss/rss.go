@@ -42,6 +42,10 @@ func NewRSS(client client.Getter) *RSS {
 func (rss *RSS) Fetch(url string) (Channel, error) {
 	var result Rss
 	err := rss.client.GetXML(url, &result)
+	if err != nil {
+		return result.Channel, err
+	}
+	fixEncoding(&result)
 	return result.Channel, err
 }
 
@@ -49,12 +53,22 @@ func unescape(s string) string {
 	return html.UnescapeString(s)
 }
 
+func fixEncoding(rss *Rss) {
+	rss.Channel.Title = unescape(rss.Channel.Title)
+	rss.Channel.Author = unescape(rss.Channel.Author)
+	for i := range rss.Channel.Items {
+		rss.Channel.Items[i].Title = unescape(rss.Channel.Items[i].Title)
+		rss.Channel.Items[i].Content.Title = unescape(rss.Channel.Items[i].Content.Title)
+		rss.Channel.Items[i].Author = unescape(rss.Channel.Items[i].Author)
+	}
+}
+
 func (rss *RSS) FetchPodcast(url string) (Podcast, error) {
 	result, err := rss.Fetch(url)
 	podcast := Podcast{
-		Title:         unescape(result.Title),
+		Title:         result.Title,
 		Description:   result.Description,
-		Author:        unescape(result.Author),
+		Author:        result.Author,
 		Link:          result.Link(),
 		Image:         result.Image.Link,
 		Copyright:     result.Copyright,
@@ -63,8 +77,8 @@ func (rss *RSS) FetchPodcast(url string) (Podcast, error) {
 	}
 	for _, i := range result.Items {
 		episode := Episode{
-			Title:       unescape(i.ItemTitle()),
-			Author:      unescape(i.Author),
+			Title:       i.ItemTitle(),
+			Author:      i.Author,
 			Link:        i.Link,
 			Description: i.Description,
 			ContentType: i.ContentType(),

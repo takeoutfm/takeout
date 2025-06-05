@@ -18,7 +18,7 @@
 package player // import "takeoutfm.dev/takeout/player"
 
 import (
-	"github.com/faiface/beep"
+	"github.com/gopxl/beep/v2"
 )
 
 type NotifyFunc func()
