@@ -1,5 +1,9 @@
 ## 0.26.1
 
+- removed CheckError/panic usage in sync; replace with explicit error checks
+
+## 0.26.1
+
 - increase default track limit for moderate 1 year of tracks (9999)
 - really fix the RSS title and author decoding
 - use gopxl/beep in player

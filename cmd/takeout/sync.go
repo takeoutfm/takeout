@@ -97,8 +97,7 @@ func syncMusic(cfg *config.Config) error {
 	if resolve {
 		syncOptions.Resolve = true
 	}
-	m.Sync(syncOptions)
-	return nil
+	return m.Sync(syncOptions)
 }
 
 func syncFilm(cfg *config.Config) error {

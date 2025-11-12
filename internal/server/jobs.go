@@ -60,7 +60,10 @@ func schedule(config *config.Config) {
 					log.Println(err)
 					return
 				}
-				doit(config, mediaConfig)
+				err = doit(config, mediaConfig)
+				if err != nil {
+					log.Println(err)
+				}
 			}
 		})
 	}
@@ -125,8 +128,7 @@ func syncMusic(config *config.Config, mediaConfig *config.Config) error {
 	defer m.Close()
 	syncOptions := music.NewSyncOptions()
 	syncOptions.Since = m.LastModified()
-	m.Sync(syncOptions)
-	return nil
+	return m.Sync(syncOptions)
 }
 
 func syncWithOptions(mediaConfig *config.Config, syncOptions music.SyncOptions) error {
@@ -136,8 +138,7 @@ func syncWithOptions(mediaConfig *config.Config, syncOptions music.SyncOptions) 
 		return err
 	}
 	defer m.Close()
-	m.Sync(syncOptions)
-	return nil
+	return m.Sync(syncOptions)
 }
 
 func syncMusicPopular(config *config.Config, mediaConfig *config.Config) error {

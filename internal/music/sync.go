@@ -76,56 +76,93 @@ func (m *Music) LastModified() time.Time {
 	return m.lastModified()
 }
 
-func (m *Music) Sync(options SyncOptions) {
+func (m *Music) Sync(options SyncOptions) error {
+	var err error
 	if options.Since.IsZero() {
 		if options.Tracks {
 			log.Printf("sync tracks\n")
-			log.CheckError(m.syncBucketTracks())
+			err = m.syncBucketTracks()
+			if err != nil {
+				return err
+			}
 			log.Printf("sync artists\n")
-			log.CheckError(m.syncArtists())
+			err = m.syncArtists()
+			if err != nil {
+				return err
+			}
 		}
 		if options.Releases {
 			log.Printf("sync releases\n")
-			log.CheckError(m.syncReleases())
+			err = m.syncReleases()
+			if err != nil {
+				return err
+			}
 			log.Printf("fix track releases\n")
 			_, err := m.fixTrackReleases()
-			log.CheckError(err)
+			if err != nil {
+				return err
+			}
 			log.Printf("assign track releases\n")
 			_, err = m.assignTrackReleases()
-			log.CheckError(err)
+			if err != nil {
+				return err
+			}
 			_, err = m.assignTrackReleaseDates()
-			// XXX this crashed with release group not found
-			log.CheckError(err)
+			if err != nil {
+				return err
+			}
 			log.Printf("fix track release titles\n")
-			log.CheckError(m.fixTrackReleaseTitles())
+			err = m.fixTrackReleaseTitles()
+			if err != nil {
+				return err
+			}
 		}
 		if options.Popular {
 			log.Printf("sync popular\n")
-			log.CheckError(m.syncPopular())
+			err = m.syncPopular()
+			if err != nil {
+				return err
+			}
 		}
 		if options.Similar {
 			log.Printf("sync similar\n")
-			log.CheckError(m.syncSimilar())
+			err = m.syncSimilar()
+			if err != nil {
+				return err
+			}
 		}
 		if options.Artwork {
 			log.Printf("sync artwork\n")
-			log.CheckError(m.syncArtwork())
+			err = m.syncArtwork()
+			if err != nil {
+				return err
+			}
 		}
 		if options.Index {
 			log.Printf("sync index\n")
-			log.CheckError(m.syncIndex())
+			err = m.syncIndex()
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		if options.Resolve {
 			log.Printf("resolving")
-			err := m.resolve()
-			log.CheckError(err)
+			err = m.resolve()
+			if err != nil {
+				return err
+			}
 		}
 		if options.Tracks {
 			modified, err := m.syncBucketTracksSince(options.Since)
-			log.CheckError(err)
+			if err != nil {
+				return err
+			}
 			if modified {
-				log.CheckError(m.syncArtists())
+				err = m.syncArtists()
+				if err != nil {
+					return err
+				}
 			}
 		}
 		var artists []Artist
@@ -135,40 +172,70 @@ func (m *Music) Sync(options SyncOptions) {
 				artists = []Artist{a}
 			} else {
 				a, err := m.syncArtist(options.Artist, "")
-				log.CheckError(err)
+				if err != nil {
+					return err
+				}
 				artists = []Artist{a}
 			}
 		} else {
 			artists = m.trackArtistsSince(options.Since)
 		}
 		if options.Releases {
-			log.CheckError(m.syncReleasesFor(artists))
-			_, err := m.fixTrackReleases()
-			log.CheckError(err)
+			err = m.syncReleasesFor(artists)
+			if err != nil {
+				return err
+			}
+			_, err = m.fixTrackReleases()
+			if err != nil {
+				return err
+			}
 			modified, err := m.assignTrackReleases()
-			log.CheckError(err)
+			if err != nil {
+				return err
+			}
 			if modified {
 				_, err = m.assignTrackReleaseDates()
-				log.CheckError(err)
-				log.CheckError(m.fixTrackReleaseTitles())
+				if err != nil {
+					return err
+				}
+				err = m.fixTrackReleaseTitles()
+				if err != nil {
+					return err
+				}
 			}
 		}
 		if options.Popular {
-			log.CheckError(m.syncPopularFor(artists))
+			err = m.syncPopularFor(artists)
+			if err != nil {
+				return err
+			}
 		}
 		if options.Similar {
-			log.CheckError(m.syncSimilarFor(artists))
+			err = m.syncSimilarFor(artists)
+			if err != nil {
+				return err
+			}
 		}
 		if options.Artwork {
-			log.CheckError(m.syncArtworkFor(artists))
+			err = m.syncArtworkFor(artists)
+			if err != nil {
+				return err
+			}
 			if len(artists) > 0 {
-				log.CheckError(m.SyncMissingArtwork())
+				err = m.SyncMissingArtwork()
+				if err != nil {
+					return err
+				}
 			}
 		}
 		if options.Index {
-			log.CheckError(m.syncIndexFor(artists))
+			err = m.syncIndexFor(artists)
+			if err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }
 
 // TODO update steps
