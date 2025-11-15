@@ -1,4 +1,4 @@
-## 0.26.1
+## 0.26.2
 
 - removed CheckError/panic usage in sync; replace with explicit error checks
 
