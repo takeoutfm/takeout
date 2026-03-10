@@ -20,6 +20,7 @@
 package client // import "takeoutfm.dev/takeout/client"
 
 import (
+	"errors"
 	"net/http"
 	"net/url"
 	"strings"
@@ -181,7 +182,7 @@ func get(context Context, uri string, result interface{}) error {
 		return Get(with(context, bearerAccess), uri, result)
 	}
 	err := call()
-	if err == ErrUnauthorized {
+	if errors.Is(err, ErrUnauthorized) {
 		err = refresh(context)
 		if err == nil {
 			err = call()
@@ -195,7 +196,7 @@ func post(context Context, uri string, data, result interface{}) error {
 		return Post(with(context, bearerAccess), uri, data, result)
 	}
 	err := call()
-	if err == ErrUnauthorized {
+	if errors.Is(err, ErrUnauthorized) {
 		err = refresh(context)
 		if err == nil {
 			err = call()
@@ -209,7 +210,7 @@ func patch(context Context, uri string, data, result interface{}) error {
 		return Patch(with(context, bearerAccess), uri, data, result)
 	}
 	err := call()
-	if err == ErrUnauthorized {
+	if errors.Is(err, ErrUnauthorized) {
 		err = refresh(context)
 		if err == nil {
 			err = call()

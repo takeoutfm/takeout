@@ -20,6 +20,7 @@
 package search // import "takeoutfm.dev/takeout/lib/search"
 
 import (
+	"errors"
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/keyword"
 	"path/filepath"
@@ -70,7 +71,7 @@ func (s *search) Open(name string, keywords []string) error {
 	}
 
 	index, err := bleve.New(path, mapping)
-	if err == bleve.ErrorIndexPathExists {
+	if errors.Is(err, bleve.ErrorIndexPathExists) {
 		index, err = bleve.Open(path)
 		if err != nil {
 			return err

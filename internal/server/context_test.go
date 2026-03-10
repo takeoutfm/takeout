@@ -103,7 +103,7 @@ func (c *TestContext) Config() *config.Config {
 func (c *TestContext) Music() *music.Music {
 	if c.m == nil {
 		c.m = music.NewMusic(c.Config())
-		err := c.m.Open()
+		err := c.m.Open(c.t.Context())
 		if err != nil {
 			c.t.Fatal(err)
 		}
@@ -155,7 +155,7 @@ func (c *TestContext) Session() auth.Session {
 func (c *TestContext) Film() *film.Film {
 	if c.f == nil {
 		c.f = film.NewFilm(c.Config())
-		err := c.f.Open()
+		err := c.f.Open(c.t.Context())
 		if err != nil {
 			c.t.Fatal(err)
 		}
@@ -166,7 +166,7 @@ func (c *TestContext) Film() *film.Film {
 func (c *TestContext) TV() *tv.TV {
 	if c.tv == nil {
 		c.tv = tv.NewTV(c.Config())
-		err := c.tv.Open()
+		err := c.tv.Open(c.t.Context())
 		if err != nil {
 			c.t.Fatal(err)
 		}
@@ -328,6 +328,6 @@ func TestWithContext(t *testing.T) {
 func TestMakeContext(t *testing.T) {
 	ctx := NewTestContext(t)
 	u := auth.User{Name: "test user"}
-	m := makeMedia("test media", ctx.Config())
+	m := makeMedia(t.Context(), "test media", ctx.Config())
 	makeContext(ctx, u, &config.Config{}, m)
 }

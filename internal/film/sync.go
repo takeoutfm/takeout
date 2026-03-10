@@ -213,7 +213,7 @@ func (f *Film) syncMovie(client *tmdb.TMDB, tmid int,
 	// rating / certification
 	for _, country := range f.config.Film.ReleaseCountries {
 		release, err := f.certification(client, tmid, country)
-		if err == tmdb.ErrReleaseTypeNotFound {
+		if errors.Is(err, tmdb.ErrReleaseTypeNotFound) {
 			continue
 		} else if err != nil {
 			return fields, err
@@ -304,7 +304,7 @@ func (f *Film) certification(client *tmdb.TMDB, tmid int, country string) (tmdb.
 	types := []int{tmdb.TypeTheatrical, tmdb.TypeDigital}
 	for _, t := range types {
 		release, err := client.MovieReleaseType(tmid, country, t)
-		if err == tmdb.ErrReleaseTypeNotFound {
+		if errors.Is(err, tmdb.ErrReleaseTypeNotFound) {
 			continue
 		}
 		return release, err

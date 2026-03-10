@@ -33,7 +33,7 @@ func makeMusic(t *testing.T) *Music {
 		t.Fatal(err)
 	}
 	m := NewMusic(config)
-	err = m.Open()
+	err = m.Open(t.Context())
 	if err != nil {
 		t.Fatal(err)
 	}
