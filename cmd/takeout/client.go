@@ -19,37 +19,47 @@ package main
 
 import (
 	"context"
-	"errors"
+	"fmt"
+
+	"github.com/gobwas/ws"
+	"github.com/gobwas/ws/wsutil"
 	"github.com/spf13/cobra"
-	"takeoutfm.dev/takeout/internal/server"
 )
 
-var jobCmd = &cobra.Command{
-	Use:   "job",
-	Short: "takeout job",
+var clientCmd = &cobra.Command{
+	Use:   "client",
+	Short: "client",
 	Long:  `TODO`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return job()
+	Run: func(cmd *cobra.Command, args []string) {
+		client()
 	},
 }
 
-var jobName string
-
-func job() error {
-	cfg, err := getConfig()
+func client() {
+	ctx := context.Background()
+	fmt.Println("client")
+	conn, _, _, err := ws.DefaultDialer.Dial(ctx, "wss://takeout.fm/live")
 	if err != nil {
-		return err
+		fmt.Println(err)
+		return
 	}
-	if jobName == "" {
-		return errors.New("no job")
+
+	err = wsutil.WriteClientText(conn, []byte(`/auth b0a3e836-ccae-4628-b6a9-0d2548327a4c`))
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
-	return server.Job(context.TODO(), cfg, jobName)
+
+	for {
+		msg, _, err := wsutil.ReadServerData(conn)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("got: %s\n", string(msg))
+	}
 }
 
 func init() {
-	jobCmd.Flags().StringVarP(&configFile, "config", "c", "", "config file")
-	jobCmd.Flags().StringVarP(
-		&jobName, "name", "n", "",
-		"backdrops, covers, fanart, film, lastfm, music, popular, podcasts, posters, profiles, similar, still, stations")
-	rootCmd.AddCommand(jobCmd)
+	rootCmd.AddCommand(clientCmd)
 }

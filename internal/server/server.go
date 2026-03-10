@@ -19,6 +19,7 @@
 package server
 
 import (
+	"context"
 	"net"
 	"net/http"
 	"net/http/pprof"
@@ -68,7 +69,8 @@ func upgradeContext(ctx Context, user auth.User) (RequestContext, error) {
 	if err != nil {
 		return RequestContext{}, err
 	}
-	media := makeMedia(mediaName, userConfig)
+	// media can remain open so use a long lived context here
+	media := makeMedia(context.TODO(), mediaName, userConfig)
 	return makeContext(ctx, user, userConfig, media), nil
 }
 
@@ -165,7 +167,7 @@ func makeProgress(config *config.Config) (*progress.Progress, error) {
 }
 
 // Serve configures and starts the Takeout web, websocket, and API services.
-func Serve(config *config.Config) error {
+func Serve(c context.Context, config *config.Config) error {
 	if systemd.HasSystemd() {
 		// no need for timestamps with systemd
 		log.SetFlags(log.FlagsNone)
@@ -180,7 +182,7 @@ func Serve(config *config.Config) error {
 	progress, err := makeProgress(config)
 	log.CheckError(err)
 
-	schedule(config)
+	schedule(c, config)
 
 	// base context for all requests
 	ctx := RequestContext{

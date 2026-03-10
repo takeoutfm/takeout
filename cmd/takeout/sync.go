@@ -18,6 +18,7 @@
 package main
 
 import (
+	"context"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -83,8 +84,9 @@ func sync() error {
 }
 
 func syncMusic(cfg *config.Config) error {
+	ctx := context.TODO()
 	m := music.NewMusic(cfg)
-	err := m.Open()
+	err := m.Open(ctx)
 	if err != nil {
 		return err
 	}
@@ -97,17 +99,18 @@ func syncMusic(cfg *config.Config) error {
 	if resolve {
 		syncOptions.Resolve = true
 	}
-	return m.Sync(syncOptions)
+	return m.Sync(ctx, syncOptions)
 }
 
 func syncFilm(cfg *config.Config) error {
+	ctx := context.TODO()
 	f := film.NewFilm(cfg)
-	err := f.Open()
+	err := f.Open(ctx)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	f.SyncSince(since(f.LastModified()))
+	f.SyncSince(ctx, since(f.LastModified()))
 	return nil
 }
 

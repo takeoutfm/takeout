@@ -19,6 +19,7 @@
 package music
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -69,10 +70,10 @@ func NewMusic(config *config.Config) *Music {
 	}
 }
 
-func (m *Music) Open() (err error) {
+func (m *Music) Open(ctx context.Context) (err error) {
 	err = m.openDB()
 	if err == nil {
-		m.buckets, err = bucket.OpenMedia(m.config.Buckets, config.MediaMusic)
+		m.buckets, err = bucket.OpenMedia(ctx, m.config.Buckets, config.MediaMusic)
 	}
 	return
 }
@@ -153,8 +154,8 @@ func TrackCover(t Track, size string) string {
 
 // URL to stream track from the S3 bucket. This will be signed and
 // expired based on config.
-func (m *Music) TrackURL(t Track) *url.URL {
-	url := m.bucketURL(t)
+func (m *Music) TrackURL(ctx context.Context, t Track) *url.URL {
+	url := m.bucketURL(ctx, t)
 	return url
 }
 

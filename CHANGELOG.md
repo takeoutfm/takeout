@@ -1,3 +1,10 @@
+## 0.27.0
+
+- upgrade dependencies, including aws s3 sdk v2 changes
+- need to prefix http:// or https:// with s3 endpoints now
+- added context parameters to various calls to allow for future improvements
+- use go 1.26.1
+
 ## 0.26.2
 
 - removed CheckError/panic usage in sync; replace with explicit error checks

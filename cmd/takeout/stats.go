@@ -18,6 +18,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -58,7 +59,7 @@ func stats() error {
 
 func musicStats(cfg *config.Config) error {
 	m := music.NewMusic(cfg)
-	err := m.Open()
+	err := m.Open(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -72,7 +73,7 @@ func musicStats(cfg *config.Config) error {
 
 func filmStats(cfg *config.Config) error {
 	f := film.NewFilm(cfg)
-	err := f.Open()
+	err := f.Open(context.TODO())
 	if err != nil {
 		return err
 	}

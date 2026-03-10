@@ -18,6 +18,7 @@
 package music
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"regexp"
@@ -76,12 +77,12 @@ func (m *Music) LastModified() time.Time {
 	return m.lastModified()
 }
 
-func (m *Music) Sync(options SyncOptions) error {
+func (m *Music) Sync(ctx context.Context, options SyncOptions) error {
 	var err error
 	if options.Since.IsZero() {
 		if options.Tracks {
 			log.Printf("sync tracks\n")
-			err = m.syncBucketTracks()
+			err = m.syncBucketTracks(ctx)
 			if err != nil {
 				return err
 			}
@@ -154,7 +155,7 @@ func (m *Music) Sync(options SyncOptions) error {
 			}
 		}
 		if options.Tracks {
-			modified, err := m.syncBucketTracksSince(options.Since)
+			modified, err := m.syncBucketTracksSince(ctx, options.Since)
 			if err != nil {
 				return err
 			}
@@ -260,15 +261,15 @@ func (m *Music) Sync(options SyncOptions) error {
 // 6. Sync credits
 //    -> Bleve: xxx
 
-func (m *Music) syncBucketTracks() error {
+func (m *Music) syncBucketTracks(ctx context.Context) error {
 	m.deleteTracks() // !!!
-	_, err := m.syncBucketTracksSince(time.Time{})
+	_, err := m.syncBucketTracksSince(ctx, time.Time{})
 	return err
 }
 
-func (m *Music) syncBucketTracksSince(lastSync time.Time) (modified bool, err error) {
+func (m *Music) syncBucketTracksSince(ctx context.Context, lastSync time.Time) (modified bool, err error) {
 	for _, b := range m.buckets {
-		trackCh, err := m.syncFromBucket(b, lastSync)
+		trackCh, err := m.syncFromBucket(ctx, b, lastSync)
 		if err != nil {
 			log.Printf("got sync err %s\n", err)
 			return false, err

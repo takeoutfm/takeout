@@ -315,7 +315,7 @@ func writePlaylist(w http.ResponseWriter, r *http.Request, plist *spiff.Playlist
 						continue
 					}
 					// TODO need to extent bucket URLExpiration for these tracks
-					url := m.TrackURL(track)
+					url := m.TrackURL(r.Context(), track)
 					plist.Spiff.Entries[i].Location = []string{url.String()}
 				}
 			}
@@ -1080,7 +1080,7 @@ func apiTrackLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url := ctx.Music().TrackURL(track)
+	url := ctx.Music().TrackURL(r.Context(), track)
 	doRedirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
@@ -1097,7 +1097,7 @@ func apiMovieLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url := ctx.Film().MovieURL(movie)
+	url := ctx.Film().MovieURL(r.Context(), movie)
 	doRedirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
@@ -1126,7 +1126,7 @@ func apiTVEpisodeLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url := ctx.TV().EpisodeURL(episode)
+	url := ctx.TV().EpisodeURL(r.Context(), episode)
 	doRedirect(w, r, url, http.StatusTemporaryRedirect)
 }
 

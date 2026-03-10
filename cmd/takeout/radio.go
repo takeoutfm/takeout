@@ -18,6 +18,7 @@
 package main
 
 import (
+	"context"
 	"github.com/spf13/cobra"
 	"takeoutfm.dev/takeout/internal/music"
 )
@@ -41,7 +42,7 @@ func radio() error {
 		return err
 	}
 	m := music.NewMusic(cfg)
-	err = m.Open()
+	err = m.Open(context.TODO())
 	if err != nil {
 		return err
 	}

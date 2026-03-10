@@ -18,6 +18,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -221,7 +222,7 @@ func fulfillPlay(ctx Context, r *actions.WebhookRequest, w *actions.WebhookRespo
 			name := config.Assistant.MediaObjectName.Execute(t)
 			desc := config.Assistant.MediaObjectDesc.Execute(t)
 			w.AddMedia(name, desc,
-				m.TrackURL(t).String(),
+				m.TrackURL(context.Background(), t).String(),
 				m.TrackImage(t).String())
 		}
 	} else {

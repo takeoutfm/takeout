@@ -18,6 +18,7 @@
 package film
 
 import (
+	"context"
 	"errors"
 	"regexp"
 	"strings"
@@ -61,13 +62,13 @@ var (
 	ErrInvalidEpisode = errors.New("invalid episode pattern")
 )
 
-func (f *Film) Sync() error {
-	return f.SyncSince(time.Time{})
+func (f *Film) Sync(ctx context.Context) error {
+	return f.SyncSince(ctx, time.Time{})
 }
 
-func (f *Film) SyncSince(lastSync time.Time) error {
+func (f *Film) SyncSince(ctx context.Context, lastSync time.Time) error {
 	for _, bucket := range f.buckets {
-		err := f.syncBucket(bucket, lastSync)
+		err := f.syncBucket(ctx, bucket, lastSync)
 		if err != nil {
 			return err
 		}
@@ -83,8 +84,8 @@ var (
 	movieRegexp = regexp.MustCompile(`.*/(.+?)\s*\(([\d]+)\)(\s-\s(.+))?\.(mkv|mp4)$`)
 )
 
-func (f *Film) syncBucket(bucket bucket.Bucket, lastSync time.Time) error {
-	objectCh, err := bucket.List(lastSync)
+func (f *Film) syncBucket(ctx context.Context, bucket bucket.Bucket, lastSync time.Time) error {
+	objectCh, err := bucket.List(ctx, lastSync)
 	if err != nil {
 		return err
 	}

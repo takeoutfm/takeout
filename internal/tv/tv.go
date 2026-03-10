@@ -18,6 +18,7 @@
 package tv
 
 import (
+	"context"
 	"errors"
 	"net/url"
 	"strconv"
@@ -53,10 +54,10 @@ func NewTV(config *config.Config) *TV {
 	}
 }
 
-func (tv *TV) Open() (err error) {
+func (tv *TV) Open(ctx context.Context) (err error) {
 	err = tv.openDB()
 	if err == nil {
-		tv.buckets, err = bucket.OpenMedia(tv.config.Buckets, config.MediaTV)
+		tv.buckets, err = bucket.OpenMedia(ctx, tv.config.Buckets, config.MediaTV)
 	}
 	return
 }
@@ -145,9 +146,9 @@ func (tv *TV) Search(q string, limit ...int) []TVEpisode {
 	return episodes
 }
 
-func (tv *TV) EpisodeURL(e TVEpisode) *url.URL {
+func (tv *TV) EpisodeURL(ctx context.Context, e TVEpisode) *url.URL {
 	// FIXME assume first bucket!!!
-	return tv.buckets[0].ObjectURL(e.Key)
+	return tv.buckets[0].ObjectURL(ctx, e.Key)
 }
 
 func SeriesPoster(s TVSeries) string {

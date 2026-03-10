@@ -18,6 +18,7 @@
 package server
 
 import (
+	"context"
 	"path/filepath"
 	"takeoutfm.dev/takeout/internal/auth"
 	"takeoutfm.dev/takeout/internal/config"
@@ -83,43 +84,43 @@ func mediaConfig(root *config.Config, mediaName string) (*config.Config, error) 
 
 var mediaMap map[string]*Media = make(map[string]*Media)
 
-func makeMedia(name string, config *config.Config) *Media {
+func makeMedia(ctx context.Context, name string, config *config.Config) *Media {
 	media, ok := mediaMap[name]
 	if !ok {
 		var err error
 		media = &Media{}
-		media.music, err = media.makeMusic(config)
+		media.music, err = media.makeMusic(ctx, config)
 		log.CheckError(err)
-		media.film, err = media.makeFilm(config)
+		media.film, err = media.makeFilm(ctx, config)
 		log.CheckError(err)
-		media.podcast, err = media.makePodcast(config)
+		media.podcast, err = media.makePodcast(ctx, config)
 		log.CheckError(err)
-		media.tv, err = media.makeTV(config)
+		media.tv, err = media.makeTV(ctx, config)
 		log.CheckError(err)
 		mediaMap[name] = media
 	}
 	return media
 }
 
-func (Media) makeMusic(config *config.Config) (*music.Music, error) {
+func (Media) makeMusic(ctx context.Context, config *config.Config) (*music.Music, error) {
 	m := music.NewMusic(config)
-	err := m.Open()
+	err := m.Open(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func (Media) makeFilm(config *config.Config) (*film.Film, error) {
+func (Media) makeFilm(ctx context.Context, config *config.Config) (*film.Film, error) {
 	f := film.NewFilm(config)
-	err := f.Open()
+	err := f.Open(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return f, nil
 }
 
-func (Media) makePodcast(config *config.Config) (*podcast.Podcast, error) {
+func (Media) makePodcast(ctx context.Context, config *config.Config) (*podcast.Podcast, error) {
 	p := podcast.NewPodcast(config)
 	err := p.Open()
 	if err != nil {
@@ -128,9 +129,9 @@ func (Media) makePodcast(config *config.Config) (*podcast.Podcast, error) {
 	return p, nil
 }
 
-func (Media) makeTV(config *config.Config) (*tv.TV, error) {
+func (Media) makeTV(ctx context.Context, config *config.Config) (*tv.TV, error) {
 	tv := tv.NewTV(config)
-	err := tv.Open()
+	err := tv.Open(ctx)
 	if err != nil {
 		return nil, err
 	}
