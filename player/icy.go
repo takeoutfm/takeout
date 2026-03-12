@@ -109,8 +109,8 @@ func (icy *Icy) Read(p []byte) (n int, err error) {
 			var data IcyMetadata
 			//StreamTitle='Joy Division - Ceremony';
 			//StreamTitle='The Stream Title';StreamUrl='https://example.com';
-			parts := strings.Split(string(icy.metadata), ";")
-			for _, part := range parts {
+			parts := strings.SplitSeq(string(icy.metadata), ";")
+			for part := range parts {
 				matches := metaRegexp.FindStringSubmatch(part)
 				if matches != nil {
 					name, value := matches[1], matches[2]

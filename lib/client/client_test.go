@@ -19,7 +19,7 @@ package client // import "takeoutfm.dev/takeout/lib/client"
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 )
@@ -31,7 +31,7 @@ type errorServer struct {
 func (s errorServer) RoundTrip(r *http.Request) (*http.Response, error) {
 	return &http.Response{
 		StatusCode: 500,
-		Body:       ioutil.NopCloser(bytes.NewBufferString(`error`)),
+		Body:       io.NopCloser(bytes.NewBufferString(`error`)),
 		Header:     make(http.Header),
 	}, nil
 }
@@ -57,7 +57,7 @@ type jsonResult struct {
 func (s jsonServer) RoundTrip(r *http.Request) (*http.Response, error) {
 	return &http.Response{
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"a":"b"}`)),
+		Body:       io.NopCloser(bytes.NewBufferString(`{"a":"b"}`)),
 		Header:     make(http.Header),
 	}, nil
 }
@@ -95,7 +95,7 @@ type xmlResult struct {
 func (s xmlServer) RoundTrip(r *http.Request) (*http.Response, error) {
 	return &http.Response{
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewBufferString(`<a flag="true">b</a>`)),
+		Body:       io.NopCloser(bytes.NewBufferString(`<a flag="true">b</a>`)),
 		Header:     make(http.Header),
 	}, nil
 }
@@ -129,7 +129,7 @@ Length1=-1
 `
 	return &http.Response{
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewBufferString(body)),
+		Body:       io.NopCloser(bytes.NewBufferString(body)),
 		Header:     make(http.Header),
 	}, nil
 }

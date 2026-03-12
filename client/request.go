@@ -67,7 +67,7 @@ var (
 	ErrUnauthorized  = errors.New("unauthorized")
 )
 
-func Get(context requestContext, uri string, result interface{}) error {
+func Get(context requestContext, uri string, result any) error {
 	req, err := http.NewRequest(http.MethodGet, endpoint(context, uri), nil)
 	if err != nil {
 		return err
@@ -92,7 +92,7 @@ func GetLocation(context requestContext, uri string) (*url.URL, error) {
 	return url, err
 }
 
-func Post(context requestContext, uri string, body interface{}, result interface{}) error {
+func Post(context requestContext, uri string, body any, result any) error {
 	data, err := json.Marshal(body)
 	if err != nil {
 		return err
@@ -104,7 +104,7 @@ func Post(context requestContext, uri string, body interface{}, result interface
 	return doJson(context, req, result)
 }
 
-func Patch(context requestContext, uri string, body interface{}, result interface{}) error {
+func Patch(context requestContext, uri string, body any, result any) error {
 	data, err := json.Marshal(body)
 	if err != nil {
 		return err
@@ -129,7 +129,7 @@ func applyHeaders(req *http.Request, headers Headers) {
 	}
 }
 
-func doJson(context requestContext, req *http.Request, result interface{}) error {
+func doJson(context requestContext, req *http.Request, result any) error {
 	resp, err := do(context, req)
 	if err != nil {
 		return err

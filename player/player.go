@@ -438,10 +438,7 @@ func (p *Player) forwardIndex() int {
 func (p *Player) backwardIndex() int {
 	p.lock()
 	defer p.unlock()
-	index := p.playlist.Index - 1
-	if index < 0 {
-		index = 0
-	}
+	index := max(p.playlist.Index-1, 0)
 	return index
 }
 

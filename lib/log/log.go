@@ -33,14 +33,14 @@ type logger interface {
 	SetOutput(io.Writer)
 	SetFlags(int)
 	// Print followed by Panic
-	Panicf(format string, v ...interface{})
-	Panicln(v ...interface{})
+	Panicf(format string, v ...any)
+	Panicln(v ...any)
 	// Print followed by Exit
-	Fatalf(format string, v ...interface{})
-	Fatalln(v ...interface{})
+	Fatalf(format string, v ...any)
+	Fatalln(v ...any)
 	// Print
-	Printf(format string, v ...interface{})
-	Println(v ...interface{})
+	Printf(format string, v ...any)
+	Println(v ...any)
 }
 
 var Logger = defaultLogger()
@@ -64,26 +64,26 @@ func CheckError(err error) {
 	}
 }
 
-func Panicf(format string, v ...interface{}) {
+func Panicf(format string, v ...any) {
 	Logger.Panicf(format, v...)
 }
 
-func Panicln(v ...interface{}) {
+func Panicln(v ...any) {
 	Logger.Panicln(v...)
 }
 
-func Fatalf(format string, v ...interface{}) {
+func Fatalf(format string, v ...any) {
 	Logger.Fatalf(format, v...)
 }
 
-func Fatalln(v ...interface{}) {
+func Fatalln(v ...any) {
 	Logger.Fatalln(v...)
 }
 
-func Printf(format string, v ...interface{}) {
+func Printf(format string, v ...any) {
 	Logger.Printf(format, v...)
 }
 
-func Println(v ...interface{}) {
+func Println(v ...any) {
 	Logger.Println(v...)
 }

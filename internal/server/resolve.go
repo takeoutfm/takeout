@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
-	"sort"
+	"slices"
 	"strings"
 	"time"
 
@@ -449,7 +449,7 @@ func resolveSourceRef(ctx Context, ref string, s *model.Station, entries []spiff
 		results := make(chan pls.Playlist)
 		errors := make(chan error)
 		client := ctx.Config().NewGetter()
-		for i := 0; i < count; i++ {
+		for range count {
 			go func(url string) {
 				result, err := client.GetPLS(url)
 				if err != nil {
@@ -459,7 +459,7 @@ func resolveSourceRef(ctx Context, ref string, s *model.Station, entries []spiff
 				}
 			}(<-queue)
 		}
-		for i := 0; i < count; i++ {
+		for range count {
 			select {
 			case result := <-results:
 				if len(result.Entries) > 0 {
@@ -861,9 +861,7 @@ func creators(tracks []model.Track) string {
 	for k := range artistMap {
 		artists = append(artists, k)
 	}
-	sort.Slice(artists, func(i, j int) bool {
-		return artists[i] < artists[j]
-	})
+	slices.Sort(artists)
 	return strings.Join(artists, " \u2022 ")
 }
 

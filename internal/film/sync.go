@@ -277,7 +277,6 @@ func (f *Film) syncMovie(client *tmdb.TMDB, tmid int,
 	for _, v := range videos.Results {
 		if v.Official && v.Trailer() && v.YouTube() {
 			// collect official trailers on youtube
-			log.Println(v.PublishDate)
 			trailers = append(trailers, Trailer{
 				TMID:     m.TMID,
 				Name:     v.Name,

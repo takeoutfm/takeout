@@ -177,7 +177,7 @@ func Activity(context Context, activity model.Events) error {
 	return err
 }
 
-func get(context Context, uri string, result interface{}) error {
+func get(context Context, uri string, result any) error {
 	call := func() error {
 		return Get(with(context, bearerAccess), uri, result)
 	}
@@ -191,7 +191,7 @@ func get(context Context, uri string, result interface{}) error {
 	return err
 }
 
-func post(context Context, uri string, data, result interface{}) error {
+func post(context Context, uri string, data, result any) error {
 	call := func() error {
 		return Post(with(context, bearerAccess), uri, data, result)
 	}
@@ -205,7 +205,7 @@ func post(context Context, uri string, data, result interface{}) error {
 	return err
 }
 
-func patch(context Context, uri string, data, result interface{}) error {
+func patch(context Context, uri string, data, result any) error {
 	call := func() error {
 		return Patch(with(context, bearerAccess), uri, data, result)
 	}

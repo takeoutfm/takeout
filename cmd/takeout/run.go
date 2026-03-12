@@ -53,13 +53,13 @@ const (
 )
 
 func generateSecret(size int) string {
-	var secret string
+	var secret strings.Builder
 	//rando.Seed(time.Now().UnixNano())
-	for i := 0; i < size; i++ {
+	for range size {
 		n := rando.Intn(len(secretChars))
-		secret += string(secretChars[n])
+		secret.WriteString(string(secretChars[n]))
 	}
-	return secret
+	return secret.String()
 }
 
 func writeSecret(dir, file, secret string) error {

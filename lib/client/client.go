@@ -73,9 +73,9 @@ func (c *Config) Merge(o Config) {
 type Getter interface {
 	Get(url string) (http.Header, []byte, error)
 	GetBody(url string) ([]byte, error)
-	GetJson(url string, result interface{}) error
-	GetJsonWith(headers map[string]string, url string, result interface{}) error
-	GetXML(url string, result interface{}) error
+	GetJson(url string, result any) error
+	GetJsonWith(headers map[string]string, url string, result any) error
+	GetXML(url string, result any) error
 	GetPLS(url string) (pls.Playlist, error)
 }
 
@@ -221,7 +221,7 @@ func (c *client) doGetWithRetry(headers map[string]string, url string) (*http.Re
 	var resp *http.Response
 	var err error
 
-	for attempt := 0; attempt < maxAttempts; attempt++ {
+	for attempt := range maxAttempts {
 		resp, err = c.doGet(headers, url)
 		if err == nil || resp == nil {
 			// success
@@ -264,11 +264,11 @@ func (c *client) GetBody(url string) (body []byte, err error) {
 	return
 }
 
-func (c *client) GetJson(url string, result interface{}) error {
+func (c *client) GetJson(url string, result any) error {
 	return c.GetJsonWith(nil, url, result)
 }
 
-func (c *client) GetJsonWith(headers map[string]string, url string, result interface{}) error {
+func (c *client) GetJsonWith(headers map[string]string, url string, result any) error {
 	resp, err := c.doGetWithRetry(headers, url)
 	if err != nil {
 		return err
@@ -281,7 +281,7 @@ func (c *client) GetJsonWith(headers map[string]string, url string, result inter
 	return nil
 }
 
-func (c *client) GetXML(urlString string, result interface{}) error {
+func (c *client) GetXML(urlString string, result any) error {
 	// TODO use only for testing
 	// if strings.HasPrefix(urlString, "file:") {
 	// 	u, err := url.Parse(urlString)

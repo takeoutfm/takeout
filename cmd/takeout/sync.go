@@ -26,6 +26,7 @@ import (
 	"takeoutfm.dev/takeout/internal/film"
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/podcast"
+	"takeoutfm.dev/takeout/internal/tv"
 )
 
 var syncCmd = &cobra.Command{
@@ -41,6 +42,7 @@ var syncBack time.Duration
 var syncAll bool
 var mediaMusic bool
 var mediaFilm bool
+var mediaTV bool
 var mediaPodcast bool
 var artist string
 var resolve bool
@@ -70,6 +72,12 @@ func sync() error {
 	}
 	if mediaFilm {
 		err = syncFilm(cfg)
+		if err != nil {
+			return err
+		}
+	}
+	if mediaTV {
+		err = syncTV(cfg)
 		if err != nil {
 			return err
 		}
@@ -114,6 +122,18 @@ func syncFilm(cfg *config.Config) error {
 	return nil
 }
 
+func syncTV(cfg *config.Config) error {
+	ctx := context.TODO()
+	t := tv.NewTV(cfg)
+	err := t.Open(ctx)
+	if err != nil {
+		return err
+	}
+	defer t.Close()
+	t.SyncSince(ctx, since(t.LastModified()))
+	return nil
+}
+
 func syncPodcast(cfg *config.Config) error {
 	p := podcast.NewPodcast(cfg)
 	err := p.Open()
@@ -131,7 +151,8 @@ func init() {
 	syncCmd.Flags().BoolVarP(&syncAll, "all", "a", false, "Re(sync) all ignoring timestamps")
 	syncCmd.Flags().BoolVarP(&mediaMusic, "music", "m", true, "Sync music")
 	syncCmd.Flags().BoolVarP(&mediaFilm, "film", "f", true, "Sync film")
-	syncCmd.Flags().BoolVarP(&mediaPodcast, "podcast", "p", false, "Sync podcasts")
+	syncCmd.Flags().BoolVarP(&mediaTV, "tv", "t", true, "Sync TV shows")
+	syncCmd.Flags().BoolVarP(&mediaPodcast, "podcast", "p", true, "Sync podcasts")
 	syncCmd.Flags().BoolVarP(&resolve, "resolve", "x", false, "Resolve")
 	syncCmd.Flags().StringVarP(&artist, "artist", "r", "", "Music artist")
 	rootCmd.AddCommand(syncCmd)

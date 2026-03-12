@@ -48,7 +48,7 @@ func TestIndex(t *testing.T) {
 	}
 	defer index.Close()
 
-	m := make(map[string]interface{})
+	m := make(map[string]any)
 
 	m["artist"] = "Gary Numan"
 	m["release"] = "The Pleasure Principle"

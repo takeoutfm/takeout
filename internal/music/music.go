@@ -124,7 +124,7 @@ func CoverArtArchiveImage(r Release) string {
 	}
 }
 
-func CoverSmall(o interface{}) string {
+func CoverSmall(o any) string {
 	switch o.(type) {
 	case Release:
 		return Cover(o.(Release), "250")
@@ -275,10 +275,7 @@ func (m *Music) Search(q string, limit ...int) []Track {
 	chunkSize := 100
 	var tracks []Track
 	for i := 0; i < len(keys); i += chunkSize {
-		end := i + chunkSize
-		if end > len(keys) {
-			end = len(keys)
-		}
+		end := min(i+chunkSize, len(keys))
 		chunk := keys[i:end]
 		tracks = append(tracks, m.tracksFor(chunk)...)
 	}

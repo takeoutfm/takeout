@@ -616,7 +616,7 @@ func apiProgressPost(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func apiView(w http.ResponseWriter, r *http.Request, view interface{}) {
+func apiView(w http.ResponseWriter, r *http.Request, view any) {
 	w.Header().Set(header.ContentType, ApplicationJson)
 	json.NewEncoder(w).Encode(view)
 }

@@ -81,7 +81,7 @@ func (t *Template) Template() *template.Template {
 	return t.templ
 }
 
-func (t *Template) Execute(vars interface{}) string {
+func (t *Template) Execute(vars any) string {
 	var buf bytes.Buffer
 	_ = t.Template().Execute(&buf, vars)
 	return buf.String()
@@ -806,7 +806,7 @@ func GetConfig() (*Config, error) {
 	return readConfig(v)
 }
 
-var dirConfigCache = make(map[string]interface{})
+var dirConfigCache = make(map[string]any)
 
 // LoadConfig uses viper to load a config file in the provided directory. The
 // result is cached.

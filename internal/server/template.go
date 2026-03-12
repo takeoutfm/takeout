@@ -31,11 +31,11 @@ import (
 	"strings"
 
 	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/internal/film"
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/people"
 	"takeoutfm.dev/takeout/internal/podcast"
 	"takeoutfm.dev/takeout/internal/tv"
-	"takeoutfm.dev/takeout/internal/film"
 	"takeoutfm.dev/takeout/lib/date"
 	"takeoutfm.dev/takeout/lib/log"
 	"takeoutfm.dev/takeout/model"
@@ -78,7 +78,7 @@ func doFuncMap() template.FuncMap {
 		"unescapeHTML": func(s string) template.HTML {
 			return template.HTML(s)
 		},
-		"chart": func(o interface{}) string {
+		"chart": func(o any) string {
 			var link string
 			switch o.(type) {
 			case *view.TrackStats:
@@ -86,7 +86,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return link
 		},
-		"link": func(o interface{}) string {
+		"link": func(o any) string {
 			var link string
 			switch o.(type) {
 			case model.Release:
@@ -110,7 +110,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return link
 		},
-		"link_amz": func(o interface{}) string {
+		"link_amz": func(o any) string {
 			var link string
 			switch o.(type) {
 			case model.Release:
@@ -118,7 +118,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return link
 		},
-		"link_camel": func(o interface{}) string {
+		"link_camel": func(o any) string {
 			var link string
 			switch o.(type) {
 			case model.Release:
@@ -126,7 +126,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return link
 		},
-		"link_mbz": func(o interface{}) string {
+		"link_mbz": func(o any) string {
 			var link string
 			switch o.(type) {
 			case model.Release:
@@ -136,7 +136,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return link
 		},
-		"link_google": func(o interface{}) string {
+		"link_google": func(o any) string {
 			var link string
 			switch o.(type) {
 			case model.Release:
@@ -146,7 +146,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return link
 		},
-		"link_wiki": func(o interface{}) string {
+		"link_wiki": func(o any) string {
 			var link string
 			switch o.(type) {
 			case model.Release:
@@ -156,7 +156,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return link
 		},
-		"url": func(o interface{}) string {
+		"url": func(o any) string {
 			var loc string
 			switch o.(type) {
 			case model.Track:
@@ -168,7 +168,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return loc
 		},
-		"popular": func(o interface{}) string {
+		"popular": func(o any) string {
 			var link string
 			switch o.(type) {
 			case model.Artist:
@@ -176,7 +176,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return link
 		},
-		"singles": func(o interface{}) string {
+		"singles": func(o any) string {
 			var link string
 			switch o.(type) {
 			case model.Artist:
@@ -184,7 +184,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return link
 		},
-		"want": func(o interface{}) string {
+		"want": func(o any) string {
 			var link string
 			switch o.(type) {
 			case model.Artist:
@@ -192,7 +192,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return link
 		},
-		"ref": func(o interface{}, args ...string) string {
+		"ref": func(o any, args ...string) string {
 			var ref string
 			switch o.(type) {
 			case model.Release:
@@ -221,10 +221,10 @@ func doFuncMap() template.FuncMap {
 		"letter": func(a model.Artist) string {
 			return a.SortName[0:1]
 		},
-		"cover": func(o interface{}) string {
+		"cover": func(o any) string {
 			return music.CoverSmall(o)
 		},
-		"image": func(o interface{}) string {
+		"image": func(o any) string {
 			var img string
 			switch o.(type) {
 			case model.Series:
@@ -234,7 +234,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return img
 		},
-		"profile": func(o interface{}) string {
+		"profile": func(o any) string {
 			var img string
 			switch o.(type) {
 			case model.Person:
@@ -242,7 +242,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return img
 		},
-		"profile_small": func(o interface{}) string {
+		"profile_small": func(o any) string {
 			var img string
 			switch o.(type) {
 			case model.Person:
@@ -250,7 +250,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return img
 		},
-		"poster": func(o interface{}) string {
+		"poster": func(o any) string {
 			var img string
 			switch o.(type) {
 			case model.Movie:
@@ -260,7 +260,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return img
 		},
-		"poster_small": func(o interface{}) string {
+		"poster_small": func(o any) string {
 			var img string
 			switch o.(type) {
 			case model.Movie:
@@ -270,7 +270,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return img
 		},
-		"backdrop": func(o interface{}) string {
+		"backdrop": func(o any) string {
 			var img string
 			switch o.(type) {
 			case model.Movie:
@@ -280,7 +280,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return img
 		},
-		"still": func(o interface{}) string {
+		"still": func(o any) string {
 			var img string
 			switch o.(type) {
 			case model.TVEpisode:
@@ -288,7 +288,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return img
 		},
-		"still_small": func(o interface{}) string {
+		"still_small": func(o any) string {
 			var img string
 			switch o.(type) {
 			case model.TVEpisode:
@@ -296,7 +296,7 @@ func doFuncMap() template.FuncMap {
 			}
 			return img
 		},
-		"still_large": func(o interface{}) string {
+		"still_large": func(o any) string {
 			var img string
 			switch o.(type) {
 			case model.TVEpisode:
@@ -309,7 +309,7 @@ func doFuncMap() template.FuncMap {
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	var result interface{}
+	var result any
 	var temp string
 
 	if v := r.URL.Query().Get("release"); v != "" {
@@ -450,7 +450,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	render(ctx, temp, result, w, r)
 }
 
-func render(ctx Context, temp string, view interface{},
+func render(ctx Context, temp string, view any,
 	w http.ResponseWriter, r *http.Request) {
 	err := ctx.Template().ExecuteTemplate(w, temp, view)
 	if err != nil {

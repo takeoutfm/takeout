@@ -19,6 +19,7 @@ package music
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"takeoutfm.dev/takeout/lib/log"
@@ -70,7 +71,7 @@ type trackIndex struct {
 	Artist   string
 	RID      string
 	// these are the indexed fields to store in the search db
-	Fields   search.FieldMap
+	Fields search.FieldMap
 }
 
 func (m *Music) creditsIndex(reid string) ([]trackIndex, error) {
@@ -179,7 +180,7 @@ func (m *Music) creditsIndex(reid string) ([]trackIndex, error) {
 	return indices, nil
 }
 
-func setField(c search.FieldMap, key string, value interface{}) search.FieldMap {
+func setField(c search.FieldMap, key string, value any) search.FieldMap {
 	// first remove
 	k := strings.Replace(key, " ", "_", -1)
 	delete(c, k)
@@ -188,7 +189,7 @@ func setField(c search.FieldMap, key string, value interface{}) search.FieldMap 
 }
 
 // TODO refactor to use search.AddField
-func addField(c search.FieldMap, key string, value interface{}) search.FieldMap {
+func addField(c search.FieldMap, key string, value any) search.FieldMap {
 	key = strings.ToLower(key)
 	keys := []string{key}
 
@@ -298,10 +299,5 @@ func relationCredits(c search.FieldMap, relations []musicbrainz.Relation) search
 }
 
 func hasAttribute(attrs []string, name string) bool {
-	for _, a := range attrs {
-		if a == name {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(attrs, name)
 }

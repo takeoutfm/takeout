@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"takeoutfm.dev/takeout/internal/auth"
 	"takeoutfm.dev/takeout/internal/config"
@@ -234,20 +235,22 @@ func fulfillNew(ctx Context, r *actions.WebhookRequest, w *actions.WebhookRespon
 	home := HomeView(ctx)
 	config := ctx.Config()
 
-	speech := config.Assistant.Recent.Speech.Text
-	text := config.Assistant.Recent.Text.Text
+	var speech strings.Builder
+	speech.WriteString(config.Assistant.Recent.Speech.Text)
+	var text strings.Builder
+	text.WriteString(config.Assistant.Recent.Text.Text)
 
 	for i, rel := range home.AddedReleases {
 		if i == config.Assistant.RecentLimit {
 			break
 		} else if i > 0 {
-			speech += " and " // TODO
-			text += ", "
+			speech.WriteString(" and ") // TODO
+			text.WriteString(", ")
 		}
-		speech += config.Assistant.Release.Speech.Execute(rel)
-		text += config.Assistant.Release.Speech.Execute(rel)
+		speech.WriteString(config.Assistant.Release.Speech.Execute(rel))
+		text.WriteString(config.Assistant.Release.Speech.Execute(rel))
 	}
-	w.AddSimple(speech, text)
+	w.AddSimple(speech.String(), text.String())
 }
 
 func fulfillWelcome(ctx Context, r *actions.WebhookRequest, w *actions.WebhookResponse) {
@@ -260,7 +263,7 @@ func addSimple(w *actions.WebhookResponse, m config.AssistantResponse) {
 	w.AddSimple(m.Speech.Text, m.Text.Text)
 }
 
-func addSimpleTemplate(w *actions.WebhookResponse, m config.AssistantResponse, vars interface{}) {
+func addSimpleTemplate(w *actions.WebhookResponse, m config.AssistantResponse, vars any) {
 	w.AddSimple(m.Speech.Execute(vars), m.Text.Execute(vars))
 }
 

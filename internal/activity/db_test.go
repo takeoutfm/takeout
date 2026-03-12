@@ -137,7 +137,7 @@ func TestTopTrackEvents(t *testing.T) {
 
 	a := makeActivity(t)
 
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		e := model.TrackEvent{
 			User: user,
 			Date: time.Now(),
@@ -211,7 +211,7 @@ func TestTopTrackEventsFrom(t *testing.T) {
 
 	a := makeActivity(t)
 
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		e := model.TrackEvent{
 			User: user,
 			Date: time.Now(),

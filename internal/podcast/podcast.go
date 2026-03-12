@@ -127,10 +127,7 @@ func (p *Podcast) Search(q string, limit ...int) (series []Series, episodes []Ep
 	// split potentially large # of result keys into chunks to query
 	chunkSize := 100
 	for i := 0; i < len(keys); i += chunkSize {
-		end := i + chunkSize
-		if end > len(keys) {
-			end = len(keys)
-		}
+		end := min(i+chunkSize, len(keys))
 		chunk := keys[i:end]
 		episodes = append(episodes, p.episodesFor(chunk)...)
 		for _, e := range episodes {

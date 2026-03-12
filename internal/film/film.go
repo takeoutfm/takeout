@@ -118,10 +118,7 @@ func (f *Film) Search(q string, limit ...int) []Movie {
 	chunkSize := 100
 	var movies []Movie
 	for i := 0; i < len(keys); i += chunkSize {
-		end := i + chunkSize
-		if end > len(keys) {
-			end = len(keys)
-		}
+		end := min(i+chunkSize, len(keys))
 		chunk := keys[i:end]
 		movies = append(movies, f.moviesFor(chunk)...)
 	}

@@ -819,7 +819,7 @@ func (m *Music) findTrackReleaseDisambiguate(t Track, trackMedia []Media) (Relea
 func (m *Music) fixTrackReleases() (bool, error) {
 	modified := false
 	fixReleases := make(map[string]struct{})
-	var fixTracks []map[string]interface{}
+	var fixTracks []map[string]any
 	//tracks := m.tracksWithoutReleases()
 	tracks := m.tracksWithoutAssignedRelease()
 
@@ -854,7 +854,7 @@ func (m *Music) fixTrackReleases() (bool, error) {
 			}
 			r := releases[pick]
 			fixReleases[key] = struct{}{}
-			fixTracks = append(fixTracks, map[string]interface{}{
+			fixTracks = append(fixTracks, map[string]any{
 				"artist":     artist.Name,
 				"from":       t.Release,
 				"to":         r.Name,
@@ -870,7 +870,7 @@ func (m *Music) fixTrackReleases() (bool, error) {
 				if strings.EqualFold(FuzzyName(t.Release), FuzzyName(r.Name)) &&
 					t.TrackCount == r.TrackCount && t.DiscCount == r.DiscCount {
 					fixReleases[key] = struct{}{}
-					fixTracks = append(fixTracks, map[string]interface{}{
+					fixTracks = append(fixTracks, map[string]any{
 						"artist":     artist.Name,
 						"from":       t.Release,
 						"to":         r.Name,

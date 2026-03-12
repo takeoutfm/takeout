@@ -126,12 +126,12 @@ func (m *Music) updateTrackCount() error {
 	if err != nil {
 		return err
 	}
-	var results []map[string]interface{}
+	var results []map[string]any
 	for rows.Next() {
 		var artist, release, date string
 		var trackCount, discCount int
 		rows.Scan(&artist, &release, &date, &trackCount, &discCount)
-		results = append(results, map[string]interface{}{
+		results = append(results, map[string]any{
 			"artist":     artist,
 			"release":    release,
 			"date":       date,

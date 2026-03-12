@@ -210,7 +210,7 @@ func (c *Client) writer() {
 
 			// drain the queue
 			queued := len(c.send)
-			for i := 0; i < queued; i++ {
+			for range queued {
 				message = <-c.send
 				err := wsutil.WriteServerText(c.conn, message.body)
 				if err != nil {
