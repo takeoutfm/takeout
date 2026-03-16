@@ -18,6 +18,7 @@
 package search // import "takeoutfm.dev/takeout/lib/search"
 
 import (
+	"errors"
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/keyword"
 	"github.com/blevesearch/bleve/v2/mapping"
@@ -39,7 +40,7 @@ func buildMapping() mapping.IndexMapping {
 
 func TestIndex(t *testing.T) {
 	index, err := bleve.New("example.bleve", buildMapping())
-	if err == bleve.ErrorIndexPathExists {
+	if errors.Is(err, bleve.ErrorIndexPathExists) {
 		index, err = bleve.Open("example.bleve")
 		if err != nil {
 			panic(err)
@@ -47,7 +48,7 @@ func TestIndex(t *testing.T) {
 	}
 	defer index.Close()
 
-	m := make(map[string]interface{})
+	m := make(map[string]any)
 
 	m["artist"] = "Gary Numan"
 	m["release"] = "The Pleasure Principle"

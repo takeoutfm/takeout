@@ -26,7 +26,9 @@ package actions
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
+	"slices"
+
 	"net/http"
 )
 
@@ -186,7 +188,7 @@ type WebhookRequest struct {
 
 func NewWebhookRequest(r *http.Request) *WebhookRequest {
 	var request WebhookRequest
-	body, _ := ioutil.ReadAll(r.Body)
+	body, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(body, &request)
 	if err != nil {
 		return nil
@@ -313,12 +315,7 @@ func (r WebhookRequest) SupportsRichResponse() bool {
 	if r.Device == nil {
 		return false
 	}
-	for _, s := range r.Device.Capabilities {
-		if s == CapabilityRichResponse {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(r.Device.Capabilities, CapabilityRichResponse)
 }
 
 func (r WebhookRequest) SupportsMedia() bool {

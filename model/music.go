@@ -18,10 +18,11 @@
 package model // import "takeoutfm.dev/takeout/model"
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	g "gorm.io/gorm"
 	"takeoutfm.dev/takeout/lib/gorm"
-	"time"
 )
 
 // Artist info from MusicBrainz.

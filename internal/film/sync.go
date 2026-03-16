@@ -18,6 +18,7 @@
 package film
 
 import (
+	"context"
 	"errors"
 	"regexp"
 	"strings"
@@ -61,13 +62,13 @@ var (
 	ErrInvalidEpisode = errors.New("invalid episode pattern")
 )
 
-func (f *Film) Sync() error {
-	return f.SyncSince(time.Time{})
+func (f *Film) Sync(ctx context.Context) error {
+	return f.SyncSince(ctx, time.Time{})
 }
 
-func (f *Film) SyncSince(lastSync time.Time) error {
+func (f *Film) SyncSince(ctx context.Context, lastSync time.Time) error {
 	for _, bucket := range f.buckets {
-		err := f.syncBucket(bucket, lastSync)
+		err := f.syncBucket(ctx, bucket, lastSync)
 		if err != nil {
 			return err
 		}
@@ -83,8 +84,8 @@ var (
 	movieRegexp = regexp.MustCompile(`.*/(.+?)\s*\(([\d]+)\)(\s-\s(.+))?\.(mkv|mp4)$`)
 )
 
-func (f *Film) syncBucket(bucket bucket.Bucket, lastSync time.Time) error {
-	objectCh, err := bucket.List(lastSync)
+func (f *Film) syncBucket(ctx context.Context, bucket bucket.Bucket, lastSync time.Time) error {
+	objectCh, err := bucket.List(ctx, lastSync)
 	if err != nil {
 		return err
 	}
@@ -212,7 +213,7 @@ func (f *Film) syncMovie(client *tmdb.TMDB, tmid int,
 	// rating / certification
 	for _, country := range f.config.Film.ReleaseCountries {
 		release, err := f.certification(client, tmid, country)
-		if err == tmdb.ErrReleaseTypeNotFound {
+		if errors.Is(err, tmdb.ErrReleaseTypeNotFound) {
 			continue
 		} else if err != nil {
 			return fields, err
@@ -276,7 +277,6 @@ func (f *Film) syncMovie(client *tmdb.TMDB, tmid int,
 	for _, v := range videos.Results {
 		if v.Official && v.Trailer() && v.YouTube() {
 			// collect official trailers on youtube
-			log.Println(v.PublishDate)
 			trailers = append(trailers, Trailer{
 				TMID:     m.TMID,
 				Name:     v.Name,
@@ -303,7 +303,7 @@ func (f *Film) certification(client *tmdb.TMDB, tmid int, country string) (tmdb.
 	types := []int{tmdb.TypeTheatrical, tmdb.TypeDigital}
 	for _, t := range types {
 		release, err := client.MovieReleaseType(tmid, country, t)
-		if err == tmdb.ErrReleaseTypeNotFound {
+		if errors.Is(err, tmdb.ErrReleaseTypeNotFound) {
 			continue
 		}
 		return release, err

@@ -100,35 +100,66 @@ func TestPickRelease(t *testing.T) {
 			Disambiguation: "",
 			Status:         "Official",
 			Country:        "XE",
+			Artwork:        true,
 			FrontArtwork:   true,
+			Media: []model.Media{
+				{Name: "", Format: "CD"},
+			},
 		},
 		{
 			Name:           "Master of Reality",
 			Disambiguation: "",
 			Status:         "Official",
 			Country:        "US",
+			Artwork:        true,
 			FrontArtwork:   false,
+			Media: []model.Media{
+				{Name: "", Format: "CD"},
+			},
 		},
 		{
 			Name:           "Master of Reality",
 			Disambiguation: "Deluxe Edition",
 			Status:         "Official",
 			Country:        "US",
+			Artwork:        true,
 			FrontArtwork:   true,
+			Media: []model.Media{
+				{Name: "", Format: "CD"},
+			},
 		},
 		{
 			Name:           "Master of Reality",
 			Disambiguation: "",
 			Status:         "Bootleg",
 			Country:        "US",
+			Artwork:        true,
 			FrontArtwork:   true,
+			Media: []model.Media{
+				{Name: "", Format: "CD"},
+			},
 		},
 		{
 			Name:           "Master of Reality",
 			Disambiguation: "",
 			Status:         "Official",
 			Country:        "US",
+			Artwork:        true,
 			FrontArtwork:   true,
+			Media: []model.Media{
+				{Name: "", Format: "CD"},
+			},
+		},
+		{
+			Name:           "Master of Reality",
+			Disambiguation: "",
+			Status:         "Official",
+			Country:        "US",
+			Artwork:        true,
+			FrontArtwork:   true,
+			Media: []model.Media{
+				{Name: "", Format: "Digital Media"},
+			},
 		},
 	}
 
@@ -149,5 +180,7 @@ func TestPickRelease(t *testing.T) {
 	if r.Status != "Official" {
 		t.Error("expect official")
 	}
-
+	if r.Media[0].Format != "CD" {
+		t.Error("expect CD")
+	}
 }

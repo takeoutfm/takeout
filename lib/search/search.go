@@ -20,13 +20,15 @@
 package search // import "takeoutfm.dev/takeout/lib/search"
 
 import (
+	"errors"
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/keyword"
+	"maps"
 	"path/filepath"
 	"strings"
 )
 
-type FieldMap map[string]interface{}
+type FieldMap map[string]any
 type IndexMap map[string]FieldMap
 
 type Config struct {
@@ -70,7 +72,7 @@ func (s *search) Open(name string, keywords []string) error {
 	}
 
 	index, err := bleve.New(path, mapping)
-	if err == bleve.ErrorIndexPathExists {
+	if errors.Is(err, bleve.ErrorIndexPathExists) {
 		index, err = bleve.Open(path)
 		if err != nil {
 			return err
@@ -122,17 +124,15 @@ func (s *search) Delete(keys []string) error {
 
 func CloneFields(fields FieldMap) FieldMap {
 	target := make(FieldMap)
-	for k, v := range fields {
-		target[k] = v
-	}
+	maps.Copy(target, fields)
 	return target
 }
 
-func (fields FieldMap) AddField(key string, value interface{}) FieldMap {
+func (fields FieldMap) AddField(key string, value any) FieldMap {
 	return AddField(fields, key, value)
 }
 
-func AddField(fields FieldMap, key string, value interface{}) FieldMap {
+func AddField(fields FieldMap, key string, value any) FieldMap {
 	key = strings.ToLower(key)
 	keys := []string{key}
 	for _, k := range keys {

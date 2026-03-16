@@ -20,7 +20,8 @@ package fanart // import "takeoutfm.dev/takeout/lib/fanart"
 import (
 	"bytes"
 	"embed"
-	"io/ioutil"
+	"io"
+
 	"net/http"
 	"strings"
 	"testing"
@@ -51,7 +52,7 @@ func (s fanartServer) RoundTrip(r *http.Request) (*http.Response, error) {
 	}
 	return &http.Response{
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewBufferString(body)),
+		Body:       io.NopCloser(bytes.NewBufferString(body)),
 		Header:     make(http.Header),
 	}, nil
 }

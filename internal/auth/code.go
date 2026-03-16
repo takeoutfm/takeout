@@ -19,8 +19,9 @@ package auth
 
 import (
 	"errors"
-	rando "math/rand"
 	"hash/maphash"
+	rando "math/rand"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -39,13 +40,13 @@ type Code struct {
 }
 
 func randomCode() string {
-	var code string
+	var code strings.Builder
 	r := rando.New(rando.NewSource(int64(new(maphash.Hash).Sum64())))
-	for i := 0; i < CodeSize; i++ {
+	for range CodeSize {
 		n := r.Intn(len(CodeChars))
-		code += string(CodeChars[n])
+		code.WriteString(string(CodeChars[n]))
 	}
-	return code
+	return code.String()
 }
 
 func (a *Auth) createCode(c Code) (err error) {

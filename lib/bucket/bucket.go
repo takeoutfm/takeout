@@ -22,6 +22,7 @@
 package bucket // import "takeoutfm.dev/takeout/lib/bucket"
 
 import (
+	"context"
 	"errors"
 	"net/url"
 	"time"
@@ -40,8 +41,8 @@ type Config struct {
 }
 
 type Bucket interface {
-	List(time.Time) (chan *Object, error)
-	ObjectURL(string) *url.URL
+	List(context.Context, time.Time) (chan *Object, error)
+	ObjectURL(context.Context, string) *url.URL
 	IsLocal() bool
 }
 
@@ -53,28 +54,14 @@ type Object struct {
 	LastModified time.Time
 }
 
-func OpenAll(buckets []Config) ([]Bucket, error) {
-	var list []Bucket
-
-	for i := range buckets {
-		b, err := Open(buckets[i])
-		if err == nil {
-			return list, err
-		}
-		list = append(list, b)
-	}
-
-	return list, nil
-}
-
-func OpenMedia(buckets []Config, mediaType string) ([]Bucket, error) {
+func OpenMedia(ctx context.Context, buckets []Config, mediaType string) ([]Bucket, error) {
 	var list []Bucket
 
 	for i := range buckets {
 		if buckets[i].Media != mediaType {
 			continue
 		}
-		b, err := Open(buckets[i])
+		b, err := Open(ctx, buckets[i])
 		if err != nil {
 			return list, err
 		}
@@ -84,12 +71,12 @@ func OpenMedia(buckets []Config, mediaType string) ([]Bucket, error) {
 	return list, nil
 }
 
-func Open(config Config) (Bucket, error) {
+func Open(ctx context.Context, config Config) (Bucket, error) {
 	if config.FS.Root != "" {
 		return newFSBucket(config), nil
 	}
 	if config.S3.Endpoint != "" {
-		return newS3Bucket(config)
+		return newS3Bucket(ctx, config)
 	}
 	return nil, ErrNoBucket
 }

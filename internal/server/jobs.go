@@ -18,6 +18,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-co-op/gocron"
@@ -32,12 +33,12 @@ import (
 	"time"
 )
 
-type syncFunc func(config *config.Config, mediaConfig *config.Config) error
+type syncFunc func(ctx context.Context, config *config.Config, mediaConfig *config.Config) error
 
-func schedule(config *config.Config) {
+func schedule(ctx context.Context, config *config.Config) {
 	scheduler := gocron.NewScheduler(time.UTC)
 
-	mediaSync := func(d time.Duration, doit syncFunc, startImmediately bool) {
+	mediaSync := func(ctx context.Context, d time.Duration, doit syncFunc, startImmediately bool) {
 		if d == 0 {
 			// job is disabled
 			return
@@ -60,7 +61,7 @@ func schedule(config *config.Config) {
 					log.Println(err)
 					return
 				}
-				err = doit(config, mediaConfig)
+				err = doit(ctx, config, mediaConfig)
 				if err != nil {
 					log.Println(err)
 				}
@@ -69,24 +70,24 @@ func schedule(config *config.Config) {
 	}
 
 	// music
-	mediaSync(config.Music.SyncInterval, syncMusic, false)
-	mediaSync(config.Music.PopularSyncInterval, syncMusicPopular, false)
-	mediaSync(config.Music.SimilarSyncInterval, syncMusicSimilar, false)
-	mediaSync(config.Music.CoverSyncInterval, syncMusicCovers, false)
+	mediaSync(ctx, config.Music.SyncInterval, syncMusic, false)
+	mediaSync(ctx, config.Music.PopularSyncInterval, syncMusicPopular, false)
+	mediaSync(ctx, config.Music.SimilarSyncInterval, syncMusicSimilar, false)
+	mediaSync(ctx, config.Music.CoverSyncInterval, syncMusicCovers, false)
 
 	// podcasts
-	mediaSync(config.Podcast.SyncInterval, syncPodcasts, false)
+	mediaSync(ctx, config.Podcast.SyncInterval, syncPodcasts, false)
 
 	// film
-	mediaSync(config.Film.SyncInterval, syncFilm, false)
-	mediaSync(config.Film.PosterSyncInterval, syncFilmPosters, false)
-	mediaSync(config.Film.BackdropSyncInterval, syncFilmBackdrops, false)
+	mediaSync(ctx, config.Film.SyncInterval, syncFilm, false)
+	mediaSync(ctx, config.Film.PosterSyncInterval, syncFilmPosters, false)
+	mediaSync(ctx, config.Film.BackdropSyncInterval, syncFilmBackdrops, false)
 
 	// tv
-	mediaSync(config.TV.SyncInterval, syncTV, false)
-	mediaSync(config.TV.PosterSyncInterval, syncTVPosters, false)
-	mediaSync(config.TV.BackdropSyncInterval, syncTVBackdrops, false)
-	mediaSync(config.TV.StillSyncInterval, syncTVStills, false)
+	mediaSync(ctx, config.TV.SyncInterval, syncTV, false)
+	mediaSync(ctx, config.TV.PosterSyncInterval, syncTVPosters, false)
+	mediaSync(ctx, config.TV.BackdropSyncInterval, syncTVBackdrops, false)
+	mediaSync(ctx, config.TV.StillSyncInterval, syncTVStills, false)
 
 	scheduler.Every(time.Minute * 5).WaitForSchedule().Do(func() {
 		a := auth.NewAuth(config)
@@ -119,39 +120,39 @@ func assignedMedia(config *config.Config) ([]string, error) {
 	return a.AssignedMedia(), nil
 }
 
-func syncMusic(config *config.Config, mediaConfig *config.Config) error {
+func syncMusic(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	m := music.NewMusic(mediaConfig)
-	err := m.Open()
+	err := m.Open(ctx)
 	if err != nil {
 		return err
 	}
 	defer m.Close()
 	syncOptions := music.NewSyncOptions()
 	syncOptions.Since = m.LastModified()
-	return m.Sync(syncOptions)
+	return m.Sync(ctx, syncOptions)
 }
 
-func syncWithOptions(mediaConfig *config.Config, syncOptions music.SyncOptions) error {
+func syncWithOptions(ctx context.Context, mediaConfig *config.Config, syncOptions music.SyncOptions) error {
 	m := music.NewMusic(mediaConfig)
-	err := m.Open()
+	err := m.Open(ctx)
 	if err != nil {
 		return err
 	}
 	defer m.Close()
-	return m.Sync(syncOptions)
+	return m.Sync(ctx, syncOptions)
 }
 
-func syncMusicPopular(config *config.Config, mediaConfig *config.Config) error {
-	return syncWithOptions(mediaConfig, music.NewSyncPopular())
+func syncMusicPopular(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
+	return syncWithOptions(ctx, mediaConfig, music.NewSyncPopular())
 }
 
-func syncMusicSimilar(config *config.Config, mediaConfig *config.Config) error {
-	return syncWithOptions(mediaConfig, music.NewSyncSimilar())
+func syncMusicSimilar(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
+	return syncWithOptions(ctx, mediaConfig, music.NewSyncSimilar())
 }
 
-func syncMusicCovers(config *config.Config, mediaConfig *config.Config) error {
+func syncMusicCovers(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	m := music.NewMusic(mediaConfig)
-	err := m.Open()
+	err := m.Open(ctx)
 	if err != nil {
 		return err
 	}
@@ -161,9 +162,9 @@ func syncMusicCovers(config *config.Config, mediaConfig *config.Config) error {
 	return nil
 }
 
-func syncMusicFanArt(config *config.Config, mediaConfig *config.Config) error {
+func syncMusicFanArt(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	m := music.NewMusic(mediaConfig)
-	err := m.Open()
+	err := m.Open(ctx)
 	if err != nil {
 		return err
 	}
@@ -172,29 +173,29 @@ func syncMusicFanArt(config *config.Config, mediaConfig *config.Config) error {
 	return nil
 }
 
-func syncFilm(config *config.Config, mediaConfig *config.Config) error {
+func syncFilm(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	f := film.NewFilm(mediaConfig)
-	err := f.Open()
+	err := f.Open(ctx)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return f.SyncSince(f.LastModified())
+	return f.SyncSince(ctx, f.LastModified())
 }
 
-func syncTV(config *config.Config, mediaConfig *config.Config) error {
+func syncTV(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	tv := tv.NewTV(mediaConfig)
-	err := tv.Open()
+	err := tv.Open(ctx)
 	if err != nil {
 		return err
 	}
 	defer tv.Close()
-	return tv.SyncSince(tv.LastModified())
+	return tv.SyncSince(ctx, tv.LastModified())
 }
 
-func syncFilmPosters(config *config.Config, mediaConfig *config.Config) error {
+func syncFilmPosters(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	f := film.NewFilm(mediaConfig)
-	err := f.Open()
+	err := f.Open(ctx)
 	if err != nil {
 		return err
 	}
@@ -203,9 +204,9 @@ func syncFilmPosters(config *config.Config, mediaConfig *config.Config) error {
 	return nil
 }
 
-func syncFilmBackdrops(config *config.Config, mediaConfig *config.Config) error {
+func syncFilmBackdrops(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	f := film.NewFilm(mediaConfig)
-	err := f.Open()
+	err := f.Open(ctx)
 	if err != nil {
 		return err
 	}
@@ -214,9 +215,9 @@ func syncFilmBackdrops(config *config.Config, mediaConfig *config.Config) error 
 	return nil
 }
 
-func syncFilmProfileImages(config *config.Config, mediaConfig *config.Config) error {
+func syncFilmProfileImages(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	f := film.NewFilm(mediaConfig)
-	err := f.Open()
+	err := f.Open(ctx)
 	if err != nil {
 		return err
 	}
@@ -225,9 +226,9 @@ func syncFilmProfileImages(config *config.Config, mediaConfig *config.Config) er
 	return nil
 }
 
-func syncTVProfileImages(config *config.Config, mediaConfig *config.Config) error {
+func syncTVProfileImages(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	tv := tv.NewTV(mediaConfig)
-	err := tv.Open()
+	err := tv.Open(ctx)
 	if err != nil {
 		return err
 	}
@@ -236,9 +237,9 @@ func syncTVProfileImages(config *config.Config, mediaConfig *config.Config) erro
 	return nil
 }
 
-func syncTVBackdrops(config *config.Config, mediaConfig *config.Config) error {
+func syncTVBackdrops(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	tv := tv.NewTV(mediaConfig)
-	err := tv.Open()
+	err := tv.Open(ctx)
 	if err != nil {
 		return err
 	}
@@ -247,9 +248,9 @@ func syncTVBackdrops(config *config.Config, mediaConfig *config.Config) error {
 	return nil
 }
 
-func syncTVPosters(config *config.Config, mediaConfig *config.Config) error {
+func syncTVPosters(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	tv := tv.NewTV(mediaConfig)
-	err := tv.Open()
+	err := tv.Open(ctx)
 	if err != nil {
 		return err
 	}
@@ -258,9 +259,9 @@ func syncTVPosters(config *config.Config, mediaConfig *config.Config) error {
 	return nil
 }
 
-func syncTVStills(config *config.Config, mediaConfig *config.Config) error {
+func syncTVStills(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	tv := tv.NewTV(mediaConfig)
-	err := tv.Open()
+	err := tv.Open(ctx)
 	if err != nil {
 		return err
 	}
@@ -269,7 +270,7 @@ func syncTVStills(config *config.Config, mediaConfig *config.Config) error {
 	return nil
 }
 
-func syncPodcasts(config *config.Config, mediaConfig *config.Config) error {
+func syncPodcasts(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	p := podcast.NewPodcast(mediaConfig)
 	err := p.Open()
 	if err != nil {
@@ -279,9 +280,9 @@ func syncPodcasts(config *config.Config, mediaConfig *config.Config) error {
 	return p.Sync()
 }
 
-func createStations(config *config.Config, mediaConfig *config.Config) error {
+func createStations(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	m := music.NewMusic(mediaConfig)
-	err := m.Open()
+	err := m.Open(ctx)
 	if err != nil {
 		return err
 	}
@@ -291,7 +292,7 @@ func createStations(config *config.Config, mediaConfig *config.Config) error {
 	return nil
 }
 
-func Job(config *config.Config, name string) error {
+func Job(ctx context.Context, config *config.Config, name string) error {
 	list, err := assignedMedia(config)
 	if err != nil {
 		return err
@@ -303,52 +304,52 @@ func Job(config *config.Config, name string) error {
 		}
 		switch name {
 		case "backdrops":
-			syncTVBackdrops(config, mediaConfig)
-			syncFilmBackdrops(config, mediaConfig)
+			syncTVBackdrops(ctx, config, mediaConfig)
+			syncFilmBackdrops(ctx, config, mediaConfig)
 		case "covers":
-			syncMusicCovers(config, mediaConfig)
+			syncMusicCovers(ctx, config, mediaConfig)
 		case "fanart":
-			syncMusicFanArt(config, mediaConfig)
+			syncMusicFanArt(ctx, config, mediaConfig)
 		case "lastfm":
-			syncMusicPopular(config, mediaConfig)
-			syncMusicSimilar(config, mediaConfig)
+			syncMusicPopular(ctx, config, mediaConfig)
+			syncMusicSimilar(ctx, config, mediaConfig)
 		case "media":
-			syncMusic(config, mediaConfig)
-			syncFilm(config, mediaConfig)
-			syncTV(config, mediaConfig)
-			syncPodcasts(config, mediaConfig)
+			syncMusic(ctx, config, mediaConfig)
+			syncFilm(ctx, config, mediaConfig)
+			syncTV(ctx, config, mediaConfig)
+			syncPodcasts(ctx, config, mediaConfig)
 		case "images":
-			syncMusicCovers(config, mediaConfig)
-			syncMusicFanArt(config, mediaConfig)
-			syncFilmPosters(config, mediaConfig)
-			syncFilmBackdrops(config, mediaConfig)
-			syncFilmProfileImages(config, mediaConfig)
-			syncTVPosters(config, mediaConfig)
-			syncTVBackdrops(config, mediaConfig)
-			syncTVStills(config, mediaConfig)
-			syncTVProfileImages(config, mediaConfig)
+			syncMusicCovers(ctx, config, mediaConfig)
+			syncMusicFanArt(ctx, config, mediaConfig)
+			syncFilmPosters(ctx, config, mediaConfig)
+			syncFilmBackdrops(ctx, config, mediaConfig)
+			syncFilmProfileImages(ctx, config, mediaConfig)
+			syncTVPosters(ctx, config, mediaConfig)
+			syncTVBackdrops(ctx, config, mediaConfig)
+			syncTVStills(ctx, config, mediaConfig)
+			syncTVProfileImages(ctx, config, mediaConfig)
 		case "music":
-			syncMusic(config, mediaConfig)
+			syncMusic(ctx, config, mediaConfig)
 		case "popular":
-			syncMusicPopular(config, mediaConfig)
+			syncMusicPopular(ctx, config, mediaConfig)
 		case "podcasts":
-			syncPodcasts(config, mediaConfig)
+			syncPodcasts(ctx, config, mediaConfig)
 		case "posters":
-			syncTVPosters(config, mediaConfig)
-			syncFilmPosters(config, mediaConfig)
+			syncTVPosters(ctx, config, mediaConfig)
+			syncFilmPosters(ctx, config, mediaConfig)
 		case "profiles":
-			syncTVProfileImages(config, mediaConfig)
-			syncFilmProfileImages(config, mediaConfig)
+			syncTVProfileImages(ctx, config, mediaConfig)
+			syncFilmProfileImages(ctx, config, mediaConfig)
 		case "similar":
-			syncMusicSimilar(config, mediaConfig)
+			syncMusicSimilar(ctx, config, mediaConfig)
 		case "stills":
-			syncTVStills(config, mediaConfig)
+			syncTVStills(ctx, config, mediaConfig)
 		case "film":
-			syncFilm(config, mediaConfig)
+			syncFilm(ctx, config, mediaConfig)
 		case "tv":
-			syncTV(config, mediaConfig)
+			syncTV(ctx, config, mediaConfig)
 		case "stations":
-			createStations(config, mediaConfig)
+			createStations(ctx, config, mediaConfig)
 		}
 	}
 	return nil
@@ -358,7 +359,7 @@ func jobsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	name := r.PathValue("name")
 	go func() {
-		err := Job(ctx.Config(), name)
+		err := Job(r.Context(), ctx.Config(), name)
 		if err != nil {
 			log.Println(name, err)
 		}

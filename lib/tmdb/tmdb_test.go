@@ -20,7 +20,8 @@ package tmdb // import "takeoutfm.dev/takeout/lib/tmdb"
 import (
 	"bytes"
 	"embed"
-	"io/ioutil"
+	"io"
+
 	"net/http"
 	"strings"
 	"testing"
@@ -63,7 +64,7 @@ func (s tmdbServer) RoundTrip(r *http.Request) (*http.Response, error) {
 	}
 	return &http.Response{
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewBufferString(body)),
+		Body:       io.NopCloser(bytes.NewBufferString(body)),
 		Header:     make(http.Header),
 	}, nil
 }

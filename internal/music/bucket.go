@@ -18,6 +18,7 @@
 package music
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"os"
@@ -32,24 +33,24 @@ import (
 )
 
 // Asynchronously obtain all tracks from the bucket.
-func (m *Music) syncFromBucket(bucket bucket.Bucket, lastSync time.Time) (trackCh chan *Track, err error) {
+func (m *Music) syncFromBucket(ctx context.Context, bucket bucket.Bucket, lastSync time.Time) (trackCh chan *Track, err error) {
 	trackCh = make(chan *Track)
 
 	go func() {
 		defer close(trackCh)
-		objectCh, err := bucket.List(lastSync)
+		objectCh, err := bucket.List(ctx, lastSync)
 		if err != nil {
 			return
 		}
 		for o := range objectCh {
-			m.checkObject(bucket, o, trackCh)
+			m.checkObject(ctx, bucket, o, trackCh)
 		}
 	}()
 
 	return
 }
 
-func (m *Music) checkObject(b bucket.Bucket, object *bucket.Object, trackCh chan *Track) {
+func (m *Music) checkObject(ctx context.Context, b bucket.Bucket, object *bucket.Object, trackCh chan *Track) {
 	t := &Track{
 		Key:          object.Key,
 		ETag:         object.ETag,
@@ -58,7 +59,7 @@ func (m *Music) checkObject(b bucket.Bucket, object *bucket.Object, trackCh chan
 	}
 
 	if b.IsLocal() {
-		url := b.ObjectURL(t.Key)
+		url := b.ObjectURL(ctx, t.Key)
 		err := parseMetadata(url, t)
 		if err == nil {
 			trackCh <- t
@@ -177,6 +178,15 @@ func matchTrack(file string, t *Track) []Track {
 
 	tracks = append(tracks, copyTrack(t, disc, track, title))
 
+	// if disc > 5 && track > 10 && str.Atoi(title) == 0 {
+	// 	// 5 and 10 are less common to avoid redundant and slower checks
+	// 	// could be 10-976-Evil ==> disc 1, track 10, 976-Evil
+	// 	title = fmt.Sprintf("%d-%s", track, title)
+	// 	track = disc
+	// 	disc = 1
+	// 	tracks = append(tracks, copyTrack(t, disc, track, title))
+	// }
+
 	// potentially not multi-disc so assume single disc if too many
 	// TODO make this configurable?
 	// eg: 18-19-2000 (Soulchild remix).flac
@@ -228,9 +238,9 @@ func matchTrack(file string, t *Track) []Track {
 }
 
 // Generate a presigned url which expires based on config settings.
-func (m *Music) bucketURL(t Track) *url.URL {
+func (m *Music) bucketURL(ctx context.Context, t Track) *url.URL {
 	// TODO FIXME assume first bucket!!!
-	return m.buckets[0].ObjectURL(t.Key)
+	return m.buckets[0].ObjectURL(ctx, t.Key)
 }
 
 func parseMetadata(u *url.URL, t *Track) error {

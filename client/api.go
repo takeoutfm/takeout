@@ -20,6 +20,7 @@
 package client // import "takeoutfm.dev/takeout/client"
 
 import (
+	"errors"
 	"net/http"
 	"net/url"
 	"strings"
@@ -176,12 +177,12 @@ func Activity(context Context, activity model.Events) error {
 	return err
 }
 
-func get(context Context, uri string, result interface{}) error {
+func get(context Context, uri string, result any) error {
 	call := func() error {
 		return Get(with(context, bearerAccess), uri, result)
 	}
 	err := call()
-	if err == ErrUnauthorized {
+	if errors.Is(err, ErrUnauthorized) {
 		err = refresh(context)
 		if err == nil {
 			err = call()
@@ -190,12 +191,12 @@ func get(context Context, uri string, result interface{}) error {
 	return err
 }
 
-func post(context Context, uri string, data, result interface{}) error {
+func post(context Context, uri string, data, result any) error {
 	call := func() error {
 		return Post(with(context, bearerAccess), uri, data, result)
 	}
 	err := call()
-	if err == ErrUnauthorized {
+	if errors.Is(err, ErrUnauthorized) {
 		err = refresh(context)
 		if err == nil {
 			err = call()
@@ -204,12 +205,12 @@ func post(context Context, uri string, data, result interface{}) error {
 	return err
 }
 
-func patch(context Context, uri string, data, result interface{}) error {
+func patch(context Context, uri string, data, result any) error {
 	call := func() error {
 		return Patch(with(context, bearerAccess), uri, data, result)
 	}
 	err := call()
-	if err == ErrUnauthorized {
+	if errors.Is(err, ErrUnauthorized) {
 		err = refresh(context)
 		if err == nil {
 			err = call()

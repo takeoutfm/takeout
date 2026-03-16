@@ -18,6 +18,7 @@
 package tv
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
@@ -58,13 +59,13 @@ type syncContext struct {
 	series map[string]int
 }
 
-func (tv *TV) Sync() error {
-	return tv.SyncSince(time.Time{})
+func (tv *TV) Sync(ctx context.Context) error {
+	return tv.SyncSince(ctx, time.Time{})
 }
 
-func (tv *TV) SyncSince(lastSync time.Time) error {
+func (tv *TV) SyncSince(ctx context.Context, lastSync time.Time) error {
 	for _, bucket := range tv.buckets {
-		err := tv.syncBucket(bucket, lastSync)
+		err := tv.syncBucket(ctx, bucket, lastSync)
 		if err != nil {
 			return err
 		}
@@ -86,8 +87,8 @@ var (
 	tvRegexp = regexp.MustCompile(`.*/(.+?)\s*\(([\d]+)\)\s+[^\d]*(S\d\dE\d\d)[^\d]*?(?:\s-\s(.+))?\.(mkv|mp4)$`)
 )
 
-func (tv *TV) syncBucket(bucket bucket.Bucket, lastSync time.Time) error {
-	objectCh, err := bucket.List(lastSync)
+func (tv *TV) syncBucket(ctx context.Context, bucket bucket.Bucket, lastSync time.Time) error {
+	objectCh, err := bucket.List(ctx, lastSync)
 	if err != nil {
 		return err
 	}

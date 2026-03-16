@@ -19,7 +19,8 @@ package server
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
+
 	"net/http"
 	"time"
 
@@ -63,10 +64,10 @@ func apiObjectPut(w http.ResponseWriter, r *http.Request) {
 		badRequest(w, ErrInvalidContent)
 		return
 	}
-	body, _ := ioutil.ReadAll(r.Body)
+	body, _ := io.ReadAll(r.Body)
 	if contentType == ApplicationJson {
 		// validate the json
-		result := make(map[string]interface{})
+		result := make(map[string]any)
 		err := json.Unmarshal(body, &result)
 		if err != nil {
 			badRequest(w, ErrInvalidContent)

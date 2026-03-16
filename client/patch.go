@@ -17,7 +17,7 @@
 
 package client // import "takeoutfm.dev/takeout/client"
 
-type M map[string]interface{}
+type M map[string]any
 type L []string
 
 func patchAppend(ref string) []M {

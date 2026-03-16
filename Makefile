@@ -95,6 +95,12 @@ test-coverage:
 	-${GO} test -coverprofile cover.out ./...
 	${GO} tool cover -func=cover.out
 
+fix-diff:
+	${GO} fix -diff ./...
+
+fix:
+	${GO} fix ./...
+
 install: install-server install-playout
 
 clean:

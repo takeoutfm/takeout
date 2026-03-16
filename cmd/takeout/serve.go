@@ -18,6 +18,7 @@
 package main
 
 import (
+	"context"
 	"github.com/spf13/cobra"
 	"takeoutfm.dev/takeout/internal/server"
 )
@@ -39,7 +40,7 @@ func serve() error {
 		return err
 	}
 	cfg.Server.Listen = listen
-	return server.Serve(cfg)
+	return server.Serve(context.TODO(), cfg)
 }
 
 func init() {

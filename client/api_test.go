@@ -20,7 +20,7 @@ package client // import "takeoutfm.dev/takeout/client"
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -114,7 +114,7 @@ func (s testApiServer) RoundTrip(r *http.Request) (*http.Response, error) {
 			data, _ := json.Marshal(result)
 			return &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewBuffer(data)),
+				Body:       io.NopCloser(bytes.NewBuffer(data)),
 				Header:     headers,
 			}, nil
 		} else if r.Method == "POST" {
@@ -132,7 +132,7 @@ func (s testApiServer) RoundTrip(r *http.Request) (*http.Response, error) {
 			data, _ := json.Marshal(result)
 			return &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewBuffer(data)),
+				Body:       io.NopCloser(bytes.NewBuffer(data)),
 				Header:     headers,
 			}, nil
 		}
@@ -152,7 +152,7 @@ func (s testApiServer) RoundTrip(r *http.Request) (*http.Response, error) {
 			data, _ := json.Marshal(result)
 			return &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewBuffer(data)),
+				Body:       io.NopCloser(bytes.NewBuffer(data)),
 				Header:     headers,
 			}, nil
 		}
@@ -170,12 +170,11 @@ func (s testApiServer) RoundTrip(r *http.Request) (*http.Response, error) {
 			}, nil
 		}
 		headers.Add("Content-type", "application/json")
-		result := view.Home{
-		}
+		result := view.Home{}
 		data, _ := json.Marshal(result)
 		return &http.Response{
 			StatusCode: 200,
-			Body:       ioutil.NopCloser(bytes.NewBuffer(data)),
+			Body:       io.NopCloser(bytes.NewBuffer(data)),
 			Header:     headers,
 		}, nil
 	} else if r.URL.Path == "/api/radio" {
@@ -186,12 +185,11 @@ func (s testApiServer) RoundTrip(r *http.Request) (*http.Response, error) {
 			}, nil
 		}
 		headers.Add("Content-type", "application/json")
-		result := view.Radio{
-		}
+		result := view.Radio{}
 		data, _ := json.Marshal(result)
 		return &http.Response{
 			StatusCode: 200,
-			Body:       ioutil.NopCloser(bytes.NewBuffer(data)),
+			Body:       io.NopCloser(bytes.NewBuffer(data)),
 			Header:     headers,
 		}, nil
 	} else if r.URL.Path == "/api/playlist" {
@@ -204,24 +202,24 @@ func (s testApiServer) RoundTrip(r *http.Request) (*http.Response, error) {
 		headers.Add("Content-type", "application/json")
 		if r.Method == "GET" {
 			result := spiff.Playlist{
-				Index: 3,
+				Index:    3,
 				Position: 10.5,
 			}
 			data, _ := json.Marshal(result)
 			return &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewBuffer(data)),
+				Body:       io.NopCloser(bytes.NewBuffer(data)),
 				Header:     headers,
 			}, nil
 		} else if r.Method == "PATCH" {
 			result := spiff.Playlist{
-				Index: 33,
+				Index:    33,
 				Position: 123.5,
 			}
 			data, _ := json.Marshal(result)
 			return &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewBuffer(data)),
+				Body:       io.NopCloser(bytes.NewBuffer(data)),
 				Header:     headers,
 			}, nil
 		}
@@ -245,12 +243,11 @@ func (s testApiServer) RoundTrip(r *http.Request) (*http.Response, error) {
 			}, nil
 		}
 		headers.Add("Content-type", "application/json")
-		result := view.Progress{
-		}
+		result := view.Progress{}
 		data, _ := json.Marshal(result)
 		return &http.Response{
 			StatusCode: 200,
-			Body:       ioutil.NopCloser(bytes.NewBuffer(data)),
+			Body:       io.NopCloser(bytes.NewBuffer(data)),
 			Header:     headers,
 		}, nil
 	} else if r.URL.Path == "/api/activity" {
@@ -262,7 +259,7 @@ func (s testApiServer) RoundTrip(r *http.Request) (*http.Response, error) {
 		}
 		if r.Method == "POST" {
 			var events model.Events
-			body, _ := ioutil.ReadAll(r.Body)
+			body, _ := io.ReadAll(r.Body)
 			err := json.Unmarshal(body, &events)
 			if err != nil {
 				return &http.Response{

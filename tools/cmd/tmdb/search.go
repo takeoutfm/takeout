@@ -112,7 +112,7 @@ func doSeries(config *config.Config, query string, year, season, episode int) {
 			continue
 		}
 
-		vars := map[string]interface{}{
+		vars := map[string]any{
 			"Series":    fixColon(v.Name),
 			"Title":     fixColon(v.Name),
 			"Year":      y,
@@ -179,7 +179,7 @@ func doMovie(config *config.Config, query string) {
 		return
 	}
 	for _, v := range results {
-		vars := map[string]interface{}{
+		vars := map[string]any{
 			"Title":      fixColon(v.Title),
 			"Year":       date.ParseDate(v.ReleaseDate).Year(),
 			"Definition": optDef,

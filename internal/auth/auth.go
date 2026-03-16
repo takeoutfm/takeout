@@ -529,7 +529,7 @@ func (a *Auth) processToken(signedToken string, cfg config.TokenConfig) (*jwt.To
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&jwt.StandardClaims{},
-		func(token *jwt.Token) (interface{}, error) {
+		func(token *jwt.Token) (any, error) {
 			secret, err := a.readSecret(cfg)
 			return secret, err
 		})

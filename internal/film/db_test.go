@@ -32,7 +32,7 @@ func makeFilm(t *testing.T) *Film {
 		t.Fatal(err)
 	}
 	f := NewFilm(config)
-	err = f.Open()
+	err = f.Open(t.Context())
 	if err != nil {
 		t.Fatal(err)
 	}

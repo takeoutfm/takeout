@@ -22,6 +22,7 @@
 package bucket // import "takeoutfm.dev/takeout/lib/bucket"
 
 import (
+	"context"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -47,7 +48,7 @@ func (f *fileBucket) IsLocal() bool {
 	return true //f.config.Local
 }
 
-func (f *fileBucket) List(lastSync time.Time) (objectCh chan *Object, err error) {
+func (f *fileBucket) List(ctx context.Context, lastSync time.Time) (objectCh chan *Object, err error) {
 	objectCh = make(chan *Object)
 
 	walk := func(path string, entry os.DirEntry, err error) error {
@@ -86,7 +87,7 @@ func (f *fileBucket) List(lastSync time.Time) (objectCh chan *Object, err error)
 	return
 }
 
-func (fileBucket) ObjectURL(key string) *url.URL {
+func (fileBucket) ObjectURL(ctx context.Context, key string) *url.URL {
 	url, err := url.Parse("file://" + key)
 	log.CheckError(err)
 	return url

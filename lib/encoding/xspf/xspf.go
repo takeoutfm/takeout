@@ -35,7 +35,7 @@ type StringTag struct {
 }
 
 func (tag *StringTag) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("\"%s\"", tag.Value)), nil
+	return fmt.Appendf(nil, "\"%s\"", tag.Value), nil
 }
 
 type IntTag struct {
@@ -43,7 +43,7 @@ type IntTag struct {
 }
 
 func (tag *IntTag) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("%d", tag.Value)), nil
+	return fmt.Appendf(nil, "%d", tag.Value), nil
 }
 
 type TrackTag struct {
@@ -59,12 +59,12 @@ type TrackTag struct {
 
 type SpiffEncoder interface {
 	Header(title string)
-	Encode(e interface{}) error
+	Encode(e any) error
 	Footer()
 }
 
 type Encoder interface {
-	Encode(e interface{}) error
+	Encode(e any) error
 }
 
 type xmlEncoder struct {
@@ -81,7 +81,7 @@ func (e xmlEncoder) Header(title string) {
 	fmt.Fprintf(e.writer, "<trackList>")
 }
 
-func (e xmlEncoder) Encode(v interface{}) error {
+func (e xmlEncoder) Encode(v any) error {
 	return encode(e.encoder, v)
 }
 
@@ -100,7 +100,7 @@ func (e jsonEncoder) Header(title string) {
 	fmt.Fprintf(e.writer, "{\"playlist\":{\"title\":\"%s\",\"track\":[", title)
 }
 
-func (e jsonEncoder) Encode(v interface{}) error {
+func (e jsonEncoder) Encode(v any) error {
 	if *e.count > 0 {
 		fmt.Fprintf(e.writer, ",")
 	}
@@ -123,7 +123,7 @@ func NewJsonEncoder(w io.Writer) SpiffEncoder {
 	return e
 }
 
-func encode(e Encoder, track interface{}) error {
+func encode(e Encoder, track any) error {
 	trackTag := &TrackTag{}
 
 	t := reflect.TypeOf(track)
@@ -148,8 +148,8 @@ func encode(e Encoder, track interface{}) error {
 					trackTag.Location = StringTag{valueField.Index(0).String()}
 				case "image":
 					trackTag.Image = StringTag{valueField.String()}
-				// case "identifier":
-				// 	trackTag.Identifier = StringTag{valueField.Index(0).String()}
+					// case "identifier":
+					// 	trackTag.Identifier = StringTag{valueField.Index(0).String()}
 				}
 			}
 		}

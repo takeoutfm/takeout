@@ -18,6 +18,7 @@
 package main
 
 import (
+	"context"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -25,6 +26,7 @@ import (
 	"takeoutfm.dev/takeout/internal/film"
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/podcast"
+	"takeoutfm.dev/takeout/internal/tv"
 )
 
 var syncCmd = &cobra.Command{
@@ -40,6 +42,7 @@ var syncBack time.Duration
 var syncAll bool
 var mediaMusic bool
 var mediaFilm bool
+var mediaTV bool
 var mediaPodcast bool
 var artist string
 var resolve bool
@@ -73,6 +76,12 @@ func sync() error {
 			return err
 		}
 	}
+	if mediaTV {
+		err = syncTV(cfg)
+		if err != nil {
+			return err
+		}
+	}
 	if mediaPodcast {
 		err = syncPodcast(cfg)
 		if err != nil {
@@ -83,8 +92,9 @@ func sync() error {
 }
 
 func syncMusic(cfg *config.Config) error {
+	ctx := context.TODO()
 	m := music.NewMusic(cfg)
-	err := m.Open()
+	err := m.Open(ctx)
 	if err != nil {
 		return err
 	}
@@ -97,17 +107,30 @@ func syncMusic(cfg *config.Config) error {
 	if resolve {
 		syncOptions.Resolve = true
 	}
-	return m.Sync(syncOptions)
+	return m.Sync(ctx, syncOptions)
 }
 
 func syncFilm(cfg *config.Config) error {
+	ctx := context.TODO()
 	f := film.NewFilm(cfg)
-	err := f.Open()
+	err := f.Open(ctx)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	f.SyncSince(since(f.LastModified()))
+	f.SyncSince(ctx, since(f.LastModified()))
+	return nil
+}
+
+func syncTV(cfg *config.Config) error {
+	ctx := context.TODO()
+	t := tv.NewTV(cfg)
+	err := t.Open(ctx)
+	if err != nil {
+		return err
+	}
+	defer t.Close()
+	t.SyncSince(ctx, since(t.LastModified()))
 	return nil
 }
 
@@ -128,7 +151,8 @@ func init() {
 	syncCmd.Flags().BoolVarP(&syncAll, "all", "a", false, "Re(sync) all ignoring timestamps")
 	syncCmd.Flags().BoolVarP(&mediaMusic, "music", "m", true, "Sync music")
 	syncCmd.Flags().BoolVarP(&mediaFilm, "film", "f", true, "Sync film")
-	syncCmd.Flags().BoolVarP(&mediaPodcast, "podcast", "p", false, "Sync podcasts")
+	syncCmd.Flags().BoolVarP(&mediaTV, "tv", "t", true, "Sync TV shows")
+	syncCmd.Flags().BoolVarP(&mediaPodcast, "podcast", "p", true, "Sync podcasts")
 	syncCmd.Flags().BoolVarP(&resolve, "resolve", "x", false, "Resolve")
 	syncCmd.Flags().StringVarP(&artist, "artist", "r", "", "Music artist")
 	rootCmd.AddCommand(syncCmd)

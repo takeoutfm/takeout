@@ -18,8 +18,10 @@
 package music
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
 	"sort"
 	"strings"
@@ -76,12 +78,12 @@ func (m *Music) LastModified() time.Time {
 	return m.lastModified()
 }
 
-func (m *Music) Sync(options SyncOptions) error {
+func (m *Music) Sync(ctx context.Context, options SyncOptions) error {
 	var err error
 	if options.Since.IsZero() {
 		if options.Tracks {
 			log.Printf("sync tracks\n")
-			err = m.syncBucketTracks()
+			err = m.syncBucketTracks(ctx)
 			if err != nil {
 				return err
 			}
@@ -154,7 +156,7 @@ func (m *Music) Sync(options SyncOptions) error {
 			}
 		}
 		if options.Tracks {
-			modified, err := m.syncBucketTracksSince(options.Since)
+			modified, err := m.syncBucketTracksSince(ctx, options.Since)
 			if err != nil {
 				return err
 			}
@@ -260,15 +262,15 @@ func (m *Music) Sync(options SyncOptions) error {
 // 6. Sync credits
 //    -> Bleve: xxx
 
-func (m *Music) syncBucketTracks() error {
+func (m *Music) syncBucketTracks(ctx context.Context) error {
 	m.deleteTracks() // !!!
-	_, err := m.syncBucketTracksSince(time.Time{})
+	_, err := m.syncBucketTracksSince(ctx, time.Time{})
 	return err
 }
 
-func (m *Music) syncBucketTracksSince(lastSync time.Time) (modified bool, err error) {
+func (m *Music) syncBucketTracksSince(ctx context.Context, lastSync time.Time) (modified bool, err error) {
 	for _, b := range m.buckets {
-		trackCh, err := m.syncFromBucket(b, lastSync)
+		trackCh, err := m.syncFromBucket(ctx, b, lastSync)
 		if err != nil {
 			log.Printf("got sync err %s\n", err)
 			return false, err
@@ -282,7 +284,11 @@ func (m *Music) syncBucketTracksSince(lastSync time.Time) (modified bool, err er
 			m.createTrack(t)
 			modified = true
 		}
-		err = m.updateTrackCount()
+		err = m.updateTrackCounts()
+		if err != nil {
+			log.Printf("updateTrackCounts error %s\n", err)
+			return modified, err
+		}
 	}
 	return
 }
@@ -646,29 +652,65 @@ func (m *Music) countryMap() map[string]int {
 	return cachedCountryMap
 }
 
+var cachedFormatMap map[string]int
+
+func (m *Music) formatMap() map[string]int {
+	if len(cachedFormatMap) == 0 {
+		cachedFormatMap = make(map[string]int)
+		for i, v := range m.config.Music.ReleaseFormats {
+			cachedFormatMap[v] = i
+		}
+	}
+	return cachedFormatMap
+}
+
 var unwantedDisambRegexp = regexp.MustCompile(`(exclusive|deluxe|edition)`)
 
 func (m *Music) pickRelease(releases []Release) int {
-	first, second, third, fourth := -1, -1, -1, -1
-	firstRank := -1
+	first, second, third, fourth, fifth := -1, -1, -1, -1, -1
+	bestFormat, bestCountry := math.MaxInt32, math.MaxInt32
+	secondBestFormat, secondBestCountry := math.MaxInt32, math.MaxInt32
 	countryMap := m.countryMap()
+	formatMap := m.formatMap()
 	for i, r := range releases {
-		rank, preferred := countryMap[r.Country]
-		if preferred && r.FrontArtwork && r.Disambiguation == "" && r.Official() {
-			if first == -1 || rank < firstRank {
+		countryRank, countryPreferred := countryMap[r.Country]
+		formatRank, formatPreferred := -1, false
+		if len(r.Media) > 0 {
+			formatRank, formatPreferred = formatMap[r.Media[0].Format]
+		}
+		if formatPreferred && countryPreferred && r.HasArtwork() && r.Disambiguation == "" && r.Official() {
+			// most preferred release so rank these by country and format.
+			if first == -1 {
 				first = i
-				firstRank = rank
+			} else if formatRank < bestFormat {
+				first = i
+				bestFormat = formatRank
+			} else if formatRank == bestFormat && countryRank < bestCountry {
+				first = i
+				bestCountry = countryRank
 			}
-		} else if r.FrontArtwork && r.Disambiguation == "" && r.Official() {
-			second = i
-		} else if r.FrontArtwork && preferred {
+		} else if formatPreferred && r.HasArtwork() && r.Disambiguation == "" && r.Official() {
+			// preferred formats rank higher than countries
+			if second == -1 || formatRank < secondBestFormat {
+				second = i
+				secondBestFormat = formatRank
+			}
+		} else if countryPreferred && r.HasArtwork() && r.Disambiguation == "" && r.Official() {
+			// preferred countries come next
+			if second == -1 || countryRank < secondBestCountry {
+				second = i
+				secondBestCountry = countryRank
+			}
+		} else if r.HasArtwork() && r.Disambiguation == "" && r.Official() {
+			third = i
+		} else if r.HasArtwork() && countryPreferred {
 			if unwantedDisambRegexp.MatchString(r.Disambiguation) {
-				fourth = i
+				fifth = i
 			} else {
-				third = i
+				fourth = i
 			}
-		} else if r.FrontArtwork {
-			fourth = i
+		} else if r.HasArtwork() {
+			fifth = i
 		}
 	}
 
@@ -680,6 +722,8 @@ func (m *Music) pickRelease(releases []Release) int {
 		return third
 	} else if fourth != -1 {
 		return fourth
+	} else if fifth != -1 {
+		return fifth
 	} else if len(releases) > 0 {
 		return 0
 	}
@@ -725,6 +769,7 @@ func (m *Music) pickDisambiguation(t Track, releases []Release) int {
 		name3 := fmt.Sprintf("%s %s", r.Name, r.Disambiguation)
 		name4 := fmt.Sprintf("%s [%s]", r.Name, r.Disambiguation)
 		name5 := fmt.Sprintf("%s", r.Disambiguation)
+		//fmt.Println(name1, name2, name3, name4, name5);
 		if strings.EqualFold(name1, t.Release) ||
 			strings.EqualFold(name2, t.Release) ||
 			strings.EqualFold(name3, t.Release) ||
@@ -741,9 +786,58 @@ func (m *Music) pickDisambiguation(t Track, releases []Release) int {
 			} else {
 				third = i
 			}
-		} //  else {
-		// 	fmt.Print("no match %s\n", t.Release)
+		} // else {
+		// 	fmt.Printf("no match %s -- %s, ++%v++\n", t.Release, r.Disambiguation, r.Media)
 		// }
+	}
+	if first != -1 {
+		return first
+	} else if second != -1 {
+		return second
+	} else if third != -1 {
+		return third
+	}
+	return m.pickDisambiguation2(t, releases)
+}
+
+// some digital media has funky disambiguations so try harder
+// Example: Deluxe Edition | 24 bit/44.1 kHz and 48.0 kHz
+func (m *Music) pickDisambiguation2(t Track, releases []Release) int {
+	countryMap := m.countryMap()
+	first, second, third := -1, -1, -1
+	firstRank := -1
+	for i, r := range releases {
+		var disambiguation string
+		if strings.Contains(r.Disambiguation, " | ") {
+			var found bool
+			disambiguation, found = strings.CutSuffix(r.Disambiguation, " | ")
+			if !found {
+				continue
+			}
+		}
+		name1 := fmt.Sprintf("%s (%s)", r.Name, disambiguation)
+		name2 := fmt.Sprintf("%s - %s", r.Name, disambiguation)
+		name3 := fmt.Sprintf("%s %s", r.Name, disambiguation)
+		name4 := fmt.Sprintf("%s [%s]", r.Name, disambiguation)
+		name5 := fmt.Sprintf("%s", disambiguation)
+		fmt.Println(name1, name2, name3, name4, name5);
+		if strings.EqualFold(name1, disambiguation) ||
+			strings.EqualFold(name2, disambiguation) ||
+			strings.EqualFold(name3, disambiguation) ||
+			strings.EqualFold(name4, disambiguation) ||
+			strings.EqualFold(name5, disambiguation) {
+			rank, preferred := countryMap[r.Country]
+			if preferred && r.FrontArtwork && r.Official() {
+				if first == -1 || rank < firstRank {
+					first = i
+					firstRank = rank
+				}
+			} else if r.FrontArtwork {
+				second = i
+			} else {
+				third = i
+			}
+		}
 	}
 	if first != -1 {
 		return first
@@ -776,6 +870,7 @@ func (m *Music) filterMedia(trackMedia []Media, releases []Release) []Release {
 			}
 		}
 		if matched == len(trackMedia) {
+			r.Media = releaseMedia // for debugging retain this
 			matchedReleases = append(matchedReleases, r)
 		}
 	}
@@ -818,7 +913,7 @@ func (m *Music) findTrackReleaseDisambiguate(t Track, trackMedia []Media) (Relea
 func (m *Music) fixTrackReleases() (bool, error) {
 	modified := false
 	fixReleases := make(map[string]struct{})
-	var fixTracks []map[string]interface{}
+	var fixTracks []map[string]any
 	//tracks := m.tracksWithoutReleases()
 	tracks := m.tracksWithoutAssignedRelease()
 
@@ -853,7 +948,7 @@ func (m *Music) fixTrackReleases() (bool, error) {
 			}
 			r := releases[pick]
 			fixReleases[key] = struct{}{}
-			fixTracks = append(fixTracks, map[string]interface{}{
+			fixTracks = append(fixTracks, map[string]any{
 				"artist":     artist.Name,
 				"from":       t.Release,
 				"to":         r.Name,
@@ -869,7 +964,7 @@ func (m *Music) fixTrackReleases() (bool, error) {
 				if strings.EqualFold(FuzzyName(t.Release), FuzzyName(r.Name)) &&
 					t.TrackCount == r.TrackCount && t.DiscCount == r.DiscCount {
 					fixReleases[key] = struct{}{}
-					fixTracks = append(fixTracks, map[string]interface{}{
+					fixTracks = append(fixTracks, map[string]any{
 						"artist":     artist.Name,
 						"from":       t.Release,
 						"to":         r.Name,
@@ -1574,16 +1669,33 @@ func (m *Music) resolveTrack(t Track) (Track, error) {
 
 	for _, query := range queries {
 		recordings, _ := m.mbz.SearchRecordings(query)
-		// fmt.Println(len(recordings), query)
+		//fmt.Println(len(recordings), query)
 		for _, r := range recordings {
 			for _, rel := range r.Releases {
 				for _, media := range rel.Media {
 					// use Track not Tracks!
 					for _, tr := range media.Track {
+						//fmt.Printf("trying %s vs %s\n", tr.Title, t.Title)
 						if tr.Title == t.Title {
 							// fmt.Printf("*** resolved track %s\n", tr.Title)
 							result.Title = tr.Title // needed?
 							return result, nil
+						}
+						if strings.HasPrefix(t.Title, tr.Title) && strings.HasSuffix(t.Title, ")") {
+							// could be a track like: 24 Hours (live in Paris, France, December 18, 1979)
+							// that no longer has the (...) in musicbrainz so chop it off
+							before, _, found := strings.Cut(t.Title, " (")
+							if found && before == tr.Title {
+								result.Title = tr.Title // needed?
+								// Note: these don't work, they are zero
+								// if tr.Position != 0 {
+								// 	result.TrackNum = tr.Position
+								// }
+								// if media.Position != 0 {
+								// 	result.DiscNum = media.Position
+								// }
+								return result, nil
+							}
 						}
 					}
 				}

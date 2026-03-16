@@ -18,6 +18,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	rando "math/rand"
@@ -52,13 +53,13 @@ const (
 )
 
 func generateSecret(size int) string {
-	var secret string
+	var secret strings.Builder
 	//rando.Seed(time.Now().UnixNano())
-	for i := 0; i < size; i++ {
+	for range size {
 		n := rando.Intn(len(secretChars))
-		secret += string(secretChars[n])
+		secret.WriteString(string(secretChars[n]))
 	}
-	return secret
+	return secret.String()
 }
 
 func writeSecret(dir, file, secret string) error {
@@ -164,24 +165,24 @@ func run(opts *viper.Viper) error {
 	}
 
 	// start the server
-	return server.Serve(cfg)
+	return server.Serve(context.TODO(), cfg)
 }
 
 func doMusic(cfg *config.Config) {
-	server.Job(cfg, "music")
-	server.Job(cfg, "stations")
+	server.Job(context.TODO(), cfg, "music")
+	server.Job(context.TODO(), cfg, "stations")
 }
 
 func doFilm(cfg *config.Config) {
-	server.Job(cfg, "film")
+	server.Job(context.TODO(), cfg, "film")
 }
 
 func doTV(cfg *config.Config) {
-	server.Job(cfg, "tv")
+	server.Job(context.TODO(), cfg, "tv")
 }
 
 func doPodcasts(cfg *config.Config) {
-	server.Job(cfg, "podcasts")
+	server.Job(context.TODO(), cfg, "podcasts")
 }
 
 func createConfig(opts *viper.Viper) error {

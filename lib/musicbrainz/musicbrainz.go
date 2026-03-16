@@ -232,16 +232,16 @@ type Track struct {
 
 // A feat. B
 func (t Track) Artist() string {
-	var artist string
+	var artist strings.Builder
 	for _, a := range t.ArtistCredit {
 		join := a.Join
 		switch join {
 		case " featuring ", " ft. ":
 			join = " feat. "
 		}
-		artist += a.Name + join
+		artist.WriteString(a.Name + join)
 	}
-	return artist
+	return artist.String()
 }
 
 type ReleasesPage struct {
@@ -618,8 +618,8 @@ func (m *MusicBrainz) doMultiArtistSearch(name string) []Artist {
 		// or "Artist One, Artist Two & Artist Three"
 		// or "Artist One, Artist Two, Artist Three & Artist Four"
 		var names []string
-		for _, v := range strings.Split(name, split) {
-			for _, artist := range strings.Split(v, ", ") {
+		for v := range strings.SplitSeq(name, split) {
+			for artist := range strings.SplitSeq(v, ", ") {
 				names = append(names, artist)
 			}
 		}

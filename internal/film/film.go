@@ -19,6 +19,7 @@
 package film
 
 import (
+	"context"
 	"net/url"
 	"strconv"
 	"strings"
@@ -46,10 +47,10 @@ func NewFilm(config *config.Config) *Film {
 	}
 }
 
-func (f *Film) Open() (err error) {
+func (f *Film) Open(ctx context.Context) (err error) {
 	err = f.openDB()
 	if err == nil {
-		f.buckets, err = bucket.OpenMedia(f.config.Buckets, config.MediaFilm)
+		f.buckets, err = bucket.OpenMedia(ctx, f.config.Buckets, config.MediaFilm)
 	}
 	return
 }
@@ -117,10 +118,7 @@ func (f *Film) Search(q string, limit ...int) []Movie {
 	chunkSize := 100
 	var movies []Movie
 	for i := 0; i < len(keys); i += chunkSize {
-		end := i + chunkSize
-		if end > len(keys) {
-			end = len(keys)
-		}
+		end := min(i+chunkSize, len(keys))
 		chunk := keys[i:end]
 		movies = append(movies, f.moviesFor(chunk)...)
 	}
@@ -128,9 +126,9 @@ func (f *Film) Search(q string, limit ...int) []Movie {
 	return movies
 }
 
-func (f *Film) MovieURL(m Movie) *url.URL {
+func (f *Film) MovieURL(ctx context.Context, m Movie) *url.URL {
 	// FIXME assume first bucket!!!
-	return f.buckets[0].ObjectURL(m.Key)
+	return f.buckets[0].ObjectURL(ctx, m.Key)
 }
 
 func MoviePoster(m Movie) string {
