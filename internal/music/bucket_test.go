@@ -86,6 +86,8 @@ func TestMatchTrack(t *testing.T) {
 		"Music/Boz Scaggs/My Time_ A Boz Scaggs Anthology (1969-1997) (1997)/2-02-1993.flac", // song is 1993
 		"Music/New Order/Substance 1987 (1987)/2-12-1963.flac", // song is 1963
 		"Music/New Order/Retro (2008)/1-01-Fine Time.flac",
+		//"Music/Deftones/Diamond Eyes (2010)/10-976-EVIL.flac", // song is 976-EVIL, not supported yet. fixed in later processing
+		"Music/Joy Division/Les Bains Douches 18 December 1979/1-07-24 Hours (live in Paris, France, December 18, 1979).flac",
 	}
 
 	expect := []string{
@@ -127,8 +129,9 @@ func TestMatchTrack(t *testing.T) {
 		"2 / 2 / 1993",
 		"2 / 12 / 1963",
 		"1 / 1 / Fine Time",
+		//"1 / 10 / 976-EVIL",
+		"1 / 7 / 24 Hours (live in Paris, France, December 18, 1979)",
 	}
-
 
 	for i, v := range patterns {
 		matches := pathRegexp.FindStringSubmatch(v)

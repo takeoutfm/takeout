@@ -4,6 +4,8 @@
 - need to prefix http:// or https:// with s3 endpoints now
 - added context parameters to various calls to allow for future improvements
 - use go 1.26.1
+- added preferred ReleaseFormats; defaults to prefer CD over Digital Media
+- more music track file sync improvements
 
 ## 0.26.2
 

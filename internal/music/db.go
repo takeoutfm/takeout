@@ -19,6 +19,7 @@ package music
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -118,7 +119,8 @@ func (m *Music) ArtistsForARIDs(arids []string) []Artist {
 // tracks in the associated release/album. This helps to match up
 // MusicBrainz releases with tracks, especially with non-exact
 // matches.
-func (m *Music) updateTrackCount() error {
+// TODO - check if this is still needed
+func (m *Music) updateTrackCounts() error {
 	rows, err := m.db.Table("tracks").
 		Select("artist, `release`, date, count(title), max(disc_num)").
 		Group("artist, `release`, date").
@@ -126,6 +128,7 @@ func (m *Music) updateTrackCount() error {
 	if err != nil {
 		return err
 	}
+	//fmt.Println("update track counts")
 	var results []map[string]any
 	for rows.Next() {
 		var artist, release, date string
@@ -140,11 +143,14 @@ func (m *Music) updateTrackCount() error {
 		})
 	}
 	rows.Close()
+	//fmt.Println(results)
 
 	for _, v := range results {
-		err = m.db.Table("tracks").
+		result := m.db.Table("tracks").
 			Where("artist = ? and `release` = ? and date = ?", v["artist"], v["release"], v["date"]).
-			Updates(Track{TrackCount: v["trackCount"].(int), DiscCount: v["discCount"].(int)}).Error
+			Updates(Track{TrackCount: v["trackCount"].(int), DiscCount: v["discCount"].(int)})
+		err = result.Error
+		//fmt.Printf("update %d %s/%s/%s %d %d\n", result.RowsAffected, v["artist"], v["release"], v["date"], v["trackCount"].(int), v["discCount"].(int))
 		if err != nil {
 			return err
 		}
@@ -170,13 +176,23 @@ func (m *Music) updateTrackAlbumArtist(oldName, newName string) (err error) {
 
 // Tracks may have release names that are modified to meet file/directory
 // naming limitations. Update the track entries with these modified names to
-// the actual release name.  Also fix disc counts.
+// the actual release name.  Also fix disc counts, disc numbers, track numbers.
 func (m *Music) updateTrackRelease(artist, oldName, newName, date string,
 	trackCount, discCount int) (err error) {
 	var tracks []Track
 	m.db.Where("artist = ? and `release` = ? and date = ? and track_count = ?",
-		artist, oldName, date, trackCount).Find(&tracks)
+		artist, oldName, date, trackCount).Order("track_num").Find(&tracks)
+
+	orderedTracks := make([]*Track, trackCount)
+	var unknownTracks []*Track
+
 	for _, t := range tracks {
+		if t.TrackNum > 0 && t.TrackNum <= trackCount {
+			orderedTracks[t.TrackNum-1] = &t
+		} else {
+			unknownTracks = append(unknownTracks, &t)
+		}
+
 		err = m.db.Model(t).
 			Update("release", newName).
 			Update("disc_count", discCount).Error
@@ -184,7 +200,29 @@ func (m *Music) updateTrackRelease(artist, oldName, newName, date string,
 		if err != nil {
 			break
 		}
+		if t.DiscNum > discCount {
+			fmt.Printf("fixing track disc number: %d->%d %s/%s/%s\n", t.DiscNum, discCount, t.Artist, t.Release, t.Title)
+			err = m.db.Model(t).Update("disc_num", discCount).Error
+			if err != nil {
+				break
+			}
+		}
 	}
+
+	for i, t := range orderedTracks {
+		if t == nil && len(unknownTracks) > 0 {
+			if len(unknownTracks) == 1 {
+				fixTrack := unknownTracks[0]
+				trackNum := i+1
+				fmt.Printf("fixing track number: %d->%d %s/%s/%s\n", fixTrack.TrackNum, trackNum, fixTrack.Artist, fixTrack.Release, fixTrack.Title)
+				err = m.db.Model(fixTrack).Update("track_num", trackNum).Error
+				if err != nil {
+					break
+				}
+			}
+		}
+	}
+
 	return
 }
 
@@ -252,7 +290,7 @@ func (m *Music) artistReleasesLike(a Artist, pattern string, trackCount, discCou
 	m.db.Where("artist = ? and name like ? and track_count = ? and disc_count = ?",
 		a.Name, pattern, trackCount, discCount).Find(&releases)
 	if len(releases) == 0 {
-		// try w/o disc
+		// try w/o disc since disc count could be wrong
 		m.db.Where("artist = ? and name like ? and track_count = ?",
 			a.Name, pattern, trackCount).Find(&releases)
 	}

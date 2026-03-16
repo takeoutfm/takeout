@@ -178,6 +178,15 @@ func matchTrack(file string, t *Track) []Track {
 
 	tracks = append(tracks, copyTrack(t, disc, track, title))
 
+	// if disc > 5 && track > 10 && str.Atoi(title) == 0 {
+	// 	// 5 and 10 are less common to avoid redundant and slower checks
+	// 	// could be 10-976-Evil ==> disc 1, track 10, 976-Evil
+	// 	title = fmt.Sprintf("%d-%s", track, title)
+	// 	track = disc
+	// 	disc = 1
+	// 	tracks = append(tracks, copyTrack(t, disc, track, title))
+	// }
+
 	// potentially not multi-disc so assume single disc if too many
 	// TODO make this configurable?
 	// eg: 18-19-2000 (Soulchild remix).flac

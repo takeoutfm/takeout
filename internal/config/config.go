@@ -141,6 +141,7 @@ type MusicConfig struct {
 	Recent               time.Duration
 	RecentLimit          int
 	ReleaseCountries     []string
+	ReleaseFormats       []string
 	SearchIndexName      string
 	SearchLimit          int
 	SimilarArtistsLimit  int
@@ -446,6 +447,10 @@ func configDefaults(v *viper.Viper) {
 		"US", // United States
 		"XW", // Worldwide
 		"XE", // Europe
+	})
+	v.SetDefault("Music.ReleaseFormats", []string{
+		"CD",
+		"Digital Media",
 	})
 
 	v.SetDefault("Music.DB.Driver", "sqlite3")
