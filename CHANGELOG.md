@@ -1,3 +1,7 @@
+## 0.27.2
+
+- added "artwork" job
+
 ## 0.27.1
 
 - added Background to ReleaseView

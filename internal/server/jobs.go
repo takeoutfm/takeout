@@ -132,6 +132,16 @@ func syncMusic(ctx context.Context, config *config.Config, mediaConfig *config.C
 	return m.Sync(ctx, syncOptions)
 }
 
+func syncArtwork(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
+	m := music.NewMusic(mediaConfig)
+	err := m.Open(ctx)
+	if err != nil {
+		return err
+	}
+	defer m.Close()
+	return m.SyncArtwork()
+}
+
 func syncWithOptions(ctx context.Context, mediaConfig *config.Config, syncOptions music.SyncOptions) error {
 	m := music.NewMusic(mediaConfig)
 	err := m.Open(ctx)
@@ -303,6 +313,8 @@ func Job(ctx context.Context, config *config.Config, name string) error {
 			return err
 		}
 		switch name {
+		case "artwork":
+			syncArtwork(ctx, config, mediaConfig)
 		case "backdrops":
 			syncTVBackdrops(ctx, config, mediaConfig)
 			syncFilmBackdrops(ctx, config, mediaConfig)

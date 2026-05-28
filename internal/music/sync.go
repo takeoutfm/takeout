@@ -135,7 +135,7 @@ func (m *Music) Sync(ctx context.Context, options SyncOptions) error {
 		}
 		if options.Artwork {
 			log.Printf("sync artwork\n")
-			err = m.syncArtwork()
+			err = m.SyncArtwork()
 			if err != nil {
 				return err
 			}
@@ -1174,7 +1174,7 @@ func (m *Music) SyncMissingArtwork() error {
 }
 
 // Sync artwork from Fanart
-func (m *Music) syncArtwork() error {
+func (m *Music) SyncArtwork() error {
 	return m.syncArtworkFor(m.Artists())
 }
 
@@ -1204,7 +1204,10 @@ func (m *Music) syncArtworkFor(artists []Artist) error {
 			}
 			m.createArtistImage(&img)
 		}
-		m.updateArtistArtwork(a)
+		err := m.updateArtistArtwork(a)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
