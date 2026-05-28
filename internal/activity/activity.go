@@ -19,6 +19,7 @@
 package activity
 
 import (
+	"fmt"
 	"sort"
 
 	"golang.org/x/exp/maps"
@@ -430,7 +431,7 @@ func (a *Activity) CreateEvents(ctx Context, events Events) error {
 			e.TMID = strconv.FormatInt(movie.TMID, 10)
 		}
 		if e.IsValid() == false {
-			return ErrInvalidMovieEvent
+			return fmt.Errorf("event is %#v: %w", e, ErrInvalidMovieEvent)
 		}
 		err := a.createMovieEvent(&e)
 		if err != nil {
@@ -442,7 +443,7 @@ func (a *Activity) CreateEvents(ctx Context, events Events) error {
 		e.User = user.Name
 		e.Date = e.Date.UTC()
 		if e.IsValid() == false {
-			return ErrInvalidEpisodeEvent
+			return fmt.Errorf("event is %#v: %w", e, ErrInvalidEpisodeEvent)
 		}
 		err := a.createEpisodeEvent(&e)
 		if err != nil {
@@ -463,7 +464,7 @@ func (a *Activity) CreateEvents(ctx Context, events Events) error {
 			e.RGID = track.RGID
 		}
 		if e.IsValid() == false {
-			return ErrInvalidTrackEvent
+			return fmt.Errorf("event is %#v: %w", e, ErrInvalidTrackEvent)
 		}
 		err := a.createTrackEvent(&e)
 		if err != nil {

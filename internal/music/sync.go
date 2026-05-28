@@ -1204,8 +1204,20 @@ func (m *Music) syncArtworkFor(artists []Artist) error {
 			}
 			m.createArtistImage(&img)
 		}
+		m.updateArtistArtwork(a)
 	}
 	return nil
+}
+
+// Artist fields are all from MusicBrainz but it really useful to have an Image
+// and Background (which MusicBrainz doesn't have) included in the API for
+// Artist as well without all the other stuff in ArtistView. Image and
+// Background were added and need to be updated seperately when artwork is
+// obtained for an artist.
+func (m *Music) updateArtistArtwork(artist Artist) error {
+	artist.Image = m.ArtistImage(artist)
+	artist.Background = m.ArtistBackground(artist)
+	return m.updateArtist(&artist)
 }
 
 func (m *Music) resolve() error {

@@ -158,6 +158,7 @@ func ReleaseView(ctx Context, release model.Release) *Release {
 	view.Popular = m.ReleasePopular(release)
 	view.Similar = m.SimilarReleases(view.Artist, release)
 	view.Image = music.CoverSmall(release)
+	view.Background = m.ArtistBackground(view.Artist)
 	return view
 }
 

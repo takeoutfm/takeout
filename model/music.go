@@ -37,6 +37,8 @@ type Artist struct {
 	Date           time.Time
 	EndDate        time.Time
 	Genre          string
+	Image          string // populated later
+	Background     string // populated later
 }
 
 type CoverArt interface {

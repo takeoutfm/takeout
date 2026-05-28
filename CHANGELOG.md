@@ -1,3 +1,10 @@
+## 0.27.1
+
+- added Background to ReleaseView
+- added Image and Background to Artist
+- added support for Authorization header as query parameter (tentative)
+- activity errors with Errorf
+
 ## 0.27.0
 
 - upgrade dependencies, including aws s3 sdk v2 changes

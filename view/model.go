@@ -85,13 +85,14 @@ type WantList struct {
 }
 
 type Release struct {
-	Artist  model.Artist
-	Release model.Release
-	Image   string
-	Tracks  []model.Track
-	Singles []model.Track
-	Popular []model.Track
-	Similar []model.Release
+	Artist     model.Artist
+	Release    model.Release
+	Image      string
+	Tracks     []model.Track
+	Singles    []model.Track
+	Popular    []model.Track
+	Similar    []model.Release
+	Background string
 }
 
 type Search struct {

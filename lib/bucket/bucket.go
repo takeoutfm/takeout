@@ -24,6 +24,7 @@ package bucket // import "takeoutfm.dev/takeout/lib/bucket"
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/url"
 	"time"
 )
@@ -78,5 +79,5 @@ func Open(ctx context.Context, config Config) (Bucket, error) {
 	if config.S3.Endpoint != "" {
 		return newS3Bucket(ctx, config)
 	}
-	return nil, ErrNoBucket
+	return nil, fmt.Errorf("bucket open failed: config is %#v: %w", config, ErrNoBucket)
 }

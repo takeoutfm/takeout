@@ -498,7 +498,7 @@ func (m *TMDB) MovieVideos(tmid int) (Videos, error) {
 
 func (m *TMDB) PersonDetail(peid int) (Person, error) {
 	if peid == 0 {
-		// inavlid peid
+		// invalid peid
 		return Person{}, ErrInvalidPersonId
 	}
 	url := fmt.Sprintf(

@@ -273,6 +273,13 @@ func Serve(c context.Context, config *config.Config) error {
 	mux.Handle("GET /api/releases/{id}", accessTokenAuthHandler(ctx, apiReleaseGet))
 	mux.Handle("GET /api/releases/{id}/playlist", accessTokenAuthHandler(ctx, apiReleaseGetPlaylist))
 	mux.Handle("GET /api/releases/{id}/playlist.xspf", accessTokenAuthHandler(ctx, apiReleaseGetPlaylist))
+
+	// TODO - work in progress for playing compilation releases by disc
+	// mux.Handle("GET /api/releases/{id}/discs", accessTokenAuthHandler(ctx, apiReleaseGet))
+	// mux.Handle("GET /api/releases/{id}/discs/{disc}", accessTokenAuthHandler(ctx, apiReleaseGet))
+	// mux.Handle("GET /api/releases/{id}/discs/{disc}/playlist", accessTokenAuthHandler(ctx, apiReleaseGet))
+	// mux.Handle("GET /api/releases/{id}/discs/{disc}/playlist.xspf", accessTokenAuthHandler(ctx, apiReleaseGet))
+
 	mux.Handle("GET /api/tracks/{id}/playlist", accessTokenAuthHandler(ctx, apiTrackPlaylist))
 
 	// people
