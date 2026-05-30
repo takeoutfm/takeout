@@ -291,7 +291,15 @@ func (c *TestContext) MovieImage(model.Movie) string {
 	return ""
 }
 
+func (c *TestContext) MovieBackground(model.Movie) string {
+	return ""
+}
+
 func (c *TestContext) EpisodeImage(model.Episode) string {
+	return ""
+}
+
+func (c *TestContext) EpisodeBackground(model.Episode) string {
 	return ""
 }
 
@@ -299,7 +307,15 @@ func (c *TestContext) TVEpisodeImage(model.TVEpisode) string {
 	return ""
 }
 
+func (c *TestContext) TVEpisodeBackground(model.TVEpisode) string {
+	return ""
+}
+
 func (c *TestContext) TVSeriesImage(model.TVSeries) string {
+	return ""
+}
+
+func (c *TestContext) TVSeriesBackground(model.TVSeries) string {
 	return ""
 }
 

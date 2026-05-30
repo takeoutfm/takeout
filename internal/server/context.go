@@ -84,12 +84,17 @@ type Context interface {
 	FindPerson(string) (model.Person, error)
 
 	TrackImage(model.Track) string
+	TrackBackground(model.Track) string
 	ArtistImage(model.Artist) string
 	ArtistBackground(model.Artist) string
 	MovieImage(model.Movie) string
+	MovieBackground(model.Movie) string
 	EpisodeImage(model.Episode) string
+	EpisodeBackground(model.Episode) string
 	TVSeriesImage(model.TVSeries) string
+	TVSeriesBackground(model.TVSeries) string
 	TVEpisodeImage(model.TVEpisode) string
+	TVEpisodeBackground(model.TVEpisode) string
 }
 
 type RequestContext struct {
@@ -253,6 +258,10 @@ func (ctx RequestContext) TrackImage(t model.Track) string {
 	return ctx.Music().TrackImage(t).String()
 }
 
+func (ctx RequestContext) TrackBackground(t model.Track) string {
+	return ctx.Music().TrackBackground(t).String()
+}
+
 func (ctx RequestContext) ArtistImage(a model.Artist) string {
 	return ctx.Music().ArtistImage(a)
 }
@@ -265,16 +274,32 @@ func (ctx RequestContext) MovieImage(m model.Movie) string {
 	return film.MoviePoster(m)
 }
 
+func (ctx RequestContext) MovieBackground(m model.Movie) string {
+	return film.MovieBackdrop(m)
+}
+
 func (ctx RequestContext) TVSeriesImage(s model.TVSeries) string {
 	return tv.SeriesPoster(s)
+}
+
+func (ctx RequestContext) TVSeriesBackground(s model.TVSeries) string {
+	return tv.SeriesBackdrop(s)
 }
 
 func (ctx RequestContext) TVEpisodeImage(e model.TVEpisode) string {
 	return tv.EpisodeStillImage(e)
 }
 
+func (ctx RequestContext) TVEpisodeBackground(e model.TVEpisode) string {
+	return "" // TODO get from series?
+}
+
 func (ctx RequestContext) EpisodeImage(e model.Episode) string {
 	return podcast.EpisodeImage(e)
+}
+
+func (ctx RequestContext) EpisodeBackground(e model.Episode) string {
+	return "" // TODO no backdrops?
 }
 
 func (ctx RequestContext) ImageClient() client.Getter {

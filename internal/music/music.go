@@ -48,6 +48,7 @@ const (
 )
 
 var coverCache map[string]string = make(map[string]string)
+var backgroundCache map[string]string = make(map[string]string)
 
 type Music struct {
 	config  *config.Config
@@ -164,9 +165,26 @@ func (m *Music) TrackURL(ctx context.Context, t Track) *url.URL {
 // 	return m.LookupETag(etag)
 // }
 
-// URL for track cover image.
+// URL for track cover image with cache
 func (m *Music) TrackImage(t Track) *url.URL {
 	url, _ := url.Parse(TrackCover(t, "front-250"))
+	return url
+}
+
+// URL for track background image with cache
+func (m *Music) TrackBackground(t Track) *url.URL {
+	v, ok := backgroundCache[t.ARID]
+	if !ok {
+		// lookup the artist and use the artist background
+		a, err := m.Artist(t.Artist)
+		if err != nil {
+			v = ""
+		} else {
+			v = m.ArtistBackground(a)
+			backgroundCache[t.ARID] = v
+		}
+	}
+	url, _ := url.Parse(v)
 	return url
 }
 

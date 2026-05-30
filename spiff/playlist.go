@@ -30,11 +30,12 @@ import (
 //  https://www.xspf.org/jspf
 
 type Header struct {
-	Title    string  `json:"title"`
-	Creator  string  `json:"creator,omitempty"`
-	Image    string  `json:"image,omitempty"`
-	Location string  `json:"location,omitempty"`
-	Date     string  `json:"date,omitempty"` // "2005-01-08T17:10:47-05:00",
+	Title      string `json:"title"`
+	Creator    string `json:"creator,omitempty"`
+	Image      string `json:"image,omitempty"`
+	Background string `json:"background,omitempty"`
+	Location   string `json:"location,omitempty"`
+	Date       string `json:"date,omitempty"` // "2005-01-08T17:10:47-05:00",
 }
 
 type Playlist struct {
@@ -54,7 +55,7 @@ func (p *Playlist) Length() int {
 
 type Spiff struct {
 	Header
-	Entries  []Entry `json:"track"`
+	Entries []Entry `json:"track"`
 }
 
 type Entry struct {
@@ -63,6 +64,7 @@ type Entry struct {
 	Album      string   `json:"album,omitempty" spiff:"album"`
 	Title      string   `json:"title,omitempty" spiff:"title"`
 	Image      string   `json:"image,omitempty" spiff:"image"`
+	Background string   `json:"background,omitempty" spiff:"background"`
 	Location   []string `json:"location,omitempty" spiff:"location"`
 	Identifier []string `json:"identifier,omitempty" spiff:"identifier"`
 	Size       []int64  `json:"size,omitempty"`

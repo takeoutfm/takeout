@@ -1,3 +1,7 @@
+## 0.27.3
+
+- added background to spiff and spiff tracks
+
 ## 0.27.2
 
 - added "artwork" job

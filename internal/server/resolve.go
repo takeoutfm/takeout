@@ -43,6 +43,7 @@ func trackEntry(ctx Context, t model.Track) spiff.Entry {
 		Album:      t.ReleaseTitle,
 		Title:      t.Title,
 		Image:      ctx.TrackImage(t),
+		Background: ctx.TrackBackground(t),
 		Location:   []string{ctx.LocateTrack(t)},
 		Identifier: []string{t.ETag},
 		Size:       []int64{t.Size},
@@ -56,6 +57,7 @@ func movieEntry(ctx Context, m model.Movie) spiff.Entry {
 		Album:      m.Title,
 		Title:      m.Title,
 		Image:      ctx.MovieImage(m),
+		Background: ctx.MovieBackground(m),
 		Location:   []string{ctx.LocateMovie(m)},
 		Identifier: []string{m.ETag},
 		Size:       []int64{m.Size},
@@ -69,6 +71,7 @@ func tvEpisodeEntry(ctx Context, series model.TVSeries, e model.TVEpisode) spiff
 		Album:      series.Name,
 		Title:      e.Name,
 		Image:      ctx.TVEpisodeImage(e),
+		Background: ctx.TVEpisodeBackground(e),
 		Location:   []string{ctx.LocateTVEpisode(e)},
 		Identifier: []string{e.ETag},
 		Size:       []int64{e.Size},
@@ -86,6 +89,7 @@ func episodeEntry(ctx Context, series model.Series, e model.Episode) spiff.Entry
 		Album:      series.Title,
 		Title:      e.Title,
 		Image:      ctx.EpisodeImage(e),
+		Background: ctx.EpisodeBackground(e),
 		Location:   []string{ctx.LocateEpisode(e)},
 		Identifier: []string{e.EID},
 		Size:       []int64{e.Size},
@@ -478,6 +482,7 @@ func resolveSourceRef(ctx Context, ref string, s *model.Station, entries []spiff
 		Album:      s.Name,
 		Title:      s.Name,
 		Image:      s.Image,
+		Background: "", // TODO no bg for stations yet
 		Location:   locations,
 		Size:       sizes,
 		Identifier: []string{},
@@ -500,6 +505,7 @@ func resolvePlsRef(ctx Context, url, creator, image string, entries []spiff.Entr
 			Album:      v.Title,
 			Title:      v.Title,
 			Image:      image,
+			Background: "", // TODO no bg for pls yet
 			Location:   []string{v.File},
 			Identifier: []string{},
 			Size:       []int64{int64(v.Length)},
@@ -530,6 +536,7 @@ func RefreshStation(ctx Context, s *model.Station) *spiff.Playlist {
 	plist.Spiff.Location = fmt.Sprintf("/api/stations/%d", s.ID)
 	plist.Spiff.Title = s.Name
 	plist.Spiff.Image = s.Image
+	plist.Spiff.Background = "" // todo no station bg
 	plist.Spiff.Creator = s.Creator
 	plist.Spiff.Date = date.FormatJson(time.Now())
 
@@ -561,6 +568,7 @@ func RefreshStation(ctx Context, s *model.Station) *spiff.Playlist {
 				Album:      "",
 				Title:      s.Name,
 				Image:      s.Image,
+				Background: "", // TODO no bg for stations
 				Location:   []string{s.Ref},
 				Identifier: []string{},
 				Size:       []int64{-1},
@@ -761,6 +769,7 @@ func ResolveArtistPlaylist(ctx Context, v *view.Artist, path, nref string) *spif
 	plist.Spiff.Creator = v.Artist.Name
 	plist.Spiff.Title = trackList.Title
 	plist.Spiff.Image = v.Image
+	plist.Spiff.Background = v.Artist.Background
 	plist.Spiff.Date = date.FormatJson(time.Now())
 	if trackList.Tracks != nil {
 		plist.Spiff.Entries = addTrackEntries(ctx, trackList.Tracks(), plist.Spiff.Entries)
@@ -775,6 +784,7 @@ func ResolveReleasePlaylist(ctx Context, v *view.Release, path string) *spiff.Pl
 	plist.Spiff.Creator = v.Release.Artist
 	plist.Spiff.Title = v.Release.Name
 	plist.Spiff.Image = v.Image
+	plist.Spiff.Background = v.Background
 	plist.Spiff.Date = date.FormatJson(v.Release.Date)
 	plist.Spiff.Entries = addTrackEntries(ctx, v.Tracks, plist.Spiff.Entries)
 	return plist
@@ -805,6 +815,7 @@ func ResolveTVSeriesPlaylist(ctx Context, v *view.TVSeries, path string) *spiff.
 	plist.Spiff.Creator = "TBD directors"
 	plist.Spiff.Title = v.Series.Name
 	plist.Spiff.Image = ctx.TVSeriesImage(v.Series)
+	plist.Spiff.Background = ctx.TVSeriesBackground(v.Series)
 	plist.Spiff.Date = date.FormatJson(v.Series.Date)
 	plist.Spiff.Entries = addTVEpisodeEntries(ctx, v.Series, v.Episodes, plist.Spiff.Entries)
 	return plist
@@ -818,6 +829,7 @@ func ResolveTVSeriesEpisodePlaylist(ctx Context, series *view.TVSeries,
 	plist.Spiff.Creator = "TBD directors"
 	plist.Spiff.Title = v.Episode.Name
 	plist.Spiff.Image = ctx.TVEpisodeImage(v.Episode)
+	plist.Spiff.Background = "" // todo no episode bg
 	plist.Spiff.Date = date.FormatJson(v.Episode.Date)
 	plist.Spiff.Entries = []spiff.Entry{
 		tvEpisodeEntry(ctx, series.Series, v.Episode),
@@ -832,6 +844,7 @@ func ResolveSeriesPlaylist(ctx Context, v *view.Series, path string) *spiff.Play
 	plist.Spiff.Creator = v.Series.Author
 	plist.Spiff.Title = v.Series.Title
 	plist.Spiff.Image = v.Series.Image
+	plist.Spiff.Background = "" // todo no podcast bg
 	plist.Spiff.Date = date.FormatJson(v.Series.Date)
 	plist.Spiff.Entries = addEpisodeEntries(ctx, v.Series, v.Episodes, plist.Spiff.Entries)
 	return plist
@@ -845,6 +858,7 @@ func ResolveSeriesEpisodePlaylist(ctx Context, series *view.Series,
 	plist.Spiff.Creator = series.Series.Author
 	plist.Spiff.Title = v.Episode.Title
 	plist.Spiff.Image = ctx.EpisodeImage(v.Episode)
+	plist.Spiff.Background = "" // todo not podcast episode bg
 	plist.Spiff.Date = date.FormatJson(v.Episode.Date)
 	plist.Spiff.Entries = []spiff.Entry{
 		episodeEntry(ctx, series.Series, v.Episode),
@@ -879,6 +893,14 @@ func ResolveActivityTracksPlaylist(ctx Context, v *view.TrackStats, res, path st
 			break
 		}
 	}
+	background := ""
+	for _, t := range tracks {
+		bg := ctx.TrackBackground(t)
+		if bg != "" {
+			background = bg
+			break
+		}
+	}
 
 	title := ""
 	switch res {
@@ -893,6 +915,7 @@ func ResolveActivityTracksPlaylist(ctx Context, v *view.TrackStats, res, path st
 	plist.Spiff.Creator = creators(tracks)
 	plist.Spiff.Title = title
 	plist.Spiff.Image = image
+	plist.Spiff.Background = background
 	plist.Spiff.Date = date.FormatJson(time.Now())
 	plist.Spiff.Entries = addTrackEntries(ctx, tracks, plist.Spiff.Entries)
 	return plist
@@ -907,6 +930,7 @@ func ResolveTrackPlaylist(ctx Context, track model.Track, path string) *spiff.Pl
 	plist.Spiff.Creator = creators(tracks)
 	plist.Spiff.Title = fmt.Sprintf("%s \u2013 Radio", track.Title)
 	plist.Spiff.Image = ctx.TrackImage(track)
+	plist.Spiff.Background = ctx.TrackBackground(track)
 	plist.Spiff.Date = date.FormatJson(time.Now())
 	plist.Spiff.Entries = addTrackEntries(ctx, tracks, plist.Spiff.Entries)
 	return plist
