@@ -173,7 +173,7 @@ func (m *Music) TrackImage(t Track) *url.URL {
 
 // URL for track background image with cache
 func (m *Music) TrackBackground(t Track) *url.URL {
-	v, ok := backgroundCache[t.ARID]
+	v, ok := backgroundCache[t.Artist]
 	if !ok {
 		// lookup the artist and use the artist background
 		a, err := m.Artist(t.Artist)
@@ -181,7 +181,7 @@ func (m *Music) TrackBackground(t Track) *url.URL {
 			v = ""
 		} else {
 			v = m.ArtistBackground(a)
-			backgroundCache[t.ARID] = v
+			backgroundCache[t.Artist] = v
 		}
 	}
 	url, _ := url.Parse(v)

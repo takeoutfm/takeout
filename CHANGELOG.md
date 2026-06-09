@@ -1,3 +1,7 @@
+## 0.27.4
+
+- fix track bg cache
+
 ## 0.27.3
 
 - added background to spiff and spiff tracks
