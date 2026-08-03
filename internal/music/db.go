@@ -960,6 +960,8 @@ func (m *Music) Query(query string) ([]Artist, []Release, []Track, []Station) {
 			queryStations(terms)
 		}
 	} else {
+		// remove any quotes
+		query = strings.Trim(query, `"'`)
 		query = "%" + query + "%"
 		queryArtists(query)
 		queryReleases(query)

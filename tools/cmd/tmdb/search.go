@@ -95,7 +95,7 @@ func doit() {
 		if season > 0 && episode > 0 {
 			doSeries(config, query, year, season, episode)
 		} else {
-			doMovie(config, query)
+			doMovie(config, query, 0)
 		}
 	}
 }
@@ -171,9 +171,9 @@ func doSeries(config *config.Config, query string, year, season, episode int) {
 	}
 }
 
-func doMovie(config *config.Config, query string) {
+func doMovie(config *config.Config, query string, year int) {
 	m := tmdb.NewTMDB(config.TMDB.Config, config.NewGetter())
-	results, err := m.MovieSearch(query)
+	results, err := m.MovieSearch(query, year)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return

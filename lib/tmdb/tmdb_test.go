@@ -90,7 +90,7 @@ func TestConfiguration(t *testing.T) {
 
 func TestMovieSearch(t *testing.T) {
 	tmdb := makeClient(t)
-	result, err := tmdb.MovieSearch("cowboys and aliens")
+	result, err := tmdb.MovieSearch("cowboys and aliens", 2011)
 	if err != nil {
 		t.Fatal(err)
 	}

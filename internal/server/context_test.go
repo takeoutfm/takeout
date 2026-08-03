@@ -279,6 +279,10 @@ func (c *TestContext) TrackImage(model.Track) string {
 	return ""
 }
 
+func (c *TestContext) TrackBackground(model.Track) string {
+	return ""
+}
+
 func (c *TestContext) ArtistImage(model.Artist) string {
 	return ""
 }

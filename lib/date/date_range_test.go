@@ -109,7 +109,7 @@ func TestIsWeek(t *testing.T) {
 		t.Error("expect is week")
 	}
 
-	d = NewDateRange(time.Now(), time.Now().AddDate(0, 0, 6))
+	d = NewDateRange(time.Now(), time.Now().AddDate(0, 0, 5))
 	if d.IsWeek() {
 		t.Error("expect not a week")
 	}

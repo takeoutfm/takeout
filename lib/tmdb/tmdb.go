@@ -405,22 +405,22 @@ const (
 	endpoint = "api.themoviedb.org"
 )
 
-func (m *TMDB) moviePage(q string, page int) (moviePage, error) {
+func (m *TMDB) moviePage(q string, year int, page int) (moviePage, error) {
 	url := fmt.Sprintf(
-		"https://%s/3/search/movie?api_key=%s&language=%s&query=%s&page=%d",
+		"https://%s/3/search/movie?api_key=%s&language=%s&query=%s&year=%dpage=%d",
 		endpoint,
 		m.config.Key,
 		m.config.Language,
-		url.QueryEscape(q), page)
+		url.QueryEscape(q), year, page)
 	var result moviePage
 	err := m.client.GetJson(url, &result)
 	return result, err
 }
 
-func (m *TMDB) MovieSearch(q string) ([]MovieResult, error) {
+func (m *TMDB) MovieSearch(q string, year int) ([]MovieResult, error) {
 	// TODO only supports one page right now
-	page, err := m.moviePage(q, 1)
-	return page.Results, err
+	p, err := m.moviePage(q, year, 1)
+	return p.Results, err
 }
 
 func (m *TMDB) MovieDetail(tmid int) (Movie, error) {

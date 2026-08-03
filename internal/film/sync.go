@@ -119,7 +119,7 @@ func fuzzyName(name string) string {
 }
 
 func (f *Film) doMovie(o *bucket.Object, client *tmdb.TMDB, s search.Searcher, title, year string) error {
-	results, err := client.MovieSearch(title)
+	results, err := client.MovieSearch(title, str.Atoi(year))
 	if err != nil {
 		return err
 	}

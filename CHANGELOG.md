@@ -1,3 +1,9 @@
+## 0.27.5
+
+- strip quotes in search when necessary
+- use year in tmdb search to match "the dead (2010)"
+- fix tests
+
 ## 0.27.4
 
 - fix track bg cache
