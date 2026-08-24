@@ -340,6 +340,16 @@ func (f *Film) MovieCount() int64 {
 	return count
 }
 
+func (f *Film) DistinctGenres() []string {
+	var genres []Genre
+	f.db.Select("distinct(name)").Order("name").Find(&genres)
+	var names []string
+	for _, g := range genres {
+		names = append(names, g.Name)
+	}
+	return names
+}
+
 func (f *Film) LastModified() time.Time {
 	var movies []Movie
 	f.db.Order("last_modified desc").Limit(1).Find(&movies)

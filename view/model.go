@@ -32,12 +32,14 @@ type TrackList struct {
 }
 
 type Index struct {
-	Time         int64
-	HasMusic     bool
-	HasMovies    bool
-	HasShows     bool
-	HasPodcasts  bool
-	HasPlaylists bool
+	Time              int64
+	HasMusic          bool
+	HasMovies         bool
+	HasShows          bool
+	HasPodcasts       bool
+	HasPlaylists      bool
+	HasRecomendMovies bool
+	MovieGenres       []string
 }
 
 type Home struct {

@@ -1,3 +1,8 @@
+## 0.28.0
+
+- added MovieGenres to index
+- added HasRecommendMovies to index
+
 ## 0.27.5
 
 - strip quotes in search when necessary

@@ -208,6 +208,11 @@ func (f *Film) HasMovies() bool {
 	return f.MovieCount() > 0
 }
 
+func (f *Film) HasRecommendations() bool {
+	recommend := f.Recommend()
+	return len(recommend) > 0
+}
+
 func (f *Film) Recommend() []Recommend {
 	var recommend []Recommend
 	for _, r := range f.config.Film.Recommend.When {
@@ -222,4 +227,8 @@ func (f *Film) Recommend() []Recommend {
 		}
 	}
 	return recommend
+}
+
+func (f *Film) MovieGenres() []string {
+	return f.DistinctGenres()
 }
