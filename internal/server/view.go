@@ -37,7 +37,7 @@ func IndexView(ctx Context) *Index {
 	view.HasShows = ctx.TV().HasShows()
 	view.HasPodcasts = ctx.Podcast().HasPodcasts()
 	view.HasPlaylists = ctx.Music().HasPlaylists(ctx.User())
-	view.HasRecomendMovies = ctx.Film().HasRecommendations()
+	view.HasRecommendMovies = ctx.Film().HasRecommendations()
 	view.MovieGenres = ctx.Film().MovieGenres()
 	return view
 }
@@ -74,6 +74,7 @@ func ArtistView(ctx Context, artist model.Artist) *Artist {
 	view.Similar = m.SimilarArtists(artist)
 	view.Image = m.ArtistImage(artist)
 	view.Background = m.ArtistBackground(artist)
+	view.IsFavorite = ctx.Favorite().IsFavoriteArtist(ctx, artist)
 	view.Popular = TrackList{
 		Title: fmt.Sprintf("%s \u2013 Popular", artist.Name),
 		Tracks: func() []model.Track {
@@ -251,6 +252,7 @@ func MovieView(ctx Context, m model.Movie) *Movie {
 	view.Vote = int(m.VoteAverage * 10)
 	view.VoteCount = m.VoteCount
 	view.Trailers = f.MovieTrailers(m)
+	view.IsFavorite = ctx.Favorite().IsFavoriteMovie(ctx, m)
 	return view
 }
 
@@ -324,6 +326,7 @@ func TVSeriesView(ctx Context, s model.TVSeries) *TVSeries {
 	view.Genres = tv.Genres(s)
 	view.Vote = int(s.VoteAverage * 10)
 	view.VoteCount = s.VoteCount
+	view.IsFavorite = ctx.Favorite().IsFavoriteTVSeries(ctx, s)
 	return view
 }
 
@@ -444,4 +447,34 @@ func PlaylistsView(ctx Context, playlists []model.Playlist) *Playlists {
 	}
 	view.Playlists = list
 	return view
+}
+
+func FavoriteView(ctx Context) *Favorite {
+	fav := ctx.Favorite()
+	view := &Favorite{}
+	view.Artists = fav.Artists(ctx)
+	view.Movies = fav.Movies(ctx)
+	view.Shows = fav.Shows(ctx)
+	view.Tracks = fav.Tracks(ctx)
+	return view
+}
+
+func FavoriteArtistsView(ctx Context) *FavoriteArtists {
+	fav := ctx.Favorite()
+	return &FavoriteArtists{Artists: fav.Artists(ctx)}
+}
+
+// func FavoriteMoviesView(ctx Context) *Favorite {
+// 	fav := ctx.Favorite()
+// 	return &Favorite{Movies: fav.Movies(ctx)}
+// }
+
+// func FavoriteTVSeriesView(ctx Context) *Favorite {
+// 	fav := ctx.Favorite()
+// 	return &Favorite{Shows: fav.Shows(ctx)}
+// }
+
+func FavoriteTracksView(ctx Context) *FavoriteTracks {
+	fav := ctx.Favorite()
+	return &FavoriteTracks{Tracks: fav.Tracks(ctx)}
 }

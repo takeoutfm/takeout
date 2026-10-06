@@ -67,7 +67,7 @@ func NewMusic(config *config.Config) *Music {
 		fanart: fanart.NewFanart(config.Fanart, client),
 		lastfm: lastfm.NewLastfm(config.LastFM, client),
 		mbz:    musicbrainz.NewMusicBrainz(client),
-		lbz:    listenbrainz.NewListenBrainz(client),
+		lbz:    listenbrainz.NewListenBrainz(config.ListenBrainz, client),
 	}
 }
 
@@ -242,6 +242,8 @@ func (m *Music) FindTrack(identifier string) (Track, error) {
 	if err != nil {
 		if strings.HasPrefix(identifier, "uuid:") {
 			return m.LookupUUID(identifier[5:])
+		} else if strings.HasPrefix(identifier, "etag:") {
+			return m.LookupETag(identifier[5:])
 		} else if strings.HasPrefix(identifier, "rid:") {
 			return m.LookupRID(identifier[4:])
 		} else {

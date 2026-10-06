@@ -45,6 +45,12 @@ const (
 	ParamEID  = "eid"
 	ParamUUID = "uuid"
 	ParamPEID = "peid"
+	ParamRID  = "rid"
+	ParamARID = "arid"
+	ParamIMID = "imid"
+	ParamTMID = "tmid"
+	ParamTVID = "tvid"
+	ParamETag = "etag"
 
 	QuerySearch = "q"
 	QueryStart  = "start"
@@ -1159,6 +1165,163 @@ func apiActivityPost(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+func apiFavoriteGet(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	apiView(w, r, FavoriteView(ctx))
+}
+
+func apiFavoriteTracksGetPlaylist(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	favorites := FavoriteTracksView(ctx)
+	plist := ResolveFavoriteTracksPlaylist(ctx, favorites, r.URL.Path)
+	writePlaylist(w, r, plist)
+}
+
+func apiFavoriteArtistsGetPlaylist(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	favorites := FavoriteArtistsView(ctx)
+	res := r.PathValue(ParamRes)
+	plist := ResolveFavoriteArtistsTracksPlaylist(ctx, favorites, r.URL.Path, res)
+	writePlaylist(w, r, plist)
+}
+
+// func apiFavoriteArtistsGet(w http.ResponseWriter, r *http.Request) {
+// 	ctx := contextValue(r)
+// 	apiView(w, r, FavoriteArtistsView(ctx))
+// }
+
+// func apiFavoriteMoviesGet(w http.ResponseWriter, r *http.Request) {
+// 	ctx := contextValue(r)
+// 	apiView(w, r, FavoriteMoviesView(ctx))
+// }
+
+// func apiFavoriteTracksGet(w http.ResponseWriter, r *http.Request) {
+// 	ctx := contextValue(r)
+// 	apiView(w, r, FavoriteTracksView(ctx))
+// }
+
+// func apiFavoriteTVSeriesGet(w http.ResponseWriter, r *http.Request) {
+// 	ctx := contextValue(r)
+// 	apiView(w, r, FavoriteTVSeriesView(ctx))
+// }
+
+func apiFavoriteTrackAdd(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	etag := r.PathValue(ParamETag)
+	track, err := ctx.FindTrack("etag:" + etag)
+	if err != nil {
+		notFoundErr(w)
+		return
+	}
+	// save favorite using RID
+	favorites := model.Favorites{Tracks: []model.TrackFavorite{{RID: track.RID}}}
+	doCreateFavorites(ctx, w, favorites)
+}
+
+func apiFavoriteArtistAdd(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	arid := r.PathValue(ParamARID)
+	artist, err := ctx.FindArtist("arid:" + arid)
+	if err != nil {
+		notFoundErr(w)
+		return
+	}
+	favorites := model.Favorites{Artists: []model.ArtistFavorite{{ARID: artist.ARID}}}
+	doCreateFavorites(ctx, w, favorites)
+}
+
+func apiFavoriteMovieAdd(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	imid := r.PathValue(ParamIMID)
+	movie, err := ctx.FindMovie("imid:" + imid)
+	if err != nil {
+		notFoundErr(w)
+		return
+	}
+	favorites := model.Favorites{Movies: []model.MovieFavorite{{IMID: movie.IMID}}}
+	doCreateFavorites(ctx, w, favorites)
+}
+
+func apiFavoriteTVSeriesAdd(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	tvid := r.PathValue(ParamTVID)
+	series, err := ctx.FindTVSeries("tvid:" + tvid)
+	if err != nil {
+		notFoundErr(w)
+		return
+	}
+	favorites := model.Favorites{Shows: []model.TVSeriesFavorite{{TVID: series.TVID}}}
+	doCreateFavorites(ctx, w, favorites)
+}
+
+func doCreateFavorites(ctx Context, w http.ResponseWriter, favorites model.Favorites) {
+	if err := ctx.Favorite().CreateFavorites(ctx, favorites); err != nil {
+		serverErr(w, err)
+		return
+	}
+	noContent(w)
+}
+
+func apiFavoriteArtistDelete(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	arid := r.PathValue(ParamARID)
+	artist, err := ctx.FindArtist("arid:" + arid)
+	if err != nil {
+		notFoundErr(w)
+		return
+	}
+	if err = ctx.Favorite().DeleteArtistFavorite(ctx, artist); err != nil {
+		serverErr(w, err)
+		return
+	}
+	noContent(w)
+}
+
+func apiFavoriteMovieDelete(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	imid := r.PathValue(ParamIMID)
+	movie, err := ctx.FindMovie("imid:" + imid)
+	if err != nil {
+		notFoundErr(w)
+		return
+	}
+	if err = ctx.Favorite().DeleteMovieFavorite(ctx, movie); err != nil {
+		serverErr(w, err)
+		return
+	}
+	noContent(w)
+}
+
+func apiFavoriteTrackDelete(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	etag := r.PathValue(ParamETag)
+	track, err := ctx.FindTrack("etag:" + etag)
+	if err != nil {
+		notFoundErr(w)
+		return
+	}
+	if err = ctx.Favorite().DeleteTrackFavorite(ctx, track); err != nil {
+		serverErr(w, err)
+		return
+	}
+	noContent(w)
+}
+
+func apiFavoriteTVSeriesDelete(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	tvid := r.PathValue(ParamTVID)
+	tvSeries, err := ctx.FindTVSeries("tvid:" + tvid)
+	if err != nil {
+		notFoundErr(w)
+		return
+	}
+	if err = ctx.Favorite().DeleteTVSeriesFavorite(ctx, tvSeries); err != nil {
+		serverErr(w, err)
+		return
+	}
+	noContent(w)
+}
+
 func clientTime(r *http.Request) time.Time {
 	v := r.URL.Query().Get(QueryTime)
 	if v == "" {
@@ -1275,4 +1438,8 @@ func apiDownload(w http.ResponseWriter, r *http.Request) {
 	prefix := "/d"
 	path := strings.TrimPrefix(r.URL.Path, prefix)
 	http.ServeFile(w, r, path)
+}
+
+func noContent(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusNoContent)
 }

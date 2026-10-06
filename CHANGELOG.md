@@ -1,3 +1,8 @@
+## 0.29.0
+
+- ListenBrainz needs authorization header now
+- Add support for favorite artists, movies, tracks and shows
+
 ## 0.28.0
 
 - added MovieGenres to index

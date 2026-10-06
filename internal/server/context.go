@@ -26,6 +26,7 @@ import (
 	"takeoutfm.dev/takeout/internal/activity"
 	"takeoutfm.dev/takeout/internal/auth"
 	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/internal/favorite"
 	"takeoutfm.dev/takeout/internal/film"
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/podcast"
@@ -54,6 +55,7 @@ type Context interface {
 	Activity() *activity.Activity
 	Auth() *auth.Auth
 	Config() *config.Config
+	Favorite() *favorite.Favorite
 	Music() *music.Music
 	Podcast() *podcast.Podcast
 	Progress() *progress.Progress
@@ -101,6 +103,7 @@ type RequestContext struct {
 	activity    *activity.Activity
 	auth        *auth.Auth
 	config      *config.Config
+	favorite    *favorite.Favorite
 	user        auth.User
 	media       *Media
 	progress    *progress.Progress
@@ -114,6 +117,7 @@ func makeContext(ctx Context, u auth.User, c *config.Config, m *Media) RequestCo
 		activity: ctx.Activity(),
 		auth:     ctx.Auth(),
 		config:   c,
+		favorite: ctx.Favorite(),
 		media:    m,
 		progress: ctx.Progress(),
 		template: ctx.Template(),
@@ -144,6 +148,10 @@ func (ctx RequestContext) Auth() *auth.Auth {
 
 func (ctx RequestContext) Config() *config.Config {
 	return ctx.config
+}
+
+func (ctx RequestContext) Favorite() *favorite.Favorite {
+	return ctx.favorite
 }
 
 func (ctx RequestContext) Music() *music.Music {

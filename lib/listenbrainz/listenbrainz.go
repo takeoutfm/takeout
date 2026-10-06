@@ -18,15 +18,23 @@
 package listenbrainz // import "takeoutfm.dev/takeout/lib/listenbrainz"
 
 import (
+	"strings"
+
 	"takeoutfm.dev/takeout/lib/client"
 )
 
+type Config struct {
+	Token string
+}
+
 type ListenBrainz struct {
+	config Config
 	client client.Getter
 }
 
-func NewListenBrainz(client client.Getter) *ListenBrainz {
+func NewListenBrainz(config Config, client client.Getter) *ListenBrainz {
 	return &ListenBrainz{
+		config: config,
 		client: client,
 	}
 }
@@ -61,10 +69,30 @@ type Result struct {
 func (l *ListenBrainz) ArtistTopTracks(arid string) ([]TopTrack, error) {
 	var results []Result
 
+	if l.config.Token == "" {
+		// not configured so skip
+		return make([]TopTrack, 0), nil
+	}
+
 	client.DefaultLimiter.RateLimit("listenbrainz.org")
 
+	// newer listenbrainz requires authhorization header
+	//
+	// https://listenbrainz.readthedocs.io/en/latest/users/api/index.html#add-the-user-token-to-your-requests
+	//
+	// # Use the account owner's token for exports and other account-specific operations.
+	// TOKEN = 'YOUR_TOKEN_HERE'
+	// AUTH_HEADER = {
+	//   "Authorization": "Token {0}".format(TOKEN)
+	// }
+	token := strings.Join([]string{"Token", l.config.Token}, " ")
+	headers := map[string]string{
+		"Authorization": token,
+	}
+
 	url := "https://api.listenbrainz.org/1/popularity/top-recordings-for-artist/" + arid
-	err := l.client.GetJson(url, &results)
+
+	err := l.client.GetJsonWith(headers, url, &results)
 	if err != nil {
 		return nil, err
 	}

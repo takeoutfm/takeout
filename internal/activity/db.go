@@ -32,7 +32,7 @@ type trackEvent struct {
 }
 
 func (a *Activity) openDB() (err error) {
-	cfg := a.config.Music.DB.GormConfig()
+	cfg := a.config.Activity.DB.GormConfig()
 
 	if a.config.Activity.DB.Driver == "sqlite3" {
 		a.db, err = gorm.Open(sqlite.Open(a.config.Activity.DB.Source), cfg)

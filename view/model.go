@@ -32,14 +32,14 @@ type TrackList struct {
 }
 
 type Index struct {
-	Time              int64
-	HasMusic          bool
-	HasMovies         bool
-	HasShows          bool
-	HasPodcasts       bool
-	HasPlaylists      bool
-	HasRecomendMovies bool
-	MovieGenres       []string
+	Time               int64
+	HasMusic           bool
+	HasMovies          bool
+	HasShows           bool
+	HasPodcasts        bool
+	HasPlaylists       bool
+	HasRecommendMovies bool
+	MovieGenres        []string
 }
 
 type Home struct {
@@ -63,6 +63,7 @@ type Artist struct {
 	Background string
 	Releases   []model.Release
 	Similar    []model.Artist
+	IsFavorite bool
 	Deep       TrackList `json:"-"`
 	Popular    TrackList `json:"-"`
 	Radio      TrackList `json:"-"`
@@ -139,6 +140,7 @@ type Movie struct {
 	Vote       int
 	VoteCount  int
 	Trailers   []model.Trailer
+	IsFavorite bool
 }
 
 type Profile struct {
@@ -184,17 +186,18 @@ type TVShows struct {
 }
 
 type TVSeries struct {
-	Series    model.TVSeries
-	Episodes  []model.TVEpisode
-	Genres    []string
-	Keywords  []string
-	Cast      []model.TVSeriesCast
-	Crew      []model.TVSeriesCrew
-	Directing []model.Person
-	Starring  []model.Person
-	Writing   []model.Person
-	Vote      int
-	VoteCount int
+	Series     model.TVSeries
+	Episodes   []model.TVEpisode
+	Genres     []string
+	Keywords   []string
+	Cast       []model.TVSeriesCast
+	Crew       []model.TVSeriesCrew
+	Directing  []model.Person
+	Starring   []model.Person
+	Writing    []model.Person
+	Vote       int
+	VoteCount  int
+	IsFavorite bool
 }
 
 type TVEpisode struct {
@@ -298,4 +301,19 @@ type Playlists struct {
 
 func NewPlaylist(p model.Playlist) *Playlist {
 	return &Playlist{ID: int(p.ID), Name: p.Name, TrackCount: p.TrackCount}
+}
+
+type Favorite struct {
+	Artists []model.Artist
+	Movies  []model.Movie
+	Shows   []model.TVSeries
+	Tracks  []model.Track
+}
+
+type FavoriteArtists struct {
+	Artists []model.Artist
+}
+
+type FavoriteTracks struct {
+	Tracks []model.Track
 }

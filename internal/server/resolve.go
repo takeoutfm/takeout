@@ -531,6 +531,33 @@ func resolveActivityTracksRef(ctx Context, entries []spiff.Entry) ([]spiff.Entry
 	return entries, nil
 }
 
+// /favorite/tracks
+func resolveFavoriteTracksRef(ctx Context, entries []spiff.Entry) ([]spiff.Entry, error) {
+	v := FavoriteTracksView(ctx)
+	entries = addTrackEntries(ctx, v.Tracks, entries)
+	return entries, nil
+}
+
+// /favorite/artists/{res}
+func resolveFavoriteArtistsTracksRef(ctx Context, res string, entries []spiff.Entry) ([]spiff.Entry, error) {
+	v := FavoriteArtistsView(ctx)
+	var tracks []model.Track
+	// build list of tracks for each favorite artist
+	for _, a := range v.Artists {
+		av := ArtistView(ctx, a)
+		trackList := resolveArtistTrackList(av, res)
+		tracks = append(tracks, trackList.Tracks()...)
+	}
+	// shuffle then reduce
+	tracks = music.Shuffle(tracks)
+	limit := ctx.Config().Favorite.ArtistsTracksLimit
+	if len(tracks) > limit {
+		tracks = tracks[:limit]
+	}
+	entries = addTrackEntries(ctx, tracks, entries)
+	return entries, nil
+}
+
 func RefreshStation(ctx Context, s *model.Station) *spiff.Playlist {
 	plist := spiff.NewPlaylist(spiff.TypeMusic)
 	plist.Spiff.Location = fmt.Sprintf("/api/stations/%d", s.ID)
@@ -594,19 +621,21 @@ func RefreshStation(ctx Context, s *model.Station) *spiff.Playlist {
 }
 
 var (
-	artistsRegexp      = regexp.MustCompile(`^/music/artists/([0-9a-zA-Z-]+)/([\w]+)$`)
-	releasesRegexp     = regexp.MustCompile(`^/music/releases/([0-9a-zA-Z-]+)/tracks$`)
-	tracksRegexp       = regexp.MustCompile(`^/music/tracks/([\d]+)$`)
-	trackRadioRegexp   = regexp.MustCompile(`^/music/tracks/([\d]+)/radio$`)
-	searchRegexp       = regexp.MustCompile(`^/music/search.*`)
-	stationsRegexp     = regexp.MustCompile(`^/music/stations/([\w ]+)$`)
-	playlistsRegexp    = regexp.MustCompile(`^/music/playlists/([\w ]+)$`)
-	moviesRegexp       = regexp.MustCompile(`^/movies/([\d]+)$`)
-	tvSeriesRegexp     = regexp.MustCompile(`^/tv/series/([\d]+)$`)
-	tvEpisodesRegexp   = regexp.MustCompile(`^/tv/episodes/([\d]+)$`)
-	seriesRegexp       = regexp.MustCompile(`^/podcasts/series/([\d]+)$`)
-	episodesRegexp     = regexp.MustCompile(`^/podcasts/episodes/([\d]+)$`)
-	recentTracksRegexp = regexp.MustCompile(`^/activity/tracks$`)
+	artistsRegexp               = regexp.MustCompile(`^/music/artists/([0-9a-zA-Z-]+)/([\w]+)$`)
+	releasesRegexp              = regexp.MustCompile(`^/music/releases/([0-9a-zA-Z-]+)/tracks$`)
+	tracksRegexp                = regexp.MustCompile(`^/music/tracks/([\d]+)$`)
+	trackRadioRegexp            = regexp.MustCompile(`^/music/tracks/([\d]+)/radio$`)
+	searchRegexp                = regexp.MustCompile(`^/music/search.*`)
+	stationsRegexp              = regexp.MustCompile(`^/music/stations/([\w ]+)$`)
+	playlistsRegexp             = regexp.MustCompile(`^/music/playlists/([\w ]+)$`)
+	moviesRegexp                = regexp.MustCompile(`^/movies/([\d]+)$`)
+	tvSeriesRegexp              = regexp.MustCompile(`^/tv/series/([\d]+)$`)
+	tvEpisodesRegexp            = regexp.MustCompile(`^/tv/episodes/([\d]+)$`)
+	seriesRegexp                = regexp.MustCompile(`^/podcasts/series/([\d]+)$`)
+	episodesRegexp              = regexp.MustCompile(`^/podcasts/episodes/([\d]+)$`)
+	recentTracksRegexp          = regexp.MustCompile(`^/activity/tracks$`)
+	favoriteTracksRegexp        = regexp.MustCompile(`^/favorite/tracks$`)
+	favoriteArtistsTracksRegexp = regexp.MustCompile(`^/favorite/artists/([\w ]+)$`)
 )
 
 func Resolve(ctx Context, plist *spiff.Playlist) (err error) {
@@ -729,6 +758,24 @@ func Resolve(ctx Context, plist *spiff.Playlist) (err error) {
 		matches = recentTracksRegexp.FindStringSubmatch(pathRef)
 		if matches != nil {
 			entries, err = resolveActivityTracksRef(ctx, entries)
+			if err != nil {
+				return err
+			}
+			continue
+		}
+
+		matches = favoriteTracksRegexp.FindStringSubmatch(pathRef)
+		if matches != nil {
+			entries, err = resolveFavoriteTracksRef(ctx, entries)
+			if err != nil {
+				return err
+			}
+			continue
+		}
+
+		matches = favoriteArtistsTracksRegexp.FindStringSubmatch(pathRef)
+		if matches != nil {
+			entries, err = resolveFavoriteArtistsTracksRef(ctx, matches[1], entries)
 			if err != nil {
 				return err
 			}
@@ -866,17 +913,25 @@ func ResolveSeriesEpisodePlaylist(ctx Context, series *view.Series,
 	return plist
 }
 
+func joinUnique(names []string) string {
+	slices.Sort(names)
+	return strings.Join(slices.Compact(names), " \u2022 ")
+}
+
 func creators(tracks []model.Track) string {
-	artistMap := make(map[string]bool)
-	for _, t := range tracks {
-		artistMap[t.Artist] = true
+	names := make([]string, len(tracks))
+	for i, t := range tracks {
+		names[i] = t.Artist
 	}
-	var artists []string
-	for k := range artistMap {
-		artists = append(artists, k)
+	return joinUnique(names)
+}
+
+func entryCreators(entries []spiff.Entry) string {
+	names := make([]string, len(entries))
+	for i, e := range entries {
+		names[i] = e.Creator
 	}
-	slices.Sort(artists)
-	return strings.Join(artists, " \u2022 ")
+	return joinUnique(names)
 }
 
 func ResolveActivityTracksPlaylist(ctx Context, v *view.TrackStats, res, path string) *spiff.Playlist {
@@ -933,5 +988,68 @@ func ResolveTrackPlaylist(ctx Context, track model.Track, path string) *spiff.Pl
 	plist.Spiff.Background = ctx.TrackBackground(track)
 	plist.Spiff.Date = date.FormatJson(time.Now())
 	plist.Spiff.Entries = addTrackEntries(ctx, tracks, plist.Spiff.Entries)
+	return plist
+}
+
+func ResolveFavoriteTracksPlaylist(ctx Context, favorite *view.FavoriteTracks, path string) *spiff.Playlist {
+	tracks := favorite.Tracks
+
+	image := ""
+	for _, t := range tracks {
+		img := ctx.TrackImage(t)
+		if img != "" {
+			image = img
+			break
+		}
+	}
+	background := ""
+	for _, t := range tracks {
+		bg := ctx.TrackBackground(t)
+		if bg != "" {
+			background = bg
+			break
+		}
+	}
+
+	plist := spiff.NewPlaylist(spiff.TypeMusic)
+	plist.Spiff.Location = path
+	plist.Spiff.Creator = creators(tracks)
+	plist.Spiff.Title = "Favorite Tracks"
+	plist.Spiff.Image = image
+	plist.Spiff.Background = background
+	plist.Spiff.Date = date.FormatJson(time.Now())
+	plist.Spiff.Entries = addTrackEntries(ctx, tracks, plist.Spiff.Entries)
+	return plist
+}
+
+func ResolveFavoriteArtistsTracksPlaylist(ctx Context, favorite *view.FavoriteArtists, path, res string) *spiff.Playlist {
+	var entries []spiff.Entry
+	entries, _ = resolveFavoriteArtistsTracksRef(ctx, res, entries)
+
+	image := ""
+	for _, t := range entries {
+		img := t.Image
+		if img != "" {
+			image = img
+			break
+		}
+	}
+	background := ""
+	for _, t := range entries {
+		bg := t.Background
+		if bg != "" {
+			background = bg
+			break
+		}
+	}
+
+	plist := spiff.NewPlaylist(spiff.TypeMusic)
+	plist.Spiff.Location = path
+	plist.Spiff.Creator = entryCreators(entries)
+	plist.Spiff.Title = "Favorite Tracks"
+	plist.Spiff.Image = image
+	plist.Spiff.Background = background
+	plist.Spiff.Date = date.FormatJson(time.Now())
+	plist.Spiff.Entries = entries
 	return plist
 }

@@ -27,6 +27,7 @@ import (
 	"takeoutfm.dev/takeout/internal/activity"
 	"takeoutfm.dev/takeout/internal/auth"
 	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/internal/favorite"
 	"takeoutfm.dev/takeout/internal/film"
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/podcast"
@@ -58,6 +59,7 @@ const TestPlaylistID = "107"
 type TestContext struct {
 	t    *testing.T
 	a    *activity.Activity
+	fav  *favorite.Favorite
 	auth *auth.Auth
 	m    *music.Music
 	pod  *podcast.Podcast
@@ -79,6 +81,17 @@ func (c *TestContext) Activity() *activity.Activity {
 		}
 	}
 	return c.a
+}
+
+func (c *TestContext) Favorite() *favorite.Favorite {
+	if c.fav == nil {
+		c.fav = favorite.NewFavorite(c.Config())
+		err := c.fav.Open()
+		if err != nil {
+			c.t.Fatal(err)
+		}
+	}
+	return c.fav
 }
 
 func (c *TestContext) Auth() *auth.Auth {

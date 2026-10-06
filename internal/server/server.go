@@ -32,6 +32,7 @@ import (
 	"takeoutfm.dev/takeout/internal/activity"
 	"takeoutfm.dev/takeout/internal/auth"
 	"takeoutfm.dev/takeout/internal/config"
+	"takeoutfm.dev/takeout/internal/favorite"
 	"takeoutfm.dev/takeout/internal/progress"
 	"takeoutfm.dev/takeout/lib/client"
 	"takeoutfm.dev/takeout/lib/log"
@@ -166,6 +167,12 @@ func makeProgress(config *config.Config) (*progress.Progress, error) {
 	return p, err
 }
 
+func makeFavorite(config *config.Config) (*favorite.Favorite, error) {
+	f := favorite.NewFavorite(config)
+	err := f.Open()
+	return f, err
+}
+
 // Serve configures and starts the Takeout web, websocket, and API services.
 func Serve(c context.Context, config *config.Config) error {
 	if systemd.HasSystemd() {
@@ -182,6 +189,9 @@ func Serve(c context.Context, config *config.Config) error {
 	progress, err := makeProgress(config)
 	log.CheckError(err)
 
+	favorite, err := makeFavorite(config)
+	log.CheckError(err)
+
 	schedule(c, config)
 
 	// base context for all requests
@@ -189,6 +199,7 @@ func Serve(c context.Context, config *config.Config) error {
 		activity: activity,
 		auth:     auth,
 		config:   config,
+		favorite: favorite,
 		progress: progress,
 		template: getTemplates(config),
 	}
@@ -336,6 +347,27 @@ func Serve(c context.Context, config *config.Config) error {
 	mux.Handle("GET /api/activity/tracks/{res}/stats", accessTokenAuthHandler(ctx, apiActivityTrackStats))
 	mux.Handle("GET /api/activity/tracks/{res}/counts", accessTokenAuthHandler(ctx, apiActivityTrackCounts))
 	mux.Handle("GET /api/activity/tracks/{res}/chart", accessTokenAuthHandler(ctx, apiActivityTrackChart))
+
+	// GET /api/favorite
+	// GET /api/favorite/{tracks|artists|movies|shows}
+	// PUT /api/favorite/{tracks|artists|movies|shows}/{id}
+	// DELETE /api/favorite/{tracks|artists|movies|shows}/{id}
+	mux.Handle("GET /api/favorite", accessTokenAuthHandler(ctx, apiFavoriteGet))
+	// mux.Handle("GET /api/favorite/artists", accessTokenAuthHandler(ctx, apiFavoriteArtistsGet))
+	// mux.Handle("GET /api/favorite/movies", accessTokenAuthHandler(ctx, apiFavoriteMoviesGet))
+	mux.Handle("GET /api/favorite/tracks/playlist", accessTokenAuthHandler(ctx, apiFavoriteTracksGetPlaylist))
+ 	mux.Handle("GET /api/favorite/artists/{res}/playlist", accessTokenAuthHandler(ctx, apiFavoriteArtistsGetPlaylist))
+	// mux.Handle("GET /api/favorite/shows", accessTokenAuthHandler(ctx, apiFavoriteTVSeriesGet))
+
+	mux.Handle("PUT /api/favorite/artists/{arid}", accessTokenAuthHandler(ctx, apiFavoriteArtistAdd))
+	mux.Handle("PUT /api/favorite/movies/{imid}", accessTokenAuthHandler(ctx, apiFavoriteMovieAdd))
+	mux.Handle("PUT /api/favorite/shows/{tvid}", accessTokenAuthHandler(ctx, apiFavoriteTVSeriesAdd))
+	mux.Handle("PUT /api/favorite/tracks/{etag}", accessTokenAuthHandler(ctx, apiFavoriteTrackAdd))
+
+	mux.Handle("DELETE /api/favorite/artists/{arid}", accessTokenAuthHandler(ctx, apiFavoriteArtistDelete))
+	mux.Handle("DELETE /api/favorite/movies/{imid}", accessTokenAuthHandler(ctx, apiFavoriteMovieDelete))
+	mux.Handle("DELETE /api/favorite/shows/{tvid}", accessTokenAuthHandler(ctx, apiFavoriteTVSeriesDelete))
+	mux.Handle("DELETE /api/favorite/tracks/{etag}", accessTokenAuthHandler(ctx, apiFavoriteTrackDelete))
 
 	// TODO - disable for now, work in progress
 	// settings

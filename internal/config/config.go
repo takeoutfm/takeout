@@ -40,9 +40,10 @@ import (
 	"takeoutfm.dev/takeout/lib/fanart"
 	g "takeoutfm.dev/takeout/lib/gorm"
 	"takeoutfm.dev/takeout/lib/lastfm"
+	"takeoutfm.dev/takeout/lib/listenbrainz"
 	"takeoutfm.dev/takeout/lib/log"
-	"takeoutfm.dev/takeout/lib/systemd"
 	"takeoutfm.dev/takeout/lib/search"
+	"takeoutfm.dev/takeout/lib/systemd"
 	"takeoutfm.dev/takeout/lib/tmdb"
 
 	"gopkg.in/yaml.v3"
@@ -238,6 +239,15 @@ type ActivityConfig struct {
 	TopMoviesTitle    string
 }
 
+type FavoriteConfig struct {
+	DB                 DatabaseConfig
+	ArtistLimit        int
+	ArtistsTracksLimit int
+	TrackLimit         int
+	MovieLimit         int
+	TVSeriesLimit      int
+}
+
 type RecommendConfig struct {
 	When []DateRecommend
 }
@@ -294,21 +304,23 @@ type ServerConfig struct {
 }
 
 type Config struct {
-	Auth      AuthConfig
-	Buckets   []bucket.Config
-	Client    client.Config
-	Fanart    fanart.Config
-	LastFM    lastfm.Config
-	Music     MusicConfig
-	TMDB      TMDBAPIConfig
-	Search    search.Config
-	Server    ServerConfig
-	Film      FilmConfig
-	TV        TVConfig
-	Assistant AssistantConfig
-	Podcast   PodcastConfig
-	Progress  ProgressConfig
-	Activity  ActivityConfig
+	Auth         AuthConfig
+	Buckets      []bucket.Config
+	Client       client.Config
+	Fanart       fanart.Config
+	LastFM       lastfm.Config
+	ListenBrainz listenbrainz.Config
+	Music        MusicConfig
+	TMDB         TMDBAPIConfig
+	Search       search.Config
+	Server       ServerConfig
+	Film         FilmConfig
+	TV           TVConfig
+	Assistant    AssistantConfig
+	Podcast      PodcastConfig
+	Progress     ProgressConfig
+	Activity     ActivityConfig
+	Favorite     FavoriteConfig
 }
 
 func (c Config) NewGetter() client.Getter {
@@ -407,6 +419,15 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Activity.TopMoviesLimit", "999")
 	v.SetDefault("Activity.TopMoviesTitle", "Top Movies")
 
+	v.SetDefault("Favorite.DB.Driver", "sqlite3")
+	v.SetDefault("Favorite.DB.Source", "${Server.DataDir}/favorite.db")
+	v.SetDefault("Favorite.DB.Logger", "default")
+	v.SetDefault("Favorite.ArtistLimit", "999")
+	v.SetDefault("Favorite.ArtistsTracksLimit", "50")
+	v.SetDefault("Favorite.TrackLimit", "9999")
+	v.SetDefault("Favorite.MovieLimit", "999")
+	v.SetDefault("Favorite.TVSeriesLimit", "999")
+
 	// TODO apply as default
 	// v.SetDefault("Bucket.URLExpiration", "15m")
 
@@ -418,6 +439,8 @@ func configDefaults(v *viper.Viper) {
 
 	v.SetDefault("LastFM.Key", "")
 	v.SetDefault("LastFM.Secret", "")
+
+	v.SetDefault("ListenBrainz.Token", "")
 
 	v.SetDefault("Music.ArtistRadioBreadth", "10")
 	v.SetDefault("Music.ArtistRadioDepth", "3")
