@@ -1221,7 +1221,7 @@ func apiFavoriteTrackAdd(w http.ResponseWriter, r *http.Request) {
 func apiFavoriteArtistAdd(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	arid := r.PathValue(ParamARID)
-	artist, err := ctx.FindArtist("arid:" + arid)
+	artist, err := ctx.FindArtist(arid)
 	if err != nil {
 		notFoundErr(w)
 		return

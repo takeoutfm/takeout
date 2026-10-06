@@ -1,3 +1,7 @@
+## 0.29.2
+
+- fav artist fix
+
 ## 0.29.1
 
 - fav fixes
