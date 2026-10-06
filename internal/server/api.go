@@ -1265,7 +1265,7 @@ func doCreateFavorites(ctx Context, w http.ResponseWriter, favorites model.Favor
 func apiFavoriteArtistDelete(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	arid := r.PathValue(ParamARID)
-	artist, err := ctx.FindArtist("arid:" + arid)
+	artist, err := ctx.FindArtist(arid)
 	if err != nil {
 		notFoundErr(w)
 		return
