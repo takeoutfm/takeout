@@ -1,3 +1,7 @@
+## 0.29.1
+
+- fav fixes
+
 ## 0.29.0
 
 - ListenBrainz needs authorization header now

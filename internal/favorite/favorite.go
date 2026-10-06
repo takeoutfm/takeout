@@ -20,6 +20,7 @@ package favorite
 
 import (
 	"fmt"
+	"time"
 
 	"gorm.io/gorm"
 	"takeoutfm.dev/takeout/internal/auth"
@@ -325,6 +326,9 @@ func (fav *Favorite) CreateFavorites(ctx Context, favorites Favorites) error {
 	user := ctx.User()
 	for _, f := range favorites.Movies {
 		f.User = user.Name
+		if f.Date.IsZero() {
+			f.Date = time.Now()
+		}
 		if f.ETag != "" {
 			// resolve using ETag
 			movie, err := ctx.Film().LookupETag(f.ETag)
@@ -345,6 +349,9 @@ func (fav *Favorite) CreateFavorites(ctx Context, favorites Favorites) error {
 
 	for _, f := range favorites.Artists {
 		f.User = user.Name
+		if f.Date.IsZero() {
+			f.Date = time.Now()
+		}
 		if f.IsValid() == false {
 			return fmt.Errorf("favorite is %#v: %w", f, ErrInvalidArtistFavorite)
 		}
@@ -356,6 +363,9 @@ func (fav *Favorite) CreateFavorites(ctx Context, favorites Favorites) error {
 
 	for _, f := range favorites.Shows {
 		f.User = user.Name
+		if f.Date.IsZero() {
+			f.Date = time.Now()
+		}
 		if f.IsValid() == false {
 			return fmt.Errorf("favorite is %#v: %w", f, ErrInvalidTVSeriesFavorite)
 		}
@@ -367,6 +377,9 @@ func (fav *Favorite) CreateFavorites(ctx Context, favorites Favorites) error {
 
 	for _, f := range favorites.Tracks {
 		f.User = user.Name
+		if f.Date.IsZero() {
+			f.Date = time.Now()
+		}
 		if f.ETag != "" {
 			// resolve using ETag
 			track, err := ctx.Music().LookupETag(f.ETag)
