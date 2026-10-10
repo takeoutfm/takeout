@@ -443,12 +443,12 @@ func Serve(c context.Context, config *config.Config) error {
 			os.Remove(socketPath)
 			os.Exit(1)
 		}()
-		err = http.Serve(sock, ctrl)
+		err = newHTTPServer("", ctrl).Serve(sock)
 		log.CheckError(err)
 	}()
 
 	systemd.StartWatchdogNotify()
 
 	log.Printf("%s v%s listening on %s", takeout.AppName, takeout.Version, config.Server.Listen)
-	return http.ListenAndServe(config.Server.Listen, mux)
+	return newHTTPServer(config.Server.Listen, hardened(mux)).ListenAndServe()
 }
