@@ -1,3 +1,8 @@
+## 0.29.4
+
+- use txn for favorite inserts
+- updated all db indices with help from claude
+
 ## 0.29.3
 
 - fix delete

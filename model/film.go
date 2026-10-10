@@ -27,9 +27,9 @@ import (
 
 type Movie struct {
 	gorm.Model
-	UUID             string `gorm:"index:idx_movie_uuid" json:"-"`
-	TMID             int64  `gorm:"uniqueIndex:idx_movie_tmid"`
-	IMID             string
+	UUID             string `gorm:"index:idx_movies_uuid" json:"-"`
+	TMID             int64  `gorm:"uniqueIndex:idx_movies_tm_id"`
+	IMID             string `gorm:"index:idx_movies_im_id"`
 	Title            string
 	Date             time.Time
 	Rating           string
@@ -45,9 +45,9 @@ type Movie struct {
 	BackdropPath     string
 	PosterPath       string
 	SortTitle        string
-	Key              string
+	Key              string `gorm:"index:idx_movies_key"`
 	Size             int64
-	ETag             string
+	ETag             string `gorm:"index:idx_movies_e_tag"`
 	LastModified     time.Time
 }
 
@@ -58,27 +58,27 @@ func (m *Movie) BeforeCreate(tx *g.DB) (err error) {
 
 type Collection struct {
 	gorm.Model
-	Name     string
+	Name     string `gorm:"index:idx_collections_name"`
 	SortName string
-	TMID     int64
+	TMID     int64 `gorm:"index:idx_collections_tm_id"`
 }
 
 type Genre struct {
 	gorm.Model
-	TMID int64
+	TMID int64 `gorm:"index:idx_genres_tm_id"`
 	Name string
 }
 
 type Keyword struct {
 	gorm.Model
-	TMID int64 `gorm:"index:idx_keyword_tmid"`
+	TMID int64 `gorm:"index:idx_keywords_tm_id"`
 	Name string
 }
 
 type Cast struct {
 	gorm.Model
-	TMID      int64 `gorm:"index:idx_cast_tmid"`
-	PEID      int64 `gorm:"index:idx_cast_peid"`
+	TMID      int64 `gorm:"index:idx_casts_tm_id"`
+	PEID      int64 `gorm:"index:idx_casts_pe_id"`
 	Character string
 	Rank      int
 	Person    Person `gorm:"-"`
@@ -98,8 +98,8 @@ func (c Cast) GetPerson() Person {
 
 type Crew struct {
 	gorm.Model
-	TMID       int64 `gorm:"index:idx_crew_tmid"`
-	PEID       int64 `gorm:"index:idx_crew_peid"`
+	TMID       int64 `gorm:"index:idx_crews_tm_id"`
+	PEID       int64 `gorm:"index:idx_crews_pe_id"`
 	Department string
 	Job        string
 	Person     Person `gorm:"-"`
@@ -124,7 +124,7 @@ type Recommend struct {
 
 type Trailer struct {
 	gorm.Model
-	TMID     int64
+	TMID     int64 `gorm:"index:idx_trailers_tm_id"`
 	Name     string
 	Site     string
 	Key      string

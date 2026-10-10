@@ -28,9 +28,9 @@ import (
 // Artist info from MusicBrainz.
 type Artist struct {
 	gorm.Model
-	Name           string `gorm:"uniqueIndex:idx_artist_name"`
+	Name           string `gorm:"index:idx_artists_name"`
 	SortName       string
-	ARID           string `gorm:"uniqueIndex:idx_artist_arid"`
+	ARID           string `gorm:"uniqueIndex:idx_artists_ar_id"`
 	Disambiguation string
 	Country        string
 	Area           string
@@ -53,17 +53,17 @@ type CoverArt interface {
 // Release info from MusicBrainz.
 type Release struct {
 	gorm.Model
-	Artist         string `gorm:"uniqueIndex:idx_release;index:idx_release_artist"`
-	Name           string `gorm:"uniqueIndex:idx_release;index:idx_release_name" sql:"collate:nocase"`
-	RGID           string `gorm:"index:idx_release_rgid"`
-	REID           string `gorm:"uniqueIndex:idx_release;index:idx_release_reid"`
+	Artist         string `gorm:"index:idx_releases_artist"`
+	Name           string `gorm:"index:idx_releases_name;type:text collate nocase"`
+	RGID           string `gorm:"index:idx_releases_rg_id"`
+	REID           string `gorm:"uniqueIndex:idx_releases_re_id"`
 	Disambiguation string
 	Asin           string
 	Country        string
-	Type           string `gorm:"index:idx_release_type"`
+	Type           string `gorm:"index:idx_releases_type"`
 	SecondaryType  string
-	Date           time.Time `gorm:"index:idx_release_rgdate"` // rg first release
-	ReleaseDate    time.Time `gorm:"index:idx_release_redate"` // re release date
+	Date           time.Time `gorm:"index:idx_releases_date"`         // rg first release
+	ReleaseDate    time.Time `gorm:"index:idx_releases_release_date"` // re release date
 	Status         string
 	TrackCount     int
 	DiscCount      int
@@ -73,8 +73,8 @@ type Release struct {
 	OtherArtwork   string
 	GroupArtwork   bool
 	Media          []Media `gorm:"-"`
-	SingleName     string  `gorm:"index:idx_release_single_name"`
-	GroupName      string  `gorm:"index:idx_release_group_name"`
+	SingleName     string  `gorm:"index:idx_releases_single_name"`
+	GroupName      string  `gorm:"index:idx_releases_group_name"`
 }
 
 func (r Release) HasArtwork() bool {
@@ -108,9 +108,9 @@ func (r Release) Official() bool {
 // Release Media from MusicBrainz.
 type Media struct {
 	gorm.Model
-	REID       string `gorm:"uniqueIndex:idx_media"`
-	Name       string `gorm:"uniqueIndex:idx_media"`
-	Position   int    `gorm:"uniqueIndex:idx_media"`
+	REID       string `gorm:"uniqueIndex:idx_media_re_id_position,priority:1"`
+	Name       string
+	Position   int `gorm:"uniqueIndex:idx_media_re_id_position,priority:2"`
 	Format     string
 	TrackCount int
 }
@@ -118,8 +118,8 @@ type Media struct {
 // Popular tracks for an artist from Last.fm.
 type Popular struct {
 	gorm.Model
-	Artist string `gorm:"uniqueIndex:idx_popular"`
-	Title  string `gorm:"uniqueIndex:idx_popular"`
+	Artist string `gorm:"uniqueIndex:idx_popular_artist_title,priority:1"`
+	Title  string `gorm:"uniqueIndex:idx_popular_artist_title,priority:2"`
 	Rank   int
 }
 
@@ -130,8 +130,8 @@ func (Popular) TableName() string {
 // Similar artist info from Last.fm
 type Similar struct {
 	gorm.Model
-	Artist string `gorm:"uniqueIndex:idx_similar"`
-	ARID   string `gorm:"uniqueIndex:idx_similar"`
+	Artist string `gorm:"uniqueIndex:idx_similar_artist_ar_id,priority:1"`
+	ARID   string `gorm:"uniqueIndex:idx_similar_artist_ar_id,priority:2"`
 	Rank   int
 }
 
@@ -142,8 +142,8 @@ func (Similar) TableName() string {
 // Artist tags from MusicBrainz.
 type ArtistTag struct {
 	gorm.Model
-	Artist string `gorm:"uniqueIndex:idx_tag"`
-	Tag    string `gorm:"uniqueIndex:idx_tag"`
+	Artist string `gorm:"uniqueIndex:idx_artist_tags_artist_tag,priority:1"`
+	Tag    string `gorm:"uniqueIndex:idx_artist_tags_artist_tag,priority:2"`
 	Count  int
 }
 
@@ -151,23 +151,23 @@ type ArtistTag struct {
 // data from MusicBrainz.
 type Track struct {
 	gorm.Model
-	UUID         string `gorm:"index:idx_track_uuid"`
-	Artist       string `spiff:"creator" gorm:"index:idx_track_artist"`
-	Release      string `gorm:"index:idx_track_release"`
-	Date         string `gorm:"index:idx_track_date"`
+	UUID         string `gorm:"index:idx_tracks_uuid"`
+	Artist       string `spiff:"creator" gorm:"index:idx_tracks_artist"`
+	Release      string `gorm:"index:idx_tracks_release"`
+	Date         string `gorm:"index:idx_tracks_date"`
 	TrackNum     int    `spiff:"tracknum"`
 	DiscNum      int
-	Title        string `spiff:"title" gorm:"index:idx_track_title"`
-	Key          string // TODO - unique constraint
+	Title        string `spiff:"title" gorm:"index:idx_tracks_title"`
+	Key          string `gorm:"uniqueIndex:idx_tracks_key"`
 	Size         int64
-	ETag         string
+	ETag         string `gorm:"index:idx_tracks_e_tag"`
 	LastModified time.Time
 	TrackCount   int
 	DiscCount    int
-	REID         string `gorm:"index:idx_track_reid"`
-	RGID         string `gorm:"index:idx_track_rgid"`
-	RID          string `gorm:"index:idx_track_rid"`  // recording id
-	ARID         string `gorm:"index:idx_track_arid"` // TODO only for local right now
+	REID         string `gorm:"index:idx_tracks_re_id"`
+	RGID         string `gorm:"index:idx_tracks_rg_id"`
+	RID          string `gorm:"index:idx_tracks_r_id"`  // recording id
+	ARID         string `gorm:"index:idx_tracks_ar_id"` // TODO only for local right now
 	MediaTitle   string
 	ReleaseTitle string `spiff:"album"`
 	TrackArtist  string // artist with featured artists
@@ -218,16 +218,16 @@ func (t Track) ArtworkMBIDs() (string, string) {
 
 type Playlist struct {
 	gorm.Model
-	User       string `gorm:"uniqueIndex:idx_playlist"`
-	Name       string `gorm:"uniqueIndex:idx_playlist"`
+	User       string `gorm:"uniqueIndex:idx_playlists_user_name,priority:1"`
+	Name       string `gorm:"uniqueIndex:idx_playlists_user_name,priority:2"`
 	Playlist   []byte
 	TrackCount int
 }
 
 type Station struct {
 	gorm.Model
-	User        string `gorm:"uniqueIndex:idx_station" json:"-"`
-	Name        string `gorm:"uniqueIndex:idx_station"`
+	User        string `gorm:"uniqueIndex:idx_stations_user_name,priority:1" json:"-"`
+	Name        string `gorm:"uniqueIndex:idx_stations_user_name,priority:2"`
 	Creator     string
 	Ref         string `json:"-"`
 	Shared      bool   `json:"-"`
@@ -243,17 +243,17 @@ func (s *Station) Visible(user string) bool {
 
 type ArtistImage struct {
 	gorm.Model
-	Artist string `gorm:"uniqueIndex:idx_artist_img"`
-	URL    string `gorm:"uniqueIndex:idx_artist_img"`
-	Source string `gorm:"uniqueIndex:idx_artist_img"`
+	Artist string `gorm:"uniqueIndex:idx_artist_images_artist_url_source,priority:1"`
+	URL    string `gorm:"uniqueIndex:idx_artist_images_artist_url_source,priority:2"`
+	Source string `gorm:"uniqueIndex:idx_artist_images_artist_url_source,priority:3"`
 	Rank   int
 }
 
 type ArtistBackground struct {
 	gorm.Model
-	Artist string `gorm:"uniqueIndex:idx_artist_bg"`
-	URL    string `gorm:"uniqueIndex:idx_artist_bg"`
-	Source string `gorm:"uniqueIndex:idx_artist_bg"`
+	Artist string `gorm:"uniqueIndex:idx_artist_backgrounds_artist_url_source,priority:1"`
+	URL    string `gorm:"uniqueIndex:idx_artist_backgrounds_artist_url_source,priority:2"`
+	Source string `gorm:"uniqueIndex:idx_artist_backgrounds_artist_url_source,priority:3"`
 	Rank   int
 }
 

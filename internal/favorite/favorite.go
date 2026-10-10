@@ -35,15 +35,23 @@ import (
 )
 
 var (
-	ErrInvalidUser             = errors.New("invalid user")
-	ErrInvalidTrackFavorite    = errors.New("invalid track favorite")
-	ErrInvalidArtistFavorite   = errors.New("invalid artist favorite")
-	ErrInvalidMovieFavorite    = errors.New("invalid movie favorite")
-	ErrInvalidTVSeriesFavorite = errors.New("invalid tvseries favorite")
-	ErrTrackNotFound           = errors.New("track not found")
-	ErrMovieNotFound           = errors.New("movie not found")
-	ErrTVSeriesNotFound        = errors.New("tvseries not found")
-	ErrArtistNotFound          = errors.New("artist not found")
+	ErrInvalidUser               = errors.New("invalid user")
+	ErrInvalidTrackFavorite      = errors.New("invalid track favorite")
+	ErrInvalidArtistFavorite     = errors.New("invalid artist favorite")
+	ErrInvalidMovieFavorite      = errors.New("invalid movie favorite")
+	ErrInvalidTVSeriesFavorite   = errors.New("invalid tvseries favorite")
+	ErrTrackNotFound             = errors.New("track not found")
+	ErrMovieNotFound             = errors.New("movie not found")
+	ErrTVSeriesNotFound          = errors.New("tvseries not found")
+	ErrArtistNotFound            = errors.New("artist not found")
+	ErrTrackFavoriteExists       = errors.New("track favorite already exists")
+	ErrMovieFavoriteExists       = errors.New("movie favorite already exists")
+	ErrArtistFavoriteExists      = errors.New("artist favorite already exists")
+	ErrTVSeriesFavoriteExists    = errors.New("tvseries favorite already exists")
+	ErrArtistFavoriteDuplicate   = errors.New("artist favorite duplicate")
+	ErrMovieFavoriteDuplicate    = errors.New("movie favorite duplicate")
+	ErrTrackFavoriteDuplicate    = errors.New("track favorite duplicate")
+	ErrTVSeriesFavoriteDuplicate = errors.New("tvseries favorite duplicate")
 )
 
 type Context interface {
@@ -323,77 +331,186 @@ func (fav *Favorite) IsFavoriteTVSeries(ctx Context, series TVSeries) bool {
 }
 
 func (fav *Favorite) CreateFavorites(ctx Context, favorites Favorites) error {
+	if err := fav.prepareFavorites(ctx, favorites); err != nil {
+		return err
+	}
+	return fav.InTx(func(tx *Favorite) error {
+		return tx.insertFavorites(favorites)
+	})
+}
+
+func (fav *Favorite) prepareFavorites(ctx Context, favorites Favorites) error {
 	user := ctx.User()
-	for _, f := range favorites.Movies {
+	if user.Name == "" {
+		return ErrInvalidUser
+	}
+
+	now := time.Now()
+
+	var movieMap = make(map[string]bool)
+
+	for i := range favorites.Movies {
+		f := &favorites.Movies[i]
 		f.User = user.Name
 		if f.Date.IsZero() {
-			f.Date = time.Now()
+			f.Date = now
 		}
 		if f.ETag != "" {
 			// resolve using ETag
 			movie, err := ctx.Film().LookupETag(f.ETag)
 			if err != nil {
-				return err
+				return fmt.Errorf("movie etag %s: %w", f.ETag, err)
 			}
 			f.IMID = movie.IMID
 			f.TMID = movie.TMID
+			if fav.IsFavoriteMovie(ctx, movie) {
+				return ErrMovieFavoriteExists
+			}
+		} else if f.IMID != "" {
+			movie, err := ctx.Film().LookupIMID(f.IMID)
+			if err != nil {
+				return fmt.Errorf("movie imid %s: %w", f.IMID, err)
+			}
+			f.TMID = movie.TMID
+			if fav.IsFavoriteMovie(ctx, movie) {
+				return ErrMovieFavoriteExists
+			}
 		}
+
+		if f.IMID != "" {
+			if movieMap[f.IMID] {
+				return ErrMovieFavoriteDuplicate
+			}
+			movieMap[f.IMID] = true
+		}
+
+		// check valid after since having an ETag only is not valid,
+		// need to resolve first and call valid after.
 		if f.IsValid() == false {
 			return fmt.Errorf("favorite is %#v: %w", f, ErrInvalidMovieFavorite)
 		}
-		err := fav.createMovieFavorite(&f)
-		if err != nil {
-			return err
-		}
 	}
 
-	for _, f := range favorites.Artists {
+	var artistMap = make(map[string]bool)
+
+	for i := range favorites.Artists {
+		f := &favorites.Artists[i]
 		f.User = user.Name
 		if f.Date.IsZero() {
-			f.Date = time.Now()
+			f.Date = now
 		}
 		if f.IsValid() == false {
 			return fmt.Errorf("favorite is %#v: %w", f, ErrInvalidArtistFavorite)
 		}
-		err := fav.createArtistFavorite(&f)
+		artist, err := ctx.Music().LookupARID(f.ARID)
 		if err != nil {
-			return err
+			return fmt.Errorf("artist arid %s: %w", f.ARID, err)
 		}
+		if fav.IsFavoriteArtist(ctx, artist) {
+			return ErrArtistFavoriteExists
+		}
+		if artistMap[f.ARID] {
+			return ErrArtistFavoriteDuplicate
+		}
+		artistMap[f.ARID] = true
 	}
 
-	for _, f := range favorites.Shows {
+	var showMap = make(map[int64]bool)
+
+	for i := range favorites.Shows {
+		f := &favorites.Shows[i]
 		f.User = user.Name
 		if f.Date.IsZero() {
-			f.Date = time.Now()
+			f.Date = now
 		}
 		if f.IsValid() == false {
 			return fmt.Errorf("favorite is %#v: %w", f, ErrInvalidTVSeriesFavorite)
 		}
-		err := fav.createTVSeriesFavorite(&f)
+		series, err := ctx.TV().LookupTVID(int(f.TVID))
 		if err != nil {
-			return err
+			return fmt.Errorf("tvseries tvid %d: %w", f.TVID, err)
 		}
+		if fav.IsFavoriteTVSeries(ctx, series) {
+			return ErrTVSeriesFavoriteExists
+		}
+		if showMap[f.TVID] {
+			return ErrTVSeriesFavoriteDuplicate
+		}
+		showMap[f.TVID] = true
 	}
 
-	for _, f := range favorites.Tracks {
+	var trackMap = make(map[string]bool)
+
+	for i := range favorites.Tracks {
+		f := &favorites.Tracks[i]
 		f.User = user.Name
 		if f.Date.IsZero() {
-			f.Date = time.Now()
+			f.Date = now
 		}
 		if f.ETag != "" {
 			// resolve using ETag
 			track, err := ctx.Music().LookupETag(f.ETag)
 			if err != nil {
-				return err
+				return fmt.Errorf("track etag %s: %w", f.ETag, err)
 			}
 			f.RID = track.RID
 			f.RGID = track.RGID
+			if fav.IsFavoriteTrack(ctx, track) {
+				return ErrTrackFavoriteExists
+			}
+		} else if f.RID != "" {
+			track, err := ctx.Music().LookupRID(f.RID)
+			if err != nil {
+				return fmt.Errorf("track rid %s: %w", f.RID, err)
+			}
+			f.RGID = track.RGID
+			if fav.IsFavoriteTrack(ctx, track) {
+				return ErrTrackFavoriteExists
+			}
 		}
+
+		if f.RID != "" {
+			if trackMap[f.RID] {
+				return ErrTrackFavoriteDuplicate
+			}
+			trackMap[f.RID] = true
+		}
+
+		// check valid after since having an ETag only is not valid,
+		// need to resolve first and call valid after.
 		if f.IsValid() == false {
-			return fmt.Errorf("event is %#v: %w", f, ErrInvalidTrackFavorite)
+			return fmt.Errorf("favorite is %#v: %w", f, ErrInvalidTrackFavorite)
 		}
-		err := fav.createTrackFavorite(&f)
-		if err != nil {
+	}
+
+	return nil
+}
+
+func (fav *Favorite) insertFavorites(favorites Favorites) error {
+	for i := range favorites.Movies {
+		f := &favorites.Movies[i]
+		if err := fav.createMovieFavorite(f); err != nil {
+			return err
+		}
+	}
+
+	for i := range favorites.Artists {
+		f := &favorites.Artists[i]
+		if err := fav.createArtistFavorite(f); err != nil {
+			return err
+		}
+	}
+
+	for i := range favorites.Shows {
+		f := &favorites.Shows[i]
+		if err := fav.createTVSeriesFavorite(f); err != nil {
+			return err
+		}
+	}
+
+	for i := range favorites.Tracks {
+		f := &favorites.Tracks[i]
+		if err := fav.createTrackFavorite(f); err != nil {
 			return err
 		}
 	}

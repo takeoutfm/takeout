@@ -57,8 +57,8 @@ type Events struct {
 
 type MovieEvent struct {
 	gorm.Model
-	User string    `gorm:"index:idx_movie_user" json:"-"`
-	Date time.Time `gorm:"uniqueIndex:idx_movie_date"`
+	User string    `gorm:"index:idx_movie_events_user_date,priority:1" json:"-"`
+	Date time.Time `gorm:"index:idx_movie_events_user_date,priority:2"`
 	TMID string
 	IMID string
 	ETag string `gorm:"-"`
@@ -70,8 +70,8 @@ func (m *MovieEvent) IsValid() bool {
 
 type TrackEvent struct {
 	gorm.Model
-	User string    `gorm:"index:idx_track_user" json:"-"`
-	Date time.Time `gorm:"uniqueIndex:idx_track_date"` // TODO dup index name w/ music
+	User string    `gorm:"index:idx_track_events_user_date,priority:1" json:"-"`
+	Date time.Time `gorm:"index:idx_track_events_user_date,priority:2"`
 	RID  string
 	RGID string
 	ETag string `gorm:"-"`
@@ -83,8 +83,8 @@ func (t *TrackEvent) IsValid() bool {
 
 type EpisodeEvent struct {
 	gorm.Model
-	User string    `gorm:"index:idx_episode_user" json:"-"`
-	Date time.Time `gorm:"uniqueIndex:idx_episode_date"`
+	User string    `gorm:"index:idx_episode_events_user_date,priority:1" json:"-"`
+	Date time.Time `gorm:"index:idx_episode_events_user_date,priority:2"`
 	EID  string
 }
 

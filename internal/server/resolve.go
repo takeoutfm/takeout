@@ -539,7 +539,7 @@ func resolveFavoriteTracksRef(ctx Context, entries []spiff.Entry) ([]spiff.Entry
 }
 
 // /favorite/artists/{res}
-func resolveFavoriteArtistsTracksRef(ctx Context, res string, entries []spiff.Entry) ([]spiff.Entry, error) {
+func resolveFavoriteArtistTracksRef(ctx Context, res string, entries []spiff.Entry) ([]spiff.Entry, error) {
 	v := FavoriteArtistsView(ctx)
 	var tracks []model.Track
 	// build list of tracks for each favorite artist
@@ -635,7 +635,7 @@ var (
 	episodesRegexp              = regexp.MustCompile(`^/podcasts/episodes/([\d]+)$`)
 	recentTracksRegexp          = regexp.MustCompile(`^/activity/tracks$`)
 	favoriteTracksRegexp        = regexp.MustCompile(`^/favorite/tracks$`)
-	favoriteArtistsTracksRegexp = regexp.MustCompile(`^/favorite/artists/([\w ]+)$`)
+	favoriteArtistTracksRegexp = regexp.MustCompile(`^/favorite/artists/([\w ]+)$`)
 )
 
 func Resolve(ctx Context, plist *spiff.Playlist) (err error) {
@@ -773,9 +773,9 @@ func Resolve(ctx Context, plist *spiff.Playlist) (err error) {
 			continue
 		}
 
-		matches = favoriteArtistsTracksRegexp.FindStringSubmatch(pathRef)
+		matches = favoriteArtistTracksRegexp.FindStringSubmatch(pathRef)
 		if matches != nil {
-			entries, err = resolveFavoriteArtistsTracksRef(ctx, matches[1], entries)
+			entries, err = resolveFavoriteArtistTracksRef(ctx, matches[1], entries)
 			if err != nil {
 				return err
 			}
@@ -1022,9 +1022,9 @@ func ResolveFavoriteTracksPlaylist(ctx Context, favorite *view.FavoriteTracks, p
 	return plist
 }
 
-func ResolveFavoriteArtistsTracksPlaylist(ctx Context, favorite *view.FavoriteArtists, path, res string) *spiff.Playlist {
+func ResolveFavoriteArtistTracksPlaylist(ctx Context, favorite *view.FavoriteArtists, path, res string) *spiff.Playlist {
 	var entries []spiff.Entry
-	entries, _ = resolveFavoriteArtistsTracksRef(ctx, res, entries)
+	entries, _ = resolveFavoriteArtistTracksRef(ctx, res, entries)
 
 	image := ""
 	for _, t := range entries {

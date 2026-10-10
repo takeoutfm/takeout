@@ -36,26 +36,26 @@ type Favorites struct {
 
 type MovieFavorite struct {
 	gorm.Model
-	User string    `gorm:"index:idx_movie_fav_user" json:"-"`
-	Date time.Time `gorm:"uniqueIndex:idx_movie_fav_date"`
+	User string `gorm:"uniqueIndex:idx_movie_favorites_user_im_id,priority:1" json:"-"`
+	Date time.Time
 	TMID int64
-	IMID string
+	IMID string `gorm:"uniqueIndex:idx_movie_favorites_user_im_id,priority:2"`
 	ETag string `gorm:"-"`
 }
 
 func (f *MovieFavorite) IsFavorite(m Movie) bool {
-	return (f.IMID != "" && f.IMID == m.IMID) || (f.TMID > 0 && f.TMID == m.TMID)
+	return f.IMID != "" && f.IMID == m.IMID
 }
 
 func (f *MovieFavorite) IsValid() bool {
-	return f.User != "" && f.Date.IsZero() == false && (f.TMID > 0 || f.IMID != "")
+	return f.User != "" && f.Date.IsZero() == false && f.IMID != ""
 }
 
 type TVSeriesFavorite struct {
 	gorm.Model
-	User string    `gorm:"index:idx_tvseries_fav_user" json:"-"`
-	Date time.Time `gorm:"uniqueIndex:idx_tvseries_fav_date"`
-	TVID int64
+	User string `gorm:"uniqueIndex:idx_tv_series_favorites_user_tv_id,priority:1" json:"-"`
+	Date time.Time
+	TVID int64 `gorm:"uniqueIndex:idx_tv_series_favorites_user_tv_id,priority:2"`
 }
 
 func (f *TVSeriesFavorite) IsFavorite(s TVSeries) bool {
@@ -68,9 +68,9 @@ func (f *TVSeriesFavorite) IsValid() bool {
 
 type TrackFavorite struct {
 	gorm.Model
-	User string    `gorm:"index:idx_track_fav_user" json:"-"`
-	Date time.Time `gorm:"uniqueIndex:idx_track_fav_date"`
-	RID  string
+	User string `gorm:"uniqueIndex:idx_track_favorites_user_r_id,priority:1" json:"-"`
+	Date time.Time
+	RID  string `gorm:"uniqueIndex:idx_track_favorites_user_r_id,priority:2"`
 	RGID string
 	ETag string `gorm:"-"`
 }
@@ -85,9 +85,9 @@ func (f *TrackFavorite) IsValid() bool {
 
 type ArtistFavorite struct {
 	gorm.Model
-	User string    `gorm:"index:idx_artist_fav_user" json:"-"`
-	Date time.Time `gorm:"uniqueIndex:idx_artist_fav_date"`
-	ARID string
+	User string `gorm:"uniqueIndex:idx_artist_favorites_user_ar_id,priority:1" json:"-"`
+	Date time.Time
+	ARID string `gorm:"uniqueIndex:idx_artist_favorites_user_ar_id,priority:2"`
 }
 
 func (f *ArtistFavorite) IsFavorite(a Artist) bool {

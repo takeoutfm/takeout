@@ -28,7 +28,7 @@ import (
 
 type TVSeries struct {
 	gorm.Model
-	TVID             int64 `gorm:"uniqueIndex:idx_series_tvid"`
+	TVID             int64 `gorm:"uniqueIndex:idx_series_tv_id"`
 	Name             string
 	SortName         string
 	Date             time.Time
@@ -53,20 +53,20 @@ func (TVSeries) TableName() string {
 // unique key is TVID, season, episode
 type TVEpisode struct {
 	gorm.Model
-	UUID         string `gorm:"index:idx_episode_uuid" json:"-"`
-	TVID         int64  `gorm:"index:idx_episode_tvid"`
+	UUID         string `gorm:"index:idx_episodes_uuid" json:"-"`
+	TVID         int64  `gorm:"uniqueIndex:idx_episodes_tv_id_season_episode,priority:1"`
 	Name         string
 	Overview     string
 	Date         time.Time
 	StillPath    string
-	Season       int `gorm:"index:idx_episode_season"`
-	Episode      int `gorm:"index:idx_episode_episode"`
+	Season       int `gorm:"uniqueIndex:idx_episodes_tv_id_season_episode,priority:2"`
+	Episode      int `gorm:"uniqueIndex:idx_episodes_tv_id_season_episode,priority:3"`
 	VoteAverage  float32
 	VoteCount    int
 	Runtime      int
 	Key          string
 	Size         int64
-	ETag         string
+	ETag         string `gorm:"index:idx_episodes_e_tag"`
 	LastModified time.Time
 }
 
@@ -81,7 +81,7 @@ func (e *TVEpisode) BeforeCreate(tx *g.DB) (err error) {
 
 type TVGenre struct {
 	gorm.Model
-	TVID int64 `gorm:"index:idx_genre_tvid"`
+	TVID int64 `gorm:"index:idx_genres_tv_id"`
 	Name string
 }
 
@@ -91,7 +91,7 @@ func (TVGenre) TableName() string {
 
 type TVKeyword struct {
 	gorm.Model
-	TVID int64 `gorm:"index:idx_keyword_tvid"`
+	TVID int64 `gorm:"index:idx_keywords_tv_id"`
 	Name string
 }
 
@@ -101,8 +101,8 @@ func (TVKeyword) TableName() string {
 
 type TVSeriesCast struct {
 	gorm.Model
-	TVID      int64 `gorm:"index:idx_cast_tvid"`
-	PEID      int64 `gorm:"index:idx_cast_peid"`
+	TVID      int64 `gorm:"index:idx_series_cast_tv_id"`
+	PEID      int64 `gorm:"index:idx_series_cast_pe_id"`
 	Character string
 	Rank      int
 	Person    Person `gorm:"-"`
@@ -122,8 +122,8 @@ func (c TVSeriesCast) GetPerson() Person {
 
 type TVSeriesCrew struct {
 	gorm.Model
-	TVID       int64 `gorm:"index:idx_crew_tvid"`
-	PEID       int64 `gorm:"index:idx_crew_peid"`
+	TVID       int64 `gorm:"index:idx_series_crew_tv_id"`
+	PEID       int64 `gorm:"index:idx_series_crew_pe_id"`
 	Department string
 	Job        string
 	Person     Person `gorm:"-"`
@@ -143,8 +143,8 @@ func (c TVSeriesCrew) GetPerson() Person {
 
 type TVEpisodeCast struct {
 	gorm.Model
-	EID       uint  `gorm:"index:idx_episode_cast_eid"`
-	PEID      int64 `gorm:"index:idx_episode_cast_peid"`
+	EID       uint  `gorm:"index:idx_episode_cast_e_id"`
+	PEID      int64 `gorm:"index:idx_episode_cast_pe_id"`
 	Character string
 	Rank      int
 	Person    Person `gorm:"-"`
@@ -164,8 +164,8 @@ func (c TVEpisodeCast) GetPerson() Person {
 
 type TVEpisodeCrew struct {
 	gorm.Model
-	EID        uint  `gorm:"index:idx_episode_crew_eid"`
-	PEID       int64 `gorm:"index:idx_episode_crew_peid"`
+	EID        uint  `gorm:"index:idx_episode_crew_e_id"`
+	PEID       int64 `gorm:"index:idx_episode_crew_pe_id"`
 	Department string
 	Job        string
 	Person     Person `gorm:"-"`

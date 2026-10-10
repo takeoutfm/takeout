@@ -24,7 +24,7 @@ import (
 
 type Series struct {
 	gorm.Model
-	SID         string `gorm:"uniqueIndex:idx_series"` // hash of link
+	SID         string `gorm:"uniqueIndex:idx_series_s_id"` // hash of link
 	Title       string
 	Description string
 	Author      string
@@ -41,8 +41,8 @@ func (Series) TableName() string {
 
 type Episode struct {
 	gorm.Model
-	SID         string // series ID
-	EID         string `gorm:"uniqueIndex:idx_episode"` // GUID
+	SID         string `gorm:"index:idx_episodes_s_id_date,priority:1"` // series ID
+	EID         string `gorm:"uniqueIndex:idx_episodes_e_id"`           // GUID
 	Title       string
 	Author      string
 	Link        string
@@ -50,7 +50,7 @@ type Episode struct {
 	ContentType string
 	Size        int64
 	URL         string
-	Date        time.Time // publish time
+	Date        time.Time `gorm:"index:idx_episodes_s_id_date,priority:2"` // publish time
 	Image       string
 }
 

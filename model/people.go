@@ -24,8 +24,8 @@ import (
 
 type Person struct {
 	gorm.Model
-	PEID        int64 `gorm:"uniqueIndex:idx_person_peid"`
-	IMID        string
+	PEID        int64  `gorm:"uniqueIndex:idx_people_pe_id"`
+	IMID        string `gorm:"index:idx_people_im_id"`
 	Name        string
 	ProfilePath string
 	Bio         string

@@ -1181,7 +1181,7 @@ func apiFavoriteArtistsGetPlaylist(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	favorites := FavoriteArtistsView(ctx)
 	res := r.PathValue(ParamRes)
-	plist := ResolveFavoriteArtistsTracksPlaylist(ctx, favorites, r.URL.Path, res)
+	plist := ResolveFavoriteArtistTracksPlaylist(ctx, favorites, r.URL.Path, res)
 	writePlaylist(w, r, plist)
 }
 

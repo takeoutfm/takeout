@@ -50,6 +50,12 @@ func (fav *Favorite) closeDB() {
 	conn.Close()
 }
 
+func (fav *Favorite) InTx(fn func(tx *Favorite) error) error {
+    return fav.db.Transaction(func(txdb *gorm.DB) error {
+        return fn(&Favorite{db: txdb})
+    })
+}
+
 func favoritesOf[T any](db *gorm.DB, user string, limit int) []T {
 	var favorites []T
 	db.Where("user = ?", user).
