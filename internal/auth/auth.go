@@ -70,7 +70,7 @@ var (
 
 type User struct {
 	gorm.Model
-	Name  string `gorm:"uniqueIndex:idx_user_name"`
+	Name  string `gorm:"uniqueIndex:idx_users_name"`
 	Key   []byte
 	Salt  []byte
 	Media string
@@ -81,9 +81,9 @@ type User struct {
 // expiration date.
 type Session struct {
 	gorm.Model
-	User    string    `gorm:"uniqueIndex:idx_session;index:idx_session_user"`
-	Token   string    `gorm:"uniqueIndex:idx_session;index:idx_session_token"`
-	Expires time.Time `gorm:"index:idx_session_expires"`
+	User    string    `gorm:"index:idx_sessions_user"`
+	Token   string    `gorm:"uniqueIndex:idx_sessions_token"`
+	Expires time.Time `gorm:"index:idx_sessions_expires"`
 }
 
 var noUser = User{}

@@ -1,3 +1,7 @@
+## 0.29.5
+
+- updated auth db indices
+
 ## 0.29.4
 
 - use txn for favorite inserts
