@@ -88,10 +88,16 @@ func imageContext(ctx Context, client client.Getter) RequestContext {
 // loginHandler performs a web based login session and sends back a cookie.
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
+	r.Body = http.MaxBytesReader(w, r.Body, maxLoginBodyBytes)
 	r.ParseForm()
 	user := r.Form.Get(FormUser)
 	pass := r.Form.Get(FormPass)
 	passcode := r.Form.Get(FormPassCode)
+
+	attempt, ok := beginLogin(ctx, w, r, user)
+	if !ok {
+		return
+	}
 
 	var err error
 	var session auth.Session
@@ -100,6 +106,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		session, err = doPasscodeLogin(ctx, user, pass, passcode)
 	}
+	attempt.finish(err)
 	if err != nil {
 		authErr(w, ErrUnauthorized)
 		return
@@ -116,12 +123,18 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 // linkHandler performs a web based login and links to the provided code.
 func linkHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
+	r.Body = http.MaxBytesReader(w, r.Body, maxLoginBodyBytes)
 	r.ParseForm()
 	user := r.Form.Get(FormUser)
 	pass := r.Form.Get(FormPass)
 	passcode := r.Form.Get(FormPassCode)
 	value := r.Form.Get(FormCode)
+	attempt, ok := beginLogin(ctx, w, r, user)
+	if !ok {
+		return
+	}
 	err := doCodeAuth(ctx, user, pass, passcode, value)
+	attempt.finish(err)
 	if err == nil {
 		// success
 		// Use 303 for PRG

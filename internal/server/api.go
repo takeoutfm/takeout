@@ -122,10 +122,16 @@ func apiTokenLogin(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 
 	var creds credentials
+	r.Body = http.MaxBytesReader(w, r.Body, maxLoginBodyBytes)
 	body, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(body, &creds)
 	if err != nil {
 		authErr(w, err)
+		return
+	}
+
+	attempt, ok := beginLogin(ctx, w, r, creds.User)
+	if !ok {
 		return
 	}
 
@@ -135,12 +141,9 @@ func apiTokenLogin(w http.ResponseWriter, r *http.Request) {
 	} else {
 		session, err = doPasscodeLogin(ctx, creds.User, creds.Pass, creds.Passcode)
 	}
+	attempt.finish(err)
 	if err != nil {
-		if auth.CredentialsError(err) {
-			authErr(w, err)
-		} else {
-			serverErr(w, err)
-		}
+		loginErr(w, err)
 		return
 	}
 
@@ -159,6 +162,7 @@ func apiLink(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 
 	var creds linkCredentials
+	r.Body = http.MaxBytesReader(w, r.Body, maxLoginBodyBytes)
 	body, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(body, &creds)
 	if err != nil {
@@ -166,13 +170,15 @@ func apiLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	attempt, ok := beginLogin(ctx, w, r, creds.User)
+	if !ok {
+		return
+	}
+
 	err = doCodeAuth(ctx, creds.User, creds.Pass, creds.Passcode, creds.Code)
+	attempt.finish(err)
 	if err != nil {
-		if auth.CredentialsError(err) {
-			authErr(w, err)
-		} else {
-			serverErr(w, err)
-		}
+		loginErr(w, err)
 		return
 	}
 

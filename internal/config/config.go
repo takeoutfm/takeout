@@ -301,6 +301,10 @@ type ServerConfig struct {
 	ImageClient client.Config
 	IncludeDirs []string
 	ExcludeDirs []string
+	// ClientIPHeader names a request header set by a trusted reverse proxy
+	// that carries the real client address (e.g. X-Real-IP). Used for login
+	// throttling. Leave empty if not behind a proxy.
+	ClientIPHeader string
 }
 
 type Config struct {
@@ -363,6 +367,7 @@ func (mc *MusicConfig) readMaps() {
 
 func configDefaults(v *viper.Viper) {
 	v.SetDefault("Server.Listen", "127.0.0.1:3000")
+	v.SetDefault("Server.ClientIPHeader", "")
 	v.SetDefault("Server.DataDir", systemd.GetStateDirectory("."))
 	v.SetDefault("Server.MediaDir", systemd.GetStateDirectory("."))
 	v.SetDefault("Server.ImageClient.CacheDir", filepath.Join(systemd.GetCacheDirectory("."), "imagecache"))
