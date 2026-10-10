@@ -19,10 +19,11 @@
 package auth
 
 import (
-	"bytes"
 	"crypto/rand"
+	"crypto/subtle"
 	"errors"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gokyle/filecache"
@@ -89,6 +90,10 @@ type Session struct {
 var noUser = User{}
 var noSession = Session{}
 
+// dummySalt is used to burn the same CPU as a real password check when the
+// requested user doesn't exist, so response time doesn't reveal valid users.
+var dummySalt = make([]byte, 8)
+
 // Expired returns whether or not the session is expired.
 func (s *Session) Expired() bool {
 	now := time.Now()
@@ -104,6 +109,7 @@ type Auth struct {
 	config    *config.Config
 	db        *gorm.DB
 	fileCache *filecache.FileCache
+	stopCache sync.Once
 }
 
 func NewAuth(config *config.Config) *Auth {
@@ -153,6 +159,9 @@ func (a *Auth) Open() (err error) {
 }
 
 func (a *Auth) Close() {
+	// filecache.Start() launches background goroutines that only exit on
+	// Stop(). Without this every short-lived Auth (e.g. scheduled jobs) leaks.
+	a.stopCache.Do(a.fileCache.Stop)
 	conn, err := a.db.DB()
 	if err != nil {
 		return
@@ -191,8 +200,11 @@ func (a *Auth) validatePassword(password string) error {
 func (a *Auth) User(userid string) (User, error) {
 	var u User
 	err := a.db.Where("name = ?", userid).First(&u).Error
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return User{}, ErrUserNotFound
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return User{}, ErrUserNotFound
+		}
+		return User{}, err
 	}
 	return u, nil
 }
@@ -201,8 +213,13 @@ func (a *Auth) User(userid string) (User, error) {
 // database.
 func (a *Auth) check(userid, pass string) (User, error) {
 	u, err := a.User(userid)
-	if err != nil {
-		return u, ErrUserNotFound
+	if errors.Is(err, ErrUserNotFound) {
+		// do the same work as a real check to avoid a user-enumeration
+		// timing side channel
+		_, _ = a.key(pass, dummySalt)
+		return noUser, ErrUserNotFound
+	} else if err != nil {
+		return noUser, err
 	}
 
 	key, err := a.key(pass, u.Salt)
@@ -210,7 +227,7 @@ func (a *Auth) check(userid, pass string) (User, error) {
 		return User{}, err
 	}
 
-	if !bytes.Equal(u.Key, key) {
+	if subtle.ConstantTimeCompare(u.Key, key) != 1 {
 		return User{}, ErrKeyMismatch
 	}
 
@@ -577,7 +594,7 @@ func (a *Auth) DeleteSession(session *Session) {
 }
 
 func (a *Auth) DeleteSessions(u User) error {
-	return a.db.Delete(Session{}, "name = ?", u.Name).Error
+	return a.db.Where("user = ?", u.Name).Delete(&Session{}).Error
 }
 
 func (a *Auth) DeleteExpiredSessions() error {
@@ -622,8 +639,11 @@ func (a *Auth) findCookieSession(cookie *http.Cookie) (Session, error) {
 func (a *Auth) findSession(token string) (Session, error) {
 	var session Session
 	err := a.db.Where("token = ?", token).First(&session).Error
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return noSession, ErrSessionNotFound
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return noSession, ErrSessionNotFound
+		}
+		return noSession, err
 	}
 	return session, nil
 }

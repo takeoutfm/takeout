@@ -18,9 +18,9 @@
 package auth
 
 import (
+	"crypto/rand"
 	"errors"
-	"hash/maphash"
-	rando "math/rand"
+	"math/big"
 	"strings"
 	"time"
 
@@ -41,10 +41,14 @@ type Code struct {
 
 func randomCode() string {
 	var code strings.Builder
-	r := rando.New(rando.NewSource(int64(new(maphash.Hash).Sum64())))
+	max := big.NewInt(int64(len(CodeChars)))
 	for range CodeSize {
-		n := r.Intn(len(CodeChars))
-		code.WriteString(string(CodeChars[n]))
+		n, err := rand.Int(rand.Reader, max)
+		if err != nil {
+			// crypto/rand failing is not recoverable
+			panic(err)
+		}
+		code.WriteByte(CodeChars[n.Int64()])
 	}
 	return code.String()
 }
