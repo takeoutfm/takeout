@@ -7,9 +7,7 @@
 <div>
   {{ .Episode.Date | ymd }}
 </div>
-<div>
-  {{ .Episode.Description | unescapeHTML }}
-</div>
+<div style="white-space: pre-line;">{{ .Episode.Description | plainText }}</div>
 <div>
   <audio controls="">
     <source src="{{.Episode|url}}" type="{{ .Episode.ContentType }}">

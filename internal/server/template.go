@@ -75,9 +75,10 @@ func doFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"join": strings.Join,
 		"ymd":  date.YMD,
-		"unescapeHTML": func(s string) template.HTML {
-			return template.HTML(s)
-		},
+		// plainText returns a plain string (not template.HTML) so the
+		// template engine escapes it. Never return template.HTML for
+		// content from feeds or other third parties.
+		"plainText": plainText,
 		"chart": func(o any) string {
 			var link string
 			switch o.(type) {
