@@ -20,6 +20,7 @@ package server
 import (
 	"context"
 	"path/filepath"
+	"sync"
 	"takeoutfm.dev/takeout/internal/auth"
 	"takeoutfm.dev/takeout/internal/config"
 	"takeoutfm.dev/takeout/internal/film"
@@ -82,9 +83,15 @@ func mediaConfig(root *config.Config, mediaName string) (*config.Config, error) 
 	return userConfig, nil
 }
 
+// mediaMap is shared by every request goroutine; mediaMu guards it. The lock is
+// held while a new Media is opened so two first requests for the same name
+// can't both open (and leak) the databases.
 var mediaMap map[string]*Media = make(map[string]*Media)
+var mediaMu sync.Mutex
 
 func makeMedia(ctx context.Context, name string, config *config.Config) *Media {
+	mediaMu.Lock()
+	defer mediaMu.Unlock()
 	media, ok := mediaMap[name]
 	if !ok {
 		var err error
