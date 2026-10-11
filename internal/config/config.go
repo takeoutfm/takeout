@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"text/template"
 	"time"
 
@@ -839,11 +840,17 @@ func GetConfig() (*Config, error) {
 	return readConfig(v)
 }
 
+// dirConfigCache is read and written from request goroutines and scheduled
+// jobs, so it is guarded by dirConfigMu.
 var dirConfigCache = make(map[string]any)
+var dirConfigMu sync.Mutex
 
 // LoadConfig uses viper to load a config file in the provided directory. The
-// result is cached.
+// result is cached. The returned *Config is shared by all callers and must be
+// treated as read-only.
 func LoadConfig(dir string) (*Config, error) {
+	dirConfigMu.Lock()
+	defer dirConfigMu.Unlock()
 	if val, ok := dirConfigCache[dir]; ok {
 		switch val.(type) {
 		case *Config:

@@ -68,19 +68,40 @@ func mediaConfigFor(root *config.Config, user auth.User) (string, *config.Config
 	return mediaName, config, err
 }
 
+// mediaConfigs caches the media config merged with the server config. Every
+// authenticated request goes through mediaConfig, so it must be cheap and must
+// not modify anything shared between requests.
+type mediaConfigKey struct {
+	root *config.Config
+	name string
+}
+
+var mediaConfigs = make(map[mediaConfigKey]*config.Config)
+var mediaConfigMu sync.Mutex
+
 func mediaConfig(root *config.Config, mediaName string) (*config.Config, error) {
+	key := mediaConfigKey{root: root, name: mediaName}
+
+	mediaConfigMu.Lock()
+	defer mediaConfigMu.Unlock()
+	if c, ok := mediaConfigs[key]; ok {
+		return c, nil
+	}
+
 	path := filepath.Join(root.Server.MediaDir, mediaName)
-	// load relative media configuration
-	userConfig, err := config.LoadConfig(path)
+	// load relative media configuration (config.LoadConfig caches this
+	// and returns a shared pointer, so it must not be modified)
+	loaded, err := config.LoadConfig(path)
 	if err != nil {
 		return nil, err
 	}
-	// XXX merge, copy server config for now
-	userConfig.Server = root.Server
-	if err != nil {
-		return nil, err
-	}
-	return userConfig, nil
+	// XXX merge, copy server config for now. This used to assign to the
+	// shared loaded config on every request, which is a data race; work on
+	// a private copy that is built once and then only read.
+	merged := *loaded
+	merged.Server = root.Server
+	mediaConfigs[key] = &merged
+	return &merged, nil
 }
 
 // mediaMap is shared by every request goroutine; mediaMu guards it. The lock is
