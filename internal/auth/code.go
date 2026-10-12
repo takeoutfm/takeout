@@ -22,6 +22,7 @@ import (
 	"errors"
 	"math/big"
 	"strings"
+	"sync"
 	"time"
 
 	"gorm.io/gorm"
@@ -76,12 +77,59 @@ func (a *Auth) DeleteExpiredCodes() error {
 	return a.db.Unscoped().Where("expires < ?", now).Delete(Code{}).Error
 }
 
-func (a *Auth) GenerateCode() *Code {
-	value := randomCode()
-	expires := time.Now().Add(a.codeAge())
-	c := &Code{Value: value, Expires: expires}
-	a.db.Create(c)
-	return c
+// maxCodesPerMinute bounds how many link codes can be created across all
+// callers (API clients, the assistant webhook, ...). Codes live for CodeAge
+// (5m by default), so this caps the number of live rows at a few hundred no
+// matter how many clients, or which addresses, are asking.
+const maxCodesPerMinute = 120
+
+// maxCodeAttempts is how many random values to try if inserting a code fails,
+// normally because the value collides with an existing row.
+const maxCodeAttempts = 5
+
+// windowCounter is a fixed window rate limit.
+type windowCounter struct {
+	mu     sync.Mutex
+	limit  int
+	window time.Duration
+	start  time.Time
+	count  int
+}
+
+func (c *windowCounter) allow(now time.Time) bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if now.Sub(c.start) >= c.window {
+		c.start = now
+		c.count = 0
+	}
+	if c.count >= c.limit {
+		return false
+	}
+	c.count++
+	return true
+}
+
+var codeRate = &windowCounter{limit: maxCodesPerMinute, window: time.Minute}
+
+// GenerateCode creates a new link code. It returns ErrTooManyCodes when codes
+// are being requested faster than the global limit.
+func (a *Auth) GenerateCode() (*Code, error) {
+	now := time.Now()
+	if !codeRate.allow(now) {
+		return nil, ErrTooManyCodes
+	}
+	expires := now.Add(a.codeAge())
+	var err error
+	for i := 0; i < maxCodeAttempts; i++ {
+		c := &Code{Value: randomCode(), Expires: expires}
+		// a collision with an existing (possibly expired but not yet
+		// cleaned up) value violates the unique index, so try another
+		if err = a.db.Create(c).Error; err == nil {
+			return c, nil
+		}
+	}
+	return nil, err
 }
 
 func (c *Code) expired() bool {

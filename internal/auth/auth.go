@@ -51,6 +51,7 @@ var (
 	ErrCodeNotFound             = errors.New("code not found")
 	ErrCodeExpired              = errors.New("code has expired")
 	ErrCodeAlreadyUsed          = errors.New("code already authorized")
+	ErrTooManyCodes             = errors.New("too many codes requested")
 	ErrInvalidTokenSubject      = errors.New("invalid subject")
 	ErrInvalidTokenAudience     = errors.New("invalid audience")
 	ErrInvalidTokenMethod       = errors.New("invalid token method")
@@ -525,6 +526,24 @@ func (a *Auth) CheckCodeToken(signedToken string) error {
 	}
 	code := a.ValidCode(claims.Subject)
 	if code == nil {
+		return ErrInvalidTokenSubject
+	}
+	return nil
+}
+
+// CheckCodeTokenFor is like CheckCodeToken but also requires that the token was
+// issued for the provided code. Code tokens are handed to anyone who asks for
+// a code, so without this check a token for one code could be used to poll any
+// other code, including one a user has just linked.
+func (a *Auth) CheckCodeTokenFor(signedToken, value string) error {
+	_, claims, err := a.processToken(signedToken, a.config.Auth.CodeToken)
+	if err != nil {
+		return err
+	}
+	if subtle.ConstantTimeCompare([]byte(claims.Subject), []byte(value)) != 1 {
+		return ErrInvalidTokenSubject
+	}
+	if a.ValidCode(claims.Subject) == nil {
 		return ErrInvalidTokenSubject
 	}
 	return nil

@@ -214,12 +214,37 @@ func beginLogin(ctx Context, w http.ResponseWriter, r *http.Request, user string
 		}
 	}
 	if blocked {
-		secs := int(wait.Seconds()) + 1
-		w.Header().Set("Retry-After", strconv.Itoa(secs))
-		handleErr(w, "too many attempts", http.StatusTooManyRequests)
+		tooMany(w, wait)
 		return nil, false
 	}
 	return a, true
+}
+
+// tooMany writes a 429 with a Retry-After header.
+func tooMany(w http.ResponseWriter, wait time.Duration) {
+	secs := int(wait.Seconds()) + 1
+	w.Header().Set("Retry-After", strconv.Itoa(secs))
+	handleErr(w, "too many attempts", http.StatusTooManyRequests)
+}
+
+// codeIPLimiter limits how many link codes one address can request. Every
+// request counts, not just failures. This only applies when the client address
+// is known (see clientIP); auth.GenerateCode has a global limit as a backstop.
+var codeIPLimiter = newFailureLimiter(20, 15*time.Minute, time.Minute, 15*time.Minute)
+
+// allowNewCode applies the per-address limit for requesting a link code. If
+// the client is locked out it writes a 429 and returns false.
+func allowNewCode(ctx Context, w http.ResponseWriter, r *http.Request) bool {
+	ip := clientIP(ctx, r)
+	if ip == "" {
+		return true
+	}
+	if ok, wait := codeIPLimiter.Allow(ip); !ok {
+		tooMany(w, wait)
+		return false
+	}
+	codeIPLimiter.Fail(ip) // counts this request
+	return true
 }
 
 // finish records the result of the login. err == nil means a session was

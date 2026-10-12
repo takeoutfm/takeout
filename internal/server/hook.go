@@ -28,6 +28,7 @@ import (
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/lib/actions"
 	"takeoutfm.dev/takeout/lib/header"
+	"takeoutfm.dev/takeout/lib/log"
 	"takeoutfm.dev/takeout/lib/token"
 	"takeoutfm.dev/takeout/model"
 )
@@ -268,8 +269,13 @@ func addSimpleTemplate(w *actions.WebhookResponse, m config.AssistantResponse, v
 }
 
 func authRequired(ctx Context, r *actions.WebhookRequest, w *actions.WebhookResponse) {
-	code := ctx.Auth().GenerateCode()
 	config := ctx.Config()
+	code, err := ctx.Auth().GenerateCode()
+	if err != nil {
+		log.Println(err)
+		addSimple(w, config.Assistant.Error)
+		return
+	}
 	vars := map[string]string{"Code": code.Value}
 	addSimpleTemplate(w, config.Assistant.Link, vars)
 	w.AddSuggestions(config.Assistant.SuggestionAuth)

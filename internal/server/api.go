@@ -19,6 +19,7 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -251,12 +252,23 @@ type codeResponse struct {
 // The token is used to check if the code has been linked.
 func apiCodeGet(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	w.Header().Set(header.ContentType, ApplicationJson)
+	if !allowNewCode(ctx, w, r) {
+		return
+	}
 
+	// Expired codes are removed by the scheduled job; doing a DELETE on every
+	// unauthenticated request just gave callers a way to hammer the database.
+	code, err := ctx.Auth().GenerateCode()
+	if errors.Is(err, auth.ErrTooManyCodes) {
+		tooMany(w, time.Minute)
+		return
+	} else if err != nil {
+		serverErr(w, err)
+		return
+	}
+
+	w.Header().Set(header.ContentType, ApplicationJson)
 	var resp codeResponse
-	var err error
-	ctx.Auth().DeleteExpiredCodes()
-	code := ctx.Auth().GenerateCode()
 	resp.Code = code.Value
 	resp.AccessToken, err = ctx.Auth().NewCodeToken(code.Value)
 	if err != nil {
@@ -281,6 +293,13 @@ func apiCodeCheck(w http.ResponseWriter, r *http.Request) {
 	err := json.Unmarshal(body, &check)
 	if err != nil {
 		authErr(w, err)
+		return
+	}
+
+	// The token must have been issued for this code. Same response as an
+	// unknown code so a caller can't tell which codes exist.
+	if err := ctx.Auth().CheckCodeTokenFor(getAuthToken(r), check.Code); err != nil {
+		authErr(w, ErrInvalidCode)
 		return
 	}
 

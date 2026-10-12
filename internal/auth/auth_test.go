@@ -160,7 +160,10 @@ func TestNewCodeToken(t *testing.T) {
 	a := makeAuth(t)
 
 	// get a code
-	code := a.GenerateCode()
+	code, err := a.GenerateCode()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if code == nil {
 		t.Fatal("expect code")
 	}
