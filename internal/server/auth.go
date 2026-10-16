@@ -58,12 +58,7 @@ func doCodeAuth(ctx Context, user, pass, passcode, value string) error {
 func getAuthToken(r *http.Request) string {
 	value := r.Header.Get(header.Authorization)
 	if value == "" {
-		// check for Authorization as a query parameter
-		// https://xyz/api/movies/uuid/location?Authorization=Bearer+token
-		value = r.URL.Query().Get(header.Authorization)
-		if value == "" {
-			return ""
-		}
+		return ""
 	}
 	result := strings.Split(value, " ")
 	var token string

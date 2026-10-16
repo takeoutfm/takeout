@@ -728,6 +728,12 @@ func (m *Music) RecentlyAdded() []Release {
 // RecentLimit to tune the result count.
 func (m *Music) RecentlyReleased() []Release {
 	var releases []Release
+
+	// select releases.artist, releases.name from releases inner join
+	// tracks on tracks.re_id = releases.re_id group by releases.artist,
+	// releases.name having releases.date > 2026-01-01 order by releases.date
+	// desc limit 25;
+
 	m.db.Joins("inner join tracks on tracks.re_id = releases.re_id").
 		Group("releases.artist, releases.name").
 		Having("releases.date >= ?", time.Now().Add(m.config.Music.Recent*-1)).
