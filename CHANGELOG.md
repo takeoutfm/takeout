@@ -1,3 +1,7 @@
+## 0.29.6
+
+- claude security updated
+
 ## 0.29.5
 
 - updated auth db indices
