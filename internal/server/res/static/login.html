@@ -1,39 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>TakeoutFM Login</title>
+    <meta charset="utf-8">
+    <title>Sign in - TakeoutFM</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="/static/login.css">
+    <script src="/static/login.js" defer></script>
   </head>
   <body>
-    <form method="post" action="/login">
-      <div class="container">
-	<div class="box">
-	  <h2>TakeoutFM Login</h2>
-	</div>
-	<div class="box">
-	  <input type="text" name="user" placeholder="Username..." size="16" required>
-	</div>
-	<div class="box">
-	  <input type="password" name="pass" placeholder="Password..." size="16" required>
-	</div>
-	<div class="box">
-	  <input type="text" name="passcode" placeholder="Passcode..." size="6">
-	</div>
-	<div class="box">
-	  <button type="submit">Login</button>
-	</div>
+    <main class="card">
+      <div class="brand">
+	<img src="/static/favicon.svg" alt="">
+	<span>TakeoutFM</span>
       </div>
-    </form>
-    <div class="footer">
-      <div>
-	<a href="https://github.com/takeoutfm">@defsub</a>
-	&#x2022
-	<a href="https://github.com/takeoutfm/takeout/blob/master/doc/privacy.md">Privacy</a>
-	&#x2022
-	<a href="https://github.com/takeoutfm/takeout/blob/master/doc/contribute.md">Contribute</a>
-      </div>
-    </div>
+      <h1>Sign in</h1>
+      <p class="message error" data-show-if="failed" role="alert" hidden>
+	Wrong username, password or passcode.
+      </p>
+      <form method="post" action="/login">
+	<label for="user">Username</label>
+	<input id="user" type="text" name="user" autocomplete="username"
+	       autocapitalize="none" spellcheck="false" required autofocus>
+	<label for="pass">Password</label>
+	<input id="pass" type="password" name="pass" autocomplete="current-password" required>
+	<label for="passcode">Passcode <span class="hint">only if you use two-factor</span></label>
+	<input id="passcode" type="text" name="passcode" autocomplete="one-time-code"
+	       inputmode="numeric" pattern="[0-9]*" maxlength="8">
+	<button type="submit">Sign in</button>
+      </form>
+      <p class="aside">Linking a TV or watch? <a href="/link">Enter its code</a></p>
+    </main>
+    <footer>
+      <a href="https://github.com/takeoutfm">@defsub</a>
+      &middot;
+      <a href="https://github.com/takeoutfm/takeout/blob/master/doc/privacy.md">Privacy</a>
+      &middot;
+      <a href="https://github.com/takeoutfm/takeout/blob/master/doc/contribute.md">Contribute</a>
+    </footer>
   </body>
 </html>

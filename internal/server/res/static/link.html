@@ -1,33 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>TakeoutFM</title>
+    <meta charset="utf-8">
+    <title>Link a device - TakeoutFM</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="/static/login.css">
+    <script src="/static/login.js" defer></script>
   </head>
   <body>
-    <form method="post" action="/link">
-      <div class="container">
-	<div class="box">
-	  <h2>TakeoutFM Link Account</h2>
-	</div>
-	<div class="box">
-	  <input type="text" name="user" placeholder="Username..." size="32" required>
-	</div>
-	<div class="box">
-	  <input type="password" name="pass" placeholder="Password..." size="32" required>
-	</div>
-	<div class="box">
-	  <input type="text" name="passcode" placeholder="Passcode..." size="6">
-	</div>
-	<div class="box">
-	  <input type="text" name="code" placeholder="Enter Code..." size="6" required>
-	</div>
-	<div class="box">
-	  <button type="submit">Link</button>
-	</div>
+    <main class="card">
+      <div class="brand">
+	<img src="/static/favicon.svg" alt="">
+	<span>TakeoutFM</span>
       </div>
-    </form>
+      <h1>Link a device</h1>
+      <p class="message success" data-show-if="linked" role="status" hidden>
+	Linked. You can go back to your device; it signs in within a few seconds.
+      </p>
+      <p class="message error" data-show-if="failed" role="alert" hidden>
+	That didn't work. Check the code (it changes every few minutes) and your sign-in.
+      </p>
+      <form method="post" action="/link">
+	<p class="lead">Enter the code shown on your TV, watch or phone.</p>
+	<label for="code">Code</label>
+	<input id="code" class="code" type="text" name="code" autocomplete="off"
+	       autocapitalize="characters" spellcheck="false" maxlength="6"
+	       pattern="[1-9A-Za-z]{6}" required autofocus>
+	<div data-credentials>
+	  <label for="user">Username</label>
+	  <input id="user" type="text" name="user" autocomplete="username"
+		 autocapitalize="none" spellcheck="false" required>
+	  <label for="pass">Password</label>
+	  <input id="pass" type="password" name="pass" autocomplete="current-password" required>
+	  <label for="passcode">Passcode <span class="hint">only if you use two-factor</span></label>
+	  <input id="passcode" type="text" name="passcode" autocomplete="one-time-code"
+		 inputmode="numeric" pattern="[0-9]*" maxlength="8">
+	</div>
+	<p class="aside" data-signed-in hidden>You're signed in here, so the device joins your account.</p>
+	<button type="submit">Link</button>
+      </form>
+      <p class="aside"><a href="/" data-signed-in hidden>Back to TakeoutFM</a></p>
+    </main>
   </body>
 </html>

@@ -26,6 +26,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 
 	"takeoutfm.dev/takeout"
@@ -108,7 +109,8 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	attempt.finish(err)
 	if err != nil {
-		authErr(w, ErrUnauthorized)
+		// back to the form, which says so
+		http.Redirect(w, r, LoginRedirect+"?failed", http.StatusSeeOther)
 		return
 	}
 
@@ -134,29 +136,50 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, LoginRedirect, http.StatusSeeOther)
 }
 
-// linkHandler performs a web based login and links to the provided code.
+// linkHandler links a device's code to an account: this browser's, when
+// it's signed in, otherwise the one signed in with the form. The device gets
+// a session of its own. Back to the form with ?linked or ?failed.
 func linkHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	r.Body = http.MaxBytesReader(w, r.Body, maxLoginBodyBytes)
 	r.ParseForm()
-	user := r.Form.Get(FormUser)
-	pass := r.Form.Get(FormPass)
-	passcode := r.Form.Get(FormPassCode)
-	value := r.Form.Get(FormCode)
-	attempt, ok := beginLogin(ctx, w, r, user)
-	if !ok {
-		return
+	// codes are upper case
+	value := strings.ToUpper(strings.TrimSpace(r.Form.Get(FormCode)))
+
+	var err error
+	if user, ok := cookieUser(ctx, r); ok {
+		attempt, ok := beginLogin(ctx, w, r, user.Name)
+		if !ok {
+			return
+		}
+		var session auth.Session
+		session, err = ctx.Auth().LoginSession(user.Name)
+		if err == nil {
+			err = ctx.Auth().AuthorizeCode(value, session.Token)
+		}
+		attempt.finish(err)
+	} else {
+		user := r.Form.Get(FormUser)
+		attempt, ok := beginLogin(ctx, w, r, user)
+		if !ok {
+			return
+		}
+		err = doCodeAuth(ctx, user, r.Form.Get(FormPass), r.Form.Get(FormPassCode), value)
+		attempt.finish(err)
 	}
-	err := doCodeAuth(ctx, user, pass, passcode, value)
-	attempt.finish(err)
-	if err == nil {
-		// success
-		// Use 303 for PRG
-		http.Redirect(w, r, SuccessRedirect, http.StatusSeeOther)
-		return
+
+	result := "?linked"
+	if err != nil {
+		result = "?failed"
 	}
 	// Use 303 for PRG
-	http.Redirect(w, r, LinkRedirect, http.StatusSeeOther)
+	http.Redirect(w, r, LinkRedirect+result, http.StatusSeeOther)
+}
+
+// cookieUser returns the user signed in with this request's cookies, if any.
+func cookieUser(ctx Context, r *http.Request) (auth.User, bool) {
+	_, user, _, ok := cookieLogin(ctx, r)
+	return user, ok
 }
 
 // imageHandler handles unauthenticated image requests.

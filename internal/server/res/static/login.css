@@ -1,26 +1,158 @@
-/* sign-in and device link pages */
+/* the sign-in and Link a device pages: one card, as the app looks */
 
-* {
-    background-color: #222;
-    color: #e6e6e6;
-    border-color: #a6a6a6;
+:root {
+    color-scheme: dark;
 }
-a {
-    text-decoration: none;
-}
-.container {
+
+body {
+    margin: 0;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    height: 300px;
+    justify-content: center;
+    gap: 24px;
+    padding: 24px 16px;
+    box-sizing: border-box;
+    background-color: #1b1b1b;
+    color: #e6e6e6;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Cantarell, sans-serif;
+    font-size: 15px;
+    line-height: 1.4;
 }
-.box {
-    width: 300px;
-    margin: 5px;
-    text-align: center;
+
+[hidden] {
+    display: none !important;
 }
-.footer {
-    font-size: small;
+
+a {
+    color: inherit;
+}
+
+.card {
+    width: 100%;
+    max-width: 360px;
+    box-sizing: border-box;
+    padding: 28px;
+    border: 1px solid #333;
+    border-radius: 12px;
+    background-color: #242424;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    opacity: 0.85;
+}
+
+.brand img {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+}
+
+h1 {
+    margin: 18px 0 14px 0;
+    font-size: 1.6em;
+    font-weight: 600;
+}
+
+.lead {
+    margin: 0 0 4px 0;
+    opacity: 0.8;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin: 12px 0 4px 0;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.hint {
+    font-weight: normal;
+    opacity: 0.6;
+}
+
+input {
+    padding: 9px 11px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background-color: #1b1b1b;
+    color: inherit;
+    font: inherit;
+}
+
+input:focus {
+    outline: 2px solid orange;
+    outline-offset: -1px;
+    border-color: transparent;
+}
+
+input.code {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 1.6em;
+    letter-spacing: 0.3em;
     text-align: center;
+    text-transform: uppercase;
+}
+
+button {
+    margin-top: 20px;
+    padding: 10px;
+    border: 0;
+    border-radius: 6px;
+    background-color: orange;
+    color: #1b1b1b;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+button:hover {
+    filter: brightness(1.08);
+}
+
+.message {
+    margin: 0 0 8px 0;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.93em;
+}
+
+.message.error {
+    background-color: #4a2323;
+    border: 1px solid #8a3a3a;
+}
+
+.message.success {
+    background-color: #1f3d27;
+    border: 1px solid #3a7a4a;
+}
+
+.aside {
+    margin: 16px 0 0 0;
+    font-size: 0.9em;
+    opacity: 0.75;
+}
+
+footer {
+    font-size: 0.8em;
+    opacity: 0.6;
+}
+
+footer a {
+    text-decoration: none;
+}
+
+[data-credentials] {
+    display: flex;
+    flex-direction: column;
 }
