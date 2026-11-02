@@ -268,7 +268,8 @@ body {
 }
 
 #sidebar a.side,
-#sidebar a.side:visited {
+#sidebar a.side:visited,
+#sidebar button.side {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -279,7 +280,8 @@ body {
     text-decoration: none;
 }
 
-#sidebar a.side svg {
+#sidebar a.side svg,
+#sidebar button.side svg {
     flex: none;
     width: 20px;
     height: 20px;
@@ -287,7 +289,8 @@ body {
     opacity: 0.8;
 }
 
-#sidebar a.side:hover {
+#sidebar a.side:hover,
+#sidebar button.side:hover {
     background-color: #2a2a2a;
 }
 
@@ -1300,5 +1303,33 @@ li.empty {
 
     button.mini-track {
         flex: 1;
+    }
+}
+
+/* Sign out: a POST form in the sidebar, looking like the links */
+.side-form {
+    margin: 0;
+}
+
+#sidebar button.side {
+    width: 100%;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+}
+
+@media (max-width: 700px) {
+    .side-form {
+        display: contents;
+    }
+
+    #sidebar button.side {
+        width: auto;
+        flex: none;
+        white-space: nowrap;
     }
 }

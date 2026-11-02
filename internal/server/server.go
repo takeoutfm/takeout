@@ -120,6 +120,22 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, SuccessRedirect, http.StatusSeeOther)
 }
 
+// logoutHandler ends this browser's session and clears its cookie. Other
+// sessions (the apps) stay signed in.
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	if cookie, err := r.Cookie(auth.CookieName); err == nil {
+		if session, err := ctx.Auth().CookieSession(cookie); err == nil {
+			ctx.Auth().DeleteSession(&session)
+		}
+		// a request's cookie has no path; clear the one set for "/"
+		cookie.Path = "/"
+		http.SetCookie(w, auth.ExpireCookie(cookie))
+	}
+	// Use 303 for PRG
+	http.Redirect(w, r, LoginRedirect, http.StatusSeeOther)
+}
+
 // linkHandler performs a web based login and links to the provided code.
 func linkHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
@@ -243,6 +259,7 @@ func Serve(c context.Context, config *config.Config) error {
 	// cookie auth
 	// mux.Handle("POST /api/login", requestHandler(ctx, apiLogin)) -- not used anymore?
 	mux.Handle("POST /login", requestHandler(ctx, loginHandler))
+	mux.Handle("POST /logout", requestHandler(ctx, logoutHandler))
 	mux.Handle("GET /login", http.HandlerFunc(aliasHandler))
 	mux.Handle("GET /login.htm", http.HandlerFunc(aliasHandler))
 	mux.Handle("GET /login.html", http.HandlerFunc(aliasHandler))
