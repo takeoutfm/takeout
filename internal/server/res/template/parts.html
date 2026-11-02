@@ -128,10 +128,30 @@
 </li>
 {{ end }}
 
+{{/* someone in the cast or crew: round photo, name and role, as in the apps */}}
 {{ define "person-tile" }}
-<a class="tile" href="/profiles/{{.Person.PEID}}">
+<a class="tile person" href="/profiles/{{.Person.PEID}}">
   <img src="{{.Person|profile_small}}" alt="" loading="lazy">
   <div class="tile-title">{{ .Person.Name }}</div>
   <div class="tile-sub">{{ .Character }}</div>
 </a>
+{{ end }}
+
+{{ define "crew-tile" }}
+<a class="tile person" href="/profiles/{{.Person.PEID}}">
+  <img src="{{.Person|profile_small}}" alt="" loading="lazy">
+  <div class="tile-title">{{ .Person.Name }}</div>
+  <div class="tile-sub">{{ .Job }}</div>
+</a>
+{{ end }}
+
+{{/* the cast, then some of the crew, of a movie, show or episode */}}
+{{ define "cast-crew" }}
+{{ if or .Cast .Crew }}
+<div class="section-head"><h2>Cast &amp; Crew</h2></div>
+<div class="tile-row people">
+  {{ range $i, $c := .Cast }}{{ if lt $i 12 }}{{ template "person-tile" $c }}{{ end }}{{ end }}
+  {{ range $i, $c := .Crew }}{{ if lt $i 6 }}{{ template "crew-tile" $c }}{{ end }}{{ end }}
+</div>
+{{ end }}
 {{ end }}

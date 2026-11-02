@@ -1317,3 +1317,21 @@ a.track:visited {
     line-height: 1;
     border-radius: 2px;
 }
+
+/* people: round photos, as the apps' cast and crew */
+.tile-row.people {
+    grid-auto-columns: 112px;
+}
+
+.tile.person {
+    text-align: center;
+}
+
+.tile.person img {
+    width: 88px;
+    height: 88px;
+    margin: 0 auto;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center top;
+}

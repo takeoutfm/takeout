@@ -35,12 +35,7 @@
   </div>
 </div>
   <div class="pl-25 pr-25">
-  {{ if .Cast }}
-  <div class="section-head"><h2>Cast</h2></div>
-  <div class="tile-row posters">
-    {{ range $i, $c := .Cast }}{{ if lt $i 12 }}{{ template "person-tile" $c }}{{ end }}{{ end }}
-  </div>
-  {{ end }}
+  {{ template "cast-crew" . }}
   {{ if .Collection }}
   <div class="section-head"><h2>{{ .Collection.Name }}</h2></div>
   <div class="tile-row posters">

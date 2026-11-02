@@ -28,12 +28,7 @@
   </div>
 </div>
   <div class="pl-25 pr-25">
-  {{ if .Cast }}
-  <div class="section-head"><h2>Cast</h2></div>
-  <div class="tile-row posters">
-    {{ range $i, $c := .Cast }}{{ if lt $i 12 }}{{ template "person-tile" $c }}{{ end }}{{ end }}
-  </div>
-  {{ end }}
+  {{ template "cast-crew" . }}
   <div class="links">
     <a target="_blank" rel="noopener" href="https://www.themoviedb.org/tv/{{ .Series.TVID }}">TMDB</a>
   </div>
