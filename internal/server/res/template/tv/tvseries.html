@@ -10,7 +10,7 @@
       <div class="tagline">
 	{{ .Series.Tagline }}
       </div>
-      <p/>
+      <p></p>
       <div class="specs">
 	{{ if .Series.Rating }}
 	<span class="rating">{{.Series.Rating}}</span>
@@ -23,7 +23,7 @@
 	{{ end }}
 	&bull;
 	{{ range .Genres }}
-	<a data-link="/v?genre={{.|urlquery}}">{{.}}</a>
+	<a href="/movie-genres/{{.}}">{{.}}</a>
 	{{ end }}
       </div>
       <div style="padding-top: 50px;">
@@ -33,7 +33,7 @@
 	    <td class="cred"><span class="heading">Starring</span></td>
 	    <td class="cred">
 	      {{ range .Starring }}
-	      <a data-link="/v?profile={{.PEID}}">{{.Name}}</a>
+	      <a href="/profiles/{{.PEID}}">{{.Name}}</a>
 	      {{ end }}
 	    </td>
 	    <td rowspan="3" width="100%" align="right">
@@ -48,7 +48,7 @@
 	    <td class="cred"><span class="heading">Directing</span></td>
 	    <td class="cred">
 	      {{ range .Directing }}
-	      <a data-link="/v?profile={{.PEID}}">{{.Name}}</a>
+	      <a href="/profiles/{{.PEID}}">{{.Name}}</a>
 	      {{ end }}
 	    </td>
 	  </tr>
@@ -58,7 +58,7 @@
 	    <td class="cred"><span class="heading">Writing</span></td>
 	    <td class="cred">
 	      {{ range .Writing }}
-	      <a data-link="/v?profile={{.PEID}}">{{.Name}}</a>
+	      <a href="/profiles/{{.PEID}}">{{.Name}}</a>
 	      {{ end }}
 	    </td>
 	  </tr>
@@ -68,7 +68,6 @@
       <h2>Overview</h2>
       <div>
 	{{ .Series.Overview }}
-	<a data-link="/v?watch={{ .Series.ID }}">watch it</a>
       </div>
     </div>
   </div>
@@ -83,7 +82,7 @@
       {{ end }}
       <tr>
 	<td class="tvepisode-cell">{{ .Episode }}</td>
-	<td class="tvepisode-cell"><a data-link="{{.|link}}">{{ .Name }}</a></td>
+	<td class="tvepisode-cell"><a href="{{.|link}}">{{ .Name }}</a></td>
 	<td class="tvepisode-cell">{{ .Date | ymd }}</td>
 	<td class="tvepisode-cell">{{ .Overview }}</td>
       </tr>

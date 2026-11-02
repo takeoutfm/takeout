@@ -22,12 +22,9 @@ import (
 	_ "embed"
 	"fmt"
 	"html/template"
-	"time"
 
 	"io/fs"
-	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"takeoutfm.dev/takeout/internal/config"
@@ -83,23 +80,21 @@ func doFuncMap() template.FuncMap {
 			var link string
 			switch o.(type) {
 			case model.Release:
-				link = fmt.Sprintf("/v?release=%d", o.(model.Release).ID)
+				link = fmt.Sprintf("/releases/%d", o.(model.Release).ID)
 			case model.Artist:
-				link = fmt.Sprintf("/v?artist=%d", o.(model.Artist).ID)
+				link = fmt.Sprintf("/artists/%d", o.(model.Artist).ID)
 			case model.Track:
 				link = locateTrack(o.(model.Track))
 			case model.Movie:
-				link = fmt.Sprintf("/v?movie=%d", o.(model.Movie).ID)
+				link = fmt.Sprintf("/movies/%d", o.(model.Movie).ID)
 			case model.Series:
-				link = fmt.Sprintf("/v?series=%d", o.(model.Series).ID)
+				link = fmt.Sprintf("/series/%d", o.(model.Series).ID)
 			case model.Episode:
-				link = fmt.Sprintf("/v?episode=%d", o.(model.Episode).ID)
-			case model.Station:
-				link = fmt.Sprintf("/v?station=%d", o.(model.Station).ID)
+				link = fmt.Sprintf("/episodes/%d", o.(model.Episode).ID)
 			case model.TVSeries:
-				link = fmt.Sprintf("/v?tvseries=%d", o.(model.TVSeries).ID)
+				link = fmt.Sprintf("/tv/series/%d", o.(model.TVSeries).ID)
 			case model.TVEpisode:
-				link = fmt.Sprintf("/v?tvepisode=%d", o.(model.TVEpisode).ID)
+				link = fmt.Sprintf("/tv/episodes/%d", o.(model.TVEpisode).ID)
 			}
 			return link
 		},
@@ -165,7 +160,7 @@ func doFuncMap() template.FuncMap {
 			var link string
 			switch o.(type) {
 			case model.Artist:
-				link = fmt.Sprintf("/v?popular=%d", o.(model.Artist).ID)
+				link = fmt.Sprintf("/artists/%d/popular", o.(model.Artist).ID)
 			}
 			return link
 		},
@@ -173,7 +168,7 @@ func doFuncMap() template.FuncMap {
 			var link string
 			switch o.(type) {
 			case model.Artist:
-				link = fmt.Sprintf("/v?singles=%d", o.(model.Artist).ID)
+				link = fmt.Sprintf("/artists/%d/singles", o.(model.Artist).ID)
 			}
 			return link
 		},
@@ -181,7 +176,7 @@ func doFuncMap() template.FuncMap {
 			var link string
 			switch o.(type) {
 			case model.Artist:
-				link = fmt.Sprintf("/v?want=%d", o.(model.Artist).ID)
+				link = fmt.Sprintf("/artists/%d/want", o.(model.Artist).ID)
 			}
 			return link
 		},
@@ -204,7 +199,7 @@ func doFuncMap() template.FuncMap {
 			return ref
 		},
 		"home": func() string {
-			return "/v?home=1"
+			return "/"
 		},
 		"runtime": func(m model.Movie) string {
 			hours := m.Runtime / 60
@@ -297,156 +292,5 @@ func doFuncMap() template.FuncMap {
 			}
 			return img
 		},
-	}
-}
-
-func viewHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := contextValue(r)
-	var result any
-	var temp string
-
-	if v := r.URL.Query().Get("release"); v != "" {
-		// /v?release={release-id}
-		m := ctx.Music()
-		id, _ := strconv.Atoi(v)
-		release, _ := m.LookupRelease(id)
-		result = ReleaseView(ctx, release)
-		temp = "release.html"
-	} else if v := r.URL.Query().Get("artist"); v != "" {
-		// /v?artist={artist-id}
-		m := ctx.Music()
-		id, _ := strconv.Atoi(v)
-		artist, _ := m.LookupArtist(id)
-		result = ArtistView(ctx, artist)
-		temp = "artist.html"
-	} else if v := r.URL.Query().Get("artists"); v != "" {
-		// /v?artists=x
-		result = ArtistsView(ctx)
-		temp = "artists.html"
-	} else if v := r.URL.Query().Get("popular"); v != "" {
-		// /v?popular={artist-id}
-		m := ctx.Music()
-		id, _ := strconv.Atoi(v)
-		artist, _ := m.LookupArtist(id)
-		result = PopularView(ctx, artist)
-		temp = "popular.html"
-	} else if v := r.URL.Query().Get("singles"); v != "" {
-		// /v?singles={artist-id}
-		m := ctx.Music()
-		id, _ := strconv.Atoi(v)
-		artist, _ := m.LookupArtist(id)
-		result = SinglesView(ctx, artist)
-		temp = "singles.html"
-	} else if v := r.URL.Query().Get("want"); v != "" {
-		// /v?want={artist-id}
-		m := ctx.Music()
-		id, _ := strconv.Atoi(v)
-		artist, _ := m.LookupArtist(id)
-		result = WantListView(ctx, artist)
-		temp = "want.html"
-	} else if v := r.URL.Query().Get("home"); v != "" {
-		// /v?home=x
-		result = HomeView(ctx)
-		temp = "home.html"
-	} else if v := r.URL.Query().Get("q"); v != "" {
-		// /v?q={pattern}
-		result = SearchView(ctx, strings.TrimSpace(v))
-		temp = "search.html"
-	} else if v := r.URL.Query().Get("radio"); v != "" {
-		// /v?radio=x
-		result = RadioView(ctx)
-		temp = "radio.html"
-	} else if v := r.URL.Query().Get("playlists"); v != "" {
-		// /v?playlist=x
-		playlists := ctx.Music().UserPlaylists(ctx.User())
-		result = PlaylistsView(ctx, playlists)
-		temp = "playlists.html"
-	} else if v := r.URL.Query().Get("movies"); v != "" {
-		// /v?movies=x
-		result = MoviesView(ctx)
-		temp = "movies.html"
-	} else if v := r.URL.Query().Get("movie"); v != "" {
-		// /v?movie={movie-id}
-		f := ctx.Film()
-		id, _ := strconv.Atoi(v)
-		movie, _ := f.LookupMovie(id)
-		result = MovieView(ctx, movie)
-		temp = "movie.html"
-	} else if v := r.URL.Query().Get("profile"); v != "" {
-		// /v?profile={peid}
-		person, _ := ctx.FindPerson(v)
-		result = ProfileView(ctx, person)
-		temp = "profile.html"
-	} else if v := r.URL.Query().Get("genre"); v != "" {
-		// /v?genre={genre-name}
-		name := strings.TrimSpace(v)
-		result = GenreView(ctx, name)
-		temp = "genre.html"
-	} else if v := r.URL.Query().Get("keyword"); v != "" {
-		// /v?keyword={keyword-name}
-		name := strings.TrimSpace(v)
-		result = KeywordView(ctx, name)
-		temp = "keyword.html"
-	} else if v := r.URL.Query().Get("watch"); v != "" {
-		// /v?watch={movie-id}
-		f := ctx.Film()
-		id, _ := strconv.Atoi(v)
-		movie, _ := f.LookupMovie(id)
-		result = WatchView(ctx, movie)
-		temp = "watch.html"
-	} else if v := r.URL.Query().Get("tv"); v != "" {
-		// /v?tv=x
-		result = TVShowsView(ctx)
-		temp = "shows.html"
-	} else if v := r.URL.Query().Get("tvseries"); v != "" {
-		// /v?tvseries={series-id}
-		tv := ctx.TV()
-		id, _ := strconv.Atoi(v)
-		series, _ := tv.LookupSeries(id)
-		result = TVSeriesView(ctx, series)
-		temp = "tvseries.html"
-	} else if v := r.URL.Query().Get("tvepisode"); v != "" {
-		// /v?tvepisode={episode-id}
-		tv := ctx.TV()
-		id, _ := strconv.Atoi(v)
-		episode, _ := tv.LookupEpisode(id)
-		result = TVEpisodeView(ctx, episode)
-		temp = "tvepisode.html"
-	} else if v := r.URL.Query().Get("podcasts"); v != "" {
-		// /v?podcasts=x
-		result = PodcastsView(ctx)
-		temp = "podcasts.html"
-	} else if v := r.URL.Query().Get("series"); v != "" {
-		// /v?series={series-id}
-		p := ctx.Podcast()
-		id, _ := strconv.Atoi(v)
-		series, _ := p.LookupSeries(id)
-		result = SeriesView(ctx, series)
-		temp = "series.html"
-	} else if v := r.URL.Query().Get("episode"); v != "" {
-		// /v?episode={episode-id}
-		p := ctx.Podcast()
-		id, _ := strconv.Atoi(v)
-		episode, _ := p.LookupEpisode(id)
-		result = EpisodeView(ctx, episode)
-		temp = "episode.html"
-	} else if v := r.URL.Query().Get("activity"); v != "" {
-		// v?activity={lastyear}
-		d := date.NewInterval(time.Now(), v)
-		result = TrackStatsView(ctx, v, d)
-		temp = "activity.html"
-	} else {
-		result = IndexView(ctx)
-		temp = "index.html"
-	}
-
-	render(ctx, temp, result, w, r)
-}
-
-func render(ctx Context, temp string, view any,
-	w http.ResponseWriter, r *http.Request) {
-	err := ctx.Template().ExecuteTemplate(w, temp, view)
-	if err != nil {
-		serverErr(w, err)
 	}
 }

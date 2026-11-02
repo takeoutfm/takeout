@@ -227,6 +227,9 @@ Takeout.music = (function() {
 
     // handles clicks on elements with data-action, here and in the page
     const onAction = function(event) {
+	if (playlistAction(event) || playAction(event)) {
+	    return;
+	}
 	const e = event.target.closest("[data-action]");
 	if (e == null) {
 	    return;
@@ -242,6 +245,45 @@ Takeout.music = (function() {
 	default: return;
 	}
 	event.preventDefault();
+    };
+
+    // play or queue a server ref: data-playlist="add-ref|append-ref|prepend-ref"
+    const playlistAction = function(event) {
+	const e = event.target.closest("[data-playlist]");
+	if (e == null) {
+	    return false;
+	}
+	event.preventDefault();
+	playClick();
+	let cmd = e.getAttribute("data-playlist");
+	let ref = e.getAttribute("data-ref");
+	if (cmd == "add-ref") {
+	    addRef(ref);
+	} else if (cmd == "append-ref") {
+	    appendRef(ref);
+	} else if (cmd == "prepend-ref") {
+	    if (playlist.length == 0) {
+		addRef(ref);
+	    } else {
+		prependRef(ref);
+	    }
+	}
+	return true;
+    };
+
+    // play one track now: data-play="now" with the track's data attributes
+    const playAction = function(event) {
+	const e = event.target.closest("[data-play]");
+	if (e == null) {
+	    return false;
+	}
+	event.preventDefault();
+	playClick();
+	if (e.getAttribute("data-play") == "now") {
+	    playPos = 0;
+	    playNow(trackData(e));
+	}
+	return true;
     };
 
     const updateControls = function() {
@@ -613,50 +655,6 @@ Takeout.music = (function() {
 	});
     };
 
-    const checkLinks = function() {
-	const refs = document.querySelectorAll("[data-playlist]");
-	refs.forEach(e => {
-	    e.onclick = function() {
-		playClick();
-		let cmd = e.getAttribute("data-playlist");
-		let ref = e.getAttribute("data-ref");
-		if (cmd == "add-ref") {
-		    addRef(ref);
-		} else if (cmd == "append-ref") {
-		    appendRef(ref);
-		} else if (cmd == "prepend-ref") {
-		    if (playlist.length == 0) {
-			addRef(ref);
-		    } else {
-			prependRef(ref);
-		    }
-		}
-	    };
-	});
-
-	const plays = document.querySelectorAll("[data-play]");
-	plays.forEach(e => {
-	    e.onclick = function() {
-		playClick();
-		let cmd = e.getAttribute("data-play");
-		if (cmd == "now") {
-		    let track = trackData(e);
-		    playPos = 0;
-		    playNow(track);
-		}
-	    };
-	});
-
-	const links = document.querySelectorAll("[data-link]");
-	links.forEach(e => {
-	    e.onclick = function() {
-		playClick();
-		// TODO hide playlist?
-		forward(e.getAttribute("data-link"));
-	    };
-	});
-    };
-
     const audioTag = function() {
 	return document.getElementById("audio");
     };
@@ -674,61 +672,19 @@ Takeout.music = (function() {
 	saveState(playIndex, playPos);
     };
 
-    const load = function(url, scroll = true) {
-	fetch(url, {credentials: 'include'}).
-    	    then(resp => {
-    		return resp.text();
-    	    }).
-    	    then(text => {
-		if (scroll) {
-		    window.scrollTo(0, 0);
-		}
-    		document.getElementById("main").innerHTML = text;
-		document.getElementById("main").style.display = "block";
-		checkLinks();
-		checkCharts();
-    	    });
-	return false;
-    };
-
-    const forward = function(url) {
-	let state = {url: url, title: "", time: Date.now()};
-	history.pushState(state, state["title"]);
-	return load(url);
-    };
-
-    const backward = function(state) {
-	if (state != null) {
-	    let url = state["url"];
-	    if (url != null) {
-		if (url != null) {
-		    load(url, false);
-		}
-	    }
-	}
-    };
-
-    const setupSearch = function() {
-	document.getElementById("f").onsubmit = function() {
-	    let q = document.getElementById("q").value;
-	    forward("/v?q=" + encodeURIComponent(q));
-	    return false;
-	};
+    // nav.js swapped in a new page
+    const pageShown = function() {
+	document.getElementById("playlist").style.display = "none";
+	document.getElementById("main").style.display = "block";
+	checkCharts();
     };
 
     const init = function() {
-	window.onpopstate = function(event) {
-	    let state = event.state;
-	    backward(state);
-	};
-
 	window.onload = function() {
 	    document.addEventListener("click", onAction);
-	    checkLinks();
+	    document.addEventListener("takeout:page", pageShown);
 	    checkCharts();
 	    registerEvents();
-	    setupSearch();
-	    forward("/v?home=1");
 	    fetchPlaylist();
 	};
     };

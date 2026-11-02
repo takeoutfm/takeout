@@ -1,15 +1,15 @@
 <div>
   <h1>Activity</h1>
   <div style="text-align: center;">
-    <a data-link="/v?activity=recent" class="takeout">Recent</a>
-    <a data-link="/v?activity=lastweek" class="takeout">Last Week</a>
-    <a data-link="/v?activity=lastmonth" class="takeout">Last Month</a>
-    <a data-link="/v?activity=lastyear" class="takeout">Last Year</a>
-    <a data-link="/v?activity=year" class="takeout">This Year</a>
-    <a data-link="/v?activity=month" class="takeout">This Month</a>
-    <a data-link="/v?activity=week" class="takeout">This Week</a>
-    <a data-link="/v?activity=yesterday" class="takeout">Yesterday</a>
-    <a data-link="/v?activity=today" class="takeout">Today</a>
+    <a href="/activity/recent" class="takeout">Recent</a>
+    <a href="/activity/lastweek" class="takeout">Last Week</a>
+    <a href="/activity/lastmonth" class="takeout">Last Month</a>
+    <a href="/activity/lastyear" class="takeout">Last Year</a>
+    <a href="/activity/year" class="takeout">This Year</a>
+    <a href="/activity/month" class="takeout">This Month</a>
+    <a href="/activity/week" class="takeout">This Week</a>
+    <a href="/activity/yesterday" class="takeout">Yesterday</a>
+    <a href="/activity/today" class="takeout">Today</a>
   </div>
   <div style="display: flex; justify-content: center; border: 1px solid; margin: 1em; padding: 1em;">
     <canvas style="max-height: 30vh;" id="chart" data-chart="{{.|chart}}"></canvas>
@@ -20,7 +20,7 @@
       <table class="act-table" style="border: 1px solid; border-spacing: 15px;">
 	{{ range .Artists }}
 	<tr class="act-row">
-	  <td><a data-link="{{.Artist|link}}">{{ .Artist.Name }}</a></td>
+	  <td><a href="{{.Artist|link}}">{{ .Artist.Name }}</a></td>
 	  <td class="act-count">{{ .Count }}</td>
 	</tr>
 	{{ end }}
@@ -35,7 +35,7 @@
 	    <img class="mini-cover" src="{{.Release|cover}}"/>
 	  </td>
 	  <td>
-	    <div><a data-link="{{.Release|link}}">{{ .Release.Name }}</a></div>
+	    <div><a href="{{.Release|link}}">{{ .Release.Name }}</a></div>
 	    <div class="artist-subtitle">{{ .Release.Artist }}</div>
 	  </td>
 	  <td class="act-count">{{ .Count }}</td>

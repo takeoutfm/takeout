@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>TakeoutFM</title>
+    <title>{{.Title}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="{{asset "takeout.css"}}">
     <link rel="stylesheet" type="text/css" href="{{asset "music.css"}}">
@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset "tv.css"}}">
     <link rel="stylesheet" type="text/css" href="{{asset "podcast.css"}}">
     <link rel="icon" type="image/svg+xml" href="{{asset "favicon.svg"}}">
+    <script src="{{asset "nav.js"}}" defer></script>
     <script type="text/javascript" src="{{asset "music.js"}}"></script>
     <script type="text/javascript" src="{{asset "chart.umd.js"}}"></script>
   </head>
@@ -16,24 +17,24 @@
     <div id="top">
       <div class="parent4">
 	<div>
-	  <a data-link="{{home}}" class="takeout">Home</a>
+	  <a href="{{home}}" class="takeout">Home</a>
 	  {{ if .HasMusic }}
-	  <a data-link="/v?artists=x" class="takeout">Artists</a>
-	  <a data-link="/v?radio=x" class="takeout">Radio</a>
+	  <a href="/artists" class="takeout">Artists</a>
+	  <a href="/radio" class="takeout">Radio</a>
 	  {{ if .HasPlaylists }}
-	  <a data-link="/v?playlists=x" class="takeout">Playlists</a>
+	  <a href="/playlists" class="takeout">Playlists</a>
 	  {{ end }}
 	  {{ end }}
 	  {{ if .HasMovies }}
-	  <a data-link="/v?movies=x" class="takeout">Movies</a>
+	  <a href="/movies" class="takeout">Movies</a>
 	  {{ end }}
 	  {{ if .HasShows }}
-	  <a data-link="/v?tv=x" class="takeout">TV Shows</a>
+	  <a href="/tv" class="takeout">TV Shows</a>
 	  {{ end }}
 	  {{ if .HasPodcasts }}
-	  <a data-link="/v?podcasts=x" class="takeout">Podcasts</a>
+	  <a href="/podcasts" class="takeout">Podcasts</a>
 	  {{ end }}
-	  <a data-link="/v?activity=recent" class="takeout">Activity</a>
+	  <a href="/activity" class="takeout">Activity</a>
 	</div>
 	<div class="parent">
 	  <div>
@@ -43,17 +44,17 @@
       </div>
       <div style="display: flex; justify-content: center;">
 	<div>
-	  <form id="f">
-	    <input class="search" id="q" type="text" placeholder="Search: text, artist:name, guitar:person, etc.">
+	  <form id="f" action="/search" method="get">
+	    <input class="search" id="q" name="q" type="search" placeholder="Search: text, artist:name, guitar:person, etc.">
 	  </form>
 	</div>
       </div>
       <div id="main">
-	Loading...
+	{{ template "fragment.html" . }}
       </div>
       <div id="playlist" style="display: none;">
       </div>
-      <p style="clear: both;"/>
+      <p style="clear: both;"></p>
       <div id="playing" style="display: none;">
 	<audio id="audio">
 	  <source id="audio-source" src=""></source>

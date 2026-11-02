@@ -163,11 +163,11 @@ func TestStaticAssets(t *testing.T) {
 		}
 	}
 	var buf bytes.Buffer
-	err := getTemplates(nil).ExecuteTemplate(&buf, "index.html", &view.Index{})
+	err := getTemplates(nil).ExecuteTemplate(&buf, "layout.html", pageData{Index: &view.Index{}})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !strings.Contains(buf.String(), staticAssets.URL("music.js")) {
-		t.Fatal("index.html doesn't use the hashed music.js url")
+		t.Fatal("layout.html doesn't use the hashed music.js url")
 	}
 }

@@ -11,7 +11,7 @@
     <h2>Releases</h2>
     {{ range .Releases }}
     <div style="float: left; padding: 10px; max-width: 110px;">
-      <a data-link="{{.|link}}" style="text-decoration: none;">
+      <a href="{{.|link}}" style="text-decoration: none;">
 	<img width="110" height="110" src="{{.|cover}}" style="border-radius: 10px;">
 	<br/>
 	<div class="release-small-title">{{ .Name }}</div>
@@ -21,16 +21,16 @@
     </div>
     {{ end }}
   </div>
-  <div style="clear: both;"/>
+  <div style="clear: both;"></div>
   {{ $popular := call .Popular.Tracks }}
   {{ if $popular }}
   <div>
     <div class="parent">
       <div class="left">
-	<a class="nodecor" data-link="{{.Artist|popular}}"><h2>Popular Tracks</h2></a>
+	<a class="nodecor" href="{{.Artist|popular}}"><h2>Popular Tracks</h2></a>
       </div>
       <div class="right">
-	<a data-link="{{.Artist|popular}}"><img src="/static/navigate_next-white-24dp.svg"/></a>
+	<a href="{{.Artist|popular}}"><img src="/static/navigate_next-white-24dp.svg"/></a>
       </div>
     </div>
     <div>
@@ -71,10 +71,10 @@
   <div>
     <div class="parent">
       <div class="left">
-	<a class="nodecor" data-link="{{.Artist|singles}}"><h2>Singles</h2></a>
+	<a class="nodecor" href="{{.Artist|singles}}"><h2>Singles</h2></a>
       </div>
       <div class="right">
-	<a data-link="{{.Artist|singles}}"><img src="/static/navigate_next-white-24dp.svg"/></a>
+	<a href="{{.Artist|singles}}"><img src="/static/navigate_next-white-24dp.svg"/></a>
       </div>
     </div>
     <div>
@@ -117,10 +117,10 @@
       {{ range .Similar }}
       <tr>
 	<td>
-	  <a data-link="{{.|link}}"><span class="circle">{{.|letter}}</span></a>
+	  <a href="{{.|link}}"><span class="circle">{{.|letter}}</span></a>
 	</td>
 	<td class="similar-artist">
-	  <a data-link="{{.|link}}">{{ .Name }}</a>
+	  <a href="{{.|link}}">{{ .Name }}</a>
 	</td>
       </tr>
     {{ end }}
@@ -128,7 +128,7 @@
   </div>
   {{ end }}
   <h2>Want List</h2>
-  <a data-link="{{.Artist|want}}">Want List</a>
+  <a href="{{.Artist|want}}">Want List</a>
   <h3>External Links</h3>
   MusicBrainz:
   <a target="_blank" href="https://musicbrainz.org/artist/{{ .Artist.ARID }}">Artist</a>

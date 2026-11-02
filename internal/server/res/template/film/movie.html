@@ -10,7 +10,7 @@
       <div class="tagline">
 	{{ .Movie.Tagline }}
       </div>
-      <p/>
+      <p></p>
       <div class="specs">
 	{{ if .Movie.Rating }}
 	<span class="rating">{{.Movie.Rating}}</span>
@@ -22,7 +22,7 @@
 	{{.Movie.Date.Year}}
 	&bull;
 	{{ range .Genres }}
-	<a data-link="/v?genre={{.|urlquery}}">{{.}}</a>
+	<a href="/movie-genres/{{.}}">{{.}}</a>
 	{{ end }}
       </div>
       <div style="padding-top: 50px;">
@@ -32,7 +32,7 @@
 	    <td class="cred"><h2>Starring</h2></td>
 	    <td class="cred">
 	      {{ range .Starring }}
-	      <a data-link="/v?profile={{.PEID}}">{{.Name}}</a>
+	      <a href="/profiles/{{.PEID}}">{{.Name}}</a>
 	      {{ end }}
 	    </td>
 	    <td rowspan="3" width="100%" align="right">
@@ -47,7 +47,7 @@
 	    <td class="cred"><h2>Directing</h2></td>
 	    <td class="cred">
 	      {{ range .Directing }}
-	      <a data-link="/v?profile={{.PEID}}">{{.Name}}</a>
+	      <a href="/profiles/{{.PEID}}">{{.Name}}</a>
 	      {{ end }}
 	    </td>
 	  </tr>
@@ -57,7 +57,7 @@
 	    <td class="cred"><h2>Writing</h2></td>
 	    <td class="cred">
 	      {{ range .Writing }}
-	      <a data-link="/v?profile={{.PEID}}">{{.Name}}</a>
+	      <a href="/profiles/{{.PEID}}">{{.Name}}</a>
 	      {{ end }}
 	    </td>
 	  </tr>
@@ -67,7 +67,6 @@
       <h2>Overview</h2>
       <div>
 	{{ .Movie.Overview }}
-	<a data-link="/v?watch={{ .Movie.ID }}">watch it</a>
       </div>
       {{ if .Trailers }}
       <h2>Trailers</h2>
@@ -85,7 +84,7 @@
     {{ range $i, $c := .Cast }}
     {{ if lt $i 5 }}
     <div class="card">
-      <a data-link="/v?profile={{ $c.Person.PEID }}"><img src="{{$c.Person|profile}}"></a>
+      <a href="/profiles/{{$c.Person.PEID}}"><img src="{{$c.Person|profile}}"></a>
       <p class="person">{{ $c.Person.Name }}</p>
       <p class="character">{{ $c.Character }}</p>
     </div>
@@ -98,7 +97,7 @@
   <div style="display: flex; padding-left: 25px;">
     {{ range .Other }}
     <div style="padding: 10px;">
-      <div><a data-link="{{.|link}}"><img src="{{.|poster_small}}"></a></div>
+      <div><a href="{{.|link}}"><img src="{{.|poster_small}}"></a></div>
       <div style="padding-top: 10px; max-width: 154px;" class="movie-title">{{ .Title }}</div>
     </div>
     {{ end }}

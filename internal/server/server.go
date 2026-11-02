@@ -236,8 +236,9 @@ func Serve(c context.Context, config *config.Config) error {
 	}
 
 	mux.Handle("GET /static/", staticAssets)
-	mux.Handle("GET /", accessTokenAuthHandler(ctx, viewHandler))
-	mux.Handle("GET /v", accessTokenAuthHandler(ctx, viewHandler))
+	for pattern, p := range pages {
+		mux.Handle(pattern, accessTokenAuthHandler(ctx, pageHandler(p)))
+	}
 
 	// cookie auth
 	// mux.Handle("POST /api/login", requestHandler(ctx, apiLogin)) -- not used anymore?

@@ -13,7 +13,7 @@ a, a:visited, a:hover, a:active {
     cursor: pointer;
 }
 
-.nodecor {
+.nodecor, a.nodecor:visited {
     text-decoration: none;
 }
 
@@ -42,7 +42,7 @@ h3 {
     font-weight: bold;
 }
 
-.takeout {
+.takeout, a.takeout:visited {
     font-size: small;
     opacity: 0.5;
     text-decoration: none;

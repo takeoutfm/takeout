@@ -147,7 +147,7 @@ func (c *TestContext) Progress() *progress.Progress {
 }
 
 func (c *TestContext) Template() *template.Template {
-	return &template.Template{}
+	return getTemplates(c.Config())
 }
 
 func (c *TestContext) User() auth.User {

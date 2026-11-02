@@ -2,7 +2,7 @@
   <h1>{{.Episode.Name}}</h1>
   <div class="parent3">
     <div class="middle">
-      <a data-link="{{.Series|link}}">{{ .Series.Name }}</a>
+      <a href="{{.Series|link}}">{{ .Series.Name }}</a>
     </div>
     <div class="middle">
       <img src="{{.Episode|still}}">
@@ -22,7 +22,6 @@
   <h2 style="padding-left: 25px; padding-top: 25px;">Overview</h2>
   <div style="display: flex; padding-left: 25px;">
     {{ .Episode.Overview }}
-    <a data-link="/v?watch={{ .Series.ID }}">watch it</a>
   </div>
   {{ if .Cast }}
   <h2 style="padding-left: 25px; padding-top: 25px;">Cast</h2>
@@ -30,7 +29,7 @@
     {{ range $i, $c := .Cast }}
     {{ if lt $i 5 }}
     <div class="card">
-      <a data-link="/v?profile={{ $c.Person.PEID }}"><img src="{{$c.Person|profile}}"></a>
+      <a href="/profiles/{{$c.Person.PEID}}"><img src="{{$c.Person|profile}}"></a>
       <p class="person">{{ $c.Person.Name }}</p>
       <p class="character">{{ $c.Character }}</p>
     </div>

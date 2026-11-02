@@ -7,7 +7,7 @@
     <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
       {{ range .AddedReleases }}
       <div style="padding: 10px; max-width: 110px; display: inline-block;">
-	<a data-link="{{.|link}}" style="text-decoration: none;">
+	<a href="{{.|link}}" style="text-decoration: none;">
 	  <img width="110" height="110" src="{{.|cover}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="release-small-title">{{ .Name }}</div>
@@ -25,7 +25,7 @@
     <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
       {{ range .NewReleases }}
       <div style="padding: 10px; max-width: 110px; display: inline-block;">
-	<a data-link="{{.|link}}" style="text-decoration: none;">
+	<a href="{{.|link}}" style="text-decoration: none;">
 	  <img width="110" height="110" src="{{.|cover}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="release-small-title">{{ .Name }}</div>
@@ -49,7 +49,7 @@
       {{ range .RecommendMovies }}
       {{ range .Movies }}
       <div style="padding: 10px; max-width: 154px; display: inline-block;">
-	<a data-link="{{.|link}}" style="text-decoration: none;">
+	<a href="{{.|link}}" style="text-decoration: none;">
 	  <img src="{{.|poster_small}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="movie-small-title">{{ .Title }}</div>
@@ -68,7 +68,7 @@
     <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
       {{ range .AddedMovies }}
       <div style="padding: 10px; max-width: 154px; display: inline-block;">
-	<a data-link="{{.|link}}" style="text-decoration: none;">
+	<a href="{{.|link}}" style="text-decoration: none;">
 	  <img src="{{.|poster_small}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="movie-small-title">{{ .Title }}</div>
@@ -86,7 +86,7 @@
     <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
       {{ range .NewMovies }}
       <div style="padding: 10px; max-width: 154px; display: inline-block;">
-	<a data-link="{{.|link}}" style="text-decoration: none;">
+	<a href="{{.|link}}" style="text-decoration: none;">
 	  <img src="{{.|poster_small}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="movie-small-title">{{ .Title }}</div>
@@ -108,7 +108,7 @@
     <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
       {{ range .AddedTVEpisodes }}
       <div style="padding: 10px; max-width: 185px; display: inline-block;">
-	<a data-link="{{.|link}}" style="text-decoration: none;">
+	<a href="{{.|link}}" style="text-decoration: none;">
 	  <img src="{{.|still_small}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="movie-small-title">{{ .Name }}</div>
@@ -130,7 +130,7 @@
     <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
       {{ range .NewSeries }}
       <div style="padding: 10px; max-width: 154px; display: inline-block;">
-	<a data-link="{{.|link}}" style="text-decoration: none;">
+	<a href="{{.|link}}" style="text-decoration: none;">
 	  <img width="144" height="144" src="{{.|image}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="series-small-title">{{ .Title }}</div>
@@ -148,7 +148,7 @@
     <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
       {{ range .NewEpisodes }}
       <div style="padding: 10px; max-width: 154px; display: inline-block;">
-	<a data-link="{{.|link}}" style="text-decoration: none;">
+	<a href="{{.|link}}" style="text-decoration: none;">
 	  <img width="144" height="144" src="{{.|image}}" style="border-radius: 10px;">
 	  <br/>
 	  <div class="series-small-title">{{ .Title }}</div>

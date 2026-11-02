@@ -5,7 +5,7 @@
       <a data-playlist="add-ref" data-ref="{{.Release|ref}}"><img src="{{.Release|cover}}" class="release-cover-small"></a>
     </div>
     <div class="middle">
-      <a data-link="{{.Artist|link}}">{{ .Artist.Name }}</a>
+      <a href="{{.Artist|link}}">{{ .Artist.Name }}</a>
       <span class="release-small-year">{{ .Release.Date.Year }}</span>
     </div>
   </div>
@@ -96,13 +96,13 @@
     </div>
   </div>
   {{ end }}
-  <div style="clear: both; padding-top: 5px;"/>
+  <div style="clear: both; padding-top: 5px;"></div>
   {{ if .Similar }}
   <h2>Similar Releases</h2>
   <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
     {{ range .Similar }}
     <div style="padding: 10px; max-width: 110px; display: inline-block;">
-      <a data-link="{{.|link}}" style="text-decoration: none;">
+      <a href="{{.|link}}" style="text-decoration: none;">
 	<img width="110" height="110" src="{{.|cover}}" style="border-radius: 10px;">
 	<br/>
 	<div class="release-small-title">{{ .Name }}</div>
@@ -113,12 +113,12 @@
     {{ end }}
   </div>
   {{ end }}
-  <div style="clear: both; padding-top: 5px;"/>
+  <div style="clear: both; padding-top: 5px;"></div>
   <h3>External Links</h3>
   MusicBrainz:
   <a target="_blank" href="https://musicbrainz.org/artist/{{ .Artist.ARID }}">Artist</a>,
   <a target="_blank" href="https://musicbrainz.org/release-group/{{ .Release.RGID }}">Release Group</a>,
   <a target="_blank" href="https://musicbrainz.org/release/{{ .Release.REID }}">Release</a>
-  <p/>
+  <p></p>
   <a alt="Open in VLC" href="/api/releases/{{.Release.ID}}/playlist.xspf"><img src="/static/open_in_new_white_24dp.svg"/></a>
 </div>
