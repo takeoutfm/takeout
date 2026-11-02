@@ -68,10 +68,10 @@ func TestLogout(t *testing.T) {
 	}
 
 	cleared := w.Result().Cookies()
-	if len(cleared) != 1 || cleared[0].Name != auth.CookieName || cleared[0].Path != "/" ||
-		!cleared[0].Expires.Before(time.Now()) {
+	if len(cleared) != 1 || !cleared[0].Expires.Before(time.Now()) {
 		t.Fatalf("cookie not expired: %+v", cleared)
 	}
+	checkCookieAttrs(t, cleared[0])
 }
 
 func TestLogoutWithoutCookie(t *testing.T) {
@@ -82,4 +82,56 @@ func TestLogoutWithoutCookie(t *testing.T) {
 	if len(w.Result().Cookies()) != 0 {
 		t.Fatal("no cookie to clear")
 	}
+}
+
+// the cookie a request carries has only a name and value; what the server
+// sends back must be the full cookie it set
+func checkCookieAttrs(t *testing.T, c *http.Cookie) {
+	t.Helper()
+	if c.Name != auth.CookieName || c.Path != "/" || !c.HttpOnly || c.SameSite != http.SameSiteStrictMode {
+		t.Fatalf("cookie attributes: %+v", c)
+	}
+}
+
+func authorize(ctx Context, cookie *http.Cookie) (*httptest.ResponseRecorder, error) {
+	req := httptest.NewRequest("GET", "/api/index", nil)
+	req.AddCookie(cookie)
+	w := httptest.NewRecorder()
+	_, err := authorizeCookie(ctx, w, req)
+	return w, err
+}
+
+func TestAuthorizeCookieRefresh(t *testing.T) {
+	ctx := NewTestContext(t)
+	a := ctx.Auth()
+	const user = "cookie-test"
+	if err := a.AddUser(user, "correct horse battery staple 9"); err != nil {
+		t.Fatal(err)
+	}
+	session, err := a.LoginSession(user)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, err := authorize(ctx, &http.Cookie{Name: auth.CookieName, Value: session.Token})
+	if err != nil {
+		t.Fatal(err)
+	}
+	sent := w.Result().Cookies()
+	if len(sent) != 1 || sent[0].Value != session.Token || sent[0].MaxAge <= 0 {
+		t.Fatalf("refreshed cookie: %+v", sent)
+	}
+	checkCookieAttrs(t, sent[0])
+}
+
+func TestAuthorizeCookieUnknown(t *testing.T) {
+	ctx := NewTestContext(t)
+	w, err := authorize(ctx, &http.Cookie{Name: auth.CookieName, Value: "no-such-session"})
+	if err != ErrAccessDeniedRedirect {
+		t.Fatalf("got %v", err)
+	}
+	sent := w.Result().Cookies()
+	if len(sent) != 1 || !sent[0].Expires.Before(time.Now()) {
+		t.Fatalf("cookie not cleared: %+v", sent)
+	}
+	checkCookieAttrs(t, sent[0])
 }

@@ -128,9 +128,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 		if session, err := ctx.Auth().CookieSession(cookie); err == nil {
 			ctx.Auth().DeleteSession(&session)
 		}
-		// a request's cookie has no path; clear the one set for "/"
-		cookie.Path = "/"
-		http.SetCookie(w, auth.ExpireCookie(cookie))
+		clearCookie(ctx, w)
 	}
 	// Use 303 for PRG
 	http.Redirect(w, r, LoginRedirect, http.StatusSeeOther)

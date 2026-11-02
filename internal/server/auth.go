@@ -132,24 +132,29 @@ func authorizeFileToken(ctx Context, w http.ResponseWriter, r *http.Request, pat
 	return nil
 }
 
+// clearCookie expires the session cookie. It's made like the cookie the
+// server set (Path=/, HttpOnly, ...): a request's cookie carries only its
+// name and value, and expiring that one would leave the real one in place.
+func clearCookie(ctx Context, w http.ResponseWriter) {
+	cookie := ctx.Auth().NewCookie(&auth.Session{})
+	http.SetCookie(w, auth.ExpireCookie(&cookie))
+}
+
 // authorizeCookie validates the provided cookie for API or web view access.
 func authorizeCookie(ctx Context, w http.ResponseWriter, r *http.Request) (auth.User, error) {
 	a := ctx.Auth()
 	cookie, err := r.Cookie(auth.CookieName)
 	if err != nil {
-		if err != http.ErrNoCookie {
-			http.SetCookie(w, auth.ExpireCookie(cookie)) // what cookie is this?
-		}
 		return auth.User{}, ErrAccessDeniedRedirect
 	}
 
 	session, err := a.CookieSession(cookie)
 	if err != nil {
-		http.SetCookie(w, auth.ExpireCookie(cookie))
+		clearCookie(ctx, w)
 		return auth.User{}, ErrAccessDeniedRedirect
 	} else if session.Expired() {
 		a.DeleteSession(&session)
-		http.SetCookie(w, auth.ExpireCookie(cookie))
+		clearCookie(ctx, w)
 		return auth.User{}, ErrAccessDeniedRedirect
 	}
 
@@ -157,13 +162,13 @@ func authorizeCookie(ctx Context, w http.ResponseWriter, r *http.Request) (auth.
 	if err != nil {
 		// session with no user?
 		a.DeleteSession(&session)
-		http.SetCookie(w, auth.ExpireCookie(cookie))
+		clearCookie(ctx, w)
 		return auth.User{}, ErrAccessDeniedRedirect
 	}
 
-	// send back an updated cookie
-	auth.UpdateCookie(session, cookie)
-	http.SetCookie(w, cookie)
+	// send back an updated cookie, made as when it was first set
+	updated := a.NewCookie(&session)
+	http.SetCookie(w, &updated)
 
 	return user, nil
 }
