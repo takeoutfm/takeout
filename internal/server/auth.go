@@ -135,39 +135,75 @@ func authorizeFileToken(ctx Context, w http.ResponseWriter, r *http.Request, pat
 // clearCookie expires the session cookie. It's made like the cookie the
 // server set (Path=/, HttpOnly, ...): a request's cookie carries only its
 // name and value, and expiring that one would leave the real one in place.
-func clearCookie(ctx Context, w http.ResponseWriter) {
+// Older servers also set session cookies for the request's own path (no
+// Path attribute), so that one is expired too.
+func clearCookie(ctx Context, w http.ResponseWriter, r *http.Request) {
 	cookie := ctx.Auth().NewCookie(&auth.Session{})
 	http.SetCookie(w, auth.ExpireCookie(&cookie))
+	clearPathCookie(ctx, w, r)
 }
 
-// authorizeCookie validates the provided cookie for API or web view access.
-func authorizeCookie(ctx Context, w http.ResponseWriter, r *http.Request) (auth.User, error) {
+// clearPathCookie expires a session cookie an older server set for this
+// request's default path (RFC 6265 5.1.4), such as /api for /api/index.
+func clearPathCookie(ctx Context, w http.ResponseWriter, r *http.Request) {
+	if path := cookieDefaultPath(r.URL.Path); path != "/" {
+		cookie := ctx.Auth().NewCookie(&auth.Session{})
+		cookie.Path = path
+		http.SetCookie(w, auth.ExpireCookie(&cookie))
+	}
+}
+
+func cookieDefaultPath(path string) string {
+	i := strings.LastIndex(path, "/")
+	if i <= 0 {
+		return "/"
+	}
+	return path[:i]
+}
+
+// cookieLogin finds the live session among the request's session cookies.
+// A browser can send several (older servers set them per path), the most
+// specific path first; first reports whether the live one was that one.
+// Expired sessions, and sessions without a user, are deleted.
+func cookieLogin(ctx Context, r *http.Request) (session auth.Session, user auth.User, first bool, ok bool) {
 	a := ctx.Auth()
-	cookie, err := r.Cookie(auth.CookieName)
-	if err != nil {
+	for i, cookie := range r.CookiesNamed(auth.CookieName) {
+		s, err := a.CookieSession(cookie)
+		if err != nil {
+			continue
+		}
+		if s.Expired() {
+			a.DeleteSession(&s)
+			continue
+		}
+		u, err := a.SessionUser(s)
+		if err != nil {
+			// session with no user?
+			a.DeleteSession(&s)
+			continue
+		}
+		return s, u, i == 0, true
+	}
+	return auth.Session{}, auth.User{}, false, false
+}
+
+// authorizeCookie validates the request's cookie for API or web view access.
+func authorizeCookie(ctx Context, w http.ResponseWriter, r *http.Request) (auth.User, error) {
+	if len(r.CookiesNamed(auth.CookieName)) == 0 {
 		return auth.User{}, ErrAccessDeniedRedirect
 	}
-
-	session, err := a.CookieSession(cookie)
-	if err != nil {
-		clearCookie(ctx, w)
-		return auth.User{}, ErrAccessDeniedRedirect
-	} else if session.Expired() {
-		a.DeleteSession(&session)
-		clearCookie(ctx, w)
+	session, user, first, ok := cookieLogin(ctx, r)
+	if !ok {
+		clearCookie(ctx, w, r)
 		return auth.User{}, ErrAccessDeniedRedirect
 	}
-
-	user, err := a.SessionUser(session)
-	if err != nil {
-		// session with no user?
-		a.DeleteSession(&session)
-		clearCookie(ctx, w)
-		return auth.User{}, ErrAccessDeniedRedirect
+	if !first {
+		// a stale cookie for this path came first; remove it
+		clearPathCookie(ctx, w, r)
 	}
 
 	// send back an updated cookie, made as when it was first set
-	updated := a.NewCookie(&session)
+	updated := ctx.Auth().NewCookie(&session)
 	http.SetCookie(w, &updated)
 
 	return user, nil

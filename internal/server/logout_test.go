@@ -93,12 +93,27 @@ func checkCookieAttrs(t *testing.T, c *http.Cookie) {
 	}
 }
 
-func authorize(ctx Context, cookie *http.Cookie) (*httptest.ResponseRecorder, error) {
+func authorize(ctx Context, cookies ...*http.Cookie) (*httptest.ResponseRecorder, error) {
 	req := httptest.NewRequest("GET", "/api/index", nil)
-	req.AddCookie(cookie)
+	for _, c := range cookies {
+		req.AddCookie(c)
+	}
 	w := httptest.NewRecorder()
 	_, err := authorizeCookie(ctx, w, req)
 	return w, err
+}
+
+// sentCookies maps each Set-Cookie's path to the cookie
+func sentCookies(w *httptest.ResponseRecorder) map[string]*http.Cookie {
+	sent := make(map[string]*http.Cookie)
+	for _, c := range w.Result().Cookies() {
+		sent[c.Path] = c
+	}
+	return sent
+}
+
+func expired(c *http.Cookie) bool {
+	return c != nil && (c.MaxAge < 0 || (!c.Expires.IsZero() && c.Expires.Before(time.Now())))
 }
 
 func TestAuthorizeCookieRefresh(t *testing.T) {
@@ -129,9 +144,52 @@ func TestAuthorizeCookieUnknown(t *testing.T) {
 	if err != ErrAccessDeniedRedirect {
 		t.Fatalf("got %v", err)
 	}
-	sent := w.Result().Cookies()
-	if len(sent) != 1 || !sent[0].Expires.Before(time.Now()) {
-		t.Fatalf("cookie not cleared: %+v", sent)
+	// cleared for "/" and for the request's own path (older servers)
+	sent := sentCookies(w)
+	if len(sent) != 2 || !expired(sent["/"]) || !expired(sent["/api"]) {
+		t.Fatalf("cookies not cleared: %+v", sent)
 	}
-	checkCookieAttrs(t, sent[0])
+	checkCookieAttrs(t, sent["/"])
+}
+
+// A browser that used an older server can hold a stale session cookie for
+// /api, which it sends before the "/" one.
+func TestAuthorizeCookieStaleFirst(t *testing.T) {
+	ctx := NewTestContext(t)
+	a := ctx.Auth()
+	const user = "stale-cookie-test"
+	if err := a.AddUser(user, "correct horse battery staple 9"); err != nil {
+		t.Fatal(err)
+	}
+	session, err := a.LoginSession(user)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, err := authorize(ctx,
+		&http.Cookie{Name: auth.CookieName, Value: "stale-session"},
+		&http.Cookie{Name: auth.CookieName, Value: session.Token})
+	if err != nil {
+		t.Fatalf("signed out by a stale cookie: %v", err)
+	}
+	sent := sentCookies(w)
+	if c := sent["/"]; c == nil || c.Value != session.Token || expired(c) {
+		t.Fatalf("live cookie not refreshed: %+v", sent)
+	}
+	if !expired(sent["/api"]) {
+		t.Fatalf("stale cookie not cleared: %+v", sent)
+	}
+	if _, err := a.TokenSession(session.Token); err != nil {
+		t.Fatalf("session gone: %v", err)
+	}
+}
+
+func TestCookieDefaultPath(t *testing.T) {
+	for path, want := range map[string]string{
+		"": "/", "/": "/", "/v": "/", "/api/index": "/api",
+		"/api/tracks/x/location": "/api/tracks/x",
+	} {
+		if got := cookieDefaultPath(path); got != want {
+			t.Errorf("%q: got %q, want %q", path, got, want)
+		}
+	}
 }

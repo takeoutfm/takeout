@@ -124,11 +124,11 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 // sessions (the apps) stay signed in.
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
-	if cookie, err := r.Cookie(auth.CookieName); err == nil {
-		if session, err := ctx.Auth().CookieSession(cookie); err == nil {
+	if len(r.CookiesNamed(auth.CookieName)) > 0 {
+		if session, _, _, ok := cookieLogin(ctx, r); ok {
 			ctx.Auth().DeleteSession(&session)
 		}
-		clearCookie(ctx, w)
+		clearCookie(ctx, w, r)
 	}
 	// Use 303 for PRG
 	http.Redirect(w, r, LoginRedirect, http.StatusSeeOther)
