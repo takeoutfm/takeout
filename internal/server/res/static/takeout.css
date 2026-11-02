@@ -365,3 +365,40 @@ body {
         padding: 0 8px;
     }
 }
+
+#progressbar {
+    cursor: pointer;
+}
+
+#progressbar.live {
+    cursor: default;
+    opacity: 0.4;
+}
+
+.np-message {
+    padding: 6px 12px;
+    font-size: small;
+    background-color: #3a3a3a;
+}
+
+.episode-actions {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+a.button,
+a.button:visited {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px 6px 8px;
+    border: 1px solid #555;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+a.button:hover {
+    background-color: #333;
+}

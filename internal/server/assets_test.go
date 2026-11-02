@@ -157,7 +157,7 @@ func TestAssetNotFound(t *testing.T) {
 }
 
 func TestStaticAssets(t *testing.T) {
-	for _, name := range []string{"music.js", "takeout.css", "login.html", "favicon.svg"} {
+	for _, name := range []string{"player.js", "nav.js", "takeout.css", "login.html", "favicon.svg"} {
 		if _, ok := staticAssets.files[name]; !ok {
 			t.Errorf("missing %s", name)
 		}
@@ -167,7 +167,7 @@ func TestStaticAssets(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(buf.String(), staticAssets.URL("music.js")) {
-		t.Fatal("layout.html doesn't use the hashed music.js url")
+	if !strings.Contains(buf.String(), staticAssets.URL("player.js")) {
+		t.Fatal("layout.html doesn't use the hashed player.js url")
 	}
 }

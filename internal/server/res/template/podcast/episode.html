@@ -8,8 +8,11 @@
   {{ .Episode.Date | ymd }}
 </div>
 <div style="white-space: pre-line;">{{ .Episode.Description | plainText }}</div>
-<div>
-  <audio controls="">
-    <source src="{{.Episode|url}}" type="{{ .Episode.ContentType }}">
-  </audio>
+<div class="episode-actions">
+  <a class="button" data-playlist="add-ref" data-ref="/podcasts/episodes/{{.Episode.ID}}">
+    <img src="/static/play_arrow-white-24dp.svg" alt="">Play
+  </a>
+  <a class="button" data-playlist="append-ref" data-ref="/podcasts/episodes/{{.Episode.ID}}">
+    <img src="/static/playlist_add-white-24dp.svg" alt="">Add to queue
+  </a>
 </div>

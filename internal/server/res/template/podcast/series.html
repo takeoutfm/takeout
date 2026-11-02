@@ -4,6 +4,11 @@
 <div>
   <img height="144" src="{{.Series|image}}">
 </div>
+<div class="episode-actions">
+  <a class="button" data-playlist="add-ref" data-ref="/podcasts/series/{{.Series.ID}}">
+    <img src="/static/play_arrow-white-24dp.svg" alt="">Play latest
+  </a>
+</div>
 <div>
   {{ range .Episodes }}
   <div class="parent">
@@ -18,6 +23,12 @@
       </div>
     </div>
     <div class="right">
+      <a data-playlist="add-ref" data-ref="/podcasts/episodes/{{.ID}}">
+	<img src="/static/play_arrow-white-24dp.svg" alt="Play">
+      </a>
+      <a data-playlist="append-ref" data-ref="/podcasts/episodes/{{.ID}}">
+	<img src="/static/playlist_add-white-24dp.svg" alt="Add to queue">
+      </a>
     </div>
   </div>
   {{ end }}

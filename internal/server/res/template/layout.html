@@ -10,8 +10,9 @@
     <link rel="stylesheet" type="text/css" href="{{asset "podcast.css"}}">
     <link rel="icon" type="image/svg+xml" href="{{asset "favicon.svg"}}">
     <script src="{{asset "nav.js"}}" defer></script>
-    <script type="text/javascript" src="{{asset "music.js"}}"></script>
-    <script type="text/javascript" src="{{asset "chart.umd.js"}}"></script>
+    <script src="{{asset "player.js"}}" defer></script>
+    <script src="{{asset "chart.umd.js"}}" defer></script>
+    <script src="{{asset "charts.js"}}" defer></script>
   </head>
   <body>
     <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg">
@@ -79,36 +80,36 @@
       </div>
       <p style="clear: both;"></p>
       <div id="playing" style="display: none;">
-	<audio id="audio">
-	  <source id="audio-source" src=""></source>
-	</audio>
-	<div class="footer" style="display: block;">
+	<audio id="audio" preload="auto"></audio>
+	<div class="footer">
+	  <div id="np-message" class="np-message" role="status" hidden></div>
 	  <table class="full-width playing">
 	    <tr class="playing">
 	      <td class="np-cover" data-action="toggle">
-		<img class="mini-cover" name="np-cover"/>
+		<img class="mini-cover" id="np-cover" alt="">
 	      </td>
 	      <td class="playing">
 		<div class="np-track" data-action="toggle">
-		  <div class="np-title" name="np-title"></div>
-		  <div class="np-artist" name="np-artist"></div>
+		  <div class="np-title" id="np-title"></div>
+		  <div class="np-artist" id="np-artist"></div>
 		  <div class="np-duration" id="np-duration"></div>
 		</div>
 	      </td>
 	      <td class="np-control playing">
-		<img id="np-playpause" class="np-control playing" src="">
+		<img id="np-playpause" class="np-control playing" data-action="playpause"
+		     src="/static/play_arrow-white-36dp.svg" alt="Play">
 	      </td>
 	      <td class="np-control playing">
-		<img id="np-next" class="np-control playing" src="">
+		<img id="np-next" class="np-control playing" data-action="next"
+		     src="/static/skip_next-white-36dp.svg" alt="Next">
 	      </td>
 	    </tr>
 	  </table>
-	  <div style="padding: 2px;">
-	    <div id="progressbar">
-	      <div id="progress"></div>
-	    </div>
+	  <div id="progressbar">
+	    <div id="progress"></div>
 	  </div>
 	</div>
       </div>
+    </div>
   </body>
 </html>
