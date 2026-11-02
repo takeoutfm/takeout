@@ -1,123 +1,49 @@
 <div>
-  <h1>{{ .Release.Name }}{{ if .Release.Disambiguation }} ({{ .Release.Disambiguation }}){{ end }}</h1>
-  <div class="parent3">
-    <div class="middle">
-      <a data-playlist="add-ref" data-ref="{{.Release|ref}}"><img src="{{.Release|cover}}" class="release-cover-small"></a>
-    </div>
-    <div class="middle">
-      <a href="{{.Artist|link}}">{{ .Artist.Name }}</a>
-      <span class="release-small-year">{{ .Release.Date.Year }}</span>
-    </div>
-  </div>
-  <div>
-    <div class="parent">
-      <div class="left">
-	<h2>Tracks</h2>
-      </div>
-      <div class="right">
-	<a data-playlist="append-ref" data-ref="{{.Release|ref}}">
-	  <img src="/static/playlist_add-white-24dp.svg"/>
-	</a>
-      </div>
-    </div>
+  <div class="page-head">
+    <img class="cover" src="{{.Release|cover}}" alt="">
     <div>
-      {{ range .Tracks }}
-      <div class="parent">
-	<div class="track-num">
-	  {{ .TrackNum }}.
-	</div>
-	<div class="left pointer">
-	  <div class="parent2">
-	    <div class="track-title">
-	      <a data-playlist="append-ref"
-		 data-ref="{{.|ref}}"
-		 data-play="now"
-		 data-creator="{{.PreferredArtist}}"
-		 data-album="{{.ReleaseTitle}}"
-		 data-title="{{.Title}}"
-		 data-image="{{.|cover}}"
-		 data-etag="{{.ETag}}"
-		 data-location="{{.|link}}">
-		{{ .Title }}
-	      </a>
-	    </div>
-	    <div class="track-artist">
-	      {{ .PreferredArtist }} &#x2022 {{ .ReleaseTitle }}
-	    </div>
-	  </div>
-	</div>
-	<div class="separator"></div>
-	<div class="right">
-	  <a data-playlist="append-ref" data-ref="{{.|ref}}">
-	    <img src="/static/playlist_add-white-24dp.svg">
-	  </a>
-	</div>
+      <h1>{{ .Release.Name }}{{ if .Release.Disambiguation }} <span class="muted">({{ .Release.Disambiguation }})</span>{{ end }}</h1>
+      <div class="subtitle"><a href="{{.Artist|link}}">{{ .Artist.Name }}</a></div>
+      <div class="muted">
+	{{ .Release.Date.Year }}{{ if .Release.Type }} &middot; {{ .Release.Type }}{{ end }}{{ if .Release.SecondaryType }} &middot; {{ .Release.SecondaryType }}{{ end }}
       </div>
-      {{ end }}
     </div>
   </div>
-  {{ if .Singles }}
-  <div>
-    <h2>Singles</h2>
-    <div>
-      {{ range .Singles }}
-      <div class="parent">
-	<div class="track-num">
-	  {{ .TrackNum }}.
-	</div>
-	<div class="left pointer">
-	  <div class="parent2">
-	    <div class="track-title">
-	      <a data-playlist="append-ref"
-		 data-ref="{{.|ref}}"
-		 data-play="now"
-		 data-creator="{{.PreferredArtist}}"
-		 data-album="{{.ReleaseTitle}}"
-		 data-title="{{.Title}}"
-		 data-image="{{.|cover}}"
-		 data-etag="{{.ETag}}"
-		 data-location="{{.|link}}">
-		{{ .Title }}
-	      </a>
-	    </div>
-	    <div class="track-artist">
-	      {{ .PreferredArtist }} &#x2022 {{ .ReleaseTitle }}
-	    </div>
-	  </div>
-	</div>
-	<div class="separator"></div>
-	<div class="right">
-	  <a data-playlist="append-ref" data-ref="{{.|ref}}">
-	    <img src="/static/playlist_add-white-24dp.svg">
-	  </a>
-	</div>
-      </div>
-      {{ end }}
-    </div>
+  <div class="actions">
+    <a class="button" href="#" data-playlist="add-ref" data-ref="{{.Release|ref}}">
+      <img src="/static/play_arrow-white-24dp.svg" alt="">Play
+    </a>
+    <a class="button" href="#" data-playlist="add-ref" data-shuffle data-ref="{{.Release|ref}}">
+      <img src="/static/shuffle-white-24dp.svg" alt="">Shuffle
+    </a>
+    <a class="button" href="#" data-playlist="append-ref" data-ref="{{.Release|ref}}">
+      <img src="/static/playlist_add-white-24dp.svg" alt="">Add to queue
+    </a>
   </div>
-  {{ end }}
-  <div class="clear pt-5"></div>
-  {{ if .Similar }}
-  <h2>Similar Releases</h2>
-  <div class="hscroll">
-    {{ range .Similar }}
-    <div class="tile-110">
-      <a class="nodecor" href="{{.|link}}">
-	<img class="rounded" width="110" height="110" src="{{.|cover}}">
-	<br/>
-	<div class="release-small-title">{{ .Name }}</div>
-	<div class="release-small-year">{{ .Date.Year }}</div>
-      </a>
-    </div>
+
+  <ol class="tracks" data-list-ref="{{.Release|ref}}">
+    {{ $disc := 0 }}
+    {{ range .Tracks }}
+    {{ if and (gt $.Release.DiscCount 1) (ne .DiscNum $disc) }}
+    <li class="disc">Disc {{ .DiscNum }}{{ if .MediaTitle }}: {{ .MediaTitle }}{{ end }}</li>
+    {{ $disc = .DiscNum }}
     {{ end }}
+    {{ template "album-track" . }}
+    {{ end }}
+  </ol>
+
+  {{ if .Similar }}
+  <div class="section-head"><h2>Similar Albums</h2></div>
+  <div class="tile-row">
+    {{ range .Similar }}{{ template "release-tile" . }}{{ end }}
   </div>
   {{ end }}
-  <div class="clear pt-5"></div>
-  <h3>External Links</h3>
-  MusicBrainz:
-  <a target="_blank" href="https://musicbrainz.org/artist/{{ .Artist.ARID }}">Artist</a>,
-  <a target="_blank" href="https://musicbrainz.org/release-group/{{ .Release.RGID }}">Release Group</a>,
-  <a target="_blank" href="https://musicbrainz.org/release/{{ .Release.REID }}">Release</a>
-  <p></p>
-  <a alt="Open in VLC" href="/api/releases/{{.Release.ID}}/playlist.xspf"><img src="/static/open_in_new_white_24dp.svg"/></a>
+
+  <div class="links">
+    MusicBrainz:
+    <a target="_blank" rel="noopener" href="https://musicbrainz.org/artist/{{ .Artist.ARID }}">artist</a>,
+    <a target="_blank" rel="noopener" href="https://musicbrainz.org/release-group/{{ .Release.RGID }}">release group</a>,
+    <a target="_blank" rel="noopener" href="https://musicbrainz.org/release/{{ .Release.REID }}">release</a>
+    &middot; <a href="/api/releases/{{.Release.ID}}/playlist.xspf">Open in a player</a>
+  </div>
 </div>

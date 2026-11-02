@@ -1,0 +1,137 @@
+{{/* Pieces shared by the pages, after the Mac and Linux apps' tiles and rows. */}}
+
+{{ define "release-tile" }}
+<a class="tile" href="{{.|link}}">
+  <img src="{{.|cover}}" alt="" loading="lazy">
+  <div class="tile-title">{{ .Name }}</div>
+  <div class="tile-sub">{{ .Artist }}</div>
+</a>
+{{ end }}
+
+{{ define "release-tile-year" }}
+<a class="tile" href="{{.|link}}">
+  <img src="{{.|cover}}" alt="" loading="lazy">
+  <div class="tile-title">{{ .Name }}</div>
+  <div class="tile-sub">{{ .Date.Year }}</div>
+</a>
+{{ end }}
+
+{{/* a track with its cover; plays its list (data-list-ref) from here */}}
+{{ define "track" }}
+<li class="track" data-track data-playlist="add-ref" data-ref="{{.|ref}}">
+  <img class="thumb" src="{{.|cover}}" alt="" loading="lazy">
+  <div class="text">
+    <div class="title">{{ .Title }}</div>
+    <div class="sub">{{ .PreferredArtist }} &middot; {{ .ReleaseTitle }}</div>
+  </div>
+  {{ template "add-button" . }}
+</li>
+{{ end }}
+
+{{/* a track on its album: number, and the artist when it's someone else */}}
+{{ define "album-track" }}
+<li class="track" data-track data-playlist="add-ref" data-ref="{{.|ref}}">
+  <span class="num">{{ .TrackNum }}</span>
+  <div class="text">
+    <div class="title">{{ .Title }}</div>
+    {{ if ne .PreferredArtist .Artist }}<div class="sub">{{ .PreferredArtist }}</div>{{ end }}
+  </div>
+  {{ template "add-button" . }}
+</li>
+{{ end }}
+
+{{ define "add-button" }}
+<a class="add" href="#" data-playlist="append-ref" data-ref="{{.|ref}}" title="Add to queue">
+  <img src="/static/playlist_add-white-24dp.svg" alt="Add to queue">
+</a>
+{{ end }}
+
+{{ define "station-tile" }}
+<a class="tile" href="#" data-playlist="add-ref" data-ref="{{.|ref}}" title="Play {{ .Name }}">
+  {{ if .Image }}
+  <img src="{{ .Image }}" alt="" loading="lazy">
+  {{ else }}
+  <div class="tile-icon"><img src="/static/radio-white-24dp.svg" alt=""></div>
+  {{ end }}
+  <div class="tile-title">{{ .Name }}</div>
+  {{ if .Description }}<div class="tile-sub">{{ .Description }}</div>{{ end }}
+</a>
+{{ end }}
+
+{{ define "artist-row" }}
+<a class="row" href="{{.|link}}" data-name="{{ .Name }}">
+  {{ if .Image }}
+  <img class="avatar" src="{{ .Image }}" alt="" loading="lazy">
+  {{ else }}
+  <span class="avatar">{{ if .SortName }}{{.|letter}}{{ end }}</span>
+  {{ end }}
+  <div class="text">
+    <div class="name">{{ .Name }}</div>
+    {{ if .Genre }}<div class="detail">{{ .Genre }}</div>{{ end }}
+  </div>
+</a>
+{{ end }}
+
+{{ define "movie-tile" }}
+<a class="tile" href="{{.|link}}">
+  <img src="{{.|poster_small}}" alt="" loading="lazy">
+  <div class="tile-title">{{ .Title }}</div>
+  <div class="tile-sub">{{ .Date.Year }}</div>
+</a>
+{{ end }}
+
+{{ define "show-tile" }}
+<a class="tile" href="{{.|link}}">
+  <img src="{{.|poster_small}}" alt="" loading="lazy">
+  <div class="tile-title">{{ .Name }}</div>
+  <div class="tile-sub">{{ .Date.Year }}</div>
+</a>
+{{ end }}
+
+{{ define "tvepisode-tile" }}
+<a class="tile" href="{{.|link}}">
+  <img src="{{.|still_small}}" alt="" loading="lazy">
+  <div class="tile-title">{{ .Name }}</div>
+  <div class="tile-sub">S{{ .Season }} E{{ .Episode }} &middot; {{ .Date.Year }}</div>
+</a>
+{{ end }}
+
+{{ define "series-tile" }}
+<a class="tile" href="{{.|link}}">
+  <img src="{{.|image}}" alt="" loading="lazy">
+  <div class="tile-title">{{ .Title }}</div>
+  <div class="tile-sub">{{ .Author }}</div>
+</a>
+{{ end }}
+
+{{ define "episode-tile" }}
+<a class="tile" href="{{.|link}}">
+  <img src="{{.|image}}" alt="" loading="lazy">
+  <div class="tile-title">{{ .Title }}</div>
+  <div class="tile-sub">{{ .Date|ymd }}</div>
+</a>
+{{ end }}
+
+{{/* a podcast episode: opens on its title, plays or queues from its buttons */}}
+{{ define "episode-row" }}
+<li class="track static">
+  <div class="text">
+    <div class="title"><a class="nodecor" href="{{.|link}}">{{ .Title }}</a></div>
+    <div class="sub">{{ .Date|ymd }}</div>
+  </div>
+  <a class="play" href="#" data-playlist="add-ref" data-ref="/podcasts/episodes/{{.ID}}" title="Play">
+    <img src="/static/play_arrow-white-24dp.svg" alt="Play">
+  </a>
+  <a class="add" href="#" data-playlist="append-ref" data-ref="/podcasts/episodes/{{.ID}}" title="Add to queue">
+    <img src="/static/playlist_add-white-24dp.svg" alt="Add to queue">
+  </a>
+</li>
+{{ end }}
+
+{{ define "person-tile" }}
+<a class="tile" href="/profiles/{{.Person.PEID}}">
+  <img src="{{.Person|profile_small}}" alt="" loading="lazy">
+  <div class="tile-title">{{ .Person.Name }}</div>
+  <div class="tile-sub">{{ .Character }}</div>
+</a>
+{{ end }}

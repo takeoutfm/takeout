@@ -1,13 +1,7 @@
 <div>
   <h1>Artists</h1>
-  <div>
-    <ul class="nolist">
-    {{ range .Artists }}
-    <li class="pb-1em">
-      <div><a href="{{.|link}}">{{ .Name }}</a></div>
-      <div class="artist-subtitle">{{ .Genre }} &#8226 {{ .Date.Year }}</div>
-    </li>
-    {{ end }}
-    </ul>
+  <input class="filter" type="search" placeholder="Filter artists" aria-label="Filter artists" data-filter="#artist-list">
+  <div class="rows" id="artist-list">
+    {{ range .Artists }}{{ template "artist-row" . }}{{ end }}
   </div>
 </div>

@@ -28,6 +28,15 @@
       <symbol id="i-tv" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></symbol>
       <symbol id="i-activity" viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></symbol>
       <symbol id="i-queue" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></symbol>
+      <symbol id="i-stop" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></symbol>
+      <symbol id="i-next" viewBox="0 0 24 24"><path d="m6 18 8.5-6L6 6v12zM16 6v12h2V6h-2z"/></symbol>
+      <symbol id="i-prev" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></symbol>
+      <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M10.59 9.17 5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></symbol>
+      <symbol id="i-clear" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></symbol>
+      <symbol id="i-nowplaying" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></symbol>
     </svg>
     <nav id="sidebar">
       <form id="f" class="side-search" action="/search" method="get" role="search">
@@ -68,44 +77,79 @@
       <div class="side-group">
 	<div class="side-section">You</div>
 	<a class="side" href="/activity" data-section="activity"{{ if eq .Section "activity" }} aria-current="page"{{ end }}><svg aria-hidden="true"><use href="#i-activity"></use></svg>Activity</a>
-	<a class="side" href="#" data-action="toggle"><svg aria-hidden="true"><use href="#i-queue"></use></svg>Queue</a>
+	<a class="side" href="#" data-action="nowplaying"><svg aria-hidden="true"><use href="#i-nowplaying"></use></svg>Now Playing</a>
       </div>
     </nav>
     <div id="top">
       <div id="main">
 	{{ template "fragment.html" . }}
       </div>
-      <div id="playlist" hidden>
-      </div>
-      <p class="clear"></p>
+      <section id="nowplaying" class="nowplaying" aria-label="Now Playing" hidden>
+	<img class="np-backdrop" data-np="background" alt="">
+	<div class="np-main">
+	  <img class="np-art" data-np="cover" alt="">
+	  <h1 data-np="title"></h1>
+	  <div class="subtitle" data-np="artist"></div>
+	  <div class="muted" data-np="album"></div>
+	  <div class="np-seek" data-np="seekable">
+	    <span class="np-time" data-np="pos"></span>
+	    <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek">
+	    <span class="np-time" data-np="dur"></span>
+	  </div>
+	  <div class="live-badge" data-np="live" hidden>LIVE</div>
+	  <div class="np-buttons">
+	    <button type="button" class="icon-button" data-action="prev" data-np="seekable" title="Previous">
+	      <svg aria-hidden="true"><use href="#i-prev"></use></svg>
+	    </button>
+	    <button type="button" class="icon-button big" data-action="playpause" title="Play">
+	      <svg aria-hidden="true"><use data-np="playicon" href="#i-play"></use></svg>
+	    </button>
+	    <button type="button" class="icon-button" data-action="next" title="Next">
+	      <svg aria-hidden="true"><use href="#i-next"></use></svg>
+	    </button>
+	  </div>
+	</div>
+	<div class="np-queue">
+	  <div class="section-head">
+	    <h2>Queue</h2>
+	    <span class="np-queue-actions">
+	      <a href="#" data-action="shuffle">Shuffle</a> &middot; <a href="#" data-action="clear">Clear</a>
+	    </span>
+	  </div>
+	  <ol class="tracks" id="queue"></ol>
+	</div>
+      </section>
       <div id="playing" hidden>
 	<audio id="audio" preload="auto"></audio>
 	<div class="footer">
 	  <div id="np-message" class="np-message" role="status" hidden></div>
-	  <table class="full-width playing">
-	    <tr class="playing">
-	      <td class="np-cover" data-action="toggle">
-		<img class="mini-cover" id="np-cover" alt="">
-	      </td>
-	      <td class="playing">
-		<div class="np-track" data-action="toggle">
-		  <div class="np-title" id="np-title"></div>
-		  <div class="np-artist" id="np-artist"></div>
-		  <div class="np-duration" id="np-duration"></div>
-		</div>
-	      </td>
-	      <td class="np-control playing">
-		<img id="np-playpause" class="np-control playing" data-action="playpause"
-		     src="/static/play_arrow-white-36dp.svg" alt="Play">
-	      </td>
-	      <td class="np-control playing">
-		<img id="np-next" class="np-control playing" data-action="next"
-		     src="/static/skip_next-white-36dp.svg" alt="Next">
-	      </td>
-	    </tr>
-	  </table>
-	  <div id="progressbar">
-	    <div id="progress"></div>
+	  <div class="mini">
+	    <button type="button" class="mini-track" data-action="nowplaying" title="Now Playing">
+	      <img class="mini-cover" data-np="cover" alt="">
+	      <span class="mini-text">
+		<span class="mini-title" data-np="title"></span>
+		<span class="mini-artist" data-np="artist"></span>
+	      </span>
+	    </button>
+	    <div class="mini-controls">
+	      <button type="button" class="icon-button" data-action="prev" data-np="seekable" title="Previous">
+		<svg aria-hidden="true"><use href="#i-prev"></use></svg>
+	      </button>
+	      <button type="button" class="icon-button big" data-action="playpause" title="Play">
+		<svg aria-hidden="true"><use data-np="playicon" href="#i-play"></use></svg>
+	      </button>
+	      <button type="button" class="icon-button" data-action="next" data-np="seekable" title="Next">
+		<svg aria-hidden="true"><use href="#i-next"></use></svg>
+	      </button>
+	    </div>
+	    <div class="mini-seek" data-np="seekable">
+	      <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek">
+	      <span class="np-time" data-np="time"></span>
+	    </div>
+	    <span class="live-badge" data-np="live" hidden>LIVE</span>
+	    <button type="button" class="icon-button" data-action="nowplaying" title="Queue">
+	      <svg aria-hidden="true"><use href="#i-queue"></use></svg>
+	    </button>
 	  </div>
 	</div>
       </div>

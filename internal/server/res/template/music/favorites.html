@@ -1,68 +1,24 @@
 <div>
   <h1>Favorites</h1>
   {{ if .Tracks }}
-  <h2>Tracks</h2>
-  {{ range .Tracks }}
-  <div class="parent">
-    <div class="left">
-      <div class="parent2">
-	<div class="track-title">
-	  <a data-playlist="add-ref"
-	     data-ref="{{.|ref}}"
-	     data-play="now"
-	     data-creator="{{.PreferredArtist}}"
-	     data-album="{{.ReleaseTitle}}"
-	     data-title="{{.Title}}"
-	     data-image="{{.|cover}}"
-	     data-etag="{{.ETag}}"
-	     data-location="{{.|link}}">
-	    {{ .Title }}
-	  </a>
-	</div>
-	<div class="track-artist">{{ .PreferredArtist }} &#x2022; {{ .ReleaseTitle }}</div>
-      </div>
-    </div>
-    <div class="right">
-      <a data-playlist="append-ref" data-ref="{{.|ref}}">
-	<img src="/static/playlist_add-white-24dp.svg" alt="Add to queue">
-      </a>
-    </div>
-  </div>
-  {{ end }}
+  <div class="section-head"><h2>Tracks</h2></div>
+  <ol class="tracks">
+    {{ range .Tracks }}{{ template "track" . }}{{ end }}
+  </ol>
   {{ end }}
   {{ if .Artists }}
-  <h2>Artists</h2>
-  <ul class="plain-list">
-    {{ range .Artists }}
-    <li><a href="{{.|link}}">{{ .Name }}</a></li>
-    {{ end }}
-  </ul>
+  <div class="section-head"><h2>Artists</h2></div>
+  <div class="rows">{{ range .Artists }}{{ template "artist-row" . }}{{ end }}</div>
   {{ end }}
   {{ if .Movies }}
-  <h2>Movies</h2>
-  <div class="poster-grid">
-    {{ range .Movies }}
-    <div class="poster-tile">
-      <a href="{{.|link}}"><img src="{{.|poster_small}}" loading="lazy" alt=""></a>
-      <div class="movie-title">{{ .Title }}</div>
-      <div class="movie-detail">{{ .Date.Year }}</div>
-    </div>
-    {{ end }}
-  </div>
+  <div class="section-head"><h2>Movies</h2></div>
+  <div class="tiles posters">{{ range .Movies }}{{ template "movie-tile" . }}{{ end }}</div>
   {{ end }}
   {{ if .Shows }}
-  <h2>TV Shows</h2>
-  <div class="poster-grid">
-    {{ range .Shows }}
-    <div class="poster-tile">
-      <a href="{{.|link}}"><img src="{{.|poster_small}}" loading="lazy" alt=""></a>
-      <div class="movie-title">{{ .Name }}</div>
-      <div class="movie-detail">{{ .Date.Year }}</div>
-    </div>
-    {{ end }}
-  </div>
+  <div class="section-head"><h2>TV Shows</h2></div>
+  <div class="tiles posters">{{ range .Shows }}{{ template "show-tile" . }}{{ end }}</div>
   {{ end }}
   {{ if not (or .Tracks .Artists .Movies .Shows) }}
-  <p class="empty">No favorites yet. Add them in the TakeoutFM app.</p>
+  <p class="empty">No favorites yet. Add them in the TakeoutFM app, or with Favorite on an artist.</p>
   {{ end }}
 </div>

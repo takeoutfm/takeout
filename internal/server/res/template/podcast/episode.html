@@ -1,18 +1,31 @@
 <div>
-  <h1>{{ .Episode.Title }}</h1>
-</div>
-<div>
-  <img height="144" src="{{.Episode|image}}">
-</div>
-<div>
-  {{ .Episode.Date | ymd }}
-</div>
-<div class="pre-line">{{ .Episode.Description | plainText }}</div>
-<div class="episode-actions">
-  <a class="button" data-playlist="add-ref" data-ref="/podcasts/episodes/{{.Episode.ID}}">
-    <img src="/static/play_arrow-white-24dp.svg" alt="">Play
-  </a>
-  <a class="button" data-playlist="append-ref" data-ref="/podcasts/episodes/{{.Episode.ID}}">
-    <img src="/static/playlist_add-white-24dp.svg" alt="">Add to queue
-  </a>
+  <div class="episode-head">
+    <img class="episode-art" src="{{.Episode|image}}" alt="">
+    <div class="episode-info">
+      <h1>{{ .Episode.Title }}</h1>
+      <div class="subtitle"><a href="/series/{{ .Episode.SID }}">{{ if .Episode.Author }}{{ .Episode.Author }}{{ else }}All episodes{{ end }}</a></div>
+      <div class="muted">
+	{{ .Episode.Date | ymd }}<span data-episode-status></span>
+      </div>
+      <progress class="episode-progress" data-episode-bar max="1" value="0" hidden></progress>
+      <div class="actions" data-episode="{{ .Episode.EID }}">
+	<a class="button primary" href="#" data-playlist="add-ref" data-ref="/podcasts/episodes/{{.Episode.ID}}">
+	  <svg class="icon" aria-hidden="true"><use href="#i-play"></use></svg><span data-play-label>Play</span>
+	</a>
+	<a class="button" href="#" data-playlist="add-ref" data-from-start data-ref="/podcasts/episodes/{{.Episode.ID}}" data-if-started hidden>
+	  <svg class="icon" aria-hidden="true"><use href="#i-prev"></use></svg>Start Over
+	</a>
+	<a class="button" href="#" data-playlist="append-ref" data-ref="/podcasts/episodes/{{.Episode.ID}}">
+	  <img src="/static/playlist_add-white-24dp.svg" alt="">Add to queue
+	</a>
+	<a class="button" href="#" data-action="mark-played" hidden>
+	  <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span class="label">Mark as Played</span>
+	</a>
+      </div>
+    </div>
+  </div>
+  {{ if .Episode.Description }}
+  <div class="section-head"><h2>Show Notes</h2></div>
+  <p class="description">{{ .Episode.Description | plainText }}</p>
+  {{ end }}
 </div>

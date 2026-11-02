@@ -137,11 +137,15 @@
 	    return;
 	}
 	savedOffset = offset;
-	const o = {ETag: t.etag, Offset: offset, Duration: duration, Date: new Date().toISOString()};
+	postOffset(t.etag, offset, duration);
+    };
+
+    const postOffset = function(etag, offset, duration) {
+	const o = {ETag: etag, Offset: offset, Duration: duration, Date: new Date().toISOString()};
 	if (offsets != null) {
-	    offsets[t.etag] = o;
+	    offsets[etag] = o;
 	}
-	fetch("/api/progress", {
+	return fetch("/api/progress", {
 	    method: "POST",
 	    body: JSON.stringify({Offsets: [o]}),
 	    headers: {"Content-Type": "application/json"},
@@ -187,6 +191,7 @@
 	    album: t.album || "",
 	    title: t.title || "",
 	    image: t.image || "",
+	    background: t.background || "",
 	    locations: t.location || [],
 	    etag: (t.identifier && t.identifier[0]) || "",
 	    kind: kind(t.location)
@@ -215,15 +220,51 @@
     };
     const current = () => (index >= 0 && index < queue.length) ? queue[index] : null;
 
-    // replace the queue with ref and play it
-    const playRef = async function(ref) {
+    // replace the queue with ref and play it, from start or shuffled
+    const playRef = async function(ref, start = 0, shuffled = false, fromStart = false) {
 	const ok = await patch([
 	    {op: "replace", path: "/playlist/track", value: []},
 	    {op: "add", path: "/playlist/track/-", value: {"$ref": ref}},
 	    ...statePatch(0, 0)
 	]);
-	if (ok && queue.length > 0) {
-	    playIndex(0);
+	if (!ok || queue.length == 0) {
+	    return;
+	}
+	if (shuffled) {
+	    shuffle();
+	} else {
+	    playIndex(Math.min(start, queue.length - 1), fromStart ? -1 : 0);
+	}
+    };
+
+    // a row in a list (data-list-ref) plays the whole list from that row,
+    // as the apps play an album from the track picked
+    const playRow = function(e) {
+	const list = e.closest("[data-list-ref]");
+	if (list && e.hasAttribute("data-track")) {
+	    const rows = Array.from(list.querySelectorAll("[data-track]"));
+	    playRef(list.getAttribute("data-list-ref"), rows.indexOf(e));
+	} else {
+	    playRef(e.getAttribute("data-ref"), 0, e.hasAttribute("data-shuffle"),
+		    e.hasAttribute("data-from-start"));
+	}
+    };
+
+    // favorite buttons: data-url is the favorite's API path, aria-pressed
+    // whether it is one now
+    const favorite = async function(e) {
+	const on = e.getAttribute("aria-pressed") == "true";
+	try {
+	    const resp = await fetch(e.getAttribute("data-url"), {method: on ? "DELETE" : "PUT"});
+	    if (resp.ok) {
+		e.setAttribute("aria-pressed", String(!on));
+		const label = e.querySelector(".label");
+		if (label) {
+		    label.textContent = on ? "Favorite" : "Unfavorite";
+		}
+	    }
+	} catch (err) {
+	    console.log("favorite: " + err);
 	}
     };
 
@@ -303,7 +344,9 @@
     const start = async function(t) {
 	playing = {track: t, type: t.kind};
 	showTrack(t);
-	if (t.kind == "podcast" && resumeAt == 0) {
+	if (resumeAt < 0) {
+	    resumeAt = 0; // start over
+	} else if (t.kind == "podcast" && resumeAt == 0) {
 	    const o = (await loadOffsets())[t.etag];
 	    if (o && o.Offset >= MinResume && (o.Duration <= 0 || o.Offset < o.Duration - Finished)) {
 		resumeAt = o.Offset;
@@ -347,7 +390,7 @@
 	playing = null;
 	resetPlay();
 	$("playing").hidden = true;
-	showQueue(false);
+	showNowPlaying(false);
 	if ("mediaSession" in navigator) {
 	    navigator.mediaSession.metadata = null;
 	}
@@ -426,6 +469,7 @@
 
     const onPause = function() {
 	showControls();
+	showEpisode();
 	if (playing && !audio.ended && audio.getAttribute("src")) {
 	    finishPodcast();
 	    saveState();
@@ -457,17 +501,35 @@
 
     // ---- display
 
+    // every element showing a part of what's playing (bar and Now Playing)
+    const setAll = function(name, fn) {
+	document.querySelectorAll('[data-np="' + name + '"]').forEach(fn);
+    };
+
     const showTrack = function(t) {
+	const live = t.kind == "stream";
 	$("playing").hidden = false;
-	$("np-title").textContent = t.title;
-	$("np-artist").textContent = isStream() ? t.album || t.creator : t.creator;
-	const cover = $("np-cover");
-	if (t.image) {
-	    cover.src = t.image;
-	} else {
-	    cover.removeAttribute("src");
-	}
-	$("progressbar").classList.toggle("live", isStream());
+	setAll("title", e => { e.textContent = t.title; });
+	// a station's name is its album; a track's second line is its artist
+	setAll("artist", e => { e.textContent = live ? t.album || t.creator : t.creator; });
+	setAll("album", e => { e.textContent = live ? "" : t.album; });
+	setAll("cover", e => {
+	    if (t.image) {
+		e.src = t.image;
+	    } else {
+		e.removeAttribute("src");
+	    }
+	});
+	setAll("background", e => {
+	    e.hidden = !t.background;
+	    if (t.background) {
+		e.src = t.background;
+	    } else {
+		e.removeAttribute("src");
+	    }
+	});
+	setAll("seekable", e => { e.hidden = live; });
+	setAll("live", e => { e.hidden = !live; });
 	showControls();
 	showProgress();
 	renderQueue();
@@ -476,8 +538,11 @@
 
     const showControls = function() {
 	const paused = !audio || audio.paused;
-	$("np-playpause").src = paused ? "/static/play_arrow-white-36dp.svg" : "/static/pause-white-36dp.svg";
-	$("np-playpause").alt = paused ? "Play" : "Pause";
+	const icon = paused ? "play" : isStream() ? "stop" : "pause";
+	setAll("playicon", e => e.setAttribute("href", "#i-" + icon));
+	document.querySelectorAll('[data-action="playpause"]').forEach(b => {
+	    b.title = paused ? "Play" : isStream() ? "Stop" : "Pause";
+	});
 	if ("mediaSession" in navigator) {
 	    navigator.mediaSession.playbackState = paused ? "paused" : "playing";
 	}
@@ -492,16 +557,27 @@
 	return m + ":" + String(s % 60).padStart(2, "0");
     };
 
+    let dragging = false; // a seek slider is being dragged
+
+    const showTimes = function(pos, d) {
+	setAll("pos", e => { e.textContent = time(pos); });
+	setAll("dur", e => { e.textContent = time(d); });
+	setAll("time", e => { e.textContent = isFinite(d) ? time(pos) + " / " + time(d) : ""; });
+    };
+
     const showProgress = function() {
 	const d = audio.duration;
 	const pos = audio.currentTime || 0;
-	if (isStream() || !isFinite(d) || d <= 0) {
-	    $("progress").style.width = isStream() ? "100%" : "0%";
-	    $("np-duration").textContent = isStream() ? "Live" : "";
+	if (dragging) {
 	    return;
 	}
-	$("progress").style.width = (pos / d * 100) + "%";
-	$("np-duration").textContent = time(pos) + " / " + time(d);
+	if (isStream() || !isFinite(d) || d <= 0) {
+	    document.querySelectorAll("input.seek").forEach(e => { e.value = 0; });
+	    showTimes(NaN, NaN);
+	    return;
+	}
+	document.querySelectorAll("input.seek").forEach(e => { e.value = Math.round(pos / d * 1000); });
+	showTimes(pos, d);
 	if ("mediaSession" in navigator && navigator.mediaSession.setPositionState) {
 	    try {
 		navigator.mediaSession.setPositionState({duration: d, position: Math.min(pos, d)});
@@ -527,32 +603,93 @@
 
     const renderQueue = function() {
 	const rows = queue.map((t, i) =>
-	    '<div class="parent' + (i == index ? ' playing' : '') + '">' +
-		'<div><img data-action="entry" data-index="' + i + '" class="np-cover clickable" src="' +
-		esc(t.image) + '" alt="" loading="lazy"></div>' +
-		'<div class="left clickable" data-action="entry" data-index="' + i + '">' +
-		'<div class="parent2">' +
-		'<div class="track-title">' + esc(t.title) + '</div>' +
-		'<div class="track-artist">' + esc(t.creator + (t.album ? " ~ " + t.album : "")) + '</div>' +
-		'</div></div>' +
-		'<div class="separator"></div>' +
-		'<div class="right"><img class="np-control clickable" src="/static/clear-white-24dp.svg"' +
-		' data-action="remove" data-index="' + i + '" alt="Remove"></div>' +
-		'</div>');
-	$("playlist").innerHTML =
-	    '<h2>Queue</h2>' +
-	    '<img class="np-control clickable" src="/static/shuffle-white-24dp.svg" data-action="shuffle" alt="Shuffle">' +
-	    '<img class="np-control clickable" src="/static/clear-white-24dp.svg" data-action="clear" alt="Clear">' +
-	    (rows.length > 0 ? rows.join("") : '<p class="empty">Nothing queued.</p>');
+	    '<li class="track' + (i == index ? ' current' : '') + '" data-action="entry" data-index="' + i + '">' +
+		'<span class="num">' + (i == index ?
+		    '<svg class="playing-icon" aria-label="Playing"><use href="#i-play"></use></svg>' : (i + 1)) + '</span>' +
+		'<img class="thumb" src="' + esc(t.image) + '" alt="" loading="lazy">' +
+		'<div class="text"><div class="title">' + esc(t.title) + '</div>' +
+		'<div class="sub">' + esc([t.creator, t.album].filter(x => x).join(" \u00b7 ")) + '</div></div>' +
+		'<a class="add" href="#" data-action="remove" data-index="' + i + '" title="Remove">' +
+		'<svg aria-label="Remove"><use href="#i-clear"></use></svg></a>' +
+	    '</li>');
+	$("queue").innerHTML = rows.length > 0 ? rows.join("") : '<li class="empty">Nothing queued.</li>';
     };
 
-    const showQueue = function(show) {
-	$("playlist").hidden = !show;
+    const showNowPlaying = function(show) {
+	$("nowplaying").hidden = !show;
 	$("main").hidden = show;
+	if (show) {
+	    window.scrollTo(0, 0);
+	    const row = document.querySelector("#queue .current");
+	    if (row) {
+		row.scrollIntoView({block: "nearest"});
+	    }
+	}
     };
 
-    const toggleQueue = function() {
-	showQueue($("playlist").hidden);
+    // Now Playing gets a history entry, so Back closes it
+    const toggleNowPlaying = function() {
+	if (!$("nowplaying").hidden) {
+	    if (history.state && history.state.nowplaying) {
+		history.back();
+	    } else {
+		showNowPlaying(false);
+	    }
+	} else if (current() != null) {
+	    history.replaceState(Object.assign({}, history.state, {scroll: window.scrollY}), "");
+	    history.pushState({scroll: 0, nowplaying: true}, "", location.href);
+	    showNowPlaying(true);
+	}
+    };
+
+    // ---- podcast episode pages: progress, Resume, Start Over, Mark as Played
+
+    const episodeState = function(o) {
+	if (o == null) {
+	    return {};
+	}
+	const finished = o.Duration > 0 && o.Offset >= o.Duration - Finished;
+	const started = !finished && o.Offset >= MinResume;
+	return {finished: finished, started: started};
+    };
+
+    const showEpisode = async function() {
+	const box = document.querySelector("#main [data-episode]");
+	if (box == null) {
+	    return;
+	}
+	const o = (await loadOffsets())[box.getAttribute("data-episode")];
+	const st = episodeState(o);
+	const page = box.closest(".page") || document;
+	const status = page.querySelector("[data-episode-status]");
+	if (status) {
+	    status.textContent = st.finished ? " \u00b7 Played" :
+		st.started ? " \u00b7 " + Math.max(1, Math.round((o.Duration - o.Offset) / 60)) + " min left" : "";
+	}
+	const bar = page.querySelector("[data-episode-bar]");
+	if (bar) {
+	    bar.hidden = !st.started;
+	    bar.value = st.started && o.Duration > 0 ? o.Offset / o.Duration : 0;
+	}
+	box.querySelectorAll("[data-play-label]").forEach(e => {
+	    e.textContent = st.started ? "Resume" : "Play";
+	});
+	box.querySelectorAll("[data-if-started]").forEach(e => { e.hidden = !st.started; });
+	const mark = box.querySelector('[data-action="mark-played"]');
+	if (mark) {
+	    // the duration is known once the episode has been played here or elsewhere
+	    mark.hidden = !(o && o.Duration > 0);
+	    mark.querySelector(".label").textContent = st.finished ? "Mark as Not Played" : "Mark as Played";
+	}
+    };
+
+    const markPlayed = async function(e) {
+	const etag = e.closest("[data-episode]").getAttribute("data-episode");
+	const o = (await loadOffsets())[etag];
+	if (o && o.Duration > 0) {
+	    await postOffset(etag, episodeState(o).finished ? 0 : o.Duration, o.Duration);
+	    showEpisode();
+	}
     };
 
     const updateSession = function(t = current()) {
@@ -589,12 +726,16 @@
 	const i = parseInt(e.getAttribute("data-index"));
 	const ref = e.getAttribute("data-ref");
 	switch (e.getAttribute("data-playlist")) {
-	case "add-ref": playRef(ref); break;
+	case "add-ref": playRow(e); break;
 	case "append-ref": addRef(ref, false); break;
 	case "prepend-ref": addRef(ref, true); break;
 	default:
 	    switch (e.getAttribute("data-action")) {
-	    case "toggle": toggleQueue(); break;
+	    case "toggle":
+	    case "nowplaying": toggleNowPlaying(); break;
+	    case "mark-played": markPlayed(e); break;
+	    case "prev": prev(); break;
+	    case "favorite": favorite(e); break;
 	    case "playpause": toggle(); break;
 	    case "next": next(); break;
 	    case "shuffle": shuffle(); break;
@@ -625,14 +766,29 @@
 	event.preventDefault();
     };
 
-    const onSeek = function(event) {
+    // seek sliders: show the time while dragging, seek on release
+    const onSeekInput = function(event) {
+	const e = event.target;
 	const d = audio.duration;
-	if (isStream() || !isFinite(d) || d <= 0) {
+	if (!e.classList || !e.classList.contains("seek") || !isFinite(d)) {
 	    return;
 	}
-	const bar = $("progressbar").getBoundingClientRect();
-	audio.currentTime = (event.clientX - bar.left) / bar.width * d;
-	lastTime = audio.currentTime;
+	dragging = true;
+	document.querySelectorAll("input.seek").forEach(s => { s.value = e.value; });
+	showTimes(e.value / 1000 * d, d);
+    };
+
+    const onSeekChange = function(event) {
+	const e = event.target;
+	if (!e.classList || !e.classList.contains("seek")) {
+	    return;
+	}
+	dragging = false;
+	const d = audio.duration;
+	if (!isStream() && isFinite(d) && d > 0) {
+	    audio.currentTime = e.value / 1000 * d;
+	    lastTime = audio.currentTime;
+	}
     };
 
     const init = function() {
@@ -647,8 +803,16 @@
 
 	document.addEventListener("click", onClick);
 	document.addEventListener("keydown", onKey);
-	document.addEventListener("takeout:page", () => showQueue(false));
-	$("progressbar").addEventListener("click", onSeek);
+	document.addEventListener("takeout:page", () => {
+	    showNowPlaying(false);
+	    showEpisode();
+	});
+	// Back or Forward to the same page: Now Playing open or closed
+	document.addEventListener("takeout:history", event => {
+	    showNowPlaying(!!(event.detail && event.detail.nowplaying) && current() != null);
+	});
+	document.addEventListener("input", onSeekInput);
+	document.addEventListener("change", onSeekChange);
 	window.addEventListener("pagehide", () => {
 	    finishPodcast();
 	    if (current() != null && !audio.paused) {
@@ -680,6 +844,7 @@
 	renderQueue();
 	fetchQueue();
 	retryListens();
+	showEpisode();
     };
 
     if (document.readyState == "loading") {

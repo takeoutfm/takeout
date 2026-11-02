@@ -27,6 +27,7 @@
     const notPages = /^\/(api|static|img|d|login|link)(\/|$|\.)/;
 
     let controller = null;
+    let shown = location.href; // the page #main shows
 
     const isPage = function(url) {
 	return url.origin == location.origin && !notPages.test(url.pathname);
@@ -86,6 +87,7 @@
 	    history.replaceState({scroll: window.scrollY}, "");
 	    history.pushState({scroll: 0}, "", url);
 	}
+	shown = url;
 	if (!show(html)) {
 	    location.assign(url);
 	    return;
@@ -129,12 +131,32 @@
 
     const onPop = function(event) {
 	const scroll = (event.state && event.state.scroll) || 0;
+	if (location.href == shown) {
+	    // the same page (an entry the player added for Now Playing)
+	    document.dispatchEvent(new CustomEvent("takeout:history", {detail: event.state}));
+	    window.scrollTo(0, scroll);
+	    return;
+	}
 	load(location.href, false, scroll);
+    };
+
+    // filter fields: <input data-filter="#list"> hides the list's items
+    // (data-name) that don't contain what was typed
+    const onInput = function(event) {
+	const input = event.target.closest("input[data-filter]");
+	if (input == null) {
+	    return;
+	}
+	const words = input.value.trim().toLowerCase();
+	document.querySelectorAll(input.getAttribute("data-filter") + " > [data-name]").forEach(e => {
+	    e.hidden = words.length > 0 && !e.getAttribute("data-name").toLowerCase().includes(words);
+	});
     };
 
     history.scrollRestoration = "manual";
     history.replaceState({scroll: 0}, "");
     document.addEventListener("click", onClick);
     document.addEventListener("submit", onSubmit);
+    document.addEventListener("input", onInput);
     window.addEventListener("popstate", onPop);
 })();

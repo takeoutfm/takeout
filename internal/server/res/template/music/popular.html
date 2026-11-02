@@ -1,46 +1,15 @@
 <div>
-  <a class="nodecor" href="{{.Artist|link}}"><h1>{{ .Artist.Name }}</h1></a>
-  <div>
-    <div class="parent">
-      <div class="left">
-	<a class="nodecor" data-playlist="add-ref" data-ref='{{ref .Artist "popular"}}'>
-	  <h2>Polular Tracks</h2>
-	</a>
-      </div>
-      <div class="right">
-	<a data-playlist="append-ref" data-ref='{{ref .Artist "popular"}}'>
-	  <img src="/static/playlist_add-white-24dp.svg"/>
-	</a>
-      </div>
-    </div>
-    {{ range .Popular }}
-    <div class="parent">
-      <div class="left pointer">
-	<div class="parent2">
-	  <div class="track-title">
-	    <a data-playlist="add-ref"
-	       data-ref="{{.|ref}}"
-	       data-play="now"
-	       data-creator="{{.PreferredArtist}}"
-	       data-album="{{.ReleaseTitle}}"
-	       data-title="{{.Title}}"
-	       data-image="{{.|cover}}"
-	       data-etag="{{.ETag}}"
-	       data-location="{{.|link}}">
-	      {{ .Title }}
-	    </a>
-	  </div>
-	  <div class="track-artist">
-	    {{ .PreferredArtist }} &#x2022 {{ .ReleaseTitle }}
-	  </div>
-	</div>
-      </div>
-      <div class="right">
-	<a data-playlist="append-ref" data-ref="{{.|ref}}">
-	  <img src="/static/playlist_add-white-24dp.svg">
-	</a>
-      </div>
-    </div>
-    {{ end }}
+  <h1>{{ .Artist.Name }}: Popular</h1>
+  <div class="actions">
+    <a class="button" href="#" data-playlist="add-ref" data-ref='{{ref .Artist "popular"}}'>
+      <img src="/static/play_arrow-white-24dp.svg" alt="">Play
+    </a>
+    <a class="button" href="#" data-playlist="add-ref" data-shuffle data-ref='{{ref .Artist "popular"}}'>
+      <img src="/static/shuffle-white-24dp.svg" alt="">Shuffle
+    </a>
+    <a class="button" href="{{.Artist|link}}">{{ .Artist.Name }}</a>
   </div>
+  <ol class="tracks" data-list-ref='{{ref .Artist "popular"}}'>
+    {{ range .Popular }}{{ template "track" . }}{{ end }}
+  </ol>
 </div>

@@ -1,12 +1,6 @@
 <div>
   <h1>{{ .Name }}</h1>
-  <div class="poster-wrap">
-    {{ range .Movies }}
-    <div class="poster-cell">
-      <div><a href="{{.|link}}"><img src="{{.|poster_small}}"></a></div>
-      <div><span class="poster-title">{{ .Title }}</span></div>
-      <div>{{ .Date.Year }}</div>
-    </div>
-    {{ end }}
+  <div class="tiles posters">
+    {{ range .Movies }}{{ template "movie-tile" . }}{{ end }}
   </div>
 </div>

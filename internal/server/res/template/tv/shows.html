@@ -1,12 +1,6 @@
 <div>
   <h1>TV Shows</h1>
-  <div class="poster-wrap">
-    {{ range .Series }}
-    <div class="poster-cell">
-      <div><a href="{{.|link}}"><img src="{{.|poster_small}}"></a></div>
-      <div><span class="movie-title poster-title">{{ .Name }}</span></div>
-      <div class="movie-detail">{{ .Date.Year }}</div>
-    </div>
-    {{ end }}
+  <div class="tiles posters">
+    {{ range .Series }}{{ template "show-tile" . }}{{ else }}<p class="empty">No shows.</p>{{ end }}
   </div>
 </div>

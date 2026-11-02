@@ -1,27 +1,18 @@
 <div>
   <h1>Playlists</h1>
-  <div>
+  <ol class="tracks">
     {{ range .Playlists }}
-    <div class="parent">
-      <div class="left pointer">
-	<div class="parent2">
-	  <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	    {{ .Name }}
-	  </a>
-	</div>
+    <li class="track" data-playlist="add-ref" data-ref="{{.|ref}}">
+      <div class="text">
+	<div class="title">{{ .Name }}</div>
+	{{ if .TrackCount }}<div class="sub">{{ .TrackCount }} tracks</div>{{ end }}
       </div>
-      <div class="separator"></div>
-      <div class="right">
-	<a data-playlist="append-ref" data-ref="{{.|ref}}">
-	  <img src="/static/playlist_add-white-24dp.svg">
-	</a>
-      </div>
-      <div class="right">
-	<a data-playlist="add-ref" data-ref="{{.|ref}}">
-	  <img src="/static/play_arrow-white-24dp.svg">
-	</a>
-      </div>
-    </div>
+      <a class="add" href="#" data-playlist="append-ref" data-ref="{{.|ref}}" title="Add to queue">
+	<img src="/static/playlist_add-white-24dp.svg" alt="Add to queue">
+      </a>
+    </li>
+    {{ else }}
+    <p class="empty">No playlists yet. Make them in the TakeoutFM app.</p>
     {{ end }}
-  </div>
+  </ol>
 </div>

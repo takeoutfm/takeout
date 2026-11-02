@@ -1,201 +1,31 @@
 <div>
   <h1>Radio</h1>
-  <div>
-    {{ if .Genre }}
-    <div>
-      <h2>Genre</h2>
-      {{ range .Genre }}
-      <div class="parent">
-	<div class="left pointer">
-	  <div class="parent2">
-	    <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	      {{ .Name }}
-	    </a>
-	  </div>
-	</div>
-	<div class="separator"></div>
-	<div class="right">
-	  <a data-playlist="append-ref" data-ref="{{.|ref}}">
-	    <img src="/static/playlist_add-white-24dp.svg">
-	  </a>
-	</div>
-	<div class="right">
-	  <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	    <img src="/static/play_arrow-white-24dp.svg">
-	  </a>
-	</div>
-      </div>
-      {{ end }}
-    </div>
-    {{ end }}
-  </div>
-  <div>
-    {{ if .Artist }}
-    <div>
-      <h2>Artist</h2>
-      {{ range .Artist }}
-      <div class="parent">
-	<div class="left pointer">
-	  <div class="parent2">
-	    <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	      {{ .Name }}
-	    </a>
-	  </div>
-	</div>
-	<div class="separator"></div>
-	<div class="right">
-	  <a data-playlist="append-ref" data-ref="{{.|ref}}">
-	    <img src="/static/playlist_add-white-24dp.svg">
-	  </a>
-	</div>
-	<div class="right">
-	  <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	    <img src="/static/play_arrow-white-24dp.svg">
-	  </a>
-	</div>
-      </div>
-      {{ end }}
-    </div>
-    {{ end }}
-  </div>
-  <div>
-    {{ if .Similar }}
-    <div>
-      <h2>Similar</h2>
-      {{ range .Similar }}
-      <div class="parent">
-	<div class="left pointer">
-	  <div class="parent2">
-	    <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	      {{ .Name }}
-	    </a>
-	  </div>
-	</div>
-	<div class="separator"></div>
-	<div class="right">
-	  <a data-playlist="append-ref" data-ref="{{.|ref}}">
-	    <img src="/static/playlist_add-white-24dp.svg">
-	  </a>
-	</div>
-	<div class="right">
-	  <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	    <img src="/static/play_arrow-white-24dp.svg">
-	  </a>
-	</div>
-      </div>
-      {{ end }}
-    </div>
-    {{ end }}
-  </div>
-  <div>
-    {{ if .Period }}
-    <div>
-      <h2>Period</h2>
-      {{ range .Period }}
-      <div class="parent">
-	<div class="left pointer">
-	  <div class="parent2">
-	    <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	      {{ .Name }}
-	    </a>
-	  </div>
-	</div>
-	<div class="separator"></div>
-	<div class="right">
-	  <a data-playlist="append-ref" data-ref="{{.|ref}}">
-	    <img src="/static/playlist_add-white-24dp.svg">
-	  </a>
-	</div>
-	<div class="right">
-	  <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	    <img src="/static/play_arrow-white-24dp.svg">
-	  </a>
-	</div>
-      </div>
-      {{ end }}
-    </div>
-    {{ end }}
-  </div>
-  <div>
-    {{ if .Series }}
-    <div>
-      <h2>Series</h2>
-      {{ range .Series }}
-      <div class="parent">
-	<div class="left pointer">
-	  <div class="parent2">
-	    <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	      {{ .Name }}
-	    </a>
-	  </div>
-	</div>
-	<div class="separator"></div>
-	<div class="right">
-	  <a data-playlist="append-ref" data-ref="{{.|ref}}">
-	    <img src="/static/playlist_add-white-24dp.svg">
-	  </a>
-	</div>
-	<div class="right">
-	  <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	    <img src="/static/play_arrow-white-24dp.svg">
-	  </a>
-	</div>
-      </div>
-      {{ end }}
-    </div>
-    {{ end }}
-  </div>
-  <div>
-    {{ if .Other }}
-    <div>
-      <h2>Other</h2>
-      {{ range .Other }}
-      <div class="parent">
-	<div class="left pointer">
-	  <div class="parent2">
-	    <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	      {{ .Name }}
-	    </a>
-	  </div>
-	</div>
-	<div class="separator"></div>
-	<div class="right">
-	  <a data-playlist="append-ref" data-ref="{{.|ref}}">
-	    <img src="/static/playlist_add-white-24dp.svg">
-	  </a>
-	</div>
-	<div class="right">
-	  <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	    <img src="/static/play_arrow-white-24dp.svg">
-	  </a>
-	</div>
-      </div>
-      {{ end }}
-    </div>
-    {{ end }}
-  </div>
-  <div>
-    {{ if .Stream }}
-    <div>
-      <h2>Streams</h2>
-      {{ range .Stream }}
-      <div class="parent">
-	<div class="left pointer">
-	  <div class="parent2">
-	    <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	      {{ .Name }}
-	    </a>
-	  </div>
-	</div>
-	<div class="separator"></div>
-	<div class="right">
-	  <a data-playlist="add-ref" data-ref="{{.|ref}}">
-	    <img src="/static/play_arrow-white-24dp.svg">
-	  </a>
-	</div>
-      </div>
-      {{ end }}
-    </div>
-    {{ end }}
-  </div>
+  {{ if .Stream }}
+  <div class="section-head"><h2>Streams</h2></div>
+  <div class="tiles">{{ range .Stream }}{{ template "station-tile" . }}{{ end }}</div>
+  {{ end }}
+  {{ if .Genre }}
+  <div class="section-head"><h2>Genres</h2></div>
+  <div class="tiles">{{ range .Genre }}{{ template "station-tile" . }}{{ end }}</div>
+  {{ end }}
+  {{ if .Period }}
+  <div class="section-head"><h2>Decades</h2></div>
+  <div class="tiles">{{ range .Period }}{{ template "station-tile" . }}{{ end }}</div>
+  {{ end }}
+  {{ if .Artist }}
+  <div class="section-head"><h2>Artists</h2></div>
+  <div class="tiles">{{ range .Artist }}{{ template "station-tile" . }}{{ end }}</div>
+  {{ end }}
+  {{ if .Similar }}
+  <div class="section-head"><h2>Similar</h2></div>
+  <div class="tiles">{{ range .Similar }}{{ template "station-tile" . }}{{ end }}</div>
+  {{ end }}
+  {{ if .Series }}
+  <div class="section-head"><h2>Series</h2></div>
+  <div class="tiles">{{ range .Series }}{{ template "station-tile" . }}{{ end }}</div>
+  {{ end }}
+  {{ if .Other }}
+  <div class="section-head"><h2>Other</h2></div>
+  <div class="tiles">{{ range .Other }}{{ template "station-tile" . }}{{ end }}</div>
+  {{ end }}
 </div>

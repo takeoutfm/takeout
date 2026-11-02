@@ -1,35 +1,20 @@
 <div>
-  <h1>{{ .Series.Title }}</h1>
-</div>
-<div>
-  <img height="144" src="{{.Series|image}}">
-</div>
-<div class="episode-actions">
-  <a class="button" data-playlist="add-ref" data-ref="/podcasts/series/{{.Series.ID}}">
-    <img src="/static/play_arrow-white-24dp.svg" alt="">Play latest
-  </a>
-</div>
-<div>
-  {{ range .Episodes }}
-  <div class="parent">
-    <div class="left pointer">
-      <div class="parent2">
-	<div class="track-title">
-	  <a href="{{.|link}}">{{ .Title }}</a>
-	</div>
-	<div class="track-artist">
-	  {{ .Date | ymd }}
-	</div>
-      </div>
-    </div>
-    <div class="right">
-      <a data-playlist="add-ref" data-ref="/podcasts/episodes/{{.ID}}">
-	<img src="/static/play_arrow-white-24dp.svg" alt="Play">
-      </a>
-      <a data-playlist="append-ref" data-ref="/podcasts/episodes/{{.ID}}">
-	<img src="/static/playlist_add-white-24dp.svg" alt="Add to queue">
-      </a>
+  <div class="page-head">
+    <img class="cover" src="{{.Series|image}}" alt="">
+    <div>
+      <h1>{{ .Series.Title }}</h1>
+      {{ if .Series.Author }}<div class="subtitle">{{ .Series.Author }}</div>{{ end }}
+      <div class="muted">{{ len .Episodes }} episodes</div>
     </div>
   </div>
-  {{ end }}
+  <div class="actions">
+    <a class="button" href="#" data-playlist="add-ref" data-ref="/podcasts/series/{{.Series.ID}}">
+      <img src="/static/play_arrow-white-24dp.svg" alt="">Play latest
+    </a>
+  </div>
+  {{ if .Series.Description }}<p class="description">{{ .Series.Description | plainText }}</p>{{ end }}
+  <div class="section-head"><h2>Episodes</h2></div>
+  <ol class="tracks">
+    {{ range .Episodes }}{{ template "episode-row" . }}{{ end }}
+  </ol>
 </div>

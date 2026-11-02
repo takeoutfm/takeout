@@ -5,6 +5,9 @@
 
 body {
     background-color: #222;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Cantarell, sans-serif;
+    font-size: 15px;
+    line-height: 1.4;
 }
 
 a, a:visited, a:hover, a:active {
@@ -17,22 +20,27 @@ a, a:visited, a:hover, a:active {
     text-decoration: none;
 }
 
+/* headings as in the Mac and Linux apps: a page title, then section headings */
 h1 {
-    text-transform: uppercase;
-    font-size: large;
-    text-align: center;
+    font-size: 1.7em;
+    font-weight: 600;
+    text-align: left;
+    margin: 0.6em 0 0.4em 0;
 }
 
 h2 {
-    text-transform: uppercase;
-    font-size: medium;
+    font-size: 1.15em;
+    font-weight: 600;
     text-align: left;
+    margin: 1.6em 0 0.5em 0;
 }
 
 h3 {
-    text-transform: uppercase;
-    font-size: small;
+    font-size: 0.95em;
+    font-weight: 600;
     text-align: left;
+    opacity: 0.7;
+    margin: 1.2em 0 0.3em 0;
 }
 
 .heading {
@@ -365,16 +373,6 @@ body {
         padding: 0 8px;
     }
 }
-
-#progressbar {
-    cursor: pointer;
-}
-
-#progressbar.live {
-    cursor: default;
-    opacity: 0.4;
-}
-
 .np-message {
     padding: 6px 12px;
     font-size: small;
@@ -580,4 +578,727 @@ a.button:hover {
 
     .pl-25 { padding-left: 8px; }
     .pr-25 { padding-right: 8px; }
+}
+
+/* ---- components shared by the pages (templates/parts.html), after the
+   Mac and Linux apps: page headers, tile grids, track rows ---- */
+
+#main .page {
+    max-width: 1200px;
+}
+
+.muted {
+    opacity: 0.7;
+}
+
+.small {
+    font-size: 0.87em;
+}
+
+/* a page header: cover (or photo) beside the title, details and actions */
+.page-head {
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+    margin: 16px 0 8px 0;
+}
+
+.page-head .cover {
+    flex: none;
+    width: 216px;
+    height: 216px;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    background-color: #2c2c2c;
+}
+
+.page-head .cover.round {
+    border-radius: 50%;
+}
+
+.page-head h1 {
+    margin: 0 0 6px 0;
+}
+
+.page-head .subtitle {
+    font-size: 1.2em;
+}
+
+.banner {
+    display: block;
+    width: 100%;
+    max-height: 288px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-top: 12px;
+}
+
+/* actions under a header: Play, Shuffle, Radio, ... */
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 14px 0 6px 0;
+}
+
+a.button,
+a.button:visited {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px 6px 10px;
+    border: 1px solid #4a4a4a;
+    border-radius: 6px;
+    background-color: #2c2c2c;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+a.button:hover {
+    background-color: #383838;
+}
+
+a.button img {
+    width: 20px;
+    height: 20px;
+}
+
+a.button[aria-pressed="true"] {
+    border-color: orange;
+}
+
+/* a section heading with an optional "See all" at the end */
+.section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid #333;
+    margin: 1.6em 0 0.6em 0;
+}
+
+.section-head h2 {
+    margin: 0 0 4px 0;
+}
+
+.section-head a {
+    font-size: 0.87em;
+    opacity: 0.7;
+    text-decoration: none;
+}
+
+/* tiles: a grid that wraps, or a row that scrolls */
+.tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 18px 14px;
+}
+
+.tiles.posters {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+
+.tiles.wide {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.tile-row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 150px;
+    gap: 14px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+}
+
+.tile-row.posters {
+    grid-auto-columns: 140px;
+}
+
+.tile-row.wide {
+    grid-auto-columns: 220px;
+}
+
+a.tile,
+a.tile:visited {
+    display: block;
+    min-width: 0;
+    text-decoration: none;
+}
+
+.tile img,
+.tile .tile-icon {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 6px;
+    background-color: #2c2c2c;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.posters .tile img {
+    aspect-ratio: 2 / 3;
+}
+
+.wide .tile img {
+    aspect-ratio: 16 / 9;
+}
+
+.tile .tile-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tile .tile-icon img {
+    width: 40%;
+    aspect-ratio: 1;
+    box-shadow: none;
+    background: none;
+    opacity: 0.6;
+}
+
+.tile:hover img {
+    filter: brightness(1.15);
+}
+
+.tile-title,
+.tile-sub {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.tile-title {
+    margin-top: 6px;
+    font-weight: 600;
+}
+
+.tile-sub {
+    font-size: 0.87em;
+    opacity: 0.7;
+}
+
+/* track rows: number or cover, title and a second line, add to queue */
+.tracks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.track {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.track:hover {
+    background-color: #2c2c2c;
+}
+
+.track .num {
+    flex: none;
+    width: 2em;
+    text-align: right;
+    opacity: 0.6;
+    font-variant-numeric: tabular-nums;
+}
+
+.track .thumb {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    background-color: #2c2c2c;
+}
+
+.track .text {
+    flex: 1;
+    min-width: 0;
+}
+
+.track .title,
+.track .sub {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.track .sub {
+    font-size: 0.87em;
+    opacity: 0.7;
+}
+
+.track .add {
+    flex: none;
+    display: flex;
+    opacity: 0;
+}
+
+.track:hover .add,
+.track .add:focus {
+    opacity: 0.8;
+}
+
+.disc {
+    margin: 1em 0 0.2em 8px;
+    font-size: 0.9em;
+    opacity: 0.7;
+}
+
+/* people and artists in a list: round photo or initial, name, detail */
+.rows {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 2px 12px;
+}
+
+a.row,
+a.row:visited {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    text-decoration: none;
+    min-width: 0;
+}
+
+a.row:hover {
+    background-color: #2c2c2c;
+}
+
+.avatar {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #3a3a3a;
+    font-weight: 600;
+}
+
+.row .text {
+    min-width: 0;
+}
+
+.row .name,
+.row .detail {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.row .detail {
+    font-size: 0.87em;
+    opacity: 0.7;
+}
+
+.filter {
+    width: 100%;
+    max-width: 360px;
+    box-sizing: border-box;
+    padding: 6px 10px;
+    margin-bottom: 12px;
+    border: 1px solid #3a3a3a;
+    border-radius: 6px;
+    background-color: #2a2a2a;
+    font-size: 14px;
+}
+
+.links {
+    margin-top: 2em;
+    font-size: 0.87em;
+    opacity: 0.7;
+}
+
+.description {
+    max-width: 70ch;
+    white-space: pre-line;
+}
+
+@media (max-width: 700px) {
+    .page-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .page-head .cover {
+        width: 160px;
+        height: 160px;
+    }
+
+    .tiles {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+
+    .track .add {
+        opacity: 0.8;
+    }
+}
+
+.track.static {
+    cursor: default;
+}
+
+.track .play {
+    flex: none;
+    display: flex;
+    opacity: 0.8;
+}
+
+a.button svg.icon {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+a.button[aria-pressed="true"] svg.icon {
+    fill: orange;
+}
+
+.page-head .cover.profile {
+    width: 160px;
+    height: 240px;
+}
+
+.track .thumb.wide {
+    width: 96px;
+    height: 54px;
+}
+
+.track .overview {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.87em;
+    opacity: 0.7;
+    margin-top: 2px;
+}
+
+/* a podcast episode: art (often wide) beside the details */
+.episode-head {
+    display: flex;
+    gap: 28px;
+    margin-top: 16px;
+}
+
+.episode-art {
+    flex: none;
+    width: 252px;
+    max-height: 252px;
+    object-fit: contain;
+    object-position: left top;
+    border-radius: 6px;
+    align-self: flex-start;
+}
+
+.episode-info {
+    min-width: 0;
+}
+
+.episode-info h1 {
+    margin-top: 0;
+}
+
+.episode-progress {
+    width: 216px;
+    height: 6px;
+    margin-top: 8px;
+    accent-color: orange;
+}
+
+a.button.primary {
+    background-color: #3d3d3d;
+    border-color: #777;
+}
+
+@media (max-width: 700px) {
+    .episode-head {
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+/* ---- the player: a bar along the bottom (as the apps' mini player) and
+   the Now Playing view ---- */
+
+button.icon-button,
+button.mini-track {
+    border: 0;
+    padding: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+button.icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+button.icon-button:hover {
+    background-color: #3a3a3a;
+}
+
+button.icon-button svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+button.icon-button.big {
+    width: 44px;
+    height: 44px;
+}
+
+button.icon-button.big svg {
+    width: 32px;
+    height: 32px;
+}
+
+input.seek {
+    accent-color: orange;
+    cursor: pointer;
+}
+
+.np-time {
+    font-size: 0.8em;
+    opacity: 0.7;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.live-badge {
+    padding: 2px 10px;
+    border-radius: 999px;
+    background-color: #a33;
+    font-size: 0.75em;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.mini {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 12px;
+}
+
+button.mini-track {
+    flex: 0 1 320px;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+}
+
+.mini-cover {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 4px;
+    background-color: #2c2c2c;
+}
+
+.mini-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.mini-title,
+.mini-artist {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.mini-artist {
+    font-size: 0.87em;
+    opacity: 0.7;
+}
+
+.mini-controls {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.mini-seek {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.mini-seek input.seek {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Now Playing: cover, title, seek bar and controls beside the queue, over
+   the artist's photo, faded */
+.nowplaying {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    gap: 32px;
+    min-height: calc(100vh - 90px);
+    padding: 24px 0;
+}
+
+.np-backdrop {
+    position: fixed;
+    inset: 0 0 0 var(--side-width);
+    width: calc(100% - var(--side-width));
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.18;
+    filter: blur(2px);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.np-main {
+    flex: 3;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.np-art {
+    width: min(100%, 420px);
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+    background-color: #2c2c2c;
+}
+
+.np-main h1 {
+    text-align: center;
+    margin: 20px 0 4px 0;
+}
+
+.np-main .subtitle {
+    font-size: 1.2em;
+}
+
+.np-seek {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: min(100%, 420px);
+    margin-top: 16px;
+}
+
+.np-seek input.seek {
+    flex: 1;
+}
+
+.np-main .live-badge {
+    margin-top: 16px;
+}
+
+.np-buttons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.np-buttons button.icon-button.big {
+    width: 56px;
+    height: 56px;
+    background-color: #3a3a3a;
+}
+
+.np-queue {
+    flex: 2;
+    min-width: 0;
+}
+
+.np-queue .section-head {
+    margin-top: 0;
+}
+
+.np-queue-actions a {
+    text-decoration: none;
+}
+
+.track.current {
+    background-color: #333;
+}
+
+.track .num .playing-icon {
+    width: 16px;
+    height: 16px;
+    fill: orange;
+    vertical-align: middle;
+}
+
+.track a.add svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+li.empty {
+    list-style: none;
+    opacity: 0.6;
+    padding: 8px;
+}
+
+@media (max-width: 900px) {
+    .nowplaying {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 700px) {
+    .np-backdrop {
+        inset: 0;
+        width: 100%;
+    }
+
+    .mini {
+        gap: 6px;
+        padding: 6px 8px;
+    }
+
+    .mini-seek,
+    .mini > button.icon-button:last-child {
+        display: none;
+    }
+
+    .mini-controls button.icon-button:not(.big) {
+        display: none;
+    }
+
+    button.mini-track {
+        flex: 1;
+    }
 }

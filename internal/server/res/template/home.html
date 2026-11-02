@@ -1,156 +1,56 @@
-{{ if or .AddedReleases .NewReleases }}
 <div>
-  <h1>Music</h1>
+  <h1>Home</h1>
   {{ if .AddedReleases }}
-  <div>
-    <h2>Recently Added</h2>
-    <div class="hscroll">
-      {{ range .AddedReleases }}
-      <div class="tile-110">
-	<a class="nodecor" href="{{.|link}}">
-	  <img class="rounded" width="110" height="110" src="{{.|cover}}">
-	  <br/>
-	  <div class="release-small-title">{{ .Name }}</div>
-	  <div class="release-small-year">{{ .Date.Year }}</div>
-	</a>
-      </div>
-      {{ end }}
-    </div>
+  <div class="section-head"><h2>Recently Added</h2><a href="/recently-added">See all</a></div>
+  <div class="tile-row">
+    {{ range .AddedReleases }}{{ template "release-tile" . }}{{ end }}
   </div>
   {{ end }}
   {{ if .NewReleases }}
-  <div>
-    <h2>Recently Released</h2>
-    <div class="hscroll">
-      {{ range .NewReleases }}
-      <div class="tile-110">
-	<a class="nodecor" href="{{.|link}}">
-	  <img class="rounded" width="110" height="110" src="{{.|cover}}">
-	  <br/>
-	  <div class="release-small-title">{{ .Name }}</div>
-	  <div class="release-small-year">{{ .Date.Year }}</div>
-	</a>
-      </div>
-      {{ end }}
-    </div>
-  </div>
-  {{ end }}
-</div>
-{{ end }}
-{{ if or .AddedMovies .NewMovies .RecommendMovies }}
-<div>
-  <h1>Movies</h1>
-  {{ if .RecommendMovies }}
-  <div>
-    <h2>Recommended</h2>
-    <div class="hscroll">
-      {{ range .RecommendMovies }}
-      {{ range .Movies }}
-      <div class="tile-154">
-	<a class="nodecor" href="{{.|link}}">
-	  <img class="rounded" src="{{.|poster_small}}">
-	  <br/>
-	  <div class="movie-small-title">{{ .Title }}</div>
-	  <div class="movie-small-year">{{ .Date.Year }}</div>
-	</a>
-      </div>
-      {{ end }}
-      {{ end }}
-    </div>
-  </div>
-  {{ end }}
-  {{ if .AddedMovies }}
-  <div>
-    <h2>Recently Added</h2>
-    <div class="hscroll">
-      {{ range .AddedMovies }}
-      <div class="tile-154">
-	<a class="nodecor" href="{{.|link}}">
-	  <img class="rounded" src="{{.|poster_small}}">
-	  <br/>
-	  <div class="movie-small-title">{{ .Title }}</div>
-	  <div class="movie-small-year">{{ .Date.Year }}</div>
-	</a>
-      </div>
-      {{ end }}
-    </div>
-  </div>
-  {{ end }}
-  {{ if .NewMovies }}
-  <div>
-    <h2>Recently Released</h2>
-    <div class="hscroll">
-      {{ range .NewMovies }}
-      <div class="tile-154">
-	<a class="nodecor" href="{{.|link}}">
-	  <img class="rounded" src="{{.|poster_small}}">
-	  <br/>
-	  <div class="movie-small-title">{{ .Title }}</div>
-	  <div class="movie-small-year">{{ .Date.Year }}</div>
-	</a>
-      </div>
-      {{ end }}
-    </div>
-  </div>
-  {{ end }}
-</div>
-{{ end }}
-{{ if .AddedTVEpisodes }}
-<div>
-  <h1>TV Shows</h1>
-  <div>
-    <h2>Recently Added</h2>
-    <div class="hscroll">
-      {{ range .AddedTVEpisodes }}
-      <div class="tile-185">
-	<a class="nodecor" href="{{.|link}}">
-	  <img class="rounded" src="{{.|still_small}}">
-	  <br/>
-	  <div class="movie-small-title">{{ .Name }}</div>
-	  <div class="movie-small-year">{{ .Date.Year }}</div>
-	</a>
-      </div>
-      {{ end }}
-    </div>
-  </div>
-</div>
-{{ end }}
-{{ if or .NewEpisodes .NewSeries }}
-<div>
-  <h1>Podcasts</h1>
-  {{ if .NewSeries }}
-  <div>
-    <h2>Recent Series</h2>
-    <div class="hscroll">
-      {{ range .NewSeries }}
-      <div class="tile-154">
-	<a class="nodecor" href="{{.|link}}">
-	  <img class="rounded" width="144" height="144" src="{{.|image}}">
-	  <br/>
-	  <div class="series-small-title">{{ .Title }}</div>
-	  <div class="series-small-year">{{ .Date|ymd }}</div>
-	</a>
-      </div>
-      {{ end }}
-    </div>
+  <div class="section-head"><h2>New Releases</h2><a href="/new-releases">See all</a></div>
+  <div class="tile-row">
+    {{ range .NewReleases }}{{ template "release-tile" . }}{{ end }}
   </div>
   {{ end }}
   {{ if .NewEpisodes }}
-  <div>
-    <h2>Recent Episodes</h2>
-    <div class="hscroll">
-      {{ range .NewEpisodes }}
-      <div class="tile-154">
-	<a class="nodecor" href="{{.|link}}">
-	  <img class="rounded" width="144" height="144" src="{{.|image}}">
-	  <br/>
-	  <div class="series-small-title">{{ .Title }}</div>
-	  <div class="series-small-year">{{ .Date|ymd }}</div>
-	</a>
-      </div>
-      {{ end }}
-    </div>
+  <div class="section-head"><h2>New Episodes</h2><a href="/podcasts">Podcasts</a></div>
+  <div class="tile-row">
+    {{ range .NewEpisodes }}{{ template "episode-tile" . }}{{ end }}
   </div>
   {{ end }}
+  {{ if .NewSeries }}
+  <div class="section-head"><h2>New Podcasts</h2></div>
+  <div class="tile-row">
+    {{ range .NewSeries }}{{ template "series-tile" . }}{{ end }}
+  </div>
+  {{ end }}
+  {{ range .RecommendMovies }}
+  {{ if .Movies }}
+  <div class="section-head"><h2>{{ .Name }}</h2></div>
+  <div class="tile-row posters">
+    {{ range .Movies }}{{ template "movie-tile" . }}{{ end }}
+  </div>
+  {{ end }}
+  {{ end }}
+  {{ if .AddedMovies }}
+  <div class="section-head"><h2>Recently Added Movies</h2><a href="/movies">All movies</a></div>
+  <div class="tile-row posters">
+    {{ range .AddedMovies }}{{ template "movie-tile" . }}{{ end }}
+  </div>
+  {{ end }}
+  {{ if .NewMovies }}
+  <div class="section-head"><h2>New Movies</h2></div>
+  <div class="tile-row posters">
+    {{ range .NewMovies }}{{ template "movie-tile" . }}{{ end }}
+  </div>
+  {{ end }}
+  {{ if .AddedTVEpisodes }}
+  <div class="section-head"><h2>Recently Added TV</h2><a href="/tv">All shows</a></div>
+  <div class="tile-row wide">
+    {{ range .AddedTVEpisodes }}{{ template "tvepisode-tile" . }}{{ end }}
+  </div>
+  {{ end }}
+  {{ if not (or .AddedReleases .NewReleases .NewEpisodes .NewSeries .RecommendMovies .AddedMovies .NewMovies .AddedTVEpisodes) }}
+  <p class="empty">Nothing new lately.</p>
+  {{ end }}
 </div>
-{{ end }}

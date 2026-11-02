@@ -1,12 +1,6 @@
 <div>
   <h1>Movies</h1>
-  <div class="poster-wrap">
-    {{ range .Movies }}
-    <div class="poster-cell">
-      <div><a href="{{.|link}}"><img src="{{.|poster_small}}"></a></div>
-      <div><span class="movie-title poster-title">{{ .Title }}</span></div>
-      <div class="movie-detail">{{ .Date.Year }}</div>
-    </div>
-    {{ end }}
+  <div class="tiles posters">
+    {{ range .Movies }}{{ template "movie-tile" . }}{{ else }}<p class="empty">No movies.</p>{{ end }}
   </div>
 </div>

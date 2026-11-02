@@ -1,205 +1,39 @@
 <div>
-  <div class="search-results">Found {{ .Hits }} results</div>
+  <h1>{{ if .Query }}&ldquo;{{ .Query }}&rdquo;{{ else }}Search{{ end }}</h1>
+  <p class="muted">{{ .Hits }} {{ if eq .Hits 1 }}result{{ else }}results{{ end }}</p>
+  {{ if .Tracks }}
+  <div class="section-head"><h2>Tracks</h2>
+    <a href="#" data-playlist="add-ref" data-ref="{{.Query|ref}}">Play all</a></div>
+  <ol class="tracks">
+    {{ range .Tracks }}{{ template "track" . }}{{ end }}
+  </ol>
+  {{ end }}
   {{ if .Artists }}
-  <div>
-    <h2>Artists</h2>
-    <table>
-      {{ range .Artists }}
-      <tr>
-	<td>
-	  <a href="{{.|link}}"><span class="circle">{{.|letter}}</span></a>
-	</td>
-	<td class="similar-artist">
-	  <a href="{{.|link}}">{{ .Name }}</a>
-	</td>
-      </tr>
-      {{ end }}
-    </table>
-  </div>
+  <div class="section-head"><h2>Artists</h2></div>
+  <div class="rows">{{ range .Artists }}{{ template "artist-row" . }}{{ end }}</div>
   {{ end }}
   {{ if .Releases }}
-  <div>
-    <h2>Releases</h2>
-    {{ range .Releases }}
-    <div class="tile-110 float-left">
-      <a class="nodecor" href="{{.|link}}">
-	<img class="rounded" width="110" height="110" src="{{.|cover}}">
-	<br/>
-	<div class="release-small-title">{{ .Name }}</div>
-	<div class="release-small-year">{{ .Date.Year }}</div>
-      </a>
-    </div>
-    {{ end }}
-  </div>
-  <div class="clear"></div>
+  <div class="section-head"><h2>Albums</h2></div>
+  <div class="tiles">{{ range .Releases }}{{ template "release-tile" . }}{{ end }}</div>
   {{ end }}
   {{ if .Stations }}
-  <div>
-    <h2>Stations</h2>
-    {{ range .Stations }}
-    <div class="tile-110 float-left">
-      <a class="nodecor" data-playlist="add-ref" data-ref='{{.|ref}}'>
-	<img class="rounded" width="110" height="110" src="{{.|cover}}">
-	<br/>
-	<div class="release-small-title">{{ .Name }}</div>
-	<div class="release-small-year">{{ .Creator }}</div>
-      </a>
-    </div>
-    {{ end }}
-  </div>
-  <div class="clear"></div>
-  {{ end }}
-  {{ if .Tracks }}
-  <div>
-    <div class="parent">
-      <div class="left">
-	<a class="nodecor" data-playlist="add-ref" data-ref='{{.Query|ref}}'>
-	  <h2>Tracks</h2>
-	</a>
-      </div>
-      <div class="right">
-	<a data-playlist="append-ref" data-ref='{{.Query|ref}}'>
-	  <img src="/static/playlist_add-white-24dp.svg"/>
-	</a>
-      </div>
-    </div>
-    {{ range .Tracks }}
-    <div class="parent">
-      <div class="left pointer">
-	<div class="parent2">
-	  <div class="track-title">
-	    <a data-playlist="add-ref"
-	       data-ref="{{.|ref}}"
-	       data-play="now"
-	       data-creator="{{.Artist}}"
-	       data-album="{{.ReleaseTitle}}"
-	       data-title="{{.Title}}"
-	       data-image="{{.|cover}}"
-	       data-etag="{{.ETag}}"
-	       data-location="{{.|link}}">
-	      {{ .Title }}
-	    </a>
-	  </div>
-	  <div class="track-artist">
-	    {{ .Artist }} ~ {{ .ReleaseTitle }}
-	  </div>
-	</div>
-      </div>
-      <div class="right">
-	<a data-playlist="append-ref" data-ref="{{.|ref}}">
-	  <img src="/static/playlist_add-white-24dp.svg">
-	</a>
-      </div>
-    </div>
-    {{ end }}
-  </div>
+  <div class="section-head"><h2>Radio</h2></div>
+  <div class="tiles">{{ range .Stations }}{{ template "station-tile" . }}{{ end }}</div>
   {{ end }}
   {{ if .Movies }}
-  <div>
-    <div class="parent">
-      <div class="left">
-	<h2>Movies</h2>
-      </div>
-      <div class="right">
-      </div>
-    </div>
-    {{ range .Movies }}
-    <div class="parent">
-      <div class="left pointer">
-	<div class="parent2">
-	  <div class="movie-title">
-	    <a href="/movies/{{.ID}}">{{ .Title }}</a>
-	  </div>
-	  <div class="movie-detail">
-	    {{ .Rating }} ~ {{ .Date.Year }} ~ {{ .Runtime }} mins
-	  </div>
-	</div>
-      </div>
-      <div class="right">
-      </div>
-    </div>
-    {{ end }}
-  </div>
+  <div class="section-head"><h2>Movies</h2></div>
+  <div class="tiles posters">{{ range .Movies }}{{ template "movie-tile" . }}{{ end }}</div>
   {{ end }}
   {{ if .TVEpisodes }}
-  <div>
-    <div class="parent">
-      <div class="left">
-	<h2>TV Shows</h2>
-      </div>
-      <div class="right">
-      </div>
-    </div>
-    {{ range .TVEpisodes }}
-    <div class="parent">
-      <div class="left pointer">
-	<div class="parent2">
-	  <div class="movie-title">
-	    <a href="/tv/episodes/{{.ID}}">{{ .Name }}</a>
-	  </div>
-	  <div class="movie-detail">
-	    S{{ .Season }}E{{ .Episode}} ~ {{ .Date.Year }} ~ {{ .Runtime }} mins
-	  </div>
-	</div>
-      </div>
-      <div class="right">
-      </div>
-    </div>
-    {{ end }}
-  </div>
+  <div class="section-head"><h2>TV Episodes</h2></div>
+  <div class="tiles wide">{{ range .TVEpisodes }}{{ template "tvepisode-tile" . }}{{ end }}</div>
   {{ end }}
   {{ if .Series }}
-  <div>
-    <div class="parent">
-      <div class="left">
-	<h2>Series</h2>
-      </div>
-      <div class="right">
-      </div>
-    </div>
-    {{ range .Series }}
-    <div class="parent">
-      <div class="left pointer">
-	<div class="parent2">
-	  <div class="series-title">
-	    <a href="/series/{{.ID}}">{{ .Title }}</a>
-	  </div>
-	  <div class="series-detail">
-	    {{ .Date | ymd }} ~ {{ .Author }}
-	  </div>
-	</div>
-      </div>
-      <div class="right">
-      </div>
-    </div>
-    {{ end }}
-  </div>
+  <div class="section-head"><h2>Podcasts</h2></div>
+  <div class="tiles">{{ range .Series }}{{ template "series-tile" . }}{{ end }}</div>
   {{ end }}
   {{ if .Episodes }}
-  <div>
-    <div class="parent">
-      <div class="left">
-	<h2>Episodes</h2>
-      </div>
-      <div class="right">
-      </div>
-    </div>
-    {{ range .Episodes }}
-    <div class="parent">
-      <div class="left pointer">
-	<div class="parent2">
-	  <div class="series-title">
-	    <a href="/episodes/{{.ID}}">{{ .Title }}</a>
-	  </div>
-	  <div class="series-detail">
-	    {{ .Date | ymd }} ~ {{ .Author }}
-	  </div>
-	</div>
-      </div>
-      <div class="right">
-      </div>
-    </div>
-    {{ end }}
-  </div>
+  <div class="section-head"><h2>Podcast Episodes</h2></div>
+  <ol class="tracks">{{ range .Episodes }}{{ template "episode-row" . }}{{ end }}</ol>
   {{ end }}
 </div>

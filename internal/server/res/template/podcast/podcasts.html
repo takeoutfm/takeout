@@ -1,12 +1,6 @@
 <div>
   <h1>Podcasts</h1>
-  <div class="poster-wrap">
-    {{ range .Series }}
-    <div class="poster-cell">
-      <div><a href="{{.|link}}"><img height="144" src="{{.|image}}"></a></div>
-      <div><span class="series-title poster-title">{{ .Title }}</span></div>
-      <div class="series-detail">{{ .Date | ymd }}</div>
-    </div>
-    {{ end }}
+  <div class="tiles">
+    {{ range .Series }}{{ template "series-tile" . }}{{ else }}<p class="empty">No podcasts.</p>{{ end }}
   </div>
 </div>

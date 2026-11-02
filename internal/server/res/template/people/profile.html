@@ -1,91 +1,35 @@
 <div>
-  <h1>{{ .Person.Name }}</h1>
-  <div class="flex">
-    <div class="pl-25 pr-25"><img src="{{.Person|profile}}"></div>
-    <div>{{ .Person.Bio }}</div>
+  <div class="page-head">
+    <img class="cover profile" src="{{.Person|profile}}" alt="">
+    <div>
+      <h1>{{ .Person.Name }}</h1>
+      <div class="muted">
+	{{ if not .Person.Birthday.IsZero }}Born {{ .Person.Birthday | ymd }}{{ end }}{{ if .Person.Birthplace }} &middot; {{ .Person.Birthplace }}{{ end }}
+      </div>
+    </div>
   </div>
-</div>
-<div class="pt-25 pl-25">
+  {{ if .Person.Bio }}<p class="description">{{ .Person.Bio }}</p>{{ end }}
+
   {{ if .Movies.Starring }}
-  <h2>Movies Starring {{ .Person.Name }}</h2>
-  <div class="poster-wrap">
-    {{ range .Movies.Starring }}
-    <div class="poster-cell">
-      <div><a href="{{.|link}}"><img src="{{.|poster_small}}"></a></div>
-      <div><span class="movie-title poster-title">{{ .Title }}</span></div>
-      <div class="movie-detail">{{ .Date.Year }}</div>
-    </div>
-    {{ end }}
-  </div>
+  <div class="section-head"><h2>Movies</h2></div>
+  <div class="tiles posters">{{ range .Movies.Starring }}{{ template "movie-tile" . }}{{ end }}</div>
   {{ end }}
-
   {{ if .Shows.Starring }}
-  <h2>TV Shows Starring {{ .Person.Name }}</h2>
-  <div class="poster-wrap">
-    {{ range .Shows.Starring }}
-    <div class="poster-cell">
-      <div><a href="{{.|link}}"><img src="{{.|poster_small}}"></a></div>
-      <div><span class="movie-title poster-title">{{ .Name }}</span></div>
-      <div class="movie-detail">{{ .Date.Year }}</div>
-    </div>
-    {{ end }}
+  <div class="section-head"><h2>TV Shows</h2></div>
+  <div class="tiles posters">{{ range .Shows.Starring }}{{ template "show-tile" . }}{{ end }}</div>
+  {{ end }}
+  {{ if or .Movies.Directing .Shows.Directing }}
+  <div class="section-head"><h2>Directing</h2></div>
+  <div class="tiles posters">
+    {{ range .Movies.Directing }}{{ template "movie-tile" . }}{{ end }}
+    {{ range .Shows.Directing }}{{ template "show-tile" . }}{{ end }}
   </div>
   {{ end }}
-
-  {{ if .Movies.Directing }}
-  <h2>Movies Directing {{ .Person.Name }}</h2>
-  <div class="poster-wrap">
-    {{ range .Movies.Directing }}
-    <div class="poster-cell">
-      <div><a href="{{.|link}}"><img src="{{.|poster_small}}"></a></div>
-      <div><span class="movie-title poster-title">{{ .Title }}</span></div>
-      <div class="movie-detail">{{ .Date.Year }}</div>
-    </div>
-    {{ end }}
+  {{ if or .Movies.Writing .Shows.Writing }}
+  <div class="section-head"><h2>Writing</h2></div>
+  <div class="tiles posters">
+    {{ range .Movies.Writing }}{{ template "movie-tile" . }}{{ end }}
+    {{ range .Shows.Writing }}{{ template "show-tile" . }}{{ end }}
   </div>
   {{ end }}
-
-  {{ if .Shows.Directing }}
-  <h2>TV shows Directing {{ .Person.Name }}</h2>
-  <div class="poster-wrap">
-    {{ range .Shows.Directing }}
-    <div class="poster-cell">
-      <div><a href="{{.|link}}"><img src="{{.|poster_small}}"></a></div>
-      <div><span class="movie-title poster-title">{{ .Name }}</span></div>
-      <div class="movie-detail">{{ .Date.Year }}</div>
-    </div>
-    {{ end }}
-  </div>
-  {{ end }}
-
-  {{ if .Movies.Writing }}
-  <h2>Movies Writing {{ .Person.Name }}</h2>
-  <div class="poster-wrap">
-    {{ range .Movies.Writing }}
-    <div class="poster-cell">
-      <div><a href="{{.|link}}"><img src="{{.|poster_small}}"></a></div>
-      <div><span class="movie-title poster-title">{{ .Title }}</span></div>
-      <div class="movie-detail">{{ .Date.Year }}</div>
-    </div>
-    {{ end }}
-  </div>
-  {{ end }}
-
-  {{ if .Shows.Writing }}
-  <h2>Shows Writing {{ .Person.Name }}</h2>
-  <div class="poster-wrap">
-    {{ range .Shows.Writing }}
-    <div class="poster-cell">
-      <div><a href="{{.|link}}"><img src="{{.|poster_small}}"></a></div>
-      <div><span class="movie-title poster-title">{{ .Name }}</span></div>
-      <div class="movie-detail">{{ .Date.Year }}</div>
-    </div>
-    {{ end }}
-  </div>
-  {{ end }}
-
-  <div class="clear pt-5"></div>
-  <h3>External Links</h3>
-  <a target="_blank" href="https://www.themoviedb.org/person/{{ .Person.PEID }}">TMDB</a>,
-  <a target="_blank" href="https://www.imdb.com/name/{{ .Person.IMID }}/">IMDB</a>
 </div>

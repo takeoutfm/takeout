@@ -1,134 +1,75 @@
 <div>
-  <h1>{{ .Artist.Name }}</h1>
-  {{ if .Image }}
-  <div class="parent3">
-    <div class="middle">
-      <img width="300" heigth="300" src="{{ .Image }}"/>
+  {{ if .Background }}<img class="banner" src="{{ .Background }}" alt="">{{ end }}
+  <div class="page-head">
+    <div>
+      <h1>{{ .Artist.Name }}</h1>
+      <div class="muted">
+	{{ .Artist.Genre }}{{ if and .Artist.Genre .Artist.Area }} &middot; {{ end }}{{ .Artist.Area }}
+      </div>
     </div>
   </div>
-  {{ end }}
-  <div>
-    <h2>Releases</h2>
-    {{ range .Releases }}
-    <div class="tile-110 float-left">
-      <a class="nodecor" href="{{.|link}}">
-	<img class="rounded" width="110" height="110" src="{{.|cover}}">
-	<br/>
-	<div class="release-small-title">{{ .Name }}</div>
-	<div class="release-small-year">{{ .Date.Year }}</div>
-      </a>
-    </div>
+  <div class="actions">
+    <a class="button" href="#" data-playlist="add-ref" data-ref='{{ref .Artist "popular"}}'>
+      <img src="/static/play_arrow-white-24dp.svg" alt="">Play
+    </a>
+    <a class="button" href="#" data-playlist="add-ref" data-ref='{{ref .Artist "shuffle"}}'>
+      <img src="/static/shuffle-white-24dp.svg" alt="">Shuffle
+    </a>
+    <a class="button" href="#" data-playlist="add-ref" data-ref='{{ref .Artist "radio"}}'>
+      <img src="/static/radio-white-24dp.svg" alt="">Radio
+    </a>
+    {{ if .Artist.ARID }}
+    <a class="button" href="#" data-action="favorite" data-url="/api/favorite/artists/{{ .Artist.ARID }}"
+       aria-pressed="{{ .IsFavorite }}">
+      <svg class="icon" aria-hidden="true"><use href="#i-favorites"></use></svg>
+      <span class="label">{{ if .IsFavorite }}Unfavorite{{ else }}Favorite{{ end }}</span>
+    </a>
     {{ end }}
   </div>
-  <div class="clear"></div>
+
   {{ $popular := call .Popular.Tracks }}
   {{ if $popular }}
-  <div>
-    <div class="parent">
-      <div class="left">
-	<a class="nodecor" href="{{.Artist|popular}}"><h2>Popular Tracks</h2></a>
-      </div>
-      <div class="right">
-	<a href="{{.Artist|popular}}"><img src="/static/navigate_next-white-24dp.svg"/></a>
-      </div>
-    </div>
-    <div>
-      {{ range $popular }}
-      <div class="parent">
-	<div class="left pointer">
-	  <div class="parent2">
-	    <div class="track-title">
-	      <a data-playlist="add-ref"
-		 data-ref="{{.|ref}}"
-		 data-play="now"
-		 data-creator="{{.PreferredArtist}}"
-		 data-album="{{.Release}}"
-		 data-title="{{.Title}}"
-		 data-image="{{.|cover}}"
-		 data-etag="{{.ETag}}"
-		 data-location="{{.|link}}">
-		{{ .Title }}
-	      </a>
-	    </div>
-	    <div class="track-artist">
-	      {{ .PreferredArtist }} &#x2022 {{ .ReleaseTitle }}
-	    </div>
-	  </div>
-	</div>
-	<div class="right">
-	  <a data-playlist="append-ref" data-ref="{{.|ref}}">
-	    <img src="/static/playlist_add-white-24dp.svg">
-	  </a>
-	</div>
-      </div>
-      {{ end }}
-    </div>
+  <div class="section-head"><h2>Popular</h2><a href="{{.Artist|popular}}">See all</a></div>
+  <ol class="tracks" data-list-ref='{{ref .Artist "popular"}}'>
+    {{ range $i, $t := $popular }}{{ if lt $i 5 }}{{ template "track" $t }}{{ end }}{{ end }}
+  </ol>
+  {{ end }}
+
+  {{ $albums := false }}{{ $singles := false }}{{ $other := false }}
+  {{ range .Releases }}
+  {{ if and (eq .Type "Album") (not .SecondaryType) }}{{ $albums = true }}
+  {{ else if or (eq .Type "Single") (eq .Type "EP") }}{{ $singles = true }}
+  {{ else }}{{ $other = true }}{{ end }}
+  {{ end }}
+
+  {{ if $albums }}
+  <div class="section-head"><h2>Albums</h2></div>
+  <div class="tiles">
+    {{ range .Releases }}{{ if and (eq .Type "Album") (not .SecondaryType) }}{{ template "release-tile-year" . }}{{ end }}{{ end }}
   </div>
   {{ end }}
-  {{ $singles := call .Singles.Tracks }}
   {{ if $singles }}
-  <div>
-    <div class="parent">
-      <div class="left">
-	<a class="nodecor" href="{{.Artist|singles}}"><h2>Singles</h2></a>
-      </div>
-      <div class="right">
-	<a href="{{.Artist|singles}}"><img src="/static/navigate_next-white-24dp.svg"/></a>
-      </div>
-    </div>
-    <div>
-      {{ range $singles }}
-      <div class="parent">
-	<div class="left pointer">
-	  <div class="parent2">
-	    <div class="track-title">
-	      <a data-playlist="add-ref"
-		 data-ref="{{.|ref}}"
-		 data-play="now"
-		 data-creator="{{.PreferredArtist}}"
-		 data-album="{{.Release}}"
-		 data-title="{{.Title}}"
-		 data-image="{{.|cover}}"
-		 data-etag="{{.ETag}}"
-		 data-location="{{.|link}}">
-		{{ .Title }}
-	      </a>
-	    </div>
-	    <div class="track-artist">
-	      {{ .PreferredArtist }} &#x2022 {{ .ReleaseTitle }}
-	    </div>
-	  </div>
-	</div>
-	<div class="right">
-	  <a data-playlist="append-ref" data-ref="{{.|ref}}">
-	    <img src="/static/playlist_add-white-24dp.svg">
-	  </a>
-	</div>
-      </div>
-      {{ end }}
-    </div>
+  <div class="section-head"><h2>Singles and EPs</h2><a href="{{.Artist|singles}}">Tracks</a></div>
+  <div class="tiles">
+    {{ range .Releases }}{{ if or (eq .Type "Single") (eq .Type "EP") }}{{ template "release-tile-year" . }}{{ end }}{{ end }}
   </div>
   {{ end }}
+  {{ if $other }}
+  <div class="section-head"><h2>Other Releases</h2></div>
+  <div class="tiles">
+    {{ range .Releases }}{{ if not (or (and (eq .Type "Album") (not .SecondaryType)) (eq .Type "Single") (eq .Type "EP")) }}{{ template "release-tile-year" . }}{{ end }}{{ end }}
+  </div>
+  {{ end }}
+
   {{ if .Similar }}
-  <div>
-    <h2>Similar Artists</h2>
-    <table>
-      {{ range .Similar }}
-      <tr>
-	<td>
-	  <a href="{{.|link}}"><span class="circle">{{.|letter}}</span></a>
-	</td>
-	<td class="similar-artist">
-	  <a href="{{.|link}}">{{ .Name }}</a>
-	</td>
-      </tr>
-    {{ end }}
-    </table>
+  <div class="section-head"><h2>Similar Artists</h2></div>
+  <div class="rows">
+    {{ range .Similar }}{{ template "artist-row" . }}{{ end }}
   </div>
   {{ end }}
-  <h2>Want List</h2>
-  <a href="{{.Artist|want}}">Want List</a>
-  <h3>External Links</h3>
-  MusicBrainz:
-  <a target="_blank" href="https://musicbrainz.org/artist/{{ .Artist.ARID }}">Artist</a>
+
+  <div class="links">
+    <a href="{{.Artist|want}}">Want list</a> &middot;
+    <a target="_blank" rel="noopener" href="https://musicbrainz.org/artist/{{ .Artist.ARID }}">MusicBrainz</a>
+  </div>
 </div>
