@@ -1,7 +1,7 @@
 <div class="hero video-hero">
   <img class="hero-bg" src="{{.Movie|backdrop}}" alt="">
   <div class="video-head">
-    <img class="poster" src="{{.Movie|poster}}" alt="">
+    <img class="poster" src="{{.Movie|poster_large}}" alt="">
     <div class="video-info">
       <h1>{{ .Movie.Title }}</h1>
       {{ if .Movie.Tagline }}<p class="tagline">{{ .Movie.Tagline }}</p>{{ end }}

@@ -33,6 +33,7 @@ import (
 	"takeoutfm.dev/takeout/internal/podcast"
 	"takeoutfm.dev/takeout/internal/tv"
 	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/lib/tmdb"
 	"takeoutfm.dev/takeout/model"
 	"takeoutfm.dev/takeout/view"
 )
@@ -56,6 +57,15 @@ func getTemplates(config *config.Config) *template.Template {
 		"res/template/podcast/*.html",
 		"res/template/tv/*.html",
 		"res/template/film/*.html"))
+}
+
+// tmdbImage is the server's image proxy path for a TMDB image, or ""
+// without one.
+func tmdbImage(size, path string) string {
+	if path == "" {
+		return ""
+	}
+	return "/img/tm/" + size + path
 }
 
 func doFuncMap() template.FuncMap {
@@ -234,6 +244,33 @@ func doFuncMap() template.FuncMap {
 			switch o.(type) {
 			case model.TVEpisode:
 				img = tv.EpisodeStillSmall(o.(model.TVEpisode))
+			}
+			return img
+		},
+		// header images, sharp on high-density screens
+		"poster_large": func(o any) string {
+			var path string
+			switch o.(type) {
+			case model.Movie:
+				path = o.(model.Movie).PosterPath
+			case model.TVSeries:
+				path = o.(model.TVSeries).PosterPath
+			}
+			return tmdbImage(tmdb.Poster780, path)
+		},
+		"profile_large": func(o any) string {
+			var path string
+			switch o.(type) {
+			case model.Person:
+				path = o.(model.Person).ProfilePath
+			}
+			return tmdbImage(tmdb.Profile632, path)
+		},
+		"still_large": func(o any) string {
+			var img string
+			switch o.(type) {
+			case model.TVEpisode:
+				img = tv.EpisodeStillLarge(o.(model.TVEpisode))
 			}
 			return img
 		},

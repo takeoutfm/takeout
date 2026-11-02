@@ -74,7 +74,7 @@
 
 {{ define "movie-tile" }}
 <a class="tile" href="{{.|link}}">
-  <img src="{{.|poster_small}}" alt="" loading="lazy">
+  <img src="{{.|poster}}" alt="" loading="lazy">
   <div class="tile-title">{{ .Title }}</div>
   <div class="tile-sub">{{ .Date.Year }}</div>
 </a>
@@ -82,7 +82,7 @@
 
 {{ define "show-tile" }}
 <a class="tile" href="{{.|link}}">
-  <img src="{{.|poster_small}}" alt="" loading="lazy">
+  <img src="{{.|poster}}" alt="" loading="lazy">
   <div class="tile-title">{{ .Name }}</div>
   <div class="tile-sub">{{ .Date.Year }}</div>
 </a>
@@ -90,7 +90,7 @@
 
 {{ define "tvepisode-tile" }}
 <a class="tile" href="{{.|link}}">
-  <img src="{{.|still_small}}" alt="" loading="lazy">
+  <img src="{{.|still}}" alt="" loading="lazy">
   <div class="tile-title">{{ .Name }}</div>
   <div class="tile-sub">S{{ .Season }} E{{ .Episode }} &middot; {{ .Date.Year }}</div>
 </a>
@@ -131,7 +131,7 @@
 {{/* someone in the cast or crew: round photo, name and role, as in the apps */}}
 {{ define "person-tile" }}
 <a class="tile person" href="/profiles/{{.Person.PEID}}">
-  <img src="{{.Person|profile_small}}" alt="" loading="lazy">
+  <img src="{{.Person|profile}}" alt="" loading="lazy">
   <div class="tile-title">{{ .Person.Name }}</div>
   <div class="tile-sub">{{ .Character }}</div>
 </a>
@@ -139,7 +139,7 @@
 
 {{ define "crew-tile" }}
 <a class="tile person" href="/profiles/{{.Person.PEID}}">
-  <img src="{{.Person|profile_small}}" alt="" loading="lazy">
+  <img src="{{.Person|profile}}" alt="" loading="lazy">
   <div class="tile-title">{{ .Person.Name }}</div>
   <div class="tile-sub">{{ .Job }}</div>
 </a>

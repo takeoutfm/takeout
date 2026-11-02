@@ -244,3 +244,20 @@ func TestTemplatesNoSelfClosing(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestLargeImages(t *testing.T) {
+	funcs := doFuncMap()
+	poster := funcs["poster_large"].(func(any) string)
+	profile := funcs["profile_large"].(func(any) string)
+	cases := map[string]string{
+		poster(model.Movie{PosterPath: "/m.jpg"}):       "/img/tm/w780/m.jpg",
+		poster(model.TVSeries{PosterPath: "/s.jpg"}):    "/img/tm/w780/s.jpg",
+		profile(model.Person{ProfilePath: "/p.jpg"}):    "/img/tm/h632/p.jpg",
+		poster(model.Movie{}) + profile(model.Person{}): "",
+	}
+	for got, want := range cases {
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	}
+}

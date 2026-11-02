@@ -1,7 +1,7 @@
 <div class="hero video-hero">
   <img class="hero-bg" src="{{.Series|backdrop}}" alt="">
   <div class="video-head">
-    <img class="poster" src="{{.Series|poster}}" alt="">
+    <img class="poster" src="{{.Series|poster_large}}" alt="">
     <div class="video-info">
       <h1>{{ .Series.Name }}</h1>
       {{ if .Series.Tagline }}<p class="tagline">{{ .Series.Tagline }}</p>{{ end }}
@@ -47,7 +47,7 @@
   {{ end }}
     <li class="track static">
       <span class="num">{{ .Episode }}</span>
-      <img class="thumb wide" src="{{.|still_small}}" alt="" loading="lazy">
+      <img class="thumb wide" src="{{.|still}}" alt="" loading="lazy">
       <div class="text">
 	<div class="title"><a class="nodecor" href="{{.|link}}">{{ .Name }}</a></div>
 	<div class="sub">{{ .Date | ymd }}</div>
