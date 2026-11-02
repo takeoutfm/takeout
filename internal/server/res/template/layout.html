@@ -11,7 +11,6 @@
     <link rel="icon" type="image/svg+xml" href="{{asset "favicon.svg"}}">
     <script src="{{asset "nav.js"}}" defer></script>
     <script src="{{asset "player.js"}}" defer></script>
-    <script src="{{asset "chart.umd.js"}}" defer></script>
     <script src="{{asset "charts.js"}}" defer></script>
   </head>
   <body>
@@ -76,10 +75,10 @@
       <div id="main">
 	{{ template "fragment.html" . }}
       </div>
-      <div id="playlist" style="display: none;">
+      <div id="playlist" hidden>
       </div>
-      <p style="clear: both;"></p>
-      <div id="playing" style="display: none;">
+      <p class="clear"></p>
+      <div id="playing" hidden>
 	<audio id="audio" preload="auto"></audio>
 	<div class="footer">
 	  <div id="np-message" class="np-message" role="status" hidden></div>

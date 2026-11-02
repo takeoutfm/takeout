@@ -10,18 +10,17 @@
   <div>
     <h2>Releases</h2>
     {{ range .Releases }}
-    <div style="float: left; padding: 10px; max-width: 110px;">
-      <a href="{{.|link}}" style="text-decoration: none;">
-	<img width="110" height="110" src="{{.|cover}}" style="border-radius: 10px;">
+    <div class="tile-110 float-left">
+      <a class="nodecor" href="{{.|link}}">
+	<img class="rounded" width="110" height="110" src="{{.|cover}}">
 	<br/>
 	<div class="release-small-title">{{ .Name }}</div>
-	<br style="display: none"/>
 	<div class="release-small-year">{{ .Date.Year }}</div>
       </a>
     </div>
     {{ end }}
   </div>
-  <div style="clear: both;"></div>
+  <div class="clear"></div>
   {{ $popular := call .Popular.Tracks }}
   {{ if $popular }}
   <div>
@@ -36,7 +35,7 @@
     <div>
       {{ range $popular }}
       <div class="parent">
-	<div class="left" style="cursor: pointer;">
+	<div class="left pointer">
 	  <div class="parent2">
 	    <div class="track-title">
 	      <a data-playlist="add-ref"
@@ -80,7 +79,7 @@
     <div>
       {{ range $singles }}
       <div class="parent">
-	<div class="left" style="cursor: pointer;">
+	<div class="left pointer">
 	  <div class="parent2">
 	    <div class="track-title">
 	      <a data-playlist="add-ref"

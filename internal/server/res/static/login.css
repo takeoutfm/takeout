@@ -1,0 +1,26 @@
+/* sign-in and device link pages */
+
+* {
+    background-color: #222;
+    color: #e6e6e6;
+    border-color: #a6a6a6;
+}
+a {
+    text-decoration: none;
+}
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+}
+.box {
+    width: 300px;
+    margin: 5px;
+    text-align: center;
+}
+.footer {
+    font-size: small;
+    text-align: center;
+}

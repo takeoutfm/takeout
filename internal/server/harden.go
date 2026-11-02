@@ -44,9 +44,10 @@ func limitBody(next http.Handler) http.Handler {
 
 // securityHeaders adds response headers that don't change how the UI works.
 //
-// The Content-Security-Policy allows only the server's own scripts (no inline
-// scripts or handlers) and fetches. Styles aren't restricted yet: the
-// templates still use inline style attributes.
+// The Content-Security-Policy allows only the server's own scripts, styles
+// and fetches: no inline scripts, handlers, <style> blocks or style
+// attributes. Images and media can come from anywhere (covers, presigned
+// storage URLs, radio stations).
 func securityHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h := w.Header()
@@ -57,7 +58,7 @@ func securityHeaders(next http.Handler) http.Handler {
 		h.Set("Referrer-Policy", "no-referrer")
 		h.Set("Content-Security-Policy",
 			"base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; "+
-				"script-src 'self'; connect-src 'self'")
+				"script-src 'self'; style-src 'self'; connect-src 'self'")
 		next.ServeHTTP(w, r)
 	})
 }

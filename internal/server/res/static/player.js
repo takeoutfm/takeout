@@ -346,7 +346,7 @@
 	index = -1;
 	playing = null;
 	resetPlay();
-	$("playing").style.display = "none";
+	$("playing").hidden = true;
 	showQueue(false);
 	if ("mediaSession" in navigator) {
 	    navigator.mediaSession.metadata = null;
@@ -458,7 +458,7 @@
     // ---- display
 
     const showTrack = function(t) {
-	$("playing").style.display = "block";
+	$("playing").hidden = false;
 	$("np-title").textContent = t.title;
 	$("np-artist").textContent = isStream() ? t.album || t.creator : t.creator;
 	const cover = $("np-cover");
@@ -547,12 +547,12 @@
     };
 
     const showQueue = function(show) {
-	$("playlist").style.display = show ? "block" : "none";
-	$("main").style.display = show ? "none" : "block";
+	$("playlist").hidden = !show;
+	$("main").hidden = show;
     };
 
     const toggleQueue = function() {
-	showQueue($("playlist").style.display == "none");
+	showQueue($("playlist").hidden);
     };
 
     const updateSession = function(t = current()) {

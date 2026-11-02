@@ -26,7 +26,7 @@
 	<div class="track-num">
 	  {{ .TrackNum }}.
 	</div>
-	<div class="left" style="cursor: pointer;">
+	<div class="left pointer">
 	  <div class="parent2">
 	    <div class="track-title">
 	      <a data-playlist="append-ref"
@@ -65,7 +65,7 @@
 	<div class="track-num">
 	  {{ .TrackNum }}.
 	</div>
-	<div class="left" style="cursor: pointer;">
+	<div class="left pointer">
 	  <div class="parent2">
 	    <div class="track-title">
 	      <a data-playlist="append-ref"
@@ -96,24 +96,23 @@
     </div>
   </div>
   {{ end }}
-  <div style="clear: both; padding-top: 5px;"></div>
+  <div class="clear pt-5"></div>
   {{ if .Similar }}
   <h2>Similar Releases</h2>
-  <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
+  <div class="hscroll">
     {{ range .Similar }}
-    <div style="padding: 10px; max-width: 110px; display: inline-block;">
-      <a href="{{.|link}}" style="text-decoration: none;">
-	<img width="110" height="110" src="{{.|cover}}" style="border-radius: 10px;">
+    <div class="tile-110">
+      <a class="nodecor" href="{{.|link}}">
+	<img class="rounded" width="110" height="110" src="{{.|cover}}">
 	<br/>
 	<div class="release-small-title">{{ .Name }}</div>
-	<br style="display: none"/>
 	<div class="release-small-year">{{ .Date.Year }}</div>
       </a>
     </div>
     {{ end }}
   </div>
   {{ end }}
-  <div style="clear: both; padding-top: 5px;"></div>
+  <div class="clear pt-5"></div>
   <h3>External Links</h3>
   MusicBrainz:
   <a target="_blank" href="https://musicbrainz.org/artist/{{ .Artist.ARID }}">Artist</a>,

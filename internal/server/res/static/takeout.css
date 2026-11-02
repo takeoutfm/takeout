@@ -402,3 +402,182 @@ a.button:visited {
 a.button:hover {
     background-color: #333;
 }
+
+/* layout helpers for the templates (inline styles aren't allowed) */
+
+[hidden] {
+    display: none !important;
+}
+
+.pointer { cursor: pointer; }
+.rounded { border-radius: 10px; }
+.flex { display: flex; }
+.float-left { float: left; }
+.clear { clear: both; }
+.center { text-align: center; }
+.large { font-size: large; }
+.pre-line { white-space: pre-line; }
+.nolist { list-style-type: none; }
+.hscroll { overflow-x: auto; overflow-y: hidden; white-space: nowrap; }
+.p-10 { padding: 10px; }
+.py-10 { padding-top: 10px; padding-bottom: 10px; }
+.pt-5 { padding-top: 5px; }
+.pt-10 { padding-top: 10px; }
+.pt-25 { padding-top: 25px; }
+.pt-50 { padding-top: 50px; }
+.pl-25 { padding-left: 25px; }
+.pr-25 { padding-right: 25px; }
+.pb-1em { padding-bottom: 1em; }
+.w-154 { max-width: 154px; }
+
+.tile-110 { padding: 10px; max-width: 110px; display: inline-block; }
+.tile-154 { padding: 10px; max-width: 154px; display: inline-block; }
+.tile-185 { padding: 10px; max-width: 185px; display: inline-block; }
+.tile-110.float-left { display: block; }
+
+.poster-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+    width: 100%;
+    text-align: center;
+}
+
+.poster-cell { margin: 1em; flex: 0; min-width: 154px; }
+.poster-title { max-width: 154px; text-overflow: ellipsis; }
+.boxed-table { border: 1px solid; border-spacing: 15px; }
+
+.chart-box {
+    border: 1px solid;
+    margin: 1em;
+    padding: 1em;
+}
+
+/* movie and TV headers: the backdrop behind a dark gradient */
+.hero {
+    position: relative;
+    isolation: isolate;
+}
+
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4));
+    z-index: -1;
+}
+
+/* TMDB vote as a ring */
+.vote {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+}
+
+.vote svg {
+    position: absolute;
+    inset: 0;
+    transform: rotate(-90deg);
+}
+
+.vote circle {
+    fill: none;
+    stroke-width: 3;
+}
+
+.vote-track { stroke: #444; }
+.vote-value { stroke: orange; }
+
+/* activity chart (charts.js) */
+.chart-box .chart {
+    width: 100%;
+}
+
+.bars {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 30vh;
+}
+
+.bars .grid { stroke: #3a3a3a; stroke-width: 1; }
+.bars .axis { fill: #a6a6a6; font-size: 11px; }
+.bars .axis.y { text-anchor: end; }
+.bars .axis.x { text-anchor: middle; }
+.bar-0 { fill: #3DDC84; }
+.bar-1 { fill: #f7f6e4; }
+.bar-2 { fill: #9BD0F5; }
+
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-size: small;
+}
+
+.legend-item::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 6px;
+    background-color: currentColor;
+}
+
+.legend-item.bar-0::before { background-color: #3DDC84; }
+.legend-item.bar-1::before { background-color: #f7f6e4; }
+.legend-item.bar-2::before { background-color: #9BD0F5; }
+
+/* let flex rows (poster beside details) shrink to the window */
+.flex > * {
+    min-width: 0;
+}
+
+.hero > .flex > :last-child {
+    flex: 1;
+}
+
+#main img {
+    max-width: 100%;
+}
+
+/* credits: keep the heading on one line, wrap the names */
+.cred + .cred {
+    white-space: normal;
+}
+
+.vote-cell {
+    width: 1%;
+    vertical-align: top;
+}
+
+/* phones: the poster above the details */
+@media (max-width: 700px) {
+    .hero > .flex {
+        flex-direction: column;
+    }
+
+    .hero > .flex > div {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .cred {
+        white-space: normal;
+    }
+
+    .pl-25 { padding-left: 8px; }
+    .pr-25 { padding-right: 8px; }
+}

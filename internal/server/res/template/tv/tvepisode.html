@@ -19,13 +19,13 @@
       {{ .Episode.Date|ymd }}
     </div>
   </div>
-  <h2 style="padding-left: 25px; padding-top: 25px;">Overview</h2>
-  <div style="display: flex; padding-left: 25px;">
+  <h2 class="pt-25 pl-25">Overview</h2>
+  <div class="flex pl-25">
     {{ .Episode.Overview }}
   </div>
   {{ if .Cast }}
-  <h2 style="padding-left: 25px; padding-top: 25px;">Cast</h2>
-  <div style="display: flex; padding-left: 25px;">
+  <h2 class="pt-25 pl-25">Cast</h2>
+  <div class="flex pl-25">
     {{ range $i, $c := .Cast }}
     {{ if lt $i 5 }}
     <div class="card">
@@ -37,7 +37,7 @@
     {{ end }}
   </div>
   {{ end }}
-  <div style="padding-left: 25px;">
+  <div class="pl-25">
     <h2>External Links</h2>
     <a target="_blank" href="https://www.themoviedb.org/tv/{{ .Series.TVID }}">TMDB</a>,
   </div>

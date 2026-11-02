@@ -4,14 +4,13 @@
   {{ if .AddedReleases }}
   <div>
     <h2>Recently Added</h2>
-    <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
+    <div class="hscroll">
       {{ range .AddedReleases }}
-      <div style="padding: 10px; max-width: 110px; display: inline-block;">
-	<a href="{{.|link}}" style="text-decoration: none;">
-	  <img width="110" height="110" src="{{.|cover}}" style="border-radius: 10px;">
+      <div class="tile-110">
+	<a class="nodecor" href="{{.|link}}">
+	  <img class="rounded" width="110" height="110" src="{{.|cover}}">
 	  <br/>
 	  <div class="release-small-title">{{ .Name }}</div>
-	  <br style="display: none"/>
 	  <div class="release-small-year">{{ .Date.Year }}</div>
 	</a>
       </div>
@@ -22,14 +21,13 @@
   {{ if .NewReleases }}
   <div>
     <h2>Recently Released</h2>
-    <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
+    <div class="hscroll">
       {{ range .NewReleases }}
-      <div style="padding: 10px; max-width: 110px; display: inline-block;">
-	<a href="{{.|link}}" style="text-decoration: none;">
-	  <img width="110" height="110" src="{{.|cover}}" style="border-radius: 10px;">
+      <div class="tile-110">
+	<a class="nodecor" href="{{.|link}}">
+	  <img class="rounded" width="110" height="110" src="{{.|cover}}">
 	  <br/>
 	  <div class="release-small-title">{{ .Name }}</div>
-	  <br style="display: none"/>
 	  <div class="release-small-year">{{ .Date.Year }}</div>
 	</a>
       </div>
@@ -45,15 +43,14 @@
   {{ if .RecommendMovies }}
   <div>
     <h2>Recommended</h2>
-    <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
+    <div class="hscroll">
       {{ range .RecommendMovies }}
       {{ range .Movies }}
-      <div style="padding: 10px; max-width: 154px; display: inline-block;">
-	<a href="{{.|link}}" style="text-decoration: none;">
-	  <img src="{{.|poster_small}}" style="border-radius: 10px;">
+      <div class="tile-154">
+	<a class="nodecor" href="{{.|link}}">
+	  <img class="rounded" src="{{.|poster_small}}">
 	  <br/>
 	  <div class="movie-small-title">{{ .Title }}</div>
-	  <br style="display: none"/>
 	  <div class="movie-small-year">{{ .Date.Year }}</div>
 	</a>
       </div>
@@ -65,14 +62,13 @@
   {{ if .AddedMovies }}
   <div>
     <h2>Recently Added</h2>
-    <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
+    <div class="hscroll">
       {{ range .AddedMovies }}
-      <div style="padding: 10px; max-width: 154px; display: inline-block;">
-	<a href="{{.|link}}" style="text-decoration: none;">
-	  <img src="{{.|poster_small}}" style="border-radius: 10px;">
+      <div class="tile-154">
+	<a class="nodecor" href="{{.|link}}">
+	  <img class="rounded" src="{{.|poster_small}}">
 	  <br/>
 	  <div class="movie-small-title">{{ .Title }}</div>
-	  <br style="display: none"/>
 	  <div class="movie-small-year">{{ .Date.Year }}</div>
 	</a>
       </div>
@@ -83,14 +79,13 @@
   {{ if .NewMovies }}
   <div>
     <h2>Recently Released</h2>
-    <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
+    <div class="hscroll">
       {{ range .NewMovies }}
-      <div style="padding: 10px; max-width: 154px; display: inline-block;">
-	<a href="{{.|link}}" style="text-decoration: none;">
-	  <img src="{{.|poster_small}}" style="border-radius: 10px;">
+      <div class="tile-154">
+	<a class="nodecor" href="{{.|link}}">
+	  <img class="rounded" src="{{.|poster_small}}">
 	  <br/>
 	  <div class="movie-small-title">{{ .Title }}</div>
-	  <br style="display: none"/>
 	  <div class="movie-small-year">{{ .Date.Year }}</div>
 	</a>
       </div>
@@ -105,14 +100,13 @@
   <h1>TV Shows</h1>
   <div>
     <h2>Recently Added</h2>
-    <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
+    <div class="hscroll">
       {{ range .AddedTVEpisodes }}
-      <div style="padding: 10px; max-width: 185px; display: inline-block;">
-	<a href="{{.|link}}" style="text-decoration: none;">
-	  <img src="{{.|still_small}}" style="border-radius: 10px;">
+      <div class="tile-185">
+	<a class="nodecor" href="{{.|link}}">
+	  <img class="rounded" src="{{.|still_small}}">
 	  <br/>
 	  <div class="movie-small-title">{{ .Name }}</div>
-	  <br style="display: none"/>
 	  <div class="movie-small-year">{{ .Date.Year }}</div>
 	</a>
       </div>
@@ -127,14 +121,13 @@
   {{ if .NewSeries }}
   <div>
     <h2>Recent Series</h2>
-    <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
+    <div class="hscroll">
       {{ range .NewSeries }}
-      <div style="padding: 10px; max-width: 154px; display: inline-block;">
-	<a href="{{.|link}}" style="text-decoration: none;">
-	  <img width="144" height="144" src="{{.|image}}" style="border-radius: 10px;">
+      <div class="tile-154">
+	<a class="nodecor" href="{{.|link}}">
+	  <img class="rounded" width="144" height="144" src="{{.|image}}">
 	  <br/>
 	  <div class="series-small-title">{{ .Title }}</div>
-	  <br style="display: none"/>
 	  <div class="series-small-year">{{ .Date|ymd }}</div>
 	</a>
       </div>
@@ -145,14 +138,13 @@
   {{ if .NewEpisodes }}
   <div>
     <h2>Recent Episodes</h2>
-    <div style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
+    <div class="hscroll">
       {{ range .NewEpisodes }}
-      <div style="padding: 10px; max-width: 154px; display: inline-block;">
-	<a href="{{.|link}}" style="text-decoration: none;">
-	  <img width="144" height="144" src="{{.|image}}" style="border-radius: 10px;">
+      <div class="tile-154">
+	<a class="nodecor" href="{{.|link}}">
+	  <img class="rounded" width="144" height="144" src="{{.|image}}">
 	  <br/>
 	  <div class="series-small-title">{{ .Title }}</div>
-	  <br style="display: none"/>
 	  <div class="series-small-year">{{ .Date|ymd }}</div>
 	</a>
       </div>

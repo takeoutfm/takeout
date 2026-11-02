@@ -1,6 +1,6 @@
 <div>
   <h1>Activity</h1>
-  <div style="text-align: center;">
+  <div class="center">
     <a href="/activity/recent" class="takeout">Recent</a>
     <a href="/activity/lastweek" class="takeout">Last Week</a>
     <a href="/activity/lastmonth" class="takeout">Last Month</a>
@@ -11,13 +11,13 @@
     <a href="/activity/yesterday" class="takeout">Yesterday</a>
     <a href="/activity/today" class="takeout">Today</a>
   </div>
-  <div style="display: flex; justify-content: center; border: 1px solid; margin: 1em; padding: 1em;">
-    <canvas style="max-height: 30vh;" id="chart" data-chart="{{.|chart}}"></canvas>
+  <div class="chart-box">
+    <div class="chart" data-chart="{{.|chart}}"></div>
   </div>
   <div class="three-col-grid">
     <div>
       <h2>Artists ({{ .ArtistCount }})</h2>
-      <table class="act-table" style="border: 1px solid; border-spacing: 15px;">
+      <table class="act-table boxed-table">
 	{{ range .Artists }}
 	<tr class="act-row">
 	  <td><a href="{{.Artist|link}}">{{ .Artist.Name }}</a></td>
@@ -28,7 +28,7 @@
     </div>
     <div>
       <h2>Releases ({{ .ReleaseCount }})</h2>
-      <table class="act-table" style="border: 1px solid; border-spacing: 15px;">
+      <table class="act-table boxed-table">
 	{{ range .Releases }}
 	<tr class="act-row">
 	  <td class="np-cover">
@@ -45,7 +45,7 @@
     </div>
     <div>
       <h2>Tracks ({{ .TrackCount }}) &#8226 Listens ({{ .ListenCount }})</h2>
-      <table class="act-table" style="border: 1px solid; border-spacing: 15px;">
+      <table class="act-table boxed-table">
 	{{ range .Tracks }}
 	<tr class="act-row">
 	  <td class="np-cover">

@@ -1,9 +1,9 @@
 <div>
   <h1>Artists</h1>
   <div>
-    <ul style="list-style-type: none;">
+    <ul class="nolist">
     {{ range .Artists }}
-    <li style="padding-bottom: 1em;">
+    <li class="pb-1em">
       <div><a href="{{.|link}}">{{ .Name }}</a></div>
       <div class="artist-subtitle">{{ .Genre }} &#8226 {{ .Date.Year }}</div>
     </li>

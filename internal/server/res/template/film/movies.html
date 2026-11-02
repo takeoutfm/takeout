@@ -1,10 +1,10 @@
 <div>
   <h1>Movies</h1>
-  <div style="display: flex; text-align: center; width: 100%; justify-content: left; flex-wrap: wrap;">
+  <div class="poster-wrap">
     {{ range .Movies }}
-    <div style="margin: 1em; flex: 0; min-width: 154px;">
+    <div class="poster-cell">
       <div><a href="{{.|link}}"><img src="{{.|poster_small}}"></a></div>
-      <div><span style="max-width: 154px; text-overflow: ellipsis;" class="movie-title">{{ .Title }}</span></div>
+      <div><span class="movie-title poster-title">{{ .Title }}</span></div>
       <div class="movie-detail">{{ .Date.Year }}</div>
     </div>
     {{ end }}

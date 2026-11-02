@@ -1,10 +1,11 @@
-<div style="background-size: cover; background-position: center; background-repeat: no-repeat; background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4)), url('{{.Movie|backdrop}}');">
-  <div style="display: flex; padding-top: 10px;">
-    <div style="padding-left: 25px; padding-right: 25px;">
+<div class="hero">
+  <img class="hero-bg" src="{{.Movie|backdrop}}" alt="">
+  <div class="flex pt-10">
+    <div class="pl-25 pr-25">
       <img src="{{.Movie|poster}}">
     </div>
-    <div style="padding-right: 25px;">
-      <div style="padding: 10px 0px 10px 0px;">
+    <div class="pr-25">
+      <div class="py-10">
 	<h1>{{ .Movie.Title }}</h1>
       </div>
       <div class="tagline">
@@ -25,7 +26,7 @@
 	<a href="/movie-genres/{{.}}">{{.}}</a>
 	{{ end }}
       </div>
-      <div style="padding-top: 50px;">
+      <div class="pt-50">
 	<table width="100%">
 	  {{ if .Starring }}
 	  <tr>
@@ -35,9 +36,10 @@
 	      <a href="/profiles/{{.PEID}}">{{.Name}}</a>
 	      {{ end }}
 	    </td>
-	    <td rowspan="3" width="100%" align="right">
-	      <div class="pie" style="--p:{{.Vote}}; display: flex; justify-content: center; align-items: center;">
-		<span style="font-size: large;">{{ .Vote }}%</span>
+	    <td rowspan="3" class="vote-cell">
+	      <div class="vote">
+		<svg viewBox="0 0 36 36" aria-hidden="true"><circle class="vote-track" cx="18" cy="18" r="15.9155"></circle><circle class="vote-value" cx="18" cy="18" r="15.9155" stroke-dasharray="{{.Vote}} 100"></circle></svg>
+		<span class="large">{{ .Vote }}%</span>
 	      </div>
 	    </td>
 	  </tr>
@@ -79,8 +81,8 @@
     </div>
   </div>
   {{ if .Cast }}
-  <h2 style="padding-left: 25px; padding-top: 25px;">Cast</h2>
-  <div style="display: flex; padding-left: 25px;">
+  <h2 class="pt-25 pl-25">Cast</h2>
+  <div class="flex pl-25">
     {{ range $i, $c := .Cast }}
     {{ if lt $i 5 }}
     <div class="card">
@@ -93,17 +95,17 @@
   </div>
   {{ end }}
   {{ if .Collection }}
-  <h2 style="padding-left: 25px; padding-top: 25px;">{{ .Collection.Name }}</h2>
-  <div style="display: flex; padding-left: 25px;">
+  <h2 class="pt-25 pl-25">{{ .Collection.Name }}</h2>
+  <div class="flex pl-25">
     {{ range .Other }}
-    <div style="padding: 10px;">
+    <div class="p-10">
       <div><a href="{{.|link}}"><img src="{{.|poster_small}}"></a></div>
-      <div style="padding-top: 10px; max-width: 154px;" class="movie-title">{{ .Title }}</div>
+      <div class="movie-title pt-10 w-154">{{ .Title }}</div>
     </div>
     {{ end }}
   </div>
   {{ end }}
-  <div style="padding-left: 25px;">
+  <div class="pl-25">
     <h2>External Links</h2>
     <a target="_blank" href="https://www.themoviedb.org/movie/{{ .Movie.TMID }}">TMDB</a>,
     <a target="_blank" href="https://www.imdb.com/title/{{ .Movie.IMID }}">IMDB</a>

@@ -93,14 +93,15 @@ func TestSecurityHeaders(t *testing.T) {
 	}
 	csp := rec.Header().Get("Content-Security-Policy")
 	for _, d := range []string{"frame-ancestors 'none'", "object-src 'none'", "base-uri 'none'",
-		"script-src 'self'", "connect-src 'self'"} {
+		"script-src 'self'", "style-src 'self'", "connect-src 'self'"} {
 		if !strings.Contains(csp, d) {
 			t.Errorf("CSP %q missing %q", csp, d)
 		}
 	}
-	// styles, images and media aren't restricted yet
-	if strings.Contains(csp, "default-src") || strings.Contains(csp, "style-src") {
-		t.Errorf("CSP unexpectedly restricts styles or everything: %q", csp)
+	// images and media come from other hosts
+	if strings.Contains(csp, "default-src") || strings.Contains(csp, "img-src") ||
+		strings.Contains(csp, "media-src") {
+		t.Errorf("CSP unexpectedly restricts images or media: %q", csp)
 	}
 }
 
@@ -120,7 +121,7 @@ func TestNoInlineScripts(t *testing.T) {
 	inline := regexp.MustCompile(`(?i)<script(\s[^>]*)?>\s*[^<\s]|\son[a-z]+\s*=\s*["']|javascript:`)
 	for _, fsys := range []fs.FS{resTemplates, resStatic} {
 		err := fs.WalkDir(fsys, ".", func(p string, d fs.DirEntry, err error) error {
-			if err != nil || d.IsDir() || strings.Contains(p, ".umd.") ||
+			if err != nil || d.IsDir() ||
 				!(strings.HasSuffix(p, ".html") || strings.HasSuffix(p, ".js")) {
 				return err
 			}
@@ -130,6 +131,31 @@ func TestNoInlineScripts(t *testing.T) {
 			}
 			if m := inline.Find(b); m != nil {
 				t.Errorf("%s: inline script %q", p, m)
+			}
+			return nil
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+// TestNoInlineStyles keeps the embedded UI working under style-src 'self':
+// no <style> blocks or style attributes (scripts may still set element.style).
+func TestNoInlineStyles(t *testing.T) {
+	inline := regexp.MustCompile(`(?i)<style[\s>]|\sstyle\s*=\s*["']`)
+	for _, fsys := range []fs.FS{resTemplates, resStatic} {
+		err := fs.WalkDir(fsys, ".", func(p string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() ||
+				!(strings.HasSuffix(p, ".html") || strings.HasSuffix(p, ".js")) {
+				return err
+			}
+			b, err := fs.ReadFile(fsys, p)
+			if err != nil {
+				return err
+			}
+			for _, m := range inline.FindAll(b, -1) {
+				t.Errorf("%s: inline style %q", p, m)
 			}
 			return nil
 		})
