@@ -10,17 +10,22 @@ body {
     line-height: 1.4;
 }
 
-a, a:visited, a:hover, a:active {
+a,
+a:visited,
+a:hover,
+a:active {
     color: inherit;
     text-decoration: underline;
     cursor: pointer;
 }
 
-.nodecor, a.nodecor:visited {
+.nodecor,
+a.nodecor:visited {
     text-decoration: none;
 }
 
 /* headings as in the Mac and Linux apps: a page title, then section headings */
+
 h1 {
     font-size: 1.7em;
     font-weight: 600;
@@ -43,36 +48,6 @@ h3 {
     margin: 1.2em 0 0.3em 0;
 }
 
-.heading {
-    text-transform: uppercase;
-    font-size: medium;
-    text-align: left;
-    font-weight: bold;
-}
-
-.takeout, a.takeout:visited {
-    font-size: small;
-    opacity: 0.5;
-    text-decoration: none;
-    cursor: pointer;
-    padding-right: 1em;
-}
-
-.circle {
-    background: grey;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-}
-
-.full-width {
-    width: 100%;
-}
-
 body {
     margin-bottom: 75px;
 }
@@ -91,113 +66,9 @@ body {
     background-color: inherit;
 }
 
-.middle {
-    /* top right bottom left */
-    margin: 0.5em 0.5em 0.5em 0.5em;
-    background-color: inherit;
-}
-
-.right {
-    /* top right bottom left */
-    margin: 0.5em 0.5em 0.5em auto;
-    background-color: inherit;
-}
-
-.separator {
-    flex-grow: 1;
-}
-
-.parent {
-    display: flex;
-    overflow: hidden;
-    align-items: center;
-    background-color: inherit;
-}
-
-.parent2 {
-    display: flex;
-    overflow: hidden;
-    flex-direction: column;
-    justify-content: space-between;
-    background-color: inherit;
-}
-
-.parent3 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: inherit;
-}
-
-.parent4 {
-    display: flex;
-    overflow: hidden;
-    align-items: center;
-    justify-content: space-between;
-    background-color: inherit;
-}
-
-.search-results {
-    font-size: small;
-    opacity: 0.5;
-}
-
-.search {
-    width: 75vw;
-    border: 3px solid #333;
-    background-color: #444;
-    border-radius: 5px 5px 5px 5px;
-    padding: 5px;
-    outline: none;
-}
-
-.clickable {
-    cursor: pointer;
-}
-
-.act-table {
-    width: 90%;
-}
-
-.act-row {
-    height: 33px;
-}
-
-.act-count {
-    text-align: right;
-    width: 20%;
-}
-
-.three-col-grid {
-    display: block;
-}
-
-.three-col-grid > * {
-    padding: 1rem;
-}
-
-@media (min-width:768px) {
-    .three-col-grid {
-        display: grid;
-        grid-auto-rows: 1fr;
-        grid-template-columns: 1fr 1fr 1fr;
-    }
-}
-
 tagline {
     font-style: italic;
     text-align: center;
-}
-
-.specs {
-    text-align: center;
-}
-
-.cred {
-    text-align: left;
-    vertical-align: top;
-    padding-right: 20px;
-    white-space: nowrap;
 }
 
 .card {
@@ -207,14 +78,6 @@ tagline {
     margin-left: 10px;
     margin-right: 4px;
     padding-bottom: 10px;
-}
-
-.person {
-    font-weight: bold;
-}
-
-.character {
-    font-weight: lighter;
 }
 
 /* sidebar: page links on the left, as in the Mac and Linux apps */
@@ -304,38 +167,12 @@ body {
     border-top: 1px solid #333;
 }
 
-.release-grid,
-.poster-grid {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.release-tile {
-    padding: 10px;
-    width: 110px;
-}
-
-.release-tile img {
-    border-radius: 10px;
-}
-
-.poster-tile {
-    margin: 1em;
-    width: 154px;
-    text-align: center;
-}
-
-.plain-list {
-    list-style: none;
-    padding-left: 0.5em;
-    line-height: 1.8;
-}
-
 .empty {
     opacity: 0.6;
 }
 
 /* phones: the sidebar becomes a scrolling row of links along the top */
+
 @media (max-width: 700px) {
     #sidebar {
         position: sticky;
@@ -376,16 +213,11 @@ body {
         padding: 0 8px;
     }
 }
+
 .np-message {
     padding: 6px 12px;
     font-size: small;
     background-color: #3a3a3a;
-}
-
-.episode-actions {
-    display: flex;
-    gap: 8px;
-    margin: 12px 0;
 }
 
 a.button,
@@ -404,57 +236,33 @@ a.button:hover {
     background-color: #333;
 }
 
-/* layout helpers for the templates (inline styles aren't allowed) */
+/* helpers for the templates (inline styles aren't allowed) */
 
 [hidden] {
     display: none !important;
 }
 
-.pointer { cursor: pointer; }
-.rounded { border-radius: 10px; }
-.flex { display: flex; }
-.float-left { float: left; }
-.clear { clear: both; }
-.center { text-align: center; }
-.large { font-size: large; }
-.pre-line { white-space: pre-line; }
-.nolist { list-style-type: none; }
-.hscroll { overflow-x: auto; overflow-y: hidden; white-space: nowrap; }
-.p-10 { padding: 10px; }
-.py-10 { padding-top: 10px; padding-bottom: 10px; }
-.pt-5 { padding-top: 5px; }
-.pt-10 { padding-top: 10px; }
-.pt-25 { padding-top: 25px; }
-.pt-50 { padding-top: 50px; }
-.pl-25 { padding-left: 25px; }
-.pr-25 { padding-right: 25px; }
-.pb-1em { padding-bottom: 1em; }
-.w-154 { max-width: 154px; }
-
-.tile-110 { padding: 10px; max-width: 110px; display: inline-block; }
-.tile-154 { padding: 10px; max-width: 154px; display: inline-block; }
-.tile-185 { padding: 10px; max-width: 185px; display: inline-block; }
-.tile-110.float-left { display: block; }
-
-.poster-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: left;
-    width: 100%;
-    text-align: center;
+.clear {
+    clear: both;
 }
 
-.poster-cell { margin: 1em; flex: 0; min-width: 154px; }
-.poster-title { max-width: 154px; text-overflow: ellipsis; }
-.boxed-table { border: 1px solid; border-spacing: 15px; }
+.pl-25 {
+    padding-left: 25px;
+}
+
+.pr-25 {
+    padding-right: 25px;
+}
 
 .chart-box {
-    border: 1px solid;
-    margin: 1em;
-    padding: 1em;
+    margin: 0 0 8px 0;
+    padding: 16px;
+    border: 1px solid #333;
+    border-radius: 8px;
 }
 
 /* movie and TV headers: the backdrop behind a dark gradient */
+
 .hero {
     position: relative;
     isolation: isolate;
@@ -478,6 +286,7 @@ a.button:hover {
 }
 
 /* TMDB vote as a ring */
+
 .vote {
     position: relative;
     display: flex;
@@ -498,10 +307,16 @@ a.button:hover {
     stroke-width: 3;
 }
 
-.vote-track { stroke: #444; }
-.vote-value { stroke: orange; }
+.vote-track {
+    stroke: #444;
+}
+
+.vote-value {
+    stroke: orange;
+}
 
 /* activity chart (charts.js) */
+
 .chart-box .chart {
     width: 100%;
 }
@@ -513,13 +328,33 @@ a.button:hover {
     max-height: 30vh;
 }
 
-.bars .grid { stroke: #3a3a3a; stroke-width: 1; }
-.bars .axis { fill: #a6a6a6; font-size: 11px; }
-.bars .axis.y { text-anchor: end; }
-.bars .axis.x { text-anchor: middle; }
-.bar-0 { fill: #3DDC84; }
-.bar-1 { fill: #f7f6e4; }
-.bar-2 { fill: #9BD0F5; }
+.bars .grid {
+    stroke: #3a3a3a; stroke-width: 1;
+}
+
+.bars .axis {
+    fill: #a6a6a6; font-size: 11px;
+}
+
+.bars .axis.y {
+    text-anchor: end;
+}
+
+.bars .axis.x {
+    text-anchor: middle;
+}
+
+.bar-0 {
+    fill: #3DDC84;
+}
+
+.bar-1 {
+    fill: #f7f6e4;
+}
+
+.bar-2 {
+    fill: #9BD0F5;
+}
 
 .legend {
     display: flex;
@@ -537,50 +372,32 @@ a.button:hover {
     background-color: currentColor;
 }
 
-.legend-item.bar-0::before { background-color: #3DDC84; }
-.legend-item.bar-1::before { background-color: #f7f6e4; }
-.legend-item.bar-2::before { background-color: #9BD0F5; }
-
-/* let flex rows (poster beside details) shrink to the window */
-.flex > * {
-    min-width: 0;
+.legend-item.bar-0::before {
+    background-color: #3DDC84;
 }
 
-.hero > .flex > :last-child {
-    flex: 1;
+.legend-item.bar-1::before {
+    background-color: #f7f6e4;
+}
+
+.legend-item.bar-2::before {
+    background-color: #9BD0F5;
 }
 
 #main img {
     max-width: 100%;
 }
 
-/* credits: keep the heading on one line, wrap the names */
-.cred + .cred {
-    white-space: normal;
-}
+/* phones: narrower side padding */
 
-.vote-cell {
-    width: 1%;
-    vertical-align: top;
-}
-
-/* phones: the poster above the details */
 @media (max-width: 700px) {
-    .hero > .flex {
-        flex-direction: column;
+    .pl-25 {
+        padding-left: 8px;
     }
 
-    .hero > .flex > div {
-        padding-left: 12px;
-        padding-right: 12px;
+    .pr-25 {
+        padding-right: 8px;
     }
-
-    .cred {
-        white-space: normal;
-    }
-
-    .pl-25 { padding-left: 8px; }
-    .pr-25 { padding-right: 8px; }
 }
 
 /* ---- components shared by the pages (templates/parts.html), after the
@@ -599,6 +416,7 @@ a.button:hover {
 }
 
 /* a page header: cover (or photo) beside the title, details and actions */
+
 .page-head {
     display: flex;
     align-items: flex-end;
@@ -614,10 +432,6 @@ a.button:hover {
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     background-color: #2c2c2c;
-}
-
-.page-head .cover.round {
-    border-radius: 50%;
 }
 
 .page-head h1 {
@@ -639,6 +453,7 @@ a.button:hover {
 }
 
 /* actions under a header: Play, Shuffle, Radio, ... */
+
 .actions {
     display: flex;
     flex-wrap: wrap;
@@ -673,6 +488,7 @@ a.button[aria-pressed="true"] {
 }
 
 /* a section heading with an optional "See all" at the end */
+
 .section-head {
     display: flex;
     align-items: baseline;
@@ -693,6 +509,7 @@ a.button[aria-pressed="true"] {
 }
 
 /* tiles: a grid that wraps, or a row that scrolls */
+
 .tiles {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -786,6 +603,7 @@ a.tile:visited {
 }
 
 /* track rows: number or cover, title and a second line, add to queue */
+
 .tracks {
     list-style: none;
     margin: 0;
@@ -857,6 +675,7 @@ a.tile:visited {
 }
 
 /* people and artists in a list: round photo or initial, name, detail */
+
 .rows {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -992,6 +811,7 @@ a.button[aria-pressed="true"] svg.icon {
 }
 
 /* a podcast episode: art (often wide) beside the details */
+
 .episode-head {
     display: flex;
     gap: 28px;
@@ -1162,6 +982,7 @@ button.mini-track {
 
 /* Now Playing: cover, title, seek bar and controls beside the queue, over
    the artist's photo, faded */
+
 .nowplaying {
     position: relative;
     isolation: isolate;
@@ -1307,6 +1128,7 @@ li.empty {
 }
 
 /* Sign out: a POST form in the sidebar, looking like the links */
+
 .side-form {
     margin: 0;
 }
@@ -1332,4 +1154,166 @@ li.empty {
         flex: none;
         white-space: nowrap;
     }
+}
+
+/* Activity: the period as pills, then artists, albums and tracks */
+
+.pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.pills a,
+.pills a:visited {
+    padding: 4px 12px;
+    border: 1px solid #444;
+    border-radius: 999px;
+    font-size: 0.87em;
+    text-decoration: none;
+}
+
+.pills a:hover {
+    background-color: #2c2c2c;
+}
+
+.pills a[aria-current="page"] {
+    border-color: orange;
+    background-color: #3a3a3a;
+}
+
+.columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0 24px;
+}
+
+.columns .section-head {
+    margin-top: 0.8em;
+}
+
+.track .count {
+    flex: none;
+    min-width: 2em;
+    text-align: right;
+    opacity: 0.7;
+    font-variant-numeric: tabular-nums;
+}
+
+a.track,
+a.track:visited {
+    color: inherit;
+}
+
+/* movie, show and episode headers: poster beside the details, over the
+   backdrop */
+
+.video-hero {
+    margin: 0 -16px;
+    padding: 28px 16px;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+}
+
+.video-head {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+}
+
+.video-head .poster {
+    flex: none;
+    width: 220px;
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+.video-head .still {
+    flex: none;
+    width: 360px;
+    max-width: 45%;
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+.video-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.video-info h1 {
+    margin-top: 0;
+}
+
+.video-info .tagline {
+    margin: -4px 0 10px 0;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+.video-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+}
+
+.video-meta .vote {
+    width: 52px;
+    height: 52px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.video-info .overview {
+    max-width: 70ch;
+    margin: 14px 0;
+}
+
+.credits {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 16px;
+    margin: 12px 0;
+}
+
+.credits dt {
+    font-weight: 600;
+    opacity: 0.7;
+}
+
+.credits dd {
+    margin: 0;
+}
+
+@media (max-width: 700px) {
+    .video-head {
+        flex-direction: column;
+    }
+
+    .video-head .poster {
+        width: 160px;
+    }
+
+    .video-head .still {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .video-hero {
+        margin: 0 -8px;
+        padding: 16px 8px;
+    }
+}
+
+/* a movie or show's rating, as a small box */
+
+.rating {
+    border: 1px solid rgba(255,255,255,0.6);
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    padding: 0.06em 4px 0.15em 4px;
+    line-height: 1;
+    border-radius: 2px;
 }

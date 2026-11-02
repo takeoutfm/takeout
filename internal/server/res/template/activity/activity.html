@@ -1,64 +1,68 @@
 <div>
   <h1>Activity</h1>
-  <div class="center">
-    <a href="/activity/recent" class="takeout">Recent</a>
-    <a href="/activity/lastweek" class="takeout">Last Week</a>
-    <a href="/activity/lastmonth" class="takeout">Last Month</a>
-    <a href="/activity/lastyear" class="takeout">Last Year</a>
-    <a href="/activity/year" class="takeout">This Year</a>
-    <a href="/activity/month" class="takeout">This Month</a>
-    <a href="/activity/week" class="takeout">This Week</a>
-    <a href="/activity/yesterday" class="takeout">Yesterday</a>
-    <a href="/activity/today" class="takeout">Today</a>
-  </div>
+  <nav class="pills" aria-label="Period">
+    {{ $i := .Interval }}
+    <a href="/activity/recent"{{ if eq $i "recent" }} aria-current="page"{{ end }}>Recent</a>
+    <a href="/activity/today"{{ if eq $i "today" }} aria-current="page"{{ end }}>Today</a>
+    <a href="/activity/yesterday"{{ if eq $i "yesterday" }} aria-current="page"{{ end }}>Yesterday</a>
+    <a href="/activity/week"{{ if eq $i "week" }} aria-current="page"{{ end }}>This Week</a>
+    <a href="/activity/lastweek"{{ if eq $i "lastweek" }} aria-current="page"{{ end }}>Last Week</a>
+    <a href="/activity/month"{{ if eq $i "month" }} aria-current="page"{{ end }}>This Month</a>
+    <a href="/activity/lastmonth"{{ if eq $i "lastmonth" }} aria-current="page"{{ end }}>Last Month</a>
+    <a href="/activity/year"{{ if eq $i "year" }} aria-current="page"{{ end }}>This Year</a>
+    <a href="/activity/lastyear"{{ if eq $i "lastyear" }} aria-current="page"{{ end }}>Last Year</a>
+  </nav>
+
   <div class="chart-box">
     <div class="chart" data-chart="{{.|chart}}"></div>
   </div>
-  <div class="three-col-grid">
-    <div>
-      <h2>Artists ({{ .ArtistCount }})</h2>
-      <table class="act-table boxed-table">
+
+  <p class="muted">
+    {{ .ListenCount }} {{ if eq .ListenCount 1 }}listen{{ else }}listens{{ end }} &middot;
+    {{ .TrackCount }} tracks &middot; {{ .ReleaseCount }} albums &middot; {{ .ArtistCount }} artists
+  </p>
+
+  <div class="columns">
+    <section>
+      <div class="section-head"><h2>Artists</h2></div>
+      <ol class="tracks">
 	{{ range .Artists }}
-	<tr class="act-row">
-	  <td><a href="{{.Artist|link}}">{{ .Artist.Name }}</a></td>
-	  <td class="act-count">{{ .Count }}</td>
-	</tr>
-	{{ end }}
-      </table>
-    </div>
-    <div>
-      <h2>Releases ({{ .ReleaseCount }})</h2>
-      <table class="act-table boxed-table">
+	<li><a class="track nodecor" href="{{.Artist|link}}">
+	  <div class="text"><div class="title">{{ .Artist.Name }}</div></div>
+	  <span class="count">{{ .Count }}</span>
+	</a></li>
+	{{ else }}<li class="empty">None.</li>{{ end }}
+      </ol>
+    </section>
+    <section>
+      <div class="section-head"><h2>Albums</h2></div>
+      <ol class="tracks">
 	{{ range .Releases }}
-	<tr class="act-row">
-	  <td class="np-cover">
-	    <img class="mini-cover" src="{{.Release|cover}}"/>
-	  </td>
-	  <td>
-	    <div><a href="{{.Release|link}}">{{ .Release.Name }}</a></div>
-	    <div class="artist-subtitle">{{ .Release.Artist }}</div>
-	  </td>
-	  <td class="act-count">{{ .Count }}</td>
-	</tr>
-	{{ end }}
-      </table>
-    </div>
-    <div>
-      <h2>Tracks ({{ .TrackCount }}) &#8226 Listens ({{ .ListenCount }})</h2>
-      <table class="act-table boxed-table">
+	<li><a class="track nodecor" href="{{.Release|link}}">
+	  <img class="thumb" src="{{.Release|cover}}" alt="" loading="lazy">
+	  <div class="text">
+	    <div class="title">{{ .Release.Name }}</div>
+	    <div class="sub">{{ .Release.Artist }}</div>
+	  </div>
+	  <span class="count">{{ .Count }}</span>
+	</a></li>
+	{{ else }}<li class="empty">None.</li>{{ end }}
+      </ol>
+    </section>
+    <section>
+      <div class="section-head"><h2>Tracks</h2></div>
+      <ol class="tracks">
 	{{ range .Tracks }}
-	<tr class="act-row">
-	  <td class="np-cover">
-	    <img class="mini-cover" src="{{.Track|cover}}"/>
-	  </td>
-	  <td>
-	    <div>{{ .Track.Title }}</div>
-	    <div class="artist-subtitle">{{ .Track.Artist }}</div>
-	  </td>
-	  <td class="act-count">{{ .Count }}</td>
-	</tr>
-	{{ end }}
-      </table>
-    </div>
+	<li class="track" data-playlist="add-ref" data-ref="{{.Track|ref}}" title="Play">
+	  <img class="thumb" src="{{.Track|cover}}" alt="" loading="lazy">
+	  <div class="text">
+	    <div class="title">{{ .Track.Title }}</div>
+	    <div class="sub">{{ .Track.Artist }}</div>
+	  </div>
+	  <span class="count">{{ .Count }}</span>
+	</li>
+	{{ else }}<li class="empty">None.</li>{{ end }}
+      </ol>
+    </section>
   </div>
 </div>

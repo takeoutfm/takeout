@@ -1,78 +1,39 @@
-<div class="hero">
+<div class="hero video-hero">
   <img class="hero-bg" src="{{.Series|backdrop}}" alt="">
-  <div class="flex pt-10">
-    <div class="pl-25 pr-25">
-      <img src="{{.Series|poster}}">
-    </div>
-    <div class="pr-25">
-      <div class="py-10">
-	<h1>{{ .Series.Name }}</h1>
-      </div>
-      <div class="tagline">
-	{{ .Series.Tagline }}
-      </div>
-      <p></p>
-      <div class="specs">
-	{{ if .Series.Rating }}
-	<span class="rating">{{.Series.Rating}}</span>
-	{{ else }}
-	<span class="rating">NR</span>
+  <div class="video-head">
+    <img class="poster" src="{{.Series|poster}}" alt="">
+    <div class="video-info">
+      <h1>{{ .Series.Name }}</h1>
+      {{ if .Series.Tagline }}<p class="tagline">{{ .Series.Tagline }}</p>{{ end }}
+      <div class="video-meta">
+	{{ if .Vote }}
+	<div class="vote" title="TMDB rating">
+	  <svg viewBox="0 0 36 36" aria-hidden="true"><circle class="vote-track" cx="18" cy="18" r="15.9155"></circle><circle class="vote-value" cx="18" cy="18" r="15.9155" stroke-dasharray="{{.Vote}} 100"></circle></svg>
+	  <span>{{ .Vote }}%</span>
+	</div>
 	{{ end }}
-	{{.Series.Date.Year}}
-	{{ if ne .Series.Date.Year .Series.EndDate.Year }}
-	- {{.Series.EndDate.Year}}
-	{{ end }}
-	&bull;
-	{{ range .Genres }}
-	<a href="/movie-genres/{{.}}">{{.}}</a>
-	{{ end }}
+	<span class="rating">{{ if .Series.Rating }}{{ .Series.Rating }}{{ else }}NR{{ end }}</span>
+	<span>{{ .Series.Date.Year }}{{ if ne .Series.Date.Year .Series.EndDate.Year }}&ndash;{{ .Series.EndDate.Year }}{{ end }}{{ if .Genres }} &middot; {{ range $i, $g := .Genres }}{{ if $i }}, {{ end }}<a href="/movie-genres/{{ $g }}">{{ $g }}</a>{{ end }}{{ end }}</span>
       </div>
-      <div class="pt-50">
-	<table width="100%">
-	  {{ if .Starring }}
-	  <tr>
-	    <td class="cred"><span class="heading">Starring</span></td>
-	    <td class="cred">
-	      {{ range .Starring }}
-	      <a href="/profiles/{{.PEID}}">{{.Name}}</a>
-	      {{ end }}
-	    </td>
-	    <td rowspan="3" class="vote-cell">
-	      <div class="vote">
-		<svg viewBox="0 0 36 36" aria-hidden="true"><circle class="vote-track" cx="18" cy="18" r="15.9155"></circle><circle class="vote-value" cx="18" cy="18" r="15.9155" stroke-dasharray="{{.Vote}} 100"></circle></svg>
-		<span class="large">{{ .Vote }}%</span>
-	      </div>
-	    </td>
-	  </tr>
-	  {{ end }}
-	  {{ if .Directing }}
-	  <tr>
-	    <td class="cred"><span class="heading">Directing</span></td>
-	    <td class="cred">
-	      {{ range .Directing }}
-	      <a href="/profiles/{{.PEID}}">{{.Name}}</a>
-	      {{ end }}
-	    </td>
-	  </tr>
-	  {{ end }}
-	  {{ if .Writing }}
-	  <tr>
-	    <td class="cred"><span class="heading">Writing</span></td>
-	    <td class="cred">
-	      {{ range .Writing }}
-	      <a href="/profiles/{{.PEID}}">{{.Name}}</a>
-	      {{ end }}
-	    </td>
-	  </tr>
-	  {{ end }}
-	</table>
+      {{ if .Series.Overview }}<p class="overview">{{ .Series.Overview }}</p>{{ end }}
+      {{ if or .Starring .Directing .Writing }}
+      <dl class="credits">
+	{{ if .Starring }}<dt>Starring</dt><dd>{{ range $i, $p := .Starring }}{{ if $i }}, {{ end }}<a href="/profiles/{{ $p.PEID }}">{{ $p.Name }}</a>{{ end }}</dd>{{ end }}
+	{{ if .Directing }}<dt>Directing</dt><dd>{{ range $i, $p := .Directing }}{{ if $i }}, {{ end }}<a href="/profiles/{{ $p.PEID }}">{{ $p.Name }}</a>{{ end }}</dd>{{ end }}
+	{{ if .Writing }}<dt>Writing</dt><dd>{{ range $i, $p := .Writing }}{{ if $i }}, {{ end }}<a href="/profiles/{{ $p.PEID }}">{{ $p.Name }}</a>{{ end }}</dd>{{ end }}
+      </dl>
+      {{ end }}
+      <div class="actions">
+	<a class="button" href="#" data-action="favorite" data-url="/api/favorite/shows/{{ .Series.TVID }}"
+	   aria-pressed="{{ .IsFavorite }}">
+	  <svg class="icon" aria-hidden="true"><use href="#i-favorites"></use></svg>
+	  <span class="label">{{ if .IsFavorite }}Unfavorite{{ else }}Favorite{{ end }}</span>
+	</a>
       </div>
-      <h2>Overview</h2>
-      <div>
-	{{ .Series.Overview }}
-      </div>
+      <p class="muted small">Watch it in the TakeoutFM app.</p>
     </div>
   </div>
+</div>
   <div class="pl-25 pr-25">
   {{ if .Episodes }}
   {{ $season := -1 }}
@@ -98,5 +59,4 @@
   <div class="links">
     <a target="_blank" rel="noopener" href="https://www.themoviedb.org/tv/{{ .Series.TVID }}">TMDB</a>
   </div>
-</div>
 </div>

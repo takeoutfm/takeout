@@ -120,7 +120,7 @@ func TestPageSection(t *testing.T) {
 	if !strings.Contains(body, `data-section="activity" aria-current="page"`) {
 		t.Error("activity not current in the sidebar")
 	}
-	if strings.Count(body, `aria-current="page"`) != 1 {
+	if n := len(regexp.MustCompile(`<a class="side"[^>]*aria-current="page"`).FindAllString(body, -1)); n != 1 {
 		t.Error("expected exactly one current sidebar item")
 	}
 	w = getPage(h, "/favorites", map[string]string{HeaderFragment: "1"})
