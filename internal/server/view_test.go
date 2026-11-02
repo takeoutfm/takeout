@@ -122,14 +122,6 @@ func TestMovieView(t *testing.T) {
 	}
 }
 
-func TestWatchView(t *testing.T) {
-	ctx := NewTestContext(t)
-	view := WatchView(ctx, model.Movie{Title: "test title"})
-	if view == nil {
-		t.Fatal("expect view")
-	}
-}
-
 func TestProfileView(t *testing.T) {
 	ctx := NewTestContext(t)
 	view := ProfileView(ctx, model.Person{Name: "test name"})

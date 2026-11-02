@@ -25,7 +25,6 @@ import (
 
 	"io/fs"
 	"net/url"
-	"strings"
 
 	"takeoutfm.dev/takeout/internal/config"
 	"takeoutfm.dev/takeout/internal/film"
@@ -61,7 +60,6 @@ func getTemplates(config *config.Config) *template.Template {
 
 func doFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"join":  strings.Join,
 		"ymd":   date.YMD,
 		"asset": staticAssets.URL,
 		// plainText returns a plain string (not template.HTML) so the
@@ -83,8 +81,6 @@ func doFuncMap() template.FuncMap {
 				link = fmt.Sprintf("/releases/%d", o.(model.Release).ID)
 			case model.Artist:
 				link = fmt.Sprintf("/artists/%d", o.(model.Artist).ID)
-			case model.Track:
-				link = locateTrack(o.(model.Track))
 			case model.Movie:
 				link = fmt.Sprintf("/movies/%d", o.(model.Movie).ID)
 			case model.Series:
@@ -106,14 +102,6 @@ func doFuncMap() template.FuncMap {
 			}
 			return link
 		},
-		"link_camel": func(o any) string {
-			var link string
-			switch o.(type) {
-			case model.Release:
-				link = fmt.Sprintf("https://camelcamelcamel.com/product/%s", o.(model.Release).Asin)
-			}
-			return link
-		},
 		"link_mbz": func(o any) string {
 			var link string
 			switch o.(type) {
@@ -123,38 +111,6 @@ func doFuncMap() template.FuncMap {
 				link = fmt.Sprintf("https://musicbrainz.org/artist/%s", o.(model.Artist).ARID)
 			}
 			return link
-		},
-		"link_google": func(o any) string {
-			var link string
-			switch o.(type) {
-			case model.Release:
-				link = fmt.Sprintf("https://www.google.com/search?q=%s",
-					url.QueryEscape(
-						strings.Join([]string{o.(model.Release).Name, "by", o.(model.Release).Artist}, " ")))
-			}
-			return link
-		},
-		"link_wiki": func(o any) string {
-			var link string
-			switch o.(type) {
-			case model.Release:
-				link = fmt.Sprintf("https://en.wikipedia.org/w/index.php?title=Special:Search&search=%s",
-					url.QueryEscape(
-						strings.Join([]string{o.(model.Release).Name, "by", o.(model.Release).Artist}, " ")))
-			}
-			return link
-		},
-		"url": func(o any) string {
-			var loc string
-			switch o.(type) {
-			case model.Track:
-				loc = locateTrack(o.(model.Track))
-			case model.Movie:
-				loc = locateMovie(o.(model.Movie))
-			case model.Episode:
-				loc = locateEpisode(o.(model.Episode))
-			}
-			return loc
 		},
 		"popular": func(o any) string {
 			var link string
@@ -197,9 +153,6 @@ func doFuncMap() template.FuncMap {
 				ref = fmt.Sprintf("/music/playlists/%d", o.(view.Playlist).ID)
 			}
 			return ref
-		},
-		"home": func() string {
-			return "/"
 		},
 		"runtime": func(m model.Movie) string {
 			hours := m.Runtime / 60
@@ -281,14 +234,6 @@ func doFuncMap() template.FuncMap {
 			switch o.(type) {
 			case model.TVEpisode:
 				img = tv.EpisodeStillSmall(o.(model.TVEpisode))
-			}
-			return img
-		},
-		"still_large": func(o any) string {
-			var img string
-			switch o.(type) {
-			case model.TVEpisode:
-				img = tv.EpisodeStillLarge(o.(model.TVEpisode))
 			}
 			return img
 		},

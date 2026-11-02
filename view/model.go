@@ -171,11 +171,6 @@ type Keyword struct {
 	Movies []model.Movie
 }
 
-type Watch struct {
-	Movie    model.Movie
-	Location string
-}
-
 type TVList struct {
 	Series   []model.TVSeries
 	Episodes []model.TVEpisode

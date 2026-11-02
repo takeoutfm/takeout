@@ -287,13 +287,6 @@ func KeywordView(ctx Context, name string) *Keyword {
 	return view
 }
 
-func WatchView(ctx Context, m model.Movie) *Watch {
-	view := &Watch{}
-	view.Movie = m
-	view.Location = ctx.LocateMovie(m)
-	return view
-}
-
 func TVListView(ctx Context) *TVList {
 	tv := ctx.TV()
 	view := &TVList{}
