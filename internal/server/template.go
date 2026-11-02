@@ -37,21 +37,12 @@ import (
 	"takeoutfm.dev/takeout/internal/podcast"
 	"takeoutfm.dev/takeout/internal/tv"
 	"takeoutfm.dev/takeout/lib/date"
-	"takeoutfm.dev/takeout/lib/log"
 	"takeoutfm.dev/takeout/model"
 	"takeoutfm.dev/takeout/view"
 )
 
 //go:embed res/static
 var resStatic embed.FS
-
-func mountResFS(resFS embed.FS) http.FileSystem {
-	fsys, err := fs.Sub(resFS, "res")
-	if err != nil {
-		log.Panicln(err)
-	}
-	return http.FS(fsys)
-}
 
 //go:embed res/template
 var resTemplates embed.FS
@@ -73,8 +64,9 @@ func getTemplates(config *config.Config) *template.Template {
 
 func doFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"join": strings.Join,
-		"ymd":  date.YMD,
+		"join":  strings.Join,
+		"ymd":   date.YMD,
+		"asset": staticAssets.URL,
 		// plainText returns a plain string (not template.HTML) so the
 		// template engine escapes it. Never return template.HTML for
 		// content from feeds or other third parties.

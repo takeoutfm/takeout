@@ -216,11 +216,6 @@ func Serve(c context.Context, config *config.Config) error {
 		progress: progress,
 		template: getTemplates(config),
 	}
-	resFileServer := http.FileServer(mountResFS(resStatic))
-	staticHandler := func(w http.ResponseWriter, r *http.Request) {
-		resFileServer.ServeHTTP(w, r)
-	}
-
 	mux := http.NewServeMux()
 
 	aliasHandler := func(w http.ResponseWriter, r *http.Request) {
@@ -240,7 +235,7 @@ func Serve(c context.Context, config *config.Config) error {
 		}
 	}
 
-	mux.Handle("GET /static/", http.HandlerFunc(staticHandler))
+	mux.Handle("GET /static/", staticAssets)
 	mux.Handle("GET /", accessTokenAuthHandler(ctx, viewHandler))
 	mux.Handle("GET /v", accessTokenAuthHandler(ctx, viewHandler))
 
