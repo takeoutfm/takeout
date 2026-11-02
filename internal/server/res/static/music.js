@@ -187,12 +187,19 @@ Takeout.music = (function() {
 	    });
     };
 
+    // escape text from tracks before it goes into HTML
+    const esc = function(s) {
+	return String(s ?? "").replace(/[&<>"']/g, c => ({
+	    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+	})[c]);
+    };
+
     const updatePlaylist = function() {
 	let e = document.getElementById("playlist");
 	let index = playIndex;
-	let html = '<a onclick="playResume();"><h2>Playlist</h2></a>';
-	html = html.concat('<img class="np-control" src="/static/shuffle-white-24dp.svg" onclick="doShuffle();">');
-	html = html.concat('<img class="np-control" src="/static/clear-white-24dp.svg" onclick="doClear();">');
+	let html = '<a data-action="resume"><h2>Playlist</h2></a>';
+	html = html.concat('<img class="np-control" src="/static/shuffle-white-24dp.svg" data-action="shuffle">');
+	html = html.concat('<img class="np-control" src="/static/clear-white-24dp.svg" data-action="clear">');
 	let i = 0;
 	playlist.forEach(t => {
 	    html = html.concat(
@@ -200,22 +207,41 @@ Takeout.music = (function() {
 		    '<div class="parent playing">' :
 		    '<div class="parent">',
 		'<div>',
-		'<img onclick="playEntry(' + i + ');" class="np-cover clickable" src="', t["image"], '">',
+		'<img data-action="entry" data-index="' + i + '" class="np-cover clickable" src="', esc(t["image"]), '">',
 		'</div>',
-		'<div class="left clickable" onclick="playEntry(' + i + ');">',
+		'<div class="left clickable" data-action="entry" data-index="' + i + '">',
 		'<div class="parent2">',
-		'<div class="track-title">', t["title"], '</div>',
-		'<div class="track-artist">', t["creator"] + ' ~ ' + t['album'], '</div>',
+		'<div class="track-title">', esc(t["title"]), '</div>',
+		'<div class="track-artist">', esc(t["creator"] + ' ~ ' + t['album']), '</div>',
 		'</div>',
 		'</div>',
 		'<div class="separator"></div>',
 		'<div class="right">',
-		'<img class="np-control clickable" src="/static/clear-white-24dp.svg" onclick="remove('+i+');">',
+		'<img class="np-control clickable" src="/static/clear-white-24dp.svg" data-action="remove" data-index="' + i + '">',
 		'</div>',
 		'</div>');
 	    i++;
 	});
 	e.innerHTML = html;
+    };
+
+    // handles clicks on elements with data-action, here and in the page
+    const onAction = function(event) {
+	const e = event.target.closest("[data-action]");
+	if (e == null) {
+	    return;
+	}
+	const i = parseInt(e.getAttribute("data-index"));
+	switch (e.getAttribute("data-action")) {
+	case "toggle": toggle(); break;
+	case "resume": playResume(); break;
+	case "shuffle": shuffle(); break;
+	case "clear": clear(); break;
+	case "entry": playEntry(i); break;
+	case "remove": remove(i); break;
+	default: return;
+	}
+	event.preventDefault();
     };
 
     const updateControls = function() {
@@ -229,10 +255,10 @@ Takeout.music = (function() {
 
     const updateNowPlaying = function(track) {
 	document.getElementsByName("np-artist").forEach(e => {
-	    e.innerHTML = track["creator"] || "";
+	    e.textContent = track["creator"] || "";
 	});
 	document.getElementsByName("np-title").forEach(e => {
-	    e.innerHTML = track["title"] || "";
+	    e.textContent = track["title"] || "";
 	});
 	document.getElementsByName("np-cover").forEach(e => {
 	    e.setAttribute("src", track["image"] || "");
@@ -697,6 +723,7 @@ Takeout.music = (function() {
 	};
 
 	window.onload = function() {
+	    document.addEventListener("click", onAction);
 	    checkLinks();
 	    checkCharts();
 	    registerEvents();
@@ -731,38 +758,3 @@ Takeout.music = (function() {
 })();
 
 Takeout.music.init();
-
-function toggle() {
-    Takeout.music.toggle();
-    return false;
-}
-
-function playNext() {
-    Takeout.music.playNext();
-    return false;
-}
-
-function playResume() {
-    Takeout.music.playResume();
-    return false;
-}
-
-function playEntry(i) {
-    Takeout.music.playEntry(i);
-    return false;
-}
-
-function remove(i) {
-    Takeout.music.remove(i);
-    return false;
-}
-
-function doClear() {
-    Takeout.music.clear();
-    return false;
-}
-
-function doShuffle() {
-    Takeout.music.shuffle();
-    return false;
-}

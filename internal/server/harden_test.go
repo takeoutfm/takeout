@@ -19,8 +19,10 @@ package server
 
 import (
 	"io"
+	"io/fs"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -90,14 +92,15 @@ func TestSecurityHeaders(t *testing.T) {
 		}
 	}
 	csp := rec.Header().Get("Content-Security-Policy")
-	for _, d := range []string{"frame-ancestors 'none'", "object-src 'none'", "base-uri 'none'"} {
+	for _, d := range []string{"frame-ancestors 'none'", "object-src 'none'", "base-uri 'none'",
+		"script-src 'self'", "connect-src 'self'"} {
 		if !strings.Contains(csp, d) {
 			t.Errorf("CSP %q missing %q", csp, d)
 		}
 	}
-	// must not restrict scripts: the bundled UI uses inline handlers
-	if strings.Contains(csp, "script-src") || strings.Contains(csp, "default-src") {
-		t.Errorf("CSP unexpectedly restricts scripts: %q", csp)
+	// styles, images and media aren't restricted yet
+	if strings.Contains(csp, "default-src") || strings.Contains(csp, "style-src") {
+		t.Errorf("CSP unexpectedly restricts styles or everything: %q", csp)
 	}
 }
 
@@ -108,5 +111,30 @@ func TestNewHTTPServerTimeouts(t *testing.T) {
 	}
 	if s.WriteTimeout != 0 {
 		t.Fatal("WriteTimeout must stay unset so media streaming isn't cut off")
+	}
+}
+
+// TestNoInlineScripts keeps the embedded UI working under script-src 'self':
+// no inline <script> blocks, on* handler attributes or javascript: URLs.
+func TestNoInlineScripts(t *testing.T) {
+	inline := regexp.MustCompile(`(?i)<script(\s[^>]*)?>\s*[^<\s]|\son[a-z]+\s*=\s*["']|javascript:`)
+	for _, fsys := range []fs.FS{resTemplates, resStatic} {
+		err := fs.WalkDir(fsys, ".", func(p string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() || strings.Contains(p, ".umd.") ||
+				!(strings.HasSuffix(p, ".html") || strings.HasSuffix(p, ".js")) {
+				return err
+			}
+			b, err := fs.ReadFile(fsys, p)
+			if err != nil {
+				return err
+			}
+			if m := inline.Find(b); m != nil {
+				t.Errorf("%s: inline script %q", p, m)
+			}
+			return nil
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 }

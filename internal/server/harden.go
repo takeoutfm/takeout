@@ -44,10 +44,9 @@ func limitBody(next http.Handler) http.Handler {
 
 // securityHeaders adds response headers that don't change how the UI works.
 //
-// The Content-Security-Policy deliberately only uses directives that don't
-// restrict scripts or styles: the bundled UI builds inline onclick handlers in
-// music.js, so a script-src policy would break it. Once those are moved to
-// addEventListener a "script-src 'self'" can be added as a second layer.
+// The Content-Security-Policy allows only the server's own scripts (no inline
+// scripts or handlers) and fetches. Styles aren't restricted yet: the
+// templates still use inline style attributes.
 func securityHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h := w.Header()
@@ -57,7 +56,8 @@ func securityHeaders(next http.Handler) http.Handler {
 		// them to other sites through the Referer header
 		h.Set("Referrer-Policy", "no-referrer")
 		h.Set("Content-Security-Policy",
-			"base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'")
+			"base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; "+
+				"script-src 'self'; connect-src 'self'")
 		next.ServeHTTP(w, r)
 	})
 }
