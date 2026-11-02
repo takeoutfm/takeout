@@ -208,3 +208,160 @@ tagline {
 .character {
     font-weight: lighter;
 }
+
+/* sidebar: page links on the left, as in the Mac and Linux apps */
+
+:root {
+    --side-width: 210px;
+}
+
+body {
+    margin-top: 0;
+}
+
+.icon-sprite {
+    display: none;
+}
+
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--side-width);
+    box-sizing: border-box;
+    padding: 12px 8px 96px 8px;
+    overflow-y: auto;
+    background-color: #1b1b1b;
+    border-right: 1px solid #333;
+}
+
+#top {
+    margin-left: var(--side-width);
+    padding: 0 16px;
+}
+
+.side-search input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 10px;
+    border: 1px solid #3a3a3a;
+    border-radius: 6px;
+    background-color: #2a2a2a;
+    font-size: 14px;
+}
+
+.side-section {
+    margin: 18px 8px 4px 8px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    opacity: 0.5;
+}
+
+#sidebar a.side,
+#sidebar a.side:visited {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    margin-top: 2px;
+    border-radius: 6px;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+#sidebar a.side svg {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    opacity: 0.8;
+}
+
+#sidebar a.side:hover {
+    background-color: #2a2a2a;
+}
+
+#sidebar a.side[aria-current="page"] {
+    background-color: #3a3a3a;
+}
+
+.footer {
+    z-index: 10;
+    background-color: #222;
+    border-top: 1px solid #333;
+}
+
+.release-grid,
+.poster-grid {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.release-tile {
+    padding: 10px;
+    width: 110px;
+}
+
+.release-tile img {
+    border-radius: 10px;
+}
+
+.poster-tile {
+    margin: 1em;
+    width: 154px;
+    text-align: center;
+}
+
+.plain-list {
+    list-style: none;
+    padding-left: 0.5em;
+    line-height: 1.8;
+}
+
+.empty {
+    opacity: 0.6;
+}
+
+/* phones: the sidebar becomes a scrolling row of links along the top */
+@media (max-width: 700px) {
+    #sidebar {
+        position: sticky;
+        z-index: 5;
+        bottom: auto;
+        width: auto;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border-right: 0;
+        border-bottom: 1px solid #333;
+    }
+
+    .side-group {
+        display: contents;
+    }
+
+    .side-section {
+        display: none;
+    }
+
+    .side-search {
+        flex: 0 0 140px;
+    }
+
+    #sidebar a.side,
+    #sidebar a.side:visited {
+        flex: none;
+        margin-top: 0;
+        white-space: nowrap;
+    }
+
+    #top {
+        margin-left: 0;
+        padding: 0 8px;
+    }
+}

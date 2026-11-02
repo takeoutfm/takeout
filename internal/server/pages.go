@@ -46,62 +46,79 @@ const (
 	minGzipSize = 1024
 )
 
-// page renders one web UI page from its view. build returns ErrNotFound for
-// a bad or unknown id.
+// page renders one web UI page from its view. section is the sidebar item
+// it belongs to, if any. build returns ErrNotFound for a bad or unknown id.
 type page struct {
-	temp  string
-	build func(ctx Context, r *http.Request) (view any, title string, err error)
+	temp    string
+	section string
+	build   func(ctx Context, r *http.Request) (view any, title string, err error)
+}
+
+// releaseList is a titled grid of releases (releases.html).
+type releaseList struct {
+	Title    string
+	Releases []model.Release
 }
 
 // pageData is what layout.html and fragment.html render.
 type pageData struct {
 	*view.Index // only for the full layout
 	Title       string
+	Section     string
 	Content     template.HTML // output of html/template, already escaped
 }
 
 // pages maps each web UI path to its page. A page's path is its API path
 // without /api.
 var pages = map[string]page{
-	"GET /{$}": {"home.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /{$}": {"home.html", "home", func(ctx Context, r *http.Request) (any, string, error) {
 		return HomeView(ctx), "", nil
 	}},
-	"GET /search": {"search.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /search": {"search.html", "", func(ctx Context, r *http.Request) (any, string, error) {
 		q := strings.TrimSpace(r.URL.Query().Get("q"))
 		return SearchView(ctx, q), q, nil
 	}},
-	"GET /artists": {"artists.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /recently-added": {"releases.html", "added", func(ctx Context, r *http.Request) (any, string, error) {
+		return &releaseList{"Recently Added", ctx.Music().RecentlyAdded()}, "Recently Added", nil
+	}},
+	"GET /new-releases": {"releases.html", "new", func(ctx Context, r *http.Request) (any, string, error) {
+		return &releaseList{"New Releases", ctx.Music().RecentlyReleased()}, "New Releases", nil
+	}},
+	"GET /favorites": {"favorites.html", "favorites", func(ctx Context, r *http.Request) (any, string, error) {
+		return FavoriteView(ctx), "Favorites", nil
+	}},
+	"GET /artists": {"artists.html", "artists", func(ctx Context, r *http.Request) (any, string, error) {
 		return ArtistsView(ctx), "Artists", nil
 	}},
-	"GET /artists/{id}": {"artist.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /artists/{id}": {"artist.html", "artists", func(ctx Context, r *http.Request) (any, string, error) {
 		artist, err := lookupArtist(ctx, r)
 		if err != nil {
 			return nil, "", err
 		}
 		return ArtistView(ctx, artist), artist.Name, nil
 	}},
-	"GET /artists/{id}/popular": {"popular.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /artists/{id}/popular": {"popular.html", "artists", func(ctx Context, r *http.Request) (any, string, error) {
 		artist, err := lookupArtist(ctx, r)
 		if err != nil {
 			return nil, "", err
 		}
 		return PopularView(ctx, artist), artist.Name, nil
 	}},
-	"GET /artists/{id}/singles": {"singles.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /artists/{id}/singles": {"singles.html", "artists", func(ctx Context, r *http.Request) (any, string, error) {
 		artist, err := lookupArtist(ctx, r)
 		if err != nil {
 			return nil, "", err
 		}
 		return SinglesView(ctx, artist), artist.Name, nil
 	}},
-	"GET /artists/{id}/want": {"want.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /artists/{id}/want": {"want.html", "artists", func(ctx Context, r *http.Request) (any, string, error) {
 		artist, err := lookupArtist(ctx, r)
 		if err != nil {
 			return nil, "", err
 		}
 		return WantListView(ctx, artist), artist.Name, nil
 	}},
-	"GET /releases/{id}": {"release.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /releases/{id}": {"release.html", "artists", func(ctx Context, r *http.Request) (any, string, error) {
 		id, err := pathID(r)
 		if err != nil {
 			return nil, "", err
@@ -112,16 +129,16 @@ var pages = map[string]page{
 		}
 		return ReleaseView(ctx, release), release.Name, nil
 	}},
-	"GET /radio": {"radio.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /radio": {"radio.html", "radio", func(ctx Context, r *http.Request) (any, string, error) {
 		return RadioView(ctx), "Radio", nil
 	}},
-	"GET /playlists": {"playlists.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /playlists": {"playlists.html", "playlists", func(ctx Context, r *http.Request) (any, string, error) {
 		return PlaylistsView(ctx, ctx.Music().UserPlaylists(ctx.User())), "Playlists", nil
 	}},
-	"GET /movies": {"movies.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /movies": {"movies.html", "movies", func(ctx Context, r *http.Request) (any, string, error) {
 		return MoviesView(ctx), "Movies", nil
 	}},
-	"GET /movies/{id}": {"movie.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /movies/{id}": {"movie.html", "movies", func(ctx Context, r *http.Request) (any, string, error) {
 		id, err := pathID(r)
 		if err != nil {
 			return nil, "", err
@@ -132,25 +149,25 @@ var pages = map[string]page{
 		}
 		return MovieView(ctx, movie), movie.Title, nil
 	}},
-	"GET /movie-genres/{name}": {"genre.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /movie-genres/{name}": {"genre.html", "movies", func(ctx Context, r *http.Request) (any, string, error) {
 		name := strings.TrimSpace(r.PathValue(ParamName))
 		return GenreView(ctx, name), name, nil
 	}},
-	"GET /movie-keywords/{name}": {"keyword.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /movie-keywords/{name}": {"keyword.html", "movies", func(ctx Context, r *http.Request) (any, string, error) {
 		name := strings.TrimSpace(r.PathValue(ParamName))
 		return KeywordView(ctx, name), name, nil
 	}},
-	"GET /profiles/{peid}": {"profile.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /profiles/{peid}": {"profile.html", "", func(ctx Context, r *http.Request) (any, string, error) {
 		person, err := ctx.FindPerson(r.PathValue(ParamPEID))
 		if err != nil {
 			return nil, "", ErrNotFound
 		}
 		return ProfileView(ctx, person), person.Name, nil
 	}},
-	"GET /tv": {"shows.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /tv": {"shows.html", "tv", func(ctx Context, r *http.Request) (any, string, error) {
 		return TVShowsView(ctx), "TV Shows", nil
 	}},
-	"GET /tv/series/{id}": {"tvseries.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /tv/series/{id}": {"tvseries.html", "tv", func(ctx Context, r *http.Request) (any, string, error) {
 		id, err := pathID(r)
 		if err != nil {
 			return nil, "", err
@@ -161,7 +178,7 @@ var pages = map[string]page{
 		}
 		return TVSeriesView(ctx, series), series.Name, nil
 	}},
-	"GET /tv/episodes/{id}": {"tvepisode.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /tv/episodes/{id}": {"tvepisode.html", "tv", func(ctx Context, r *http.Request) (any, string, error) {
 		id, err := pathID(r)
 		if err != nil {
 			return nil, "", err
@@ -172,10 +189,10 @@ var pages = map[string]page{
 		}
 		return TVEpisodeView(ctx, episode), episode.Name, nil
 	}},
-	"GET /podcasts": {"podcasts.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /podcasts": {"podcasts.html", "podcasts", func(ctx Context, r *http.Request) (any, string, error) {
 		return PodcastsView(ctx), "Podcasts", nil
 	}},
-	"GET /series/{id}": {"series.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /series/{id}": {"series.html", "podcasts", func(ctx Context, r *http.Request) (any, string, error) {
 		id, err := pathID(r)
 		if err != nil {
 			return nil, "", err
@@ -186,7 +203,7 @@ var pages = map[string]page{
 		}
 		return SeriesView(ctx, series), series.Title, nil
 	}},
-	"GET /episodes/{id}": {"episode.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /episodes/{id}": {"episode.html", "podcasts", func(ctx Context, r *http.Request) (any, string, error) {
 		id, err := pathID(r)
 		if err != nil {
 			return nil, "", err
@@ -197,10 +214,10 @@ var pages = map[string]page{
 		}
 		return EpisodeView(ctx, episode), episode.Title, nil
 	}},
-	"GET /activity": {"activity.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /activity": {"activity.html", "activity", func(ctx Context, r *http.Request) (any, string, error) {
 		return activityPage(ctx, "recent")
 	}},
-	"GET /activity/{interval}": {"activity.html", func(ctx Context, r *http.Request) (any, string, error) {
+	"GET /activity/{interval}": {"activity.html", "activity", func(ctx Context, r *http.Request) (any, string, error) {
 		return activityPage(ctx, r.PathValue(ParamInterval))
 	}},
 }
@@ -257,7 +274,11 @@ func pageHandler(p page) http.HandlerFunc {
 			serverErr(w, err)
 			return
 		}
-		data := pageData{Title: pageTitle(title), Content: template.HTML(body.String())}
+		data := pageData{
+			Title:   pageTitle(title),
+			Section: p.section,
+			Content: template.HTML(body.String()),
+		}
 		name := "fragment.html"
 		if r.Header.Get(HeaderFragment) == "" {
 			name = "layout.html"

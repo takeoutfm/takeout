@@ -14,41 +14,64 @@
     <script type="text/javascript" src="{{asset "chart.umd.js"}}"></script>
   </head>
   <body>
+    <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg">
+      <!-- Material Icons (Apache-2.0), 24px -->
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></symbol>
+      <symbol id="i-added" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></symbol>
+      <symbol id="i-new" viewBox="0 0 24 24"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></symbol>
+      <symbol id="i-artists" viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></symbol>
+      <symbol id="i-favorites" viewBox="0 0 24 24"><path d="m12 21.35-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></symbol>
+      <symbol id="i-playlists" viewBox="0 0 24 24"><path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/></symbol>
+      <symbol id="i-radio" viewBox="0 0 24 24"><path d="M3.24 6.15C2.51 6.43 2 7.17 2 8v12c0 1.1.89 2 2 2h16c1.11 0 2-.9 2-2V8c0-1.11-.89-2-2-2H8.3l8.26-3.34L15.88 1 3.24 6.15zM7 20c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-8h-2v-2h-2v2H4V8h16v4z"/></symbol>
+      <symbol id="i-podcasts" viewBox="0 0 24 24"><path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20 5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"/></symbol>
+      <symbol id="i-movies" viewBox="0 0 24 24"><path d="m18 4 2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></symbol>
+      <symbol id="i-tv" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></symbol>
+      <symbol id="i-activity" viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></symbol>
+      <symbol id="i-queue" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></symbol>
+    </svg>
+    <nav id="sidebar">
+      <form id="f" class="side-search" action="/search" method="get" role="search">
+	<input id="q" name="q" type="search" placeholder="Search" aria-label="Search: text, artist:name, guitar:person, etc." title="text, artist:name, guitar:person, etc.">
+      </form>
+      <div class="side-group">
+	<a class="side" href="/" data-section="home"{{ if eq .Section "home" }} aria-current="page"{{ end }}><svg aria-hidden="true"><use href="#i-home"></use></svg>Home</a>
+      </div>
+      {{ if or .HasMusic .HasPodcasts }}
+      <div class="side-group">
+	<div class="side-section">Music</div>
+	{{ if .HasMusic }}
+	<a class="side" href="/recently-added" data-section="added"{{ if eq .Section "added" }} aria-current="page"{{ end }}><svg aria-hidden="true"><use href="#i-added"></use></svg>Recently Added</a>
+	<a class="side" href="/new-releases" data-section="new"{{ if eq .Section "new" }} aria-current="page"{{ end }}><svg aria-hidden="true"><use href="#i-new"></use></svg>New Releases</a>
+	<a class="side" href="/artists" data-section="artists"{{ if eq .Section "artists" }} aria-current="page"{{ end }}><svg aria-hidden="true"><use href="#i-artists"></use></svg>Artists</a>
+	<a class="side" href="/favorites" data-section="favorites"{{ if eq .Section "favorites" }} aria-current="page"{{ end }}><svg aria-hidden="true"><use href="#i-favorites"></use></svg>Favorites</a>
+	{{ if .HasPlaylists }}
+	<a class="side" href="/playlists" data-section="playlists"{{ if eq .Section "playlists" }} aria-current="page"{{ end }}><svg aria-hidden="true"><use href="#i-playlists"></use></svg>Playlists</a>
+	{{ end }}
+	<a class="side" href="/radio" data-section="radio"{{ if eq .Section "radio" }} aria-current="page"{{ end }}><svg aria-hidden="true"><use href="#i-radio"></use></svg>Radio</a>
+	{{ end }}
+	{{ if .HasPodcasts }}
+	<a class="side" href="/podcasts" data-section="podcasts"{{ if eq .Section "podcasts" }} aria-current="page"{{ end }}><svg aria-hidden="true"><use href="#i-podcasts"></use></svg>Podcasts</a>
+	{{ end }}
+      </div>
+      {{ end }}
+      {{ if or .HasMovies .HasShows }}
+      <div class="side-group">
+	<div class="side-section">Video</div>
+	{{ if .HasMovies }}
+	<a class="side" href="/movies" data-section="movies"{{ if eq .Section "movies" }} aria-current="page"{{ end }}><svg aria-hidden="true"><use href="#i-movies"></use></svg>Movies</a>
+	{{ end }}
+	{{ if .HasShows }}
+	<a class="side" href="/tv" data-section="tv"{{ if eq .Section "tv" }} aria-current="page"{{ end }}><svg aria-hidden="true"><use href="#i-tv"></use></svg>TV Shows</a>
+	{{ end }}
+      </div>
+      {{ end }}
+      <div class="side-group">
+	<div class="side-section">You</div>
+	<a class="side" href="/activity" data-section="activity"{{ if eq .Section "activity" }} aria-current="page"{{ end }}><svg aria-hidden="true"><use href="#i-activity"></use></svg>Activity</a>
+	<a class="side" href="#" data-action="toggle"><svg aria-hidden="true"><use href="#i-queue"></use></svg>Queue</a>
+      </div>
+    </nav>
     <div id="top">
-      <div class="parent4">
-	<div>
-	  <a href="{{home}}" class="takeout">Home</a>
-	  {{ if .HasMusic }}
-	  <a href="/artists" class="takeout">Artists</a>
-	  <a href="/radio" class="takeout">Radio</a>
-	  {{ if .HasPlaylists }}
-	  <a href="/playlists" class="takeout">Playlists</a>
-	  {{ end }}
-	  {{ end }}
-	  {{ if .HasMovies }}
-	  <a href="/movies" class="takeout">Movies</a>
-	  {{ end }}
-	  {{ if .HasShows }}
-	  <a href="/tv" class="takeout">TV Shows</a>
-	  {{ end }}
-	  {{ if .HasPodcasts }}
-	  <a href="/podcasts" class="takeout">Podcasts</a>
-	  {{ end }}
-	  <a href="/activity" class="takeout">Activity</a>
-	</div>
-	<div class="parent">
-	  <div>
-	    <img class="np-control" data-action="toggle" src="/static/list-white-36dp.svg">
-	  </div>
-	</div>
-      </div>
-      <div style="display: flex; justify-content: center;">
-	<div>
-	  <form id="f" action="/search" method="get">
-	    <input class="search" id="q" name="q" type="search" placeholder="Search: text, artist:name, guitar:person, etc.">
-	  </form>
-	</div>
-      </div>
       <div id="main">
 	{{ template "fragment.html" . }}
       </div>

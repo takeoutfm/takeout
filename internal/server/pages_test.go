@@ -61,6 +61,7 @@ func vary(w *httptest.ResponseRecorder) string {
 
 var listPages = []string{
 	"/", "/search?q=jazz", "/artists", "/radio", "/playlists",
+	"/recently-added", "/new-releases", "/favorites",
 	"/movies", "/movie-genres/Drama", "/movie-keywords/heist", "/profiles/1",
 	"/tv", "/podcasts", "/activity", "/activity/lastweek",
 }
@@ -108,6 +109,23 @@ func TestPageTitle(t *testing.T) {
 	w = getPage(h, "/", map[string]string{HeaderFragment: "1"})
 	if !strings.Contains(w.Body.String(), `data-title="TakeoutFM"`) {
 		t.Error("home title")
+	}
+}
+
+func TestPageSection(t *testing.T) {
+	h := pageMux(t)
+	// the test library is empty, so only the sections every user has show
+	w := getPage(h, "/activity/lastweek", nil)
+	body := w.Body.String()
+	if !strings.Contains(body, `data-section="activity" aria-current="page"`) {
+		t.Error("activity not current in the sidebar")
+	}
+	if strings.Count(body, `aria-current="page"`) != 1 {
+		t.Error("expected exactly one current sidebar item")
+	}
+	w = getPage(h, "/favorites", map[string]string{HeaderFragment: "1"})
+	if !strings.Contains(w.Body.String(), `data-section="favorites"`) {
+		t.Error("fragment without its section")
 	}
 }
 

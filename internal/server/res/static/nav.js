@@ -32,6 +32,17 @@
 	return url.origin == location.origin && !notPages.test(url.pathname);
     };
 
+    // highlight the page's sidebar item (the server does it on a full load)
+    const markSection = function(section) {
+	document.querySelectorAll("#sidebar a[data-section]").forEach(a => {
+	    if (section && a.getAttribute("data-section") == section) {
+		a.setAttribute("aria-current", "page");
+	    } else {
+		a.removeAttribute("aria-current");
+	    }
+	});
+    };
+
     const show = function(html) {
 	const doc = new DOMParser().parseFromString(html, "text/html");
 	const page = doc.querySelector("[data-title]");
@@ -40,6 +51,7 @@
 	}
 	document.title = page.getAttribute("data-title");
 	document.getElementById("main").replaceChildren(page);
+	markSection(page.getAttribute("data-section"));
 	document.dispatchEvent(new CustomEvent("takeout:page"));
 	return true;
     };

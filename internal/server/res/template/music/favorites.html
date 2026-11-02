@@ -1,0 +1,68 @@
+<div>
+  <h1>Favorites</h1>
+  {{ if .Tracks }}
+  <h2>Tracks</h2>
+  {{ range .Tracks }}
+  <div class="parent">
+    <div class="left">
+      <div class="parent2">
+	<div class="track-title">
+	  <a data-playlist="add-ref"
+	     data-ref="{{.|ref}}"
+	     data-play="now"
+	     data-creator="{{.PreferredArtist}}"
+	     data-album="{{.ReleaseTitle}}"
+	     data-title="{{.Title}}"
+	     data-image="{{.|cover}}"
+	     data-etag="{{.ETag}}"
+	     data-location="{{.|link}}">
+	    {{ .Title }}
+	  </a>
+	</div>
+	<div class="track-artist">{{ .PreferredArtist }} &#x2022; {{ .ReleaseTitle }}</div>
+      </div>
+    </div>
+    <div class="right">
+      <a data-playlist="append-ref" data-ref="{{.|ref}}">
+	<img src="/static/playlist_add-white-24dp.svg" alt="Add to queue">
+      </a>
+    </div>
+  </div>
+  {{ end }}
+  {{ end }}
+  {{ if .Artists }}
+  <h2>Artists</h2>
+  <ul class="plain-list">
+    {{ range .Artists }}
+    <li><a href="{{.|link}}">{{ .Name }}</a></li>
+    {{ end }}
+  </ul>
+  {{ end }}
+  {{ if .Movies }}
+  <h2>Movies</h2>
+  <div class="poster-grid">
+    {{ range .Movies }}
+    <div class="poster-tile">
+      <a href="{{.|link}}"><img src="{{.|poster_small}}" loading="lazy" alt=""></a>
+      <div class="movie-title">{{ .Title }}</div>
+      <div class="movie-detail">{{ .Date.Year }}</div>
+    </div>
+    {{ end }}
+  </div>
+  {{ end }}
+  {{ if .Shows }}
+  <h2>TV Shows</h2>
+  <div class="poster-grid">
+    {{ range .Shows }}
+    <div class="poster-tile">
+      <a href="{{.|link}}"><img src="{{.|poster_small}}" loading="lazy" alt=""></a>
+      <div class="movie-title">{{ .Name }}</div>
+      <div class="movie-detail">{{ .Date.Year }}</div>
+    </div>
+    {{ end }}
+  </div>
+  {{ end }}
+  {{ if not (or .Tracks .Artists .Movies .Shows) }}
+  <p class="empty">No favorites yet. Add them in the TakeoutFM app.</p>
+  {{ end }}
+</div>

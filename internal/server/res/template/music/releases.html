@@ -1,0 +1,16 @@
+<div>
+  <h1>{{ .Title }}</h1>
+  <div class="release-grid">
+    {{ range .Releases }}
+    <div class="release-tile">
+      <a href="{{.|link}}" class="nodecor">
+	<img width="110" height="110" src="{{.|cover}}" loading="lazy" alt="">
+	<div class="release-small-title">{{ .Name }}</div>
+	<div class="release-small-year">{{ .Artist }} &#x2022; {{ .Date.Year }}</div>
+      </a>
+    </div>
+    {{ else }}
+    <p class="empty">Nothing here yet.</p>
+    {{ end }}
+  </div>
+</div>
