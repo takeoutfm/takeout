@@ -28,6 +28,7 @@
     const SaveProgressEvery = 10; // seconds, podcasts
     const MinResume = 10;         // seconds; earlier counts as not started
     const Finished = 120;         // seconds from the end counts as finished
+    const OffsetsMaxAge = 10000;  // ms before podcast progress is fetched again
     const RetryKey = "takeout.listens";
 
     let audio = null;
@@ -47,6 +48,7 @@
     let savedOffset = -1;
     let sinceSave = 0;
     let offsets = null;  // podcast progress from the server, by etag
+    let offsetsAt = 0;   // when it was fetched (ms)
     let locationIndex = 0;
 
     const $ = id => document.getElementById(id);
@@ -153,18 +155,25 @@
 	}).catch(err => console.log("progress: " + err));
     };
 
+    // Podcast progress, fetched again when it's older than OffsetsMaxAge:
+    // the apps save it too. The newest of each episode's offsets wins, so
+    // this page's own saves aren't lost to a slower server.
     const loadOffsets = async function() {
 	if (offsets == null) {
 	    offsets = {};
+	}
+	if (Date.now() - offsetsAt > OffsetsMaxAge) {
+	    offsetsAt = Date.now();
 	    try {
 		const data = await (await fetch("/api/progress")).json();
 		(data.Offsets || []).forEach(o => {
 		    const prev = offsets[o.ETag];
-		    if (prev == null || o.Date > prev.Date) {
+		    if (prev == null || Date.parse(o.Date) > Date.parse(prev.Date)) {
 			offsets[o.ETag] = o;
 		    }
 		});
 	    } catch (e) {
+		offsetsAt = 0;
 		console.log("progress: " + e);
 	    }
 	}
