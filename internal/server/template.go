@@ -193,14 +193,6 @@ func doFuncMap() template.FuncMap {
 			}
 			return img
 		},
-		"profile_small": func(o any) string {
-			var img string
-			switch o.(type) {
-			case model.Person:
-				img = people.PersonProfileSmall(o.(model.Person))
-			}
-			return img
-		},
 		"poster": func(o any) string {
 			var img string
 			switch o.(type) {
@@ -208,16 +200,6 @@ func doFuncMap() template.FuncMap {
 				img = film.MoviePoster(o.(model.Movie))
 			case model.TVSeries:
 				img = tv.SeriesPoster(o.(model.TVSeries))
-			}
-			return img
-		},
-		"poster_small": func(o any) string {
-			var img string
-			switch o.(type) {
-			case model.Movie:
-				img = film.MoviePosterSmall(o.(model.Movie))
-			case model.TVSeries, model.TVEpisode:
-				img = tv.SeriesPosterSmall(o.(model.TVSeries))
 			}
 			return img
 		},
@@ -236,14 +218,6 @@ func doFuncMap() template.FuncMap {
 			switch o.(type) {
 			case model.TVEpisode:
 				img = tv.EpisodeStillImage(o.(model.TVEpisode))
-			}
-			return img
-		},
-		"still_small": func(o any) string {
-			var img string
-			switch o.(type) {
-			case model.TVEpisode:
-				img = tv.EpisodeStillSmall(o.(model.TVEpisode))
 			}
 			return img
 		},
