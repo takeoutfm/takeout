@@ -47,6 +47,7 @@ type CoverArt interface {
 	HasBackArtwork() bool
 	HasOtherArtwork() bool
 	HasGroupArtwork() bool
+	OtherArtworkID() string
 	ArtworkMBIDs() (string, string)
 }
 
@@ -95,6 +96,10 @@ func (r Release) HasOtherArtwork() bool {
 
 func (r Release) HasGroupArtwork() bool {
 	return r.GroupArtwork
+}
+
+func (r Release) OtherArtworkID() string {
+	return r.OtherArtwork
 }
 
 func (r Release) ArtworkMBIDs() (string, string) {
@@ -210,6 +215,10 @@ func (t Track) HasOtherArtwork() bool {
 
 func (t Track) HasGroupArtwork() bool {
 	return t.GroupArtwork
+}
+
+func (t Track) OtherArtworkID() string {
+	return t.OtherArtwork
 }
 
 func (t Track) ArtworkMBIDs() (string, string) {

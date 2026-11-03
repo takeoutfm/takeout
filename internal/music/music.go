@@ -97,8 +97,7 @@ func Cover(art CoverArt, size string) string {
 		return fmt.Sprintf("%s/front", url)
 	} else if art.HasArtwork() && art.HasOtherArtwork() {
 		// use id-250, id-500, id-1200
-		//return fmt.Sprintf("%s/%s-%s", url, art.OtherArtwork, size)
-		return url
+		return fmt.Sprintf("%s/%s", url, art.OtherArtworkID())
 	} else {
 		return "/static/album-white-36dp.svg"
 	}
