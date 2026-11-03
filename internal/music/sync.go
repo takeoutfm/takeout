@@ -552,6 +552,8 @@ func (m *Music) assignTrackReleases() (bool, error) {
 				// could be 404 continue
 			}
 			artChecked[r.REID] = struct{}{}
+			// keep the artwork found for the next tracks of this release
+			releaseCache[cacheKey] = r
 		}
 
 		err := m.assignTrackRelease(t, r)

@@ -170,6 +170,60 @@ func TestRelease(t *testing.T) {
 	}
 }
 
+func TestReleaseArtworkUpdatesTracks(t *testing.T) {
+	m := makeMusic(t)
+
+	reid := "144eaad7-6e31-4860-a7f4-10d7e22532ea"
+	r := model.Release{
+		Artist: "test artist",
+		Name:   "test name",
+		RGID:   "9df09ba5-e7d9-334c-8c26-fef56a88d67a",
+		REID:   reid,
+	}
+	err := m.createRelease(&r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, etag := range []string{"etag 1", "etag 2"} {
+		track := model.Track{
+			Artist:   "test artist",
+			Release:  "test name",
+			TrackNum: i + 1,
+			Title:    etag,
+			Key:      etag,
+			ETag:     etag,
+			REID:     reid,
+			RGID:     r.RGID,
+		}
+		err = m.createTrack(&track)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	r.FrontArtwork = false
+	r.BackArtwork = true
+	err = m.updateArtwork(&r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.updateOtherArtwork(&r, "44068562771")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, etag := range []string{"etag 1", "etag 2"} {
+		track, err := m.LookupETag(etag)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !track.Artwork || track.FrontArtwork || track.OtherArtwork != "44068562771" {
+			t.Errorf("expect release artwork on %s, got %v %v %s",
+				etag, track.Artwork, track.FrontArtwork, track.OtherArtwork)
+		}
+	}
+}
+
 func TestMedia(t *testing.T) {
 	m := makeMusic(t)
 

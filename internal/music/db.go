@@ -444,15 +444,29 @@ func (m *Music) trackRelease(t Track) (Release, error) {
 // When there's artwork but no front, other_cover will be the ID of the image
 // used for some type of artwork.
 func (m *Music) updateOtherArtwork(r *Release, id string) error {
-	return m.db.Model(r).Update("other_artwork", id).Error
+	err := m.db.Model(r).Update("other_artwork", id).Error
+	if err != nil {
+		return err
+	}
+	// tracks keep a copy of their release's artwork
+	return m.db.Model(&Track{}).Where("re_id = ?", r.REID).
+		Update("other_artwork", id).Error
 }
 
 func (m *Music) updateArtwork(r *Release) error {
-	return m.db.Model(r).
-		Update("artwork", r.FrontArtwork || r.BackArtwork).
-		Update("front_artwork", r.FrontArtwork).
-		Update("back_artwork", r.BackArtwork).
-		Update("group_artwork", r.GroupArtwork).Error
+	artwork := map[string]any{
+		"artwork":       r.FrontArtwork || r.BackArtwork,
+		"front_artwork": r.FrontArtwork,
+		"back_artwork":  r.BackArtwork,
+		"group_artwork": r.GroupArtwork,
+	}
+	err := m.db.Model(r).Updates(artwork).Error
+	if err != nil {
+		return err
+	}
+	// tracks keep a copy of their release's artwork
+	return m.db.Model(&Track{}).Where("re_id = ?", r.REID).
+		Updates(artwork).Error
 }
 
 // select count(*) from releases where artwork = false and re_id in (select distinct re_id from tracks);
