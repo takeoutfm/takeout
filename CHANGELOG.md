@@ -1,3 +1,26 @@
+## 0.30.0
+
+- new web UI, still built into the server: pages are rendered from templates
+  with real URLs (/releases/12, /tv/series/4, /search?q=...) and swapped in
+  place, so playback continues while browsing; the old /v?... pages are gone
+- web UI layout follows the Mac and Linux apps: sidebar, page headers with
+  Play, Shuffle, Radio and Favorite, tile grids, track lists, and a mini
+  player with a Now Playing screen and queue
+- new pages: Recently Added, New Releases, Favorites; Activity redesigned
+- music, radio and podcasts play in the web UI; movies and TV are browse-only
+  (watch in the apps)
+- web player uses the server playlist, counts listens like the apps (4 minutes
+  or half the track), and saves and resumes podcast progress
+- podcast episode page with Resume, Start Over and Mark as Played
+- sign out, redesigned sign-in, and Link a device (no password needed when
+  already signed in)
+- session cookie is always sent with Path=/, HttpOnly, Secure and
+  SameSite=Strict; stale per-path cookies from older versions are cleared
+- Content-Security-Policy now allows only the server's own scripts and styles
+- static files served from memory, gzipped, with hashed URLs; Chart.js
+  replaced by a small SVG chart
+- sharper TMDB images for posters, stills and cast photos
+
 ## 0.29.6
 
 - claude security updated
