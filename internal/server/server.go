@@ -298,6 +298,8 @@ func Serve(c context.Context, config *config.Config) error {
 	mux.Handle("POST /api/code", codeTokenAuthHandler(ctx, apiCodeCheck))
 	mux.Handle("POST /api/link", requestHandler(ctx, apiLink))
 
+	mux.Handle("GET /api/me", accessTokenAuthHandler(ctx, apiMe))
+
 	// misc
 	mux.Handle("GET /api/home", accessTokenAuthHandler(ctx, apiHome))
 	mux.Handle("GET /api/index", accessTokenAuthHandler(ctx, apiIndex))

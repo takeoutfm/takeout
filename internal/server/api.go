@@ -323,6 +323,16 @@ func apiCodeCheck(w http.ResponseWriter, r *http.Request) {
 	authorizeNew(session, w, r)
 }
 
+type me struct {
+	User string
+}
+
+// apiMe returns the current user for display in apps
+func apiMe(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	apiView(w, r, me{User: ctx.User().Name})
+}
+
 var locationRegexp = regexp.MustCompile(`/api/(tracks)/([0-9a-zA-Z-]+)/location`)
 
 // writePlaylist will write a playlist to the response and optionally fully

@@ -230,3 +230,31 @@ func TestApiPlaylistsGetPlaylistsEmpty(t *testing.T) {
 		t.Error("expected 0 entries")
 	}
 }
+
+func TestApiMe(t *testing.T) {
+	r := httptest.NewRequest("GET", "https://takeout/api/me", nil)
+	r = withContext(r, NewTestContext(t))
+
+	w := httptest.NewRecorder()
+	apiMe(w, r)
+
+	resp := w.Result()
+	body, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode != 200 {
+		t.Errorf("expected 200, got %d", resp.StatusCode)
+	}
+	if ct := resp.Header.Get("Content-Type"); ct != ApplicationJson {
+		t.Errorf("expected content type %q, got %q", ApplicationJson, ct)
+	}
+
+	var result struct {
+		User string
+	}
+	if err := json.Unmarshal(body, &result); err != nil {
+		t.Fatalf("invalid json %q: %s", body, err)
+	}
+	if result.User != TestUserID {
+		t.Errorf("expected user %q, got %q", TestUserID, result.User)
+	}
+}
