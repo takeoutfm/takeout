@@ -1,3 +1,7 @@
+## 0.30.1
+
+- added /api/me
+
 ## 0.30.0
 
 - new web UI, still built into the server: pages are rendered from templates
