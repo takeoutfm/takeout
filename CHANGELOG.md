@@ -1,4 +1,4 @@
-## Unreleased
+## 0.30.2
 
 - GET /api/code returns ExpiresIn (seconds until the code expires) and
   Interval (seconds to wait between POST /api/code checks)

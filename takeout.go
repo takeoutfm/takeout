@@ -19,6 +19,6 @@ package takeout // import "takeoutfm.dev/takeout"
 
 const (
 	AppName = "Takeout"
-	Version = "0.30.1"
+	Version = "0.30.2"
 	Contact = "takeoutfm.com"
 )
