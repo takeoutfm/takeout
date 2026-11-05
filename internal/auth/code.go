@@ -31,6 +31,10 @@ import (
 const (
 	CodeChars = "123456789ABCDEFGHILKMNPQRSTUVWXYZ"
 	CodeSize  = 6
+
+	// CodePollInterval is how long clients should wait between checks to see
+	// if a code has been linked (the RFC 8628 default).
+	CodePollInterval = 5 * time.Second
 )
 
 type Code struct {
@@ -174,6 +178,16 @@ func (a *Auth) AuthorizeCode(value, token string) error {
 		return ErrCodeAlreadyUsed
 	}
 	return a.db.Model(code).Update("token", token).Error
+}
+
+// CodeExpiresIn returns how long a newly generated code can still be used:
+// the time left on the code or on its code token, whichever ends first.
+func (a *Auth) CodeExpiresIn(c *Code) time.Duration {
+	d := time.Until(c.Expires)
+	if age := a.config.Auth.CodeToken.Age; age < d {
+		d = age
+	}
+	return max(d, 0)
 }
 
 func (a *Auth) codeAge() time.Duration {

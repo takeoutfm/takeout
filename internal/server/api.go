@@ -245,6 +245,8 @@ func apiTokenRefresh(w http.ResponseWriter, r *http.Request) {
 type codeResponse struct {
 	AccessToken string
 	Code        string
+	ExpiresIn   int // seconds until Code and AccessToken are no longer valid
+	Interval    int // minimum seconds between POST /api/code checks
 }
 
 // apiCodeGet begins a code-based authorization phase.
@@ -270,6 +272,8 @@ func apiCodeGet(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(header.ContentType, ApplicationJson)
 	var resp codeResponse
 	resp.Code = code.Value
+	resp.ExpiresIn = int(ctx.Auth().CodeExpiresIn(code) / time.Second)
+	resp.Interval = int(auth.CodePollInterval / time.Second)
 	resp.AccessToken, err = ctx.Auth().NewCodeToken(code.Value)
 	if err != nil {
 		serverErr(w, err)

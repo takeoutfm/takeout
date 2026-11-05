@@ -86,6 +86,8 @@ func (r *request) Headers() Headers {
 type AccessCode struct {
 	AccessToken string
 	Code        string
+	ExpiresIn   int // seconds until Code and AccessToken are no longer valid
+	Interval    int // minimum seconds between CheckCode calls
 }
 
 type Tokens struct {
