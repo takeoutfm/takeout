@@ -95,3 +95,19 @@ func (p *Progress) Delete(user auth.User, offset Offset) error {
 	}
 	return p.deleteOffset(&offset)
 }
+
+// Durations returns the longest duration in seconds that any player reported
+// for each of the etags, where known.
+func (p *Progress) Durations(etags []string) map[string]int {
+	result := make(map[string]int)
+	const chunkSize = 500
+	for i := 0; i < len(etags); i += chunkSize {
+		chunk := etags[i:min(i+chunkSize, len(etags))]
+		var offsets []Offset
+		p.db.Where("e_tag in (?) and duration > 0", chunk).Find(&offsets)
+		for _, o := range offsets {
+			result[o.ETag] = max(result[o.ETag], o.Duration)
+		}
+	}
+	return result
+}

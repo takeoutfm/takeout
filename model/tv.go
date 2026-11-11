@@ -68,6 +68,7 @@ type TVEpisode struct {
 	Size         int64
 	ETag         string `gorm:"index:idx_episodes_e_tag"`
 	LastModified time.Time
+	Duration     int `gorm:"index:idx_episodes_duration"` // seconds; 0 not scanned, -1 unreadable
 }
 
 func (TVEpisode) TableName() string {

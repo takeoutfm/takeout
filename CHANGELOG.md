@@ -1,3 +1,11 @@
+## Unreleased
+
+- movies, episodes and tracks have a Duration in seconds, read from the file
+  headers (mkv, mp4/m4a, flac, ogg, mp3) with range requests; new hourly jobs
+  scan files in batches (Film/TV/Music.DurationSyncInterval and
+  DurationSyncLimit), also runnable as the "durations" job. 0 means not
+  scanned yet and -1 means the duration couldn't be read
+
 ## 0.30.2
 
 - GET /api/code returns ExpiresIn (seconds until the code expires) and

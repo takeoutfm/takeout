@@ -182,6 +182,7 @@ type Track struct {
 	BackArtwork  bool
 	OtherArtwork string
 	GroupArtwork bool
+	Duration     int `gorm:"index:idx_tracks_duration"` // seconds; 0 not scanned, -1 unreadable
 }
 
 func (t *Track) BeforeCreate(tx *g.DB) (err error) {

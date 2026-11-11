@@ -49,6 +49,7 @@ type Movie struct {
 	Size             int64
 	ETag             string `gorm:"index:idx_movies_e_tag"`
 	LastModified     time.Time
+	Duration         int `gorm:"index:idx_movies_duration"` // seconds; 0 not scanned, -1 unreadable
 }
 
 func (m *Movie) BeforeCreate(tx *g.DB) (err error) {

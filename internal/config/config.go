@@ -155,6 +155,8 @@ type MusicConfig struct {
 	PopularSyncInterval  time.Duration
 	SimilarSyncInterval  time.Duration
 	CoverSyncInterval    time.Duration
+	DurationSyncInterval time.Duration
+	DurationSyncLimit    int
 	RelatedArtists       time.Duration
 }
 
@@ -171,6 +173,8 @@ type FilmConfig struct {
 	SyncInterval         time.Duration
 	PosterSyncInterval   time.Duration
 	BackdropSyncInterval time.Duration
+	DurationSyncInterval time.Duration
+	DurationSyncLimit    int
 	DuplicateResolution  string
 }
 
@@ -195,6 +199,8 @@ type TVConfig struct {
 	PosterSyncInterval   time.Duration
 	BackdropSyncInterval time.Duration
 	StillSyncInterval    time.Duration
+	DurationSyncInterval time.Duration
+	DurationSyncLimit    int
 }
 
 func (c TVConfig) SortedCast(credits tmdb.Credits) []tmdb.Cast {
@@ -469,6 +475,8 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Music.PopularSyncInterval", "24h")
 	v.SetDefault("Music.SimilarSyncInterval", "24h")
 	v.SetDefault("Music.CoverSyncInterval", "24h")
+	v.SetDefault("Music.DurationSyncInterval", "1h")
+	v.SetDefault("Music.DurationSyncLimit", "2000")
 	v.SetDefault("Music.RelatedArtists", "43800h") // +/- 5 years
 
 	// see https://wiki.musicbrainz.org/Release_Country
@@ -517,6 +525,8 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Film.SyncInterval", "1h")
 	v.SetDefault("Film.PosterSyncInterval", "24h")
 	v.SetDefault("Film.BackdropSyncInterval", "24h")
+	v.SetDefault("Film.DurationSyncInterval", "1h")
+	v.SetDefault("Film.DurationSyncLimit", "500")
 	v.SetDefault("Film.DuplicateResolution", "largest")
 
 	v.SetDefault("TV.DB.Driver", "sqlite3")
@@ -542,6 +552,8 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("TV.PosterSyncInterval", "24h")
 	v.SetDefault("TV.BackdropSyncInterval", "24h")
 	v.SetDefault("TV.StillSyncInterval", "24h")
+	v.SetDefault("TV.DurationSyncInterval", "1h")
+	v.SetDefault("TV.DurationSyncLimit", "1000")
 
 	// see https://musicbrainz.org/search (series)
 	v.SetDefault("Music.RadioSeries", []string{

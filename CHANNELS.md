@@ -1,6 +1,6 @@
 # Channels
 
-Status: proposal. Nothing here is implemented yet.
+Status: proposal. Phase 1 (durations) is implemented; the rest is not.
 
 A TV-style guide of named channels with movies and shows "already playing", primarily for
 Android TV. Someone used to watching TV sees what's on, picks a channel and joins wherever the
@@ -251,9 +251,15 @@ Add `Duration int` (seconds) to `Movie`, `TVEpisode` and `Track`; `AutoMigrate` 
 | `> 0` | Duration in seconds |
 | `-1` | Couldn't be read; don't retry |
 
-- A full re-sync may wipe the column for movies and tracks. The job refills it cheaply.
-- `syncEpisode` updates the existing row, so it must reset `Duration` to `0` when the ETag
-  changes. Check whether a replaced track file keeps its row in `createTrack`.
+- A full music re-sync (`deleteTracks`) wipes the column for tracks. The job refills it
+  cheaply. Movies keep it: a re-sync of an unchanged file is skipped as a duplicate, and a
+  changed file gets a new row with `Duration = 0`.
+- `syncEpisode` updates the existing row and resets `Duration` to `0` when the ETag changes.
+- A replaced track file keeps its old row: `createTrack` is a plain `Create` on the unique
+  `Key`, so the insert fails (silently) and the row keeps its old ETag, size and duration.
+  This predates channels and affects more than durations.
+- A missing file (404) is marked `-1` like an unreadable one, so dead rows don't block each
+  batch. Network and server errors leave `0` and are retried next run.
 - For video, the scheduler uses `Duration` when positive, otherwise `Runtime` plus a safety
   margin. Tracks without a positive `Duration` aren't used for breaks.
 

@@ -321,6 +321,10 @@ func (tv *TV) syncEpisode(o *bucket.Object, tvid, season, episode int) (search.F
 	ep.VoteAverage = detail.VoteAverage
 	ep.VoteCount = detail.VoteCount
 	ep.Runtime = detail.Runtime
+	if ep.ETag != o.ETag {
+		// file changed, scan it again
+		ep.Duration = 0
+	}
 	ep.Key = o.Key
 	ep.Size = o.Size
 	ep.ETag = o.ETag

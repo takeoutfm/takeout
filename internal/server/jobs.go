@@ -28,7 +28,9 @@ import (
 	"takeoutfm.dev/takeout/internal/film"
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/podcast"
+	"takeoutfm.dev/takeout/internal/progress"
 	"takeoutfm.dev/takeout/internal/tv"
+	"takeoutfm.dev/takeout/lib/duration"
 	"takeoutfm.dev/takeout/lib/log"
 	"time"
 )
@@ -74,6 +76,7 @@ func schedule(ctx context.Context, config *config.Config) {
 	mediaSync(ctx, config.Music.PopularSyncInterval, syncMusicPopular, false)
 	mediaSync(ctx, config.Music.SimilarSyncInterval, syncMusicSimilar, false)
 	mediaSync(ctx, config.Music.CoverSyncInterval, syncMusicCovers, false)
+	mediaSync(ctx, config.Music.DurationSyncInterval, syncMusicDurations, false)
 
 	// podcasts
 	mediaSync(ctx, config.Podcast.SyncInterval, syncPodcasts, false)
@@ -82,12 +85,14 @@ func schedule(ctx context.Context, config *config.Config) {
 	mediaSync(ctx, config.Film.SyncInterval, syncFilm, false)
 	mediaSync(ctx, config.Film.PosterSyncInterval, syncFilmPosters, false)
 	mediaSync(ctx, config.Film.BackdropSyncInterval, syncFilmBackdrops, false)
+	mediaSync(ctx, config.Film.DurationSyncInterval, syncFilmDurations, false)
 
 	// tv
 	mediaSync(ctx, config.TV.SyncInterval, syncTV, false)
 	mediaSync(ctx, config.TV.PosterSyncInterval, syncTVPosters, false)
 	mediaSync(ctx, config.TV.BackdropSyncInterval, syncTVBackdrops, false)
 	mediaSync(ctx, config.TV.StillSyncInterval, syncTVStills, false)
+	mediaSync(ctx, config.TV.DurationSyncInterval, syncTVDurations, false)
 
 	scheduler.Every(time.Minute * 5).WaitForSchedule().Do(func() {
 		a := auth.NewAuth(config)
@@ -280,6 +285,95 @@ func syncTVStills(ctx context.Context, config *config.Config, mediaConfig *confi
 	return nil
 }
 
+// Range requests for reading media file headers.
+var durationClient = &http.Client{Timeout: time.Minute}
+
+func syncFilmDurations(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
+	f := film.NewFilm(mediaConfig)
+	err := f.Open(ctx)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	results := f.SyncDurations(ctx, durationClient, mediaConfig.Film.DurationSyncLimit)
+	validateDurations(config, "movie", results)
+	return nil
+}
+
+func syncTVDurations(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
+	tv := tv.NewTV(mediaConfig)
+	err := tv.Open(ctx)
+	if err != nil {
+		return err
+	}
+	defer tv.Close()
+	results := tv.SyncDurations(ctx, durationClient, mediaConfig.TV.DurationSyncLimit)
+	validateDurations(config, "episode", results)
+	return nil
+}
+
+func syncMusicDurations(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
+	m := music.NewMusic(mediaConfig)
+	err := m.Open(ctx)
+	if err != nil {
+		return err
+	}
+	defer m.Close()
+	results := m.SyncDurations(ctx, durationClient, mediaConfig.Music.DurationSyncLimit)
+	logDurations("track", results, 0, 0)
+	return nil
+}
+
+// validateDurations compares scanned video durations with those reported by
+// players in watch progress, and logs any that differ by more than a minute.
+func validateDurations(config *config.Config, kind string, results []duration.Result) {
+	if len(results) == 0 {
+		return
+	}
+	p := progress.NewProgress(config)
+	if err := p.Open(); err != nil {
+		log.Println(err)
+		logDurations(kind, results, 0, 0)
+		return
+	}
+	defer p.Close()
+
+	var etags []string
+	for _, r := range results {
+		if r.Seconds > 0 {
+			etags = append(etags, r.ETag)
+		}
+	}
+	reported := p.Durations(etags)
+	checked, mismatched := 0, 0
+	for _, r := range results {
+		d, ok := reported[r.ETag]
+		if !ok || r.Seconds <= 0 {
+			continue
+		}
+		checked++
+		if diff := r.Seconds - d; diff > 60 || diff < -60 {
+			mismatched++
+			log.Printf("duration mismatch %s: scanned %ds, player %ds\n", r.Name, r.Seconds, d)
+		}
+	}
+	logDurations(kind, results, checked, mismatched)
+}
+
+func logDurations(kind string, results []duration.Result, checked, mismatched int) {
+	if len(results) == 0 {
+		return
+	}
+	unreadable := 0
+	for _, r := range results {
+		if r.Seconds < 0 {
+			unreadable++
+		}
+	}
+	log.Printf("durations: %d %s files scanned, %d unreadable, %d checked against players, %d mismatched\n",
+		len(results), kind, unreadable, checked, mismatched)
+}
+
 func syncPodcasts(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
 	p := podcast.NewPodcast(mediaConfig)
 	err := p.Open()
@@ -318,6 +412,10 @@ func Job(ctx context.Context, config *config.Config, name string) error {
 		case "backdrops":
 			syncTVBackdrops(ctx, config, mediaConfig)
 			syncFilmBackdrops(ctx, config, mediaConfig)
+		case "durations":
+			syncFilmDurations(ctx, config, mediaConfig)
+			syncTVDurations(ctx, config, mediaConfig)
+			syncMusicDurations(ctx, config, mediaConfig)
 		case "covers":
 			syncMusicCovers(ctx, config, mediaConfig)
 		case "fanart":
