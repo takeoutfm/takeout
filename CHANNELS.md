@@ -4,7 +4,8 @@ Status: proposal. Phases 1 (durations) and 2 (server schedule) are implemented. 
 phase 3 (live player) and phase 4 (guide grid, days, Watch Now, Start Over) are built, except
 Open to Live TV; live playback hasn't been tested yet. Of phase 5, specials, features and music
 breaks are implemented; music channels are not. Of phase 6, the phone and Linux apps have the
-guide and a live player; Apple, Wear and the Android TV home screen don't. See
+guide and a live player; Apple doesn't yet, Wear OS won't (video doesn't fit a watch), and
+the Android TV home screen is deferred (see "Home screen integration"). See
 "Implementation notes" at the end for where the server code differs from this text.
 
 A TV-style guide of named channels with movies and shows "already playing", primarily for
@@ -494,6 +495,33 @@ in the current music player. These don't need wall-clock sync between TVs.
    filling, music breaks, music channels.
 6. **Other surfaces:** phone and other apps, Android TV home-screen integration, optional
    automatic genre channels.
+
+### Home screen integration (deferred)
+
+Deferred in November 2026, after looking at what Google TV allows. Google controls most of
+its home screen now:
+
+- **Continue Watching:** the old Watch Next API (`TvContractCompat.WatchNextPrograms`) still
+  works on Google TV, but Google says it loses support in the second half of 2027. Its
+  replacement, the Engage SDK, needs Google to set up access before integrating, which a
+  self-hosted app distributed outside Play is unlikely to get. The row holds at most 5 titles
+  per app.
+- **Preview channel rows** (an app's own row): nothing official says Google TV dropped them,
+  but developers report rows that show on older Android TV no longer appearing on Google TV.
+  Expect them only on plain Android TV home screens and some third-party launchers.
+- **The Live tab** (`TvInputService`): Google picks its partners, so it isn't open to an
+  independent app.
+
+What doesn't depend on Google: Open to Live TV and deep links such as
+`takeout://live/<channel>`, which any of the above would need anyway. If this is picked up
+again, Watch Next entries (movie and episode progress, plus Live TV) are the cheapest step,
+knowing they stop working in late 2027.
+
+Sources: [Increase Google TV app discovery (May 2026)](https://android-developers.googleblog.com/2026/05/increase-google-tv-app-discovery.html),
+[Engage SDK FAQ](https://developer.android.com/guide/playcore/engage/faq),
+[tv-samples issue #83](https://www.github.com/android/tv-samples/issues/83),
+[Develop a TV input service](https://developer.android.com/training/tv/tif/tvinput),
+[Google TV Live tab help](https://support.google.com/googletv/answer/10267283?hl=en).
 
 ## Implementation notes
 
