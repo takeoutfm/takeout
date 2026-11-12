@@ -29,7 +29,7 @@ import (
 // unscannedTracks returns up to limit tracks whose duration hasn't been read.
 func (m *Music) unscannedTracks(limit int) []Track {
 	var list []Track
-	m.db.Where("duration = 0 and key <> ''").Order("id").Limit(limit).Find(&list)
+	m.db.Where("(duration = 0 or duration is null) and key <> ''").Order("id").Limit(limit).Find(&list)
 	return list
 }
 

@@ -843,6 +843,7 @@ func TestingConfig() (*Config, error) {
 	v.SetDefault("Podcast.DB.Source", "${Activity.DB.Source}")
 	v.SetDefault("Progress.DB.Source", "${Activity.DB.Source}")
 	v.SetDefault("Film.DB.Source", "${Activity.DB.Source}")
+	v.SetDefault("TV.DB.Source", "${Activity.DB.Source}")
 	v.SetDefault("Guide.DB.Source", "${Activity.DB.Source}")
 
 	v.SetDefault("Auth.AccessToken.Issuer", "takeout.test")

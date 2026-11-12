@@ -61,19 +61,24 @@ func TestSyncDurations(t *testing.T) {
 		{TMID: 9003, Title: "Missing", Key: "missing.mkv"},
 		{TMID: 9004, Title: "No Key"},
 		{TMID: 9005, Title: "Done", Key: "good.mkv", Duration: 42},
+		{TMID: 9006, Title: "Upgraded", Key: "good.mkv"},
 	}
 	for i := range movies {
 		if err := f.createMovie(&movies[i]); err != nil {
 			t.Fatal(err)
 		}
 	}
+	// A row from before the duration column existed: adding the column left it NULL, not 0.
+	if err := f.db.Exec("update movies set duration = null where tm_id = 9006").Error; err != nil {
+		t.Fatal(err)
+	}
 
 	results := f.SyncDurations(t.Context(), nil, 100)
-	if len(results) != 3 {
+	if len(results) != 4 {
 		t.Fatalf("got %d results", len(results))
 	}
 
-	want := map[int64]int{9001: 10, 9002: -1, 9003: -1, 9004: 0, 9005: 42}
+	want := map[int64]int{9001: 10, 9002: -1, 9003: -1, 9004: 0, 9005: 42, 9006: 10}
 	for tmid, secs := range want {
 		m, err := f.LookupTMID(int(tmid))
 		if err != nil {

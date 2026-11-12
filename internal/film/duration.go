@@ -29,7 +29,7 @@ import (
 // unscannedMovies returns up to limit movies whose duration hasn't been read.
 func (f *Film) unscannedMovies(limit int) []Movie {
 	var list []Movie
-	f.db.Where("duration = 0 and key <> ''").Order("id").Limit(limit).Find(&list)
+	f.db.Where("(duration = 0 or duration is null) and key <> ''").Order("id").Limit(limit).Find(&list)
 	return list
 }
 

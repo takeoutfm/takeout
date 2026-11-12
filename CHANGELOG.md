@@ -4,7 +4,8 @@
   headers (mkv, mp4/m4a, flac, ogg, mp3) with range requests; new hourly jobs
   scan files in batches (Film/TV/Music.DurationSyncInterval and
   DurationSyncLimit), also runnable as the "durations" job. 0 means not
-  scanned yet and -1 means the duration couldn't be read
+  scanned yet (as does an empty value in databases from before this
+  release) and -1 means the duration couldn't be read
 - channels: a TV-style schedule of movies and shows from search queries, set
   up per media collection under Guide.Lineup (Name, Movies and/or Shows
   queries, optional Layout/Match date window, Align, MinBreak) with

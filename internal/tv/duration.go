@@ -30,7 +30,7 @@ import (
 // unscannedTVEpisodes returns up to limit episodes whose duration hasn't been read.
 func (tv *TV) unscannedTVEpisodes(limit int) []TVEpisode {
 	var list []TVEpisode
-	tv.db.Where("duration = 0 and key <> ''").Order("id").Limit(limit).Find(&list)
+	tv.db.Where("(duration = 0 or duration is null) and key <> ''").Order("id").Limit(limit).Find(&list)
 	return list
 }
 
