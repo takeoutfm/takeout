@@ -51,7 +51,7 @@ func (g *Guide) Open() error {
 	if err != nil {
 		return err
 	}
-	return g.db.AutoMigrate(&Channel{}, &Program{})
+	return g.db.AutoMigrate(&Channel{}, &Program{}, &SpecialAiring{})
 }
 
 func (g *Guide) Close() {
@@ -210,4 +210,26 @@ func (g *Guide) createPrograms(list []Program) error {
 // deleteEnded removes programs that ended before t.
 func (g *Guide) deleteEnded(t time.Time) error {
 	return g.db.Unscoped().Where("end_at < ?", t.UTC()).Delete(&Program{}).Error
+}
+
+// specialAirings returns a channel's specials, in start order.
+func (g *Guide) specialAirings(channelID uint) []SpecialAiring {
+	var list []SpecialAiring
+	g.db.Where("channel_id = ?", channelID).Order("start_at").Find(&list)
+	return list
+}
+
+// specialNear reports whether a special named name airs on another channel
+// within d of t.
+func (g *Guide) specialNear(name string, channelID uint, t time.Time, d time.Duration) bool {
+	var count int64
+	g.db.Model(&SpecialAiring{}).
+		Where("name = ? and channel_id <> ? and start_at > ? and start_at < ?",
+			name, channelID, t.Add(-d).UTC(), t.Add(d).UTC()).
+		Count(&count)
+	return count > 0
+}
+
+func (g *Guide) createSpecialAiring(a *SpecialAiring) error {
+	return g.db.Create(a).Error
 }

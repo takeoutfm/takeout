@@ -11,6 +11,11 @@
   queries, optional Layout/Match date window, Align, MinBreak) with
   Guide.Timezone, Horizon (168h), Align (5m), MinBreak and SyncInterval
   (1h); the "guide" job extends each schedule and runs at startup
+- channel specials: Lineup entries can have Specials (Every, At, MaxLength,
+  Collections, MinFilms, Skip, Themes with Name, Movies/Shows and Order:
+  date) for an occasional themed block, such as a film collection marathon,
+  rotated so each comes round in turn; its programs have Block set to the
+  special's name
 - GET /api/guide[?start=&end=] returns Channels, what's on each one (default now to
   3 hours ahead, RFC3339 times, capped at the horizon) with each program's
   title, images and Location; titles no longer in the library are "offair"

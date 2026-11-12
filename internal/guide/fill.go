@@ -33,8 +33,9 @@ type Title struct {
 	TVID    int64
 	Season  int
 	Episode int
-	Seconds int     // playing time
-	Vote    float32 // 0-10
+	Seconds int       // playing time
+	Vote    float32   // 0-10
+	Date    time.Time // release or air date
 }
 
 func (t Title) duration() time.Duration {
@@ -105,6 +106,24 @@ type fillPlan struct {
 	Location *time.Location
 	OnAir    func(day time.Time) bool // seasonal window; nil is always
 	Seed     uint64
+	Blocks   []block // specials, in start order
+}
+
+// block is a special placed ahead of regular programming. Its programs are
+// laid out from Start; End is when the program after it can start.
+type block struct {
+	Start, End time.Time
+	Programs   []Program
+}
+
+// nextBlock returns the first block that hasn't ended by t, or nil.
+func nextBlock(blocks []block, t time.Time) *block {
+	for i := range blocks {
+		if blocks[i].End.After(t) {
+			return &blocks[i]
+		}
+	}
+	return nil
 }
 
 func (p fillPlan) loc() *time.Location {
@@ -299,12 +318,38 @@ func fill(plan fillPlan, pool []Title, history []Program, busy busyTimes) []Prog
 	var out []Program
 	t := plan.Start
 	for i := 0; t.Before(plan.Until) && i < 100000; i++ {
+		b := nextBlock(plan.Blocks, t)
+		if b != nil && !t.Before(b.Start) {
+			// a special: its programs as laid out (busy already has them)
+			for _, p := range b.Programs {
+				if p.Start.Before(t) || !p.Start.Before(plan.Until) {
+					continue
+				}
+				out = append(out, p)
+				title := programTitle(p)
+				if u, ok := byKey[title.unit()]; ok {
+					u.aired(title, p.Start)
+				}
+				prev = title.unit()
+			}
+			t = b.End
+			continue
+		}
 		if plan.OnAir != nil && !plan.OnAir(t.In(loc)) {
 			t = nextMidnight(t, loc)
 			continue
 		}
-		u := pick(units, t, prev, busy, rng, cooldown, spacing, align, plan.MinBreak, loc)
+		var limit time.Time
+		if b != nil {
+			limit = b.Start
+		}
+		u := pick(units, t, limit, prev, busy, rng, cooldown, spacing, align, plan.MinBreak, loc)
 		if u == nil {
+			if !limit.IsZero() {
+				// nothing fits before the special; a longer break
+				t = limit
+				continue
+			}
 			// nothing can air now; try the next mark
 			t = t.Add(align)
 			continue
@@ -326,7 +371,9 @@ type candidate struct {
 	weight float64
 }
 
-func pick(units []*unit, t time.Time, prev string, busy busyTimes, rng *rand.Rand,
+// pick chooses what airs at t. With a non-zero limit, the program and the
+// break after it must be over by then.
+func pick(units []*unit, t, limit time.Time, prev string, busy busyTimes, rng *rand.Rand,
 	cooldown, spacing, align, minBreak time.Duration, loc *time.Location) *unit {
 
 	var candidates []candidate
@@ -336,6 +383,9 @@ func pick(units []*unit, t time.Time, prev string, busy busyTimes, rng *rand.Ran
 		title := u.title()
 		end := t.Add(title.duration())
 		next := nextStart(end, align, minBreak, loc)
+		if !limit.IsZero() && next.After(limit) {
+			continue
+		}
 		if busy.overlaps(title.key(), t, next) {
 			continue
 		}

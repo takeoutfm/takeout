@@ -19,6 +19,7 @@ package guide
 
 import (
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -30,6 +31,29 @@ type fakeLibrary map[string][]Title
 
 func (l fakeLibrary) Movies(query string, limit int) []Title { return l[query] }
 func (l fakeLibrary) Shows(query string, limit int) []Title  { return l[query] }
+
+// Collections are the keys "collection:<name>".
+func (l fakeLibrary) Collection(name string) []Title { return l["collection:"+name] }
+
+func (l fakeLibrary) CollectionCounts(tmids []int64) map[string]int {
+	in := make(map[int64]bool)
+	for _, id := range tmids {
+		in[id] = true
+	}
+	counts := make(map[string]int)
+	for k, titles := range l {
+		name, ok := strings.CutPrefix(k, "collection:")
+		if !ok {
+			continue
+		}
+		for _, t := range titles {
+			if in[t.TMID] {
+				counts[name]++
+			}
+		}
+	}
+	return counts
+}
 
 func makeGuide(t *testing.T, lineup []config.LineupEntry) *Guide {
 	cfg, err := config.TestingConfig()

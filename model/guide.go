@@ -51,3 +51,13 @@ type Program struct {
 	Episode   int
 	RID       string
 }
+
+// SpecialAiring is a special planned or aired on a channel. It outlives the
+// special's programs, so rotation still knows what aired when.
+type SpecialAiring struct {
+	gorm.Model
+	ChannelID uint      `gorm:"index:idx_special_airings_channel"`
+	Name      string    `gorm:"index:idx_special_airings_name"`
+	Start     time.Time `gorm:"column:start_at"`
+	End       time.Time `gorm:"column:end_at"` // when the special's slot ends
+}

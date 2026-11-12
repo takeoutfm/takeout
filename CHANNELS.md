@@ -2,7 +2,8 @@
 
 Status: proposal. Phases 1 (durations) and 2 (server schedule) are implemented. In the TV app,
 phase 3 (live player) and phase 4 (guide grid, days, Watch Now, Start Over) are built, except
-Open to Live TV; live playback hasn't been tested yet. Phases 5 and 6 are not started. See
+Open to Live TV; live playback hasn't been tested yet. Of phase 5, specials are implemented;
+features, music breaks and music channels are not. Phase 6 is not started. See
 "Implementation notes" at the end for where the server code differs from this text.
 
 A TV-style guide of named channels with movies and shows "already playing", primarily for
@@ -516,8 +517,23 @@ Phase 2 as built, where it differs from or fills in the design above:
   keywords to each episode's index fields in `syncEpisode` would fix this, after a full TV
   re-sync.
 - **Config:** `Guide.SearchLimit` (default 5000) is the pool search limit. Per-channel
-  `Align` and `MinBreak` override the collection's. `BreakMusic`, `Specials` and `Features`
-  aren't read yet (phase 5).
+  `Align` and `MinBreak` override the collection's. `BreakMusic` and `Features` aren't read
+  yet (phase 5).
+- **Specials** (`internal/guide/special.go`): a channel's specials are its `Themes`, then, with
+  `Collections`, every collection with at least `MinFilms` of the channel's pool movies, less
+  `Skip`. A collection plays every film owned from it in release order; a theme plays its
+  query in release order with `Order: date`, else shuffled (a series' episodes stay in order).
+  When `Every` has passed since the channel's last special (the first is due as soon as
+  specials are configured), the job picks an evening 0–3 days later at `At` and records it in
+  `special_airings`, which outlives the programs. It picks the special that has gone longest
+  without airing on the channel, skipping one that airs on another channel within 7 days and
+  one with fewer than 2 programs. Specials need at least one regular schedule run to be
+  placed, so the first lands after the end of the existing schedule. Each run places every
+  channel's specials before filling any channel, so regular programming everywhere avoids
+  their titles at the time; regular programming before a special ends in time for it, with
+  a longer break if nothing fits. The special's programs, laid out back to back until the
+  next wouldn't end within `MaxLength`, carry its name in `Block`; their titles then count
+  toward the usual no-repeat window. They aren't kept off the days before the special.
 - **Breaks:** gaps between programs are left empty; the apps can show a slate until music
   breaks are scheduled.
 - **Tables** are `channels` and `programs` in `guide.db` next to the other media

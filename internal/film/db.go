@@ -106,6 +106,26 @@ func (f *Film) Collections() []Collection {
 	return collections
 }
 
+// CollectionCounts counts, for each collection, how many of the movies in
+// tmids belong to it.
+func (f *Film) CollectionCounts(tmids []int64) map[string]int {
+	counts := make(map[string]int)
+	const chunkSize = 500
+	for i := 0; i < len(tmids); i += chunkSize {
+		chunk := tmids[i:min(i+chunkSize, len(tmids))]
+		var rows []struct {
+			Name  string
+			Count int
+		}
+		f.db.Model(&Collection{}).Select("name, count(distinct tm_id) as count").
+			Where("tm_id in (?)", chunk).Group("name").Scan(&rows)
+		for _, r := range rows {
+			counts[r.Name] += r.Count
+		}
+	}
+	return counts
+}
+
 func (f *Film) MovieCollections(m Movie) []Collection {
 	var collections []Collection
 	f.db.Where("tm_id = ?", m.TMID).Find(&collections)

@@ -251,6 +251,27 @@ type LineupEntry struct {
 	Shows    string // tv episode search query
 	Align    time.Duration
 	MinBreak time.Duration
+	Specials SpecialsConfig
+}
+
+// SpecialsConfig is a channel's occasional themed events, such as a marathon
+// of a film collection. A zero Every means no specials.
+type SpecialsConfig struct {
+	Every       time.Duration // about how often the channel runs a special
+	At          string        // local start time, "20:00" if empty
+	MaxLength   time.Duration // the special ends after the last whole program that fits; 12h if zero
+	Collections bool          // add specials from the channel's film collections
+	MinFilms    int           // films a collection needs in the channel's results; 3 if zero
+	Skip        []string      // collection names never to use
+	Themes      []ThemeConfig
+}
+
+// ThemeConfig is a hand-written special.
+type ThemeConfig struct {
+	Name   string
+	Movies string // movie search query
+	Shows  string // tv episode search query
+	Order  string // "date" for release order; shuffled otherwise
 }
 
 // Location is the time zone used for channel day windows and alignment.

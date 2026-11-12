@@ -42,6 +42,12 @@ const (
 type Library interface {
 	Movies(query string, limit int) []Title
 	Shows(query string, limit int) []Title
+	// CollectionCounts counts, for each film collection, how many of the
+	// movies in tmids belong to it.
+	CollectionCounts(tmids []int64) map[string]int
+	// Collection is every movie in the library from the named collection,
+	// in release order.
+	Collection(name string) []Title
 }
 
 // MediaLibrary is the Library and Resolver for a media collection.
@@ -89,15 +95,32 @@ func seconds(duration, runtime int) int {
 	return 0
 }
 
+func movieTitle(m Movie) Title {
+	return Title{
+		Kind:    ProgramMovie,
+		TMID:    m.TMID,
+		Seconds: seconds(m.Duration, m.Runtime),
+		Vote:    m.VoteAverage,
+		Date:    m.Date,
+	}
+}
+
 func (l *MediaLibrary) Movies(query string, limit int) []Title {
 	var titles []Title
 	for _, m := range l.film.Search(query, limit) {
-		titles = append(titles, Title{
-			Kind:    ProgramMovie,
-			TMID:    m.TMID,
-			Seconds: seconds(m.Duration, m.Runtime),
-			Vote:    m.VoteAverage,
-		})
+		titles = append(titles, movieTitle(m))
+	}
+	return titles
+}
+
+func (l *MediaLibrary) CollectionCounts(tmids []int64) map[string]int {
+	return l.film.CollectionCounts(tmids)
+}
+
+func (l *MediaLibrary) Collection(name string) []Title {
+	var titles []Title
+	for _, m := range l.film.CollectionMovies(Collection{Name: name}) {
+		titles = append(titles, movieTitle(m))
 	}
 	return titles
 }
@@ -112,6 +135,7 @@ func (l *MediaLibrary) Shows(query string, limit int) []Title {
 			Episode: e.Episode,
 			Seconds: seconds(e.Duration, e.Runtime),
 			Vote:    e.VoteAverage,
+			Date:    e.Date,
 		})
 	}
 	return titles
@@ -160,6 +184,14 @@ func (g *Guide) Sync(now time.Time, lib Library) error {
 	}
 
 	until := now.Add(cfg.Horizon)
+	type channelFill struct {
+		cc      config.LineupEntry
+		ch      Channel
+		plan    fillPlan
+		pool    []Title
+		history []Program
+	}
+	var fills []channelFill
 	for _, cc := range cfg.Lineup {
 		ch, err := g.ensureChannel(cc.Name)
 		if err != nil {
@@ -204,16 +236,38 @@ func (g *Guide) Sync(now time.Time, lib Library) error {
 				return date.MatchTime(layout, match, day)
 			}
 		}
+		fills = append(fills, channelFill{cc, ch, plan, pool, history})
+	}
 
-		programs := fill(plan, pool, history, busy)
+	// Specials first, on every channel, so regular programming everywhere
+	// steers clear of their titles.
+	for i := range fills {
+		f := &fills[i]
+		blocks, err := g.specialBlocks(f.ch, f.cc, f.pool, lib, f.plan.Start, until,
+			f.plan.Align, f.plan.MinBreak, loc)
+		if err != nil {
+			return err
+		}
+		f.plan.Blocks = blocks
+		for _, b := range blocks {
+			for _, p := range b.Programs {
+				if !p.Start.Before(f.plan.Start) {
+					busy.add(p, nextStart(p.End, f.plan.Align, f.plan.MinBreak, loc))
+				}
+			}
+		}
+	}
+
+	for _, f := range fills {
+		programs := fill(f.plan, f.pool, f.history, busy)
 		for i := range programs {
-			programs[i].ChannelID = ch.ID
+			programs[i].ChannelID = f.ch.ID
 		}
 		if err := g.createPrograms(programs); err != nil {
 			return err
 		}
 		if len(programs) > 0 {
-			log.Printf("channels: %s scheduled %d programs to %s\n", cc.Name, len(programs),
+			log.Printf("channels: %s scheduled %d programs to %s\n", f.cc.Name, len(programs),
 				programs[len(programs)-1].Start.In(loc).Format(time.RFC3339))
 		}
 	}
