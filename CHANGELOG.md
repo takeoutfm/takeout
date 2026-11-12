@@ -1,16 +1,15 @@
-## Unreleased
+## 0.31.0
 
-- movies, episodes and tracks have a Duration in seconds, read from the file
-  headers (mkv, mp4/m4a, flac, ogg, mp3) with range requests; new hourly jobs
-  scan files in batches (Film/TV/Music.DurationSyncInterval and
-  DurationSyncLimit), also runnable as the "durations" job. 0 means not
-  scanned yet (as does an empty value in databases from before this
-  release) and -1 means the duration couldn't be read
-- channels: a TV-style schedule of movies and shows from search queries, set
-  up per media collection under Guide.Lineup (Name, Movies and/or Shows
-  queries, optional Layout/Match date window, Align, MinBreak) with
-  Guide.Timezone, Horizon (168h), Align (5m), MinBreak and SyncInterval
-  (1h); the "guide" job extends each schedule and runs at startup
+Channels: a TV-style guide of what's on, scheduled from your library and
+played live by the apps. The design and configuration are in CHANNELS.md.
+
+- channels: a schedule of movies and shows from search queries, set up per
+  media collection under Guide.Lineup (Name, Movies and/or Shows queries,
+  optional Layout/Match date window for seasonal channels, Align, MinBreak)
+  with Guide.Timezone, Horizon (168h), Align (5m), MinBreak and SyncInterval
+  (1h); the "guide" job extends each schedule and runs at startup. Series
+  play in order, movies don't repeat for a while, and the same title isn't
+  on two channels at once
 - channel specials: Lineup entries can have Specials (Every, At, MaxLength,
   Collections, MinFilms, Skip, Themes with Name, Movies/Shows and Order:
   date) for an occasional themed block, such as a film collection marathon,
@@ -24,14 +23,23 @@
 - channel music breaks: gaps between programs are filled with tracks from
   Guide.BreakMusic or a Lineup entry's BreakMusic (any track if unset) that
   have a scanned duration, as Kind "track" programs with title, artist,
-  cover and Location; GET /api/guide fills a feature slot about to air if
-  the guide job hasn't
-- channel programming before a special or feature slot picks titles that
-  leave the least dead air, rather than leaving a break no title fits
-- GET /api/guide[?start=&end=] returns Channels, what's on each one (default now to
-  3 hours ahead, RFC3339 times, capped at the horizon) with each program's
-  title, images and Location; titles no longer in the library are "offair"
+  cover and Location
+- programming before a special or feature slot picks titles that leave the
+  least dead air, rather than leaving a break no title fits
+- GET /api/guide[?start=&end=] returns Channels, what's on each one (default
+  now to 3 hours ahead, RFC3339 times, capped at the horizon) with each
+  program's Kind (movie, episode, track, reserved or offair for titles no
+  longer in the library), title, images, Block and Location, and the
+  server's Time; it fills a feature slot about to air if the guide job
+  hasn't
 - GET /api/index has HasGuide
+- movies, episodes and tracks have a Duration in seconds, read from the file
+  headers (mkv, mp4/m4a, flac, ogg, mp3) with range requests; new hourly jobs
+  scan files in batches (Film/TV/Music.DurationSyncInterval and
+  DurationSyncLimit), also runnable as the "durations" job. 0 means not
+  scanned yet (as does an empty value in databases from before this
+  release, which the jobs also scan) and -1 means the duration couldn't be
+  read
 
 ## 0.30.2
 
