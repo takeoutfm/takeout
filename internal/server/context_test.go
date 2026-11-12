@@ -29,6 +29,7 @@ import (
 	"takeoutfm.dev/takeout/internal/config"
 	"takeoutfm.dev/takeout/internal/favorite"
 	"takeoutfm.dev/takeout/internal/film"
+	"takeoutfm.dev/takeout/internal/guide"
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/podcast"
 	"takeoutfm.dev/takeout/internal/progress"
@@ -66,6 +67,7 @@ type TestContext struct {
 	p    *progress.Progress
 	f    *film.Film
 	tv   *tv.TV
+	ch   *guide.Guide
 }
 
 func NewTestContext(t *testing.T) *TestContext {
@@ -187,6 +189,17 @@ func (c *TestContext) TV() *tv.TV {
 	return c.tv
 }
 
+func (c *TestContext) Guide() *guide.Guide {
+	if c.ch == nil {
+		c.ch = guide.NewGuide(c.Config())
+		err := c.ch.Open()
+		if err != nil {
+			c.t.Fatal(err)
+		}
+	}
+	return c.ch
+}
+
 func (c *TestContext) ImageClient() client.Getter {
 	return nil
 }
@@ -206,7 +219,6 @@ func (c *TestContext) LocateEpisode(model.Episode) string {
 func (c *TestContext) LocateTVEpisode(model.TVEpisode) string {
 	return "/api/tv/episodes/24eb51db-a4b3-4b23-9d8b-6ccb97150f2c/location"
 }
-
 
 func (c *TestContext) FindArtist(id string) (model.Artist, error) {
 	if id == TestArtistID {

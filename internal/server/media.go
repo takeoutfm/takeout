@@ -24,6 +24,7 @@ import (
 	"takeoutfm.dev/takeout/internal/auth"
 	"takeoutfm.dev/takeout/internal/config"
 	"takeoutfm.dev/takeout/internal/film"
+	"takeoutfm.dev/takeout/internal/guide"
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/podcast"
 	"takeoutfm.dev/takeout/internal/tv"
@@ -36,6 +37,7 @@ type Media struct {
 	film    *film.Film
 	podcast *podcast.Podcast
 	tv      *tv.TV
+	guide   *guide.Guide
 }
 
 func (m Media) Config() *config.Config {
@@ -56,6 +58,10 @@ func (m Media) Film() *film.Film {
 
 func (m Media) TV() *tv.TV {
 	return m.tv
+}
+
+func (m Media) Guide() *guide.Guide {
+	return m.guide
 }
 
 func mediaConfigFor(root *config.Config, user auth.User) (string, *config.Config, error) {
@@ -125,6 +131,8 @@ func makeMedia(ctx context.Context, name string, config *config.Config) *Media {
 		log.CheckError(err)
 		media.tv, err = media.makeTV(ctx, config)
 		log.CheckError(err)
+		media.guide, err = media.makeGuide(config)
+		log.CheckError(err)
 		mediaMap[name] = media
 	}
 	return media
@@ -164,4 +172,13 @@ func (Media) makeTV(ctx context.Context, config *config.Config) (*tv.TV, error) 
 		return nil, err
 	}
 	return tv, nil
+}
+
+func (Media) makeGuide(config *config.Config) (*guide.Guide, error) {
+	g := guide.NewGuide(config)
+	err := g.Open()
+	if err != nil {
+		return nil, err
+	}
+	return g, nil
 }

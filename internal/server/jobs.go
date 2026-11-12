@@ -26,6 +26,7 @@ import (
 	"takeoutfm.dev/takeout/internal/auth"
 	"takeoutfm.dev/takeout/internal/config"
 	"takeoutfm.dev/takeout/internal/film"
+	"takeoutfm.dev/takeout/internal/guide"
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/podcast"
 	"takeoutfm.dev/takeout/internal/progress"
@@ -93,6 +94,9 @@ func schedule(ctx context.Context, config *config.Config) {
 	mediaSync(ctx, config.TV.BackdropSyncInterval, syncTVBackdrops, false)
 	mediaSync(ctx, config.TV.StillSyncInterval, syncTVStills, false)
 	mediaSync(ctx, config.TV.DurationSyncInterval, syncTVDurations, false)
+
+	// channel guide
+	mediaSync(ctx, config.Guide.SyncInterval, syncGuide, true)
 
 	scheduler.Every(time.Minute * 5).WaitForSchedule().Do(func() {
 		a := auth.NewAuth(config)
@@ -285,6 +289,28 @@ func syncTVStills(ctx context.Context, config *config.Config, mediaConfig *confi
 	return nil
 }
 
+func syncGuide(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
+	if len(mediaConfig.Guide.Lineup) == 0 {
+		return nil
+	}
+	f := film.NewFilm(mediaConfig)
+	if err := f.Open(ctx); err != nil {
+		return err
+	}
+	defer f.Close()
+	t := tv.NewTV(mediaConfig)
+	if err := t.Open(ctx); err != nil {
+		return err
+	}
+	defer t.Close()
+	c := guide.NewGuide(mediaConfig)
+	if err := c.Open(); err != nil {
+		return err
+	}
+	defer c.Close()
+	return c.Sync(time.Now(), guide.NewLibrary(f, t))
+}
+
 // Range requests for reading media file headers.
 var durationClient = &http.Client{Timeout: time.Minute}
 
@@ -412,6 +438,8 @@ func Job(ctx context.Context, config *config.Config, name string) error {
 		case "backdrops":
 			syncTVBackdrops(ctx, config, mediaConfig)
 			syncFilmBackdrops(ctx, config, mediaConfig)
+		case "guide":
+			syncGuide(ctx, config, mediaConfig)
 		case "durations":
 			syncFilmDurations(ctx, config, mediaConfig)
 			syncTVDurations(ctx, config, mediaConfig)

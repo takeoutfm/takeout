@@ -5,6 +5,15 @@
   scan files in batches (Film/TV/Music.DurationSyncInterval and
   DurationSyncLimit), also runnable as the "durations" job. 0 means not
   scanned yet and -1 means the duration couldn't be read
+- channels: a TV-style schedule of movies and shows from search queries, set
+  up per media collection under Guide.Lineup (Name, Movies and/or Shows
+  queries, optional Layout/Match date window, Align, MinBreak) with
+  Guide.Timezone, Horizon (168h), Align (5m), MinBreak and SyncInterval
+  (1h); the "guide" job extends each schedule and runs at startup
+- GET /api/guide[?start=&end=] returns Channels, what's on each one (default now to
+  3 hours ahead, RFC3339 times, capped at the horizon) with each program's
+  title, images and Location; titles no longer in the library are "offair"
+- GET /api/index has HasGuide
 
 ## 0.30.2
 

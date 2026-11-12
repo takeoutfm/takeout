@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"time"
 
+	"takeoutfm.dev/takeout/internal/guide"
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/people"
 	"takeoutfm.dev/takeout/lib/date"
@@ -38,6 +39,7 @@ func IndexView(ctx Context) *Index {
 	view.HasPodcasts = ctx.Podcast().HasPodcasts()
 	view.HasPlaylists = ctx.Music().HasPlaylists(ctx.User())
 	view.HasRecommendMovies = ctx.Film().HasRecommendations()
+	view.HasGuide = ctx.Guide() != nil && ctx.Guide().HasGuide()
 	view.MovieGenres = ctx.Film().MovieGenres()
 	return view
 }
@@ -470,4 +472,64 @@ func FavoriteArtistsView(ctx Context) *FavoriteArtists {
 func FavoriteTracksView(ctx Context) *FavoriteTracks {
 	fav := ctx.Favorite()
 	return &FavoriteTracks{Tracks: fav.Tracks(ctx)}
+}
+
+// GuideView is what's on each channel between start and end.
+func GuideView(ctx Context, now, start, end time.Time) *Guide {
+	view := &Guide{Time: now.UnixMilli(), Start: start.UTC(), End: end.UTC()}
+	view.Channels = []Channel{}
+	g := ctx.Guide()
+	if g == nil || !start.Before(end) {
+		return view
+	}
+	for _, l := range g.Listings(start, end, guide.NewLibrary(ctx.Film(), ctx.TV())) {
+		channel := Channel{Name: l.Channel.Name}
+		for _, e := range l.Programs {
+			channel.Programs = append(channel.Programs, guideProgram(ctx, e))
+		}
+		view.Channels = append(view.Channels, channel)
+	}
+	return view
+}
+
+func guideProgram(ctx Context, e guide.Entry) Program {
+	p := Program{
+		Kind:    e.Kind,
+		Block:   e.Block,
+		Start:   e.Start.UTC(),
+		End:     e.End.UTC(),
+		TMID:    e.TMID,
+		TVID:    e.TVID,
+		Season:  e.Season,
+		Episode: e.Episode,
+	}
+	switch {
+	case e.Movie != nil:
+		m := *e.Movie
+		p.TargetID = m.ID
+		p.Title = m.Title
+		p.Subtitle = m.Tagline
+		p.Rating = m.Rating
+		p.Image = ctx.MovieImage(m)
+		p.Background = ctx.MovieBackground(m)
+		p.ETag = m.ETag
+		p.Size = m.Size
+		p.Location = ctx.LocateMovie(m)
+	case e.TVEpisode != nil:
+		ep := *e.TVEpisode
+		p.TargetID = ep.ID
+		p.Title = e.Series.Name
+		p.Subtitle = ep.Name
+		p.Rating = e.Series.Rating
+		p.Image = ctx.TVEpisodeImage(ep)
+		p.Background = ctx.TVEpisodeBackground(ep)
+		p.ETag = ep.ETag
+		p.Size = ep.Size
+		p.Location = ctx.LocateTVEpisode(ep)
+	default:
+		// left the library; show a slate until the next program
+		p.Kind = ProgramOffAir
+		p.Title = "Off Air"
+	}
+	return p
 }

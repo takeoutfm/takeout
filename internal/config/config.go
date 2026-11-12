@@ -31,6 +31,7 @@ import (
 	"sync"
 	"text/template"
 	"time"
+	_ "time/tzdata" // channel time zones in minimal containers
 
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
@@ -230,6 +231,38 @@ type ProgressConfig struct {
 	DB DatabaseConfig
 }
 
+// GuideConfig is a TV-style lineup of channels built from search queries.
+type GuideConfig struct {
+	DB           DatabaseConfig
+	Timezone     string        // for day windows; empty is server local time
+	SyncInterval time.Duration // how often the schedule is extended
+	Horizon      time.Duration // how far ahead the schedule is built
+	Align        time.Duration // programs start on multiples of this
+	MinBreak     time.Duration // shortest gap between programs
+	SearchLimit  int           // max search results for a channel's pool
+	Lineup       []LineupEntry
+}
+
+type LineupEntry struct {
+	Name     string
+	Layout   string // optional date window, as in DateRecommend
+	Match    string
+	Movies   string // movie search query
+	Shows    string // tv episode search query
+	Align    time.Duration
+	MinBreak time.Duration
+}
+
+// Location is the time zone used for channel day windows and alignment.
+func (c GuideConfig) Location() *time.Location {
+	if c.Timezone != "" {
+		if loc, err := time.LoadLocation(c.Timezone); err == nil {
+			return loc
+		}
+	}
+	return time.Local
+}
+
 type ActivityConfig struct {
 	DB                DatabaseConfig
 	RecentMoviesTitle string
@@ -332,6 +365,7 @@ type Config struct {
 	Progress     ProgressConfig
 	Activity     ActivityConfig
 	Favorite     FavoriteConfig
+	Guide        GuideConfig
 }
 
 func (c Config) NewGetter() client.Getter {
@@ -502,6 +536,15 @@ func configDefaults(v *viper.Viper) {
 		"{{.Series}} ({{.Year}}) - S{{.Season}}E{{.Episode}} - {{.Name}}{{.Extension}}")
 
 	v.SetDefault("Search.IndexDir", ".")
+
+	v.SetDefault("Guide.DB.Driver", "sqlite3")
+	v.SetDefault("Guide.DB.Source", "guide.db")
+	v.SetDefault("Guide.DB.Logger", "default")
+	v.SetDefault("Guide.SyncInterval", "1h")
+	v.SetDefault("Guide.Horizon", "168h")
+	v.SetDefault("Guide.Align", "5m")
+	v.SetDefault("Guide.MinBreak", "0")
+	v.SetDefault("Guide.SearchLimit", "5000")
 
 	v.SetDefault("Film.DB.Driver", "sqlite3")
 	v.SetDefault("Film.DB.Source", "film.db")
@@ -800,6 +843,7 @@ func TestingConfig() (*Config, error) {
 	v.SetDefault("Podcast.DB.Source", "${Activity.DB.Source}")
 	v.SetDefault("Progress.DB.Source", "${Activity.DB.Source}")
 	v.SetDefault("Film.DB.Source", "${Activity.DB.Source}")
+	v.SetDefault("Guide.DB.Source", "${Activity.DB.Source}")
 
 	v.SetDefault("Auth.AccessToken.Issuer", "takeout.test")
 	v.SetDefault("Auth.AccessToken.Age", "5m")

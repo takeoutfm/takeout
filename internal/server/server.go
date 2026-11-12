@@ -304,6 +304,7 @@ func Serve(c context.Context, config *config.Config) error {
 	mux.Handle("GET /api/home", accessTokenAuthHandler(ctx, apiHome))
 	mux.Handle("GET /api/index", accessTokenAuthHandler(ctx, apiIndex))
 	mux.Handle("GET /api/search", accessTokenAuthHandler(ctx, apiSearch))
+	mux.Handle("GET /api/guide", accessTokenAuthHandler(ctx, apiGuide))
 
 	// playlist
 	mux.Handle("GET /api/playlist", accessTokenAuthHandler(ctx, apiPlaylist))

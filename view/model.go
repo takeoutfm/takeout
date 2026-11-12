@@ -39,7 +39,47 @@ type Index struct {
 	HasPodcasts        bool
 	HasPlaylists       bool
 	HasRecommendMovies bool
+	HasGuide           bool
 	MovieGenres        []string
+}
+
+// Guide is what's on the channels between Start and End.
+type Guide struct {
+	Time     int64 // server time in milliseconds; use it, not the device clock
+	Start    time.Time
+	End      time.Time
+	Channels []Channel
+}
+
+// Channel is a channel and its programs in the requested range.
+type Channel struct {
+	Name     string // unique; a channel's identity
+	Programs []Program
+}
+
+const ProgramOffAir = "offair"
+
+// Program is one program on a channel. The gap between its End and the next program's
+// Start is a break. Kind is movie, episode or offair, when the title has left
+// the library.
+type Program struct {
+	Kind       string
+	Block      string `json:",omitempty"`
+	Start      time.Time
+	End        time.Time
+	Title      string
+	Subtitle   string `json:",omitempty"`
+	Rating     string `json:",omitempty"`
+	Image      string `json:",omitempty"`
+	Background string `json:",omitempty"`
+	ETag       string `json:",omitempty"`
+	Size       int64  `json:",omitempty"`
+	Location   string `json:",omitempty"`
+	TargetID   uint   `json:",omitempty"` // row for Kind: /api/movies/{id} or /api/tv/episodes/{id}
+	TMID       int64  `json:",omitempty"`
+	TVID       int64  `json:",omitempty"`
+	Season     int    `json:",omitempty"`
+	Episode    int    `json:",omitempty"`
 }
 
 type Home struct {

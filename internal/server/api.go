@@ -678,6 +678,42 @@ func apiIndex(w http.ResponseWriter, r *http.Request) {
 	apiView(w, r, view)
 }
 
+// apiGuide returns the channel programs between start (default now) and end
+// (default start + 3h), both RFC3339. A program is included if any part of it
+// is in the range. End is limited to the schedule horizon.
+func apiGuide(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	now := time.Now()
+	start := now
+	if v := r.URL.Query().Get(QueryStart); v != "" {
+		t, err := time.Parse(time.RFC3339, v)
+		if err != nil {
+			badRequest(w, ErrInvalidParameter)
+			return
+		}
+		start = t
+	}
+	end := start.Add(3 * time.Hour)
+	if v := r.URL.Query().Get(QueryEnd); v != "" {
+		t, err := time.Parse(time.RFC3339, v)
+		if err != nil {
+			badRequest(w, ErrInvalidParameter)
+			return
+		}
+		end = t
+	}
+	if end.Before(start) {
+		badRequest(w, ErrInvalidParameter)
+		return
+	}
+	if ch := ctx.Guide(); ch != nil {
+		if limit := now.Add(ch.Horizon()); end.After(limit) {
+			end = limit
+		}
+	}
+	apiView(w, r, GuideView(ctx, now, start, end))
+}
+
 func apiSearch(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	if v := r.URL.Query().Get(QuerySearch); v != "" {

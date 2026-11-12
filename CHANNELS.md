@@ -1,6 +1,7 @@
 # Channels
 
-Status: proposal. Phase 1 (durations) is implemented; the rest is not.
+Status: proposal. Phases 1 (durations) and 2 (server schedule) are implemented; the rest is
+not. See "Implementation notes" at the end for where the code differs from this text.
 
 A TV-style guide of named channels with movies and shows "already playing", primarily for
 Android TV. Someone used to watching TV sees what's on, picks a channel and joins wherever the
@@ -24,7 +25,7 @@ shape as a `DateRecommend` entry (name, optional date window, query), with separ
 because movies and TV are two search indexes.
 
 ```yaml
-Channels:
+Guide:
   Timezone: America/Los_Angeles
   BreakMusic: "genre:jazz"
   Lineup:
@@ -50,8 +51,8 @@ particularly how multiple terms combine.
 Rules:
 
 - **Names, not numbers.** Each channel gets a row with a database ID, created or matched by name
-  on each job run. The schedule and API use that ID. Renaming a channel creates a new row and
-  starts a fresh schedule, and the old entries age out.
+  on each job run. The schedule uses that ID; the API uses the name. Renaming a channel creates
+  a new row and starts a fresh schedule, and the old entries age out.
 - **Order** is the order of `Lineup`. A seasonal channel placed first is at the top while it's
   in season.
 - **Seasonal channels** come and go on their own. The job checks the window for each day with
@@ -224,7 +225,7 @@ internal sync identifiers.
 | Episode | `TVID` + season + episode |
 | Break track | `RID` (MusicBrainz recording); tracks without one aren't used for breaks |
 
-Channel rows are different: `internal/channel` owns them and media syncs never rebuild them, so
+Channel rows are different: `internal/guide` owns them and media syncs never rebuild them, so
 their database IDs are stable.
 
 Don't use media row IDs or UUIDs, because `syncMovie` deletes and recreates the row and a full
@@ -300,14 +301,14 @@ should be close but won't match exactly.
 
 ## Schedule generation
 
-New package `internal/channel` with its own database, shaped like `internal/progress`, added to
+New package `internal/guide` (type `Guide`) with its own database, shaped like `internal/progress`, added to
 the `Media` struct next to `film` and `tv`. Each collection gets its own schedule, shared by the
 users assigned to it.
 
 A job in `schedule()` runs through `mediaSync`, starting immediately:
 
 ```go
-mediaSync(ctx, config.Channels.SyncInterval, syncChannels, true)
+mediaSync(ctx, config.Guide.SyncInterval, syncGuide, true)
 ```
 
 Each run finds where every channel's schedule ends and adds programs up to now + `Horizon`, and
@@ -370,7 +371,7 @@ GET /api/guide[?start=<RFC3339>][&end=<RFC3339>]
 
 | App needs | Request |
 |---|---|
-| Show the Live tab or not | `HasChannels` in `/api/index` |
+| Show the Live tab or not | `HasGuide` in `/api/index` |
 | What's on now, for surfing | `/api/guide` |
 | The guide for a day | `/api/guide?start=…&end=…`, the TV's local midnight to midnight |
 
@@ -384,7 +385,7 @@ GET /api/guide[?start=<RFC3339>][&end=<RFC3339>]
   day's earlier programs. Older ranges return nothing.
 
 The response contains the server's current time and the channels with programs in the range, in
-`Lineup` order, each with its ID, name and programs. Channels with nothing in the range (an
+`Lineup` order, each with its name and programs. Channels with nothing in the range (an
 out-of-season channel, for example) are left out. A separate channel list isn't needed, since
 every use of channels also needs programs; add one later only if something calls for it.
 
@@ -406,7 +407,7 @@ Apps must use the server's time to compute offsets, because TV clocks can be wro
 fills it before responding. A slot then never airs empty, even if the job didn't run on time
 because the server was down.
 
-Add `HasChannels` to `Index`. Existing `ApiIndexView` flags treat a missing value as "yes" for
+Add `HasGuide` to `Index`. Existing `ApiIndexView` flags treat a missing value as "yes" for
 older servers; this one must treat missing as "no".
 
 ## Apps (`takeout_native`)
@@ -422,7 +423,7 @@ older servers; this one must treat missing as "no".
 
 ### Android TV guide
 
-- A new top-level tab, shown only when `HasChannels` is true.
+- A new top-level tab, shown only when `HasGuide` is true.
 - The guide grid: channel names on the left, program cells sized by duration, a "now" line,
   details and backdrop for the focused program on top, and day switching across the week.
 - Consecutive `track` rows appear as a single "Music break" cell, or no cell at all for very
@@ -481,7 +482,7 @@ in the current music player. These don't need wall-clock sync between TVs.
 
 1. **Durations:** `Duration` columns on movies, episodes and tracks, header readers, scan jobs,
    validation.
-2. **Server schedule:** `Channels` config, `internal/channel`, `/api/guide`, `HasChannels`. Testable before any TV work.
+2. **Server schedule:** `Guide` config, `internal/guide`, `/api/guide`, `HasGuide`. Testable before any TV work.
 3. **TV live player:** `:shared` repository, channel surfing and a simple "On Now" list, to prove
    tuning speed on the Chromecast before building the grid.
 4. **Full guide:** the grid, day browsing, Start Over, Open to Live TV.
@@ -489,3 +490,50 @@ in the current music player. These don't need wall-clock sync between TVs.
    filling, music breaks, music channels.
 6. **Other surfaces:** phone and other apps, Android TV home-screen integration, optional
    automatic genre channels.
+
+## Implementation notes
+
+Phase 2 as built, where it differs from or fills in the design above:
+
+- **Names:** the package is `internal/guide` and its main type is `Guide`, like `film.Film`.
+  The config section is `Guide:` (with `Lineup`, `Timezone`, `Horizon` and so on), the index
+  flag is `HasGuide`, and the job is `guide`. Database rows are `model.Channel` and
+  `model.Program`. `guide.Listing` is one channel's programs in a time range. The
+  `/api/guide` response is `view.Guide` with `Channels` (`view.Channel`), each with its `Name`
+  and `Programs` (`view.Program`).
+
+- **Queries** are bleve query strings. Plain terms are alternatives: `rating:G rating:PG`
+  matches either. Prefix `+` to require a term: `+genre:comedy +vote:>7`.
+- **Show queries:** the TV index holds only episode fields (`series`, `season`, `episode`,
+  `title`, `rating`, `vote`, cast and crew), not series genres or keywords, so
+  `Shows: "genre:comedy"` matches nothing today. Name the series instead:
+  `Shows: 'series:"The Office" series:"Parks and Recreation"'`. Adding series genres and
+  keywords to each episode's index fields in `syncEpisode` would fix this, after a full TV
+  re-sync.
+- **Config:** `Guide.SearchLimit` (default 5000) is the pool search limit. Per-channel
+  `Align` and `MinBreak` override the collection's. `BreakMusic`, `Specials` and `Features`
+  aren't read yet (phase 5).
+- **Breaks:** gaps between programs are left empty; the apps can show a slate until music
+  breaks are scheduled.
+- **Tables** are `channels` and `programs` in `guide.db` next to the other media
+  databases. The program times are columns `start_at` and `end_at`, since `end` is an SQL
+  keyword. JSON still uses `Start` and `End`.
+- **Alignment** is from local midnight in `Timezone`, so marks stay on round local times in
+  zones with half-hour offsets and across DST changes. Time zone data is embedded in the
+  binary, so `Timezone` works in minimal containers.
+- **Selection:** movies and series are picked by weighted random draw, seeded by channel name
+  and start time. Weights favor higher votes, slightly favor titles that leave a small gap or
+  land on :00/:30, and exclude a movie aired on that channel within half the pool's running
+  time (between 1 and 7 days). A series isn't picked twice in a row when others are
+  available, and becomes more likely the longer since it last aired. Episodes run in order
+  and wrap around; season 0 is skipped.
+- **Runtime fallback:** a title without a scanned duration uses its TMDB runtime plus 2
+  minutes. Titles with neither aren't scheduled.
+- **After downtime** the schedule restarts at the current mark rather than filling the past,
+  so the guide may show a gap.
+- **Config changes** only affect programs not yet scheduled, up to a week out.
+- **Guide programs** carry `TargetID` (the movie or episode row, per `Kind`, for details and
+  Watch Now), `TMID` or `TVID`/`Season`/`Episode`, `Title`, `Subtitle` (tagline or episode
+  name), `Rating`, `Image`, `Background`, `ETag`, `Size` and `Location`. A title that has left
+  the library is `Kind: "offair"` with only its times. The response's `Time` is the server time in
+  milliseconds, as in `/api/index`.
