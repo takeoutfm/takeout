@@ -1,7 +1,9 @@
 # Channels
 
-Status: proposal. Phases 1 (durations) and 2 (server schedule) are implemented; the rest is
-not. See "Implementation notes" at the end for where the code differs from this text.
+Status: proposal. Phases 1 (durations) and 2 (server schedule) are implemented. In the TV app,
+phase 3 (live player) and phase 4 (guide grid, days, Watch Now, Start Over) are built, except
+Open to Live TV; live playback hasn't been tested yet. Phases 5 and 6 are not started. See
+"Implementation notes" at the end for where the server code differs from this text.
 
 A TV-style guide of named channels with movies and shows "already playing", primarily for
 Android TV. Someone used to watching TV sees what's on, picks a channel and joins wherever the
@@ -30,9 +32,9 @@ Guide:
   BreakMusic: "genre:jazz"
   Lineup:
     - {Name: Spooky Season, Layout: Jan, Match: Oct, Movies: "keyword:halloween"}
-    - {Name: Horror, Movies: "genre:horror", BreakMusic: "genre:ambient"}
-    - {Name: Sitcoms, Shows: "genre:comedy"}
-    - {Name: Family Night, Movies: "rating:G rating:PG", Shows: "genre:family", Align: 15m}
+    - {Name: Horror, Movies: "genre:Horror", BreakMusic: "genre:ambient"}
+    - {Name: Sitcoms, Shows: "genre:Comedy"}
+    - {Name: Family Night, Movies: "rating:G rating:PG", Shows: "genre:Family", Align: 15m}
 ```
 
 The query strings are illustrative; check them against the real search index and data,
@@ -90,7 +92,7 @@ keeps the two names because they read more clearly than one general list.
 Lineup:
   # Multiple specials
   - Name: Action
-    Movies: "genre:action"
+    Movies: "genre:Action"
     Specials:
       Every: 720h                  # one special about every 30 days
       At: "20:00"                  # on an evening the scheduler picks
@@ -122,13 +124,13 @@ Lineup:
         Match: Sat
         At: "20:00"
         Length: 4h
-        Movies: "genre:western"
+        Movies: "genre:Western"
       - Name: Sunday Matinee
         Layout: Mon
         Match: Sun
         At: "14:00"
         Length: 3h
-        Movies: "genre:family"
+        Movies: "genre:Family"
       - Name: First of the Month
         Layout: "2"                # compare the day of the month
         Match: "1"
@@ -159,7 +161,7 @@ the database, one row per movie keyed by that movie's TMID. On each run:
 2. Fetch the `collections` rows with those `tm_id` values, in chunks like `Search` does.
 3. Group by `Name` and keep names with at least `MinFilms` rows, minus `Skip`.
 
-For example, Action with `genre:action` might qualify Die Hard (5 films) and Mission: Impossible
+For example, Action with `genre:Action` might qualify Die Hard (5 films) and Mission: Impossible
 (6), while Alien (2 action-tagged films) doesn't qualify there but would on Horror.
 
 - **What plays:** every film you own from the collection, in release order (`CollectionMovies`),
@@ -503,10 +505,13 @@ Phase 2 as built, where it differs from or fills in the design above:
   and `Programs` (`view.Program`).
 
 - **Queries** are bleve query strings. Plain terms are alternatives: `rating:G rating:PG`
-  matches either. Prefix `+` to require a term: `+genre:comedy +vote:>7`.
+  matches either. Prefix `+` to require a term: `+genre:Comedy +vote:>7`.
+- **Genres are case-sensitive:** `genre` and `keyword` are exact-match fields, and movie genres
+  are stored as TMDB names them, so `genre:Action` and `genre:"Science Fiction"` match but
+  `genre:action` matches nothing.
 - **Show queries:** the TV index holds only episode fields (`series`, `season`, `episode`,
   `title`, `rating`, `vote`, cast and crew), not series genres or keywords, so
-  `Shows: "genre:comedy"` matches nothing today. Name the series instead:
+  `Shows: "genre:Comedy"` matches nothing today. Name the series instead:
   `Shows: 'series:"The Office" series:"Parks and Recreation"'`. Adding series genres and
   keywords to each episode's index fields in `syncEpisode` would fix this, after a full TV
   re-sync.
