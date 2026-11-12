@@ -450,7 +450,10 @@ older servers; this one must treat missing as "no".
 ### Live player
 
 - Separate mode from the on-demand player. The existing player already opens at an offset.
-- Up and down change channel in `Lineup` order.
+- Channels change from the guide, not by surfing with up and down (the TV remote's Channel
+  buttons still step through `Lineup` order). The controls are the video player's, in the
+  same places on each app (audio and subtitle pickers included, the language chosen kept for
+  the next program), less seeking and speed.
 - A banner shows the channel, title, time left and what's next.
 - Program progress instead of a scrub bar.
 - **Pause:** allowed. On resume show "Behind live · Jump to live". At the end of a program, jump
