@@ -273,3 +273,37 @@ func TestFillEmpty(t *testing.T) {
 		t.Error("expected nothing")
 	}
 }
+
+// A movie channel fills up to a special without leaving a break no movie fits.
+func TestFillCloseGapBeforeBlock(t *testing.T) {
+	special := at("2026-11-12 20:00:00")
+	sp := Program{Start: special, End: special.Add(2 * time.Hour), Kind: ProgramMovie, TMID: 9999, Block: "Marathon"}
+	var gaps []time.Duration
+	for seed := uint64(1); seed <= 50; seed++ {
+		plan := fillPlan{
+			Start:    at("2026-11-12 08:00:00"),
+			Until:    at("2026-11-13 08:00:00"),
+			Align:    30 * time.Minute,
+			MinBreak: time.Minute,
+			Location: la,
+			Seed:     seed,
+			Blocks:   []block{{Start: special, End: sp.End.Add(30 * time.Minute), Programs: []Program{sp}}},
+		}
+		// 75 minutes to a little over 3 hours
+		out := fill(plan, movies(200, 75*60), nil, busyTimes{})
+		checkSchedule(t, plan, out)
+		for i, p := range out {
+			if p.Block != "" {
+				gap := p.Start.Sub(nextStart(out[i-1].End, plan.Align, plan.MinBreak, la))
+				gaps = append(gaps, gap)
+				if gap >= plan.Align {
+					t.Errorf("seed %d: %s before the special", seed, gap)
+				}
+				break
+			}
+		}
+	}
+	if len(gaps) != 50 {
+		t.Fatalf("special missing: %d", len(gaps))
+	}
+}

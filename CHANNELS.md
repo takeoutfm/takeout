@@ -529,8 +529,11 @@ Phase 2 as built, where it differs from or fills in the design above:
   one with fewer than 2 programs. Specials need at least one regular schedule run to be
   placed, so the first lands after the end of the existing schedule. Each run places every
   channel's specials before filling any channel, so regular programming everywhere avoids
-  their titles at the time; regular programming before a special ends in time for it, with
-  a longer break if nothing fits. The special's programs, laid out back to back until the
+  their titles at the time; regular programming before a special ends in time for it. Close
+  to the special (or a feature slot, or a slot's end), the scheduler only picks among the
+  titles that leave the least dead air: one after which nothing else fits counts its leftover
+  time as a break, so a 105-minute movie is chosen over a 75-minute one that would leave half
+  an hour no movie fits. A longer break is left only if nothing fits at all. The special's programs, laid out back to back until the
   next wouldn't end within `MaxLength`, carry its name in `Block`; their titles then count
   toward the usual no-repeat window. They aren't kept off the days before the special.
   A special moves to a later evening, up to a week, rather than overlap one of the channel's
@@ -556,6 +559,8 @@ Phase 2 as built, where it differs from or fills in the design above:
   cut to the next program's `Start`, so programs never overlap. Track rows carry `RID` and don't
   count as what aired before when the scheduler picks the next title. In the guide a track has
   its title, the artist as `Subtitle`, cover `Image` and `Location`.
+  The TV grid shows a break of 15 minutes or more as an unfocusable "Music" cell; shorter ones
+  stay plain gaps.
 - **Safeguard:** `/api/guide` fills any reserved slot starting within 24 hours before
   answering (`Guide.FillDue`). A lock keeps it and the job from filling at once, and a slot
   already filled elsewhere is left alone.

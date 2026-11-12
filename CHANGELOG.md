@@ -26,6 +26,8 @@
   have a scanned duration, as Kind "track" programs with title, artist,
   cover and Location; GET /api/guide fills a feature slot about to air if
   the guide job hasn't
+- channel programming before a special or feature slot picks titles that
+  leave the least dead air, rather than leaving a break no title fits
 - GET /api/guide[?start=&end=] returns Channels, what's on each one (default now to
   3 hours ahead, RFC3339 times, capped at the horizon) with each program's
   title, images and Location; titles no longer in the library are "offair"

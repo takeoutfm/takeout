@@ -382,6 +382,37 @@ func fill(plan fillPlan, pool []Title, history []Program, busy busyTimes) []Prog
 type candidate struct {
 	u      *unit
 	weight float64
+	next   time.Time // when the program after it can start
+	slot   time.Duration
+}
+
+// closeGap keeps the candidates that leave the least dead air before limit.
+// A candidate after which nothing else fits is the last before limit, and the
+// time it leaves becomes a break; one that leaves room for another program
+// leaves no break yet. Without this, a short movie before a special at 8:00
+// can leave half an hour that no movie fits.
+func closeGap(candidates []candidate, limit time.Time, align time.Duration) []candidate {
+	shortest := candidates[0].slot
+	for _, c := range candidates[1:] {
+		shortest = min(shortest, c.slot)
+	}
+	waste := func(c candidate) time.Duration {
+		if left := limit.Sub(c.next); left < shortest {
+			return left
+		}
+		return 0
+	}
+	least := waste(candidates[0])
+	for _, c := range candidates[1:] {
+		least = min(least, waste(c))
+	}
+	var out []candidate
+	for _, c := range candidates {
+		if waste(c) <= least+align/2 {
+			out = append(out, c)
+		}
+	}
+	return out
 }
 
 // pick chooses what airs at t. With a non-zero limit, the program and the
@@ -431,11 +462,16 @@ func pick(units []*unit, t, limit time.Time, prev string, busy busyTimes, rng *r
 			w *= 1.25
 		}
 
-		candidates = append(candidates, candidate{u, w})
-		total += w
+		candidates = append(candidates, candidate{u: u, weight: w, next: next, slot: next.Sub(t)})
 	}
 	if len(candidates) == 0 {
 		return fallback
+	}
+	if !limit.IsZero() {
+		candidates = closeGap(candidates, limit, align)
+	}
+	for _, c := range candidates {
+		total += c.weight
 	}
 	r := rng.Float64() * total
 	for _, c := range candidates {
