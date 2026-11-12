@@ -526,6 +526,10 @@ func guideProgram(ctx Context, e guide.Entry) Program {
 		p.ETag = ep.ETag
 		p.Size = ep.Size
 		p.Location = ctx.LocateTVEpisode(ep)
+	case e.Kind == model.ProgramReserved:
+		// a feature whose programs aren't chosen yet
+		p.Title = e.Block
+		p.Subtitle = e.Description
 	default:
 		// left the library; show a slate until the next program
 		p.Kind = ProgramOffAir

@@ -16,6 +16,11 @@
   date) for an occasional themed block, such as a film collection marathon,
   rotated so each comes round in turn; its programs have Block set to the
   special's name
+- channel features: Lineup entries can have Features (Name, Layout/Match
+  days, At, Length, Source added or released, or Movies/Shows, and
+  Description), a regular slot reserved in the guide as Kind "reserved"
+  with the feature's name and filled about a day ahead with titles the
+  feature hasn't shown; with nothing new it becomes regular programming
 - GET /api/guide[?start=&end=] returns Channels, what's on each one (default now to
   3 hours ahead, RFC3339 times, capped at the horizon) with each program's
   title, images and Location; titles no longer in the library are "offair"

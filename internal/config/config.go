@@ -252,6 +252,22 @@ type LineupEntry struct {
 	Align    time.Duration
 	MinBreak time.Duration
 	Specials SpecialsConfig
+	Features []FeatureConfig
+}
+
+// FeatureConfig is a regular slot on a channel, like "Friday night is new
+// movies". The slot is reserved when the schedule reaches its day and filled
+// about a day before it airs.
+type FeatureConfig struct {
+	Name        string
+	Layout      string // which days, as in DateRecommend; every day if empty
+	Match       string
+	At          string        // local start time, "20:00" if empty
+	Length      time.Duration // how long the slot is
+	Source      string        // "added" or "released" (recent movies), instead of a query
+	Movies      string        // movie search query
+	Shows       string        // tv episode search query
+	Description string        // shown in the guide until the slot is filled
 }
 
 // SpecialsConfig is a channel's occasional themed events, such as a marathon

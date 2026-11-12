@@ -19,6 +19,7 @@ package guide
 
 import (
 	"hash/fnv"
+	"sort"
 	"time"
 
 	"takeoutfm.dev/takeout/internal/config"
@@ -48,6 +49,8 @@ type Library interface {
 	// Collection is every movie in the library from the named collection,
 	// in release order.
 	Collection(name string) []Title
+	// RecentMovies is movies recently "added" or "released", newest first.
+	RecentMovies(source string) []Title
 }
 
 // MediaLibrary is the Library and Resolver for a media collection.
@@ -117,6 +120,21 @@ func (l *MediaLibrary) CollectionCounts(tmids []int64) map[string]int {
 	return l.film.CollectionCounts(tmids)
 }
 
+func (l *MediaLibrary) RecentMovies(source string) []Title {
+	var movies []Movie
+	switch source {
+	case "added":
+		movies = l.film.RecentlyAdded()
+	case "released":
+		movies = l.film.RecentlyReleased()
+	}
+	var titles []Title
+	for _, m := range movies {
+		titles = append(titles, movieTitle(m))
+	}
+	return titles
+}
+
 func (l *MediaLibrary) Collection(name string) []Title {
 	var titles []Title
 	for _, m := range l.film.CollectionMovies(Collection{Name: name}) {
@@ -139,6 +157,18 @@ func (l *MediaLibrary) Shows(query string, limit int) []Title {
 		})
 	}
 	return titles
+}
+
+// channelPool is the titles for a channel's regular programming.
+func channelPool(cc config.LineupEntry, lib Library, limit int) []Title {
+	var pool []Title
+	if cc.Movies != "" {
+		pool = append(pool, lib.Movies(cc.Movies, limit)...)
+	}
+	if cc.Shows != "" {
+		pool = append(pool, lib.Shows(cc.Shows, limit)...)
+	}
+	return pool
 }
 
 func channelSettings(gc config.GuideConfig, cc config.LineupEntry) (align, minBreak time.Duration) {
@@ -183,6 +213,22 @@ func (g *Guide) Sync(now time.Time, lib Library) error {
 		busy.add(p, p.End)
 	}
 
+	// Feature slots airing within a day get their programs now.
+	for _, cc := range cfg.Lineup {
+		if len(cc.Features) == 0 {
+			continue
+		}
+		ch, err := g.ensureChannel(cc.Name)
+		if err != nil {
+			return err
+		}
+		align, minBreak := channelSettings(cfg, cc)
+		if err := g.fillFeatures(now, ch, cc, channelPool(cc, lib, cfg.SearchLimit), lib, busy,
+			align, minBreak, loc); err != nil {
+			return err
+		}
+	}
+
 	until := now.Add(cfg.Horizon)
 	type channelFill struct {
 		cc      config.LineupEntry
@@ -210,13 +256,7 @@ func (g *Guide) Sync(now time.Time, lib Library) error {
 			continue
 		}
 
-		var pool []Title
-		if cc.Movies != "" {
-			pool = append(pool, lib.Movies(cc.Movies, cfg.SearchLimit)...)
-		}
-		if cc.Shows != "" {
-			pool = append(pool, lib.Shows(cc.Shows, cfg.SearchLimit)...)
-		}
+		pool := channelPool(cc, lib, cfg.SearchLimit)
 		if d := poolDuration(pool); d < minPool {
 			log.Printf("channels: skipping %s, only %s of content\n", cc.Name, d.Round(time.Minute))
 			continue
@@ -239,8 +279,8 @@ func (g *Guide) Sync(now time.Time, lib Library) error {
 		fills = append(fills, channelFill{cc, ch, plan, pool, history})
 	}
 
-	// Specials first, on every channel, so regular programming everywhere
-	// steers clear of their titles.
+	// Feature slots and specials first, on every channel, so regular
+	// programming everywhere steers clear of their titles.
 	for i := range fills {
 		f := &fills[i]
 		blocks, err := g.specialBlocks(f.ch, f.cc, f.pool, lib, f.plan.Start, until,
@@ -248,10 +288,14 @@ func (g *Guide) Sync(now time.Time, lib Library) error {
 		if err != nil {
 			return err
 		}
+		// a day past until too, so a program starting before until can't
+		// run into a slot just after it
+		blocks = append(blocks, featureBlocks(f.cc, f.plan.Start, until.Add(featureLead), f.plan.Align, loc)...)
+		sort.Slice(blocks, func(i, j int) bool { return blocks[i].Start.Before(blocks[j].Start) })
 		f.plan.Blocks = blocks
 		for _, b := range blocks {
 			for _, p := range b.Programs {
-				if !p.Start.Before(f.plan.Start) {
+				if p.Kind != ProgramReserved && !p.Start.Before(f.plan.Start) {
 					busy.add(p, nextStart(p.End, f.plan.Align, f.plan.MinBreak, loc))
 				}
 			}

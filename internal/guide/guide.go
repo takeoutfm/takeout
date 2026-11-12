@@ -51,7 +51,7 @@ func (g *Guide) Open() error {
 	if err != nil {
 		return err
 	}
-	return g.db.AutoMigrate(&Channel{}, &Program{}, &SpecialAiring{})
+	return g.db.AutoMigrate(&Channel{}, &Program{}, &SpecialAiring{}, &FeatureTitle{})
 }
 
 func (g *Guide) Close() {
@@ -87,11 +87,13 @@ type Entry struct {
 	Movie     *Movie
 	Series    *TVSeries
 	TVEpisode *TVEpisode
+	// for a reserved feature slot, the feature's Description
+	Description string
 }
 
 // OffAir reports whether the title is no longer in the library.
 func (e Entry) OffAir() bool {
-	return e.Movie == nil && e.TVEpisode == nil
+	return e.Kind != ProgramReserved && e.Movie == nil && e.TVEpisode == nil
 }
 
 // Listing is a channel with its programs in a time range.
@@ -116,7 +118,15 @@ func (g *Guide) Listings(start, end time.Time, r Resolver) []Listing {
 		}
 		listing := Listing{Channel: ch}
 		for _, p := range programs {
-			listing.Programs = append(listing.Programs, resolve(p, r))
+			e := resolve(p, r)
+			if p.Kind == ProgramReserved {
+				for _, f := range cc.Features {
+					if f.Name == p.Block {
+						e.Description = f.Description
+					}
+				}
+			}
+			listing.Programs = append(listing.Programs, e)
 		}
 		result = append(result, listing)
 	}
@@ -232,4 +242,44 @@ func (g *Guide) specialNear(name string, channelID uint, t time.Time, d time.Dur
 
 func (g *Guide) createSpecialAiring(a *SpecialAiring) error {
 	return g.db.Create(a).Error
+}
+
+// reservedBefore returns a channel's reserved feature slots starting before t.
+func (g *Guide) reservedBefore(channelID uint, t time.Time) []Program {
+	var list []Program
+	g.db.Where("channel_id = ? and kind = ? and start_at < ?", channelID, ProgramReserved, t.UTC()).
+		Order("start_at").Find(&list)
+	return list
+}
+
+// featureKeys returns the keys of the titles a feature has shown on a channel.
+func (g *Guide) featureKeys(channelID uint, feature string) map[string]bool {
+	var list []FeatureTitle
+	g.db.Where("channel_id = ? and feature = ?", channelID, feature).Find(&list)
+	keys := make(map[string]bool)
+	for _, f := range list {
+		keys[f.Key] = true
+	}
+	return keys
+}
+
+// replaceReserved swaps a reserved slot for its programs, recording the titles
+// the feature showed.
+func (g *Guide) replaceReserved(reserved Program, programs []Program, shown []FeatureTitle) error {
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Unscoped().Delete(&Program{}, reserved.ID).Error; err != nil {
+			return err
+		}
+		if len(programs) > 0 {
+			if err := tx.CreateInBatches(programs, 200).Error; err != nil {
+				return err
+			}
+		}
+		if len(shown) > 0 {
+			if err := tx.Create(&shown).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }

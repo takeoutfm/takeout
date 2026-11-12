@@ -32,6 +32,9 @@ type fakeLibrary map[string][]Title
 func (l fakeLibrary) Movies(query string, limit int) []Title { return l[query] }
 func (l fakeLibrary) Shows(query string, limit int) []Title  { return l[query] }
 
+// Recent movies are the keys "recent:added" and "recent:released".
+func (l fakeLibrary) RecentMovies(source string) []Title { return l["recent:"+source] }
+
 // Collections are the keys "collection:<name>".
 func (l fakeLibrary) Collection(name string) []Title { return l["collection:"+name] }
 

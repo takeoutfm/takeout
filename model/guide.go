@@ -34,6 +34,8 @@ const (
 	ProgramMovie   = "movie"
 	ProgramEpisode = "episode"
 	ProgramTrack   = "track"
+	// a feature's slot before its programs are chosen; Block is its name
+	ProgramReserved = "reserved"
 )
 
 // Program is one scheduled entry on a channel. Titles are keyed by external
@@ -60,4 +62,14 @@ type SpecialAiring struct {
 	Name      string    `gorm:"index:idx_special_airings_name"`
 	Start     time.Time `gorm:"column:start_at"`
 	End       time.Time `gorm:"column:end_at"` // when the special's slot ends
+}
+
+// FeatureTitle is a title a feature has shown on a channel, so the feature
+// moves on to new ones. Key is the title's schedule key.
+type FeatureTitle struct {
+	gorm.Model
+	ChannelID uint   `gorm:"index:idx_feature_titles_feature,priority:1"`
+	Feature   string `gorm:"index:idx_feature_titles_feature,priority:2"`
+	Key       string
+	Start     time.Time `gorm:"column:start_at"`
 }

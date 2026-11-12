@@ -106,7 +106,8 @@ type fillPlan struct {
 	Location *time.Location
 	OnAir    func(day time.Time) bool // seasonal window; nil is always
 	Seed     uint64
-	Blocks   []block // specials, in start order
+	Blocks   []block   // specials and feature slots, in start order
+	Stop     time.Time // if set, every program and its break end by then
 }
 
 // block is a special placed ahead of regular programming. Its programs are
@@ -342,6 +343,9 @@ func fill(plan fillPlan, pool []Title, history []Program, busy busyTimes) []Prog
 		var limit time.Time
 		if b != nil {
 			limit = b.Start
+		}
+		if !plan.Stop.IsZero() && (limit.IsZero() || plan.Stop.Before(limit)) {
+			limit = plan.Stop
 		}
 		u := pick(units, t, limit, prev, busy, rng, cooldown, spacing, align, plan.MinBreak, loc)
 		if u == nil {

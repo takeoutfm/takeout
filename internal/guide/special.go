@@ -209,6 +209,10 @@ func (g *Guide) specialBlocks(ch Channel, cc config.LineupEntry, pool []Title, l
 	for at.Before(start) {
 		at = at.AddDate(0, 0, 1)
 	}
+	// a feature's evening is taken; try the next
+	for i := 0; i < 7 && overlapsFeature(cc, at, at.Add(maxLength), loc); i++ {
+		at = at.AddDate(0, 0, 1)
+	}
 
 	// the special that has gone longest without airing here
 	candidates := slices.Clone(list)

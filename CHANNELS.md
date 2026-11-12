@@ -2,8 +2,8 @@
 
 Status: proposal. Phases 1 (durations) and 2 (server schedule) are implemented. In the TV app,
 phase 3 (live player) and phase 4 (guide grid, days, Watch Now, Start Over) are built, except
-Open to Live TV; live playback hasn't been tested yet. Of phase 5, specials are implemented;
-features, music breaks and music channels are not. Phase 6 is not started. See
+Open to Live TV; live playback hasn't been tested yet. Of phase 5, specials and features are
+implemented; music breaks and music channels are not. Phase 6 is not started. See
 "Implementation notes" at the end for where the server code differs from this text.
 
 A TV-style guide of named channels with movies and shows "already playing", primarily for
@@ -517,8 +517,7 @@ Phase 2 as built, where it differs from or fills in the design above:
   keywords to each episode's index fields in `syncEpisode` would fix this, after a full TV
   re-sync.
 - **Config:** `Guide.SearchLimit` (default 5000) is the pool search limit. Per-channel
-  `Align` and `MinBreak` override the collection's. `BreakMusic` and `Features` aren't read
-  yet (phase 5).
+  `Align` and `MinBreak` override the collection's. `BreakMusic` isn't read yet (phase 5).
 - **Specials** (`internal/guide/special.go`): a channel's specials are its `Themes`, then, with
   `Collections`, every collection with at least `MinFilms` of the channel's pool movies, less
   `Skip`. A collection plays every film owned from it in release order; a theme plays its
@@ -534,6 +533,19 @@ Phase 2 as built, where it differs from or fills in the design above:
   a longer break if nothing fits. The special's programs, laid out back to back until the
   next wouldn't end within `MaxLength`, carry its name in `Block`; their titles then count
   toward the usual no-repeat window. They aren't kept off the days before the special.
+  A special moves to a later evening, up to a week, rather than overlap one of the channel's
+  features.
+- **Features** (`internal/guide/feature.go`): each day matching a feature's `Layout`/`Match`
+  (every day without a `Layout`) gets a slot at `At` for `Length`; when two overlap on a day,
+  the first listed wins. As the schedule extends, each slot becomes one `Kind: "reserved"`
+  program with the feature's name in `Block`, and the guide shows it with its `Description`.
+  Regular programming looks a day past the schedule's end for slots, so nothing runs into one.
+  A run fills each slot starting within 24 hours: titles from `Source` (`added`/`released`,
+  newest first) or the `Movies`/`Shows` queries (shuffled), skipping ones the feature has
+  shown on that channel (`feature_titles`), ones that don't fit what's left, and ones on
+  elsewhere then. A leftover of 30 minutes or more is regular programming, a shorter one a
+  break. With nothing new the whole slot is regular programming without the feature's name.
+  A slot is reserved in one run and filled in a later one.
 - **Breaks:** gaps between programs are left empty; the apps can show a slate until music
   breaks are scheduled.
 - **Tables** are `channels` and `programs` in `guide.db` next to the other media

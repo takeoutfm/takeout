@@ -47,6 +47,7 @@ func (guideLibrary) Shows(query string, limit int) []guide.Title { return nil }
 
 func (guideLibrary) CollectionCounts(tmids []int64) map[string]int { return nil }
 func (guideLibrary) Collection(name string) []guide.Title          { return nil }
+func (guideLibrary) RecentMovies(source string) []guide.Title      { return nil }
 
 type guideContext struct {
 	*TestContext
