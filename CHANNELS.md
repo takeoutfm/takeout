@@ -3,7 +3,8 @@
 Status: proposal. Phases 1 (durations) and 2 (server schedule) are implemented. In the TV app,
 phase 3 (live player) and phase 4 (guide grid, days, Watch Now, Start Over) are built, except
 Open to Live TV; live playback hasn't been tested yet. Of phase 5, specials, features and music
-breaks are implemented; music channels are not. Phase 6 is not started. See
+breaks are implemented; music channels are not. Of phase 6, the phone and Linux apps have the
+guide and a live player; Apple, Wear and the Android TV home screen don't. See
 "Implementation notes" at the end for where the server code differs from this text.
 
 A TV-style guide of named channels with movies and shows "already playing", primarily for
