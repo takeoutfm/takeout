@@ -240,6 +240,7 @@ type GuideConfig struct {
 	Align        time.Duration // programs start on multiples of this
 	MinBreak     time.Duration // shortest gap between programs
 	SearchLimit  int           // max search results for a channel's pool
+	BreakMusic   string        // music search query for breaks; empty is the whole library
 	Lineup       []LineupEntry
 }
 
@@ -251,8 +252,10 @@ type LineupEntry struct {
 	Shows    string // tv episode search query
 	Align    time.Duration
 	MinBreak time.Duration
-	Specials SpecialsConfig
-	Features []FeatureConfig
+	// music search query for this channel's breaks, instead of Guide.BreakMusic
+	BreakMusic string
+	Specials   SpecialsConfig
+	Features   []FeatureConfig
 }
 
 // FeatureConfig is a regular slot on a channel, like "Friday night is new

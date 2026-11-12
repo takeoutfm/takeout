@@ -78,6 +78,7 @@ func (g *Guide) Location() *time.Location {
 type Resolver interface {
 	Movie(tmid int64) (Movie, bool)
 	Episode(tvid int64, season, episode int) (TVSeries, TVEpisode, bool)
+	Track(rid string) (Track, bool)
 }
 
 // Entry is a scheduled program with the movie or episode it plays. Both are
@@ -87,13 +88,14 @@ type Entry struct {
 	Movie     *Movie
 	Series    *TVSeries
 	TVEpisode *TVEpisode
+	Track     *Track // a break track
 	// for a reserved feature slot, the feature's Description
 	Description string
 }
 
 // OffAir reports whether the title is no longer in the library.
 func (e Entry) OffAir() bool {
-	return e.Kind != ProgramReserved && e.Movie == nil && e.TVEpisode == nil
+	return e.Kind != ProgramReserved && e.Movie == nil && e.TVEpisode == nil && e.Track == nil
 }
 
 // Listing is a channel with its programs in a time range.
@@ -146,6 +148,10 @@ func resolve(p Program, r Resolver) Entry {
 	case ProgramEpisode:
 		if s, ep, ok := r.Episode(p.TVID, p.Season, p.Episode); ok {
 			e.Series, e.TVEpisode = &s, &ep
+		}
+	case ProgramTrack:
+		if t, ok := r.Track(p.RID); ok {
+			e.Track = &t
 		}
 	}
 	return e
@@ -267,8 +273,13 @@ func (g *Guide) featureKeys(channelID uint, feature string) map[string]bool {
 // the feature showed.
 func (g *Guide) replaceReserved(reserved Program, programs []Program, shown []FeatureTitle) error {
 	return g.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Unscoped().Delete(&Program{}, reserved.ID).Error; err != nil {
-			return err
+		result := tx.Unscoped().Delete(&Program{}, reserved.ID)
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected == 0 {
+			// filled elsewhere already
+			return nil
 		}
 		if len(programs) > 0 {
 			if err := tx.CreateInBatches(programs, 200).Error; err != nil {
@@ -282,4 +293,11 @@ func (g *Guide) replaceReserved(reserved Program, programs []Program, shown []Fe
 		}
 		return nil
 	})
+}
+
+// hasReservedBefore reports whether any reserved slot starts before t.
+func (g *Guide) hasReservedBefore(t time.Time) bool {
+	var count int64
+	g.db.Model(&Program{}).Where("kind = ? and start_at < ?", ProgramReserved, t.UTC()).Count(&count)
+	return count > 0
 }

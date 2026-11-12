@@ -21,6 +21,11 @@
   Description), a regular slot reserved in the guide as Kind "reserved"
   with the feature's name and filled about a day ahead with titles the
   feature hasn't shown; with nothing new it becomes regular programming
+- channel music breaks: gaps between programs are filled with tracks from
+  Guide.BreakMusic or a Lineup entry's BreakMusic (any track if unset) that
+  have a scanned duration, as Kind "track" programs with title, artist,
+  cover and Location; GET /api/guide fills a feature slot about to air if
+  the guide job hasn't
 - GET /api/guide[?start=&end=] returns Channels, what's on each one (default now to
   3 hours ahead, RFC3339 times, capped at the horizon) with each program's
   title, images and Location; titles no longer in the library are "offair"

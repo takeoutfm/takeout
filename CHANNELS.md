@@ -2,8 +2,8 @@
 
 Status: proposal. Phases 1 (durations) and 2 (server schedule) are implemented. In the TV app,
 phase 3 (live player) and phase 4 (guide grid, days, Watch Now, Start Over) are built, except
-Open to Live TV; live playback hasn't been tested yet. Of phase 5, specials and features are
-implemented; music breaks and music channels are not. Phase 6 is not started. See
+Open to Live TV; live playback hasn't been tested yet. Of phase 5, specials, features and music
+breaks are implemented; music channels are not. Phase 6 is not started. See
 "Implementation notes" at the end for where the server code differs from this text.
 
 A TV-style guide of named channels with movies and shows "already playing", primarily for
@@ -517,7 +517,7 @@ Phase 2 as built, where it differs from or fills in the design above:
   keywords to each episode's index fields in `syncEpisode` would fix this, after a full TV
   re-sync.
 - **Config:** `Guide.SearchLimit` (default 5000) is the pool search limit. Per-channel
-  `Align` and `MinBreak` override the collection's. `BreakMusic` isn't read yet (phase 5).
+  `Align` and `MinBreak` override the collection's, and so does `BreakMusic`.
 - **Specials** (`internal/guide/special.go`): a channel's specials are its `Themes`, then, with
   `Collections`, every collection with at least `MinFilms` of the channel's pool movies, less
   `Skip`. A collection plays every film owned from it in release order; a theme plays its
@@ -546,8 +546,19 @@ Phase 2 as built, where it differs from or fills in the design above:
   elsewhere then. A leftover of 30 minutes or more is regular programming, a shorter one a
   break. With nothing new the whole slot is regular programming without the feature's name.
   A slot is reserved in one run and filled in a later one.
-- **Breaks:** gaps between programs are left empty; the apps can show a slate until music
-  breaks are scheduled.
+- **Music breaks** (`internal/guide/breaks.go`): after extending the schedules, each run puts
+  music in every upcoming gap of 30 seconds or more between a channel's programs that has none
+  yet, so gaps left by specials and features get music too. Tracks come from the channel's
+  `BreakMusic` query, else `Guide.BreakMusic`, else any track, and must have a recording ID and a
+  scanned duration (`Music.BreakTracks` picks from the whole library at random). They're
+  shuffled and play back to back from the end of the program; a track isn't repeated on the
+  channel within its last 200 break tracks unless the pool runs out. The last track's `End` is
+  cut to the next program's `Start`, so programs never overlap. Track rows carry `RID` and don't
+  count as what aired before when the scheduler picks the next title. In the guide a track has
+  its title, the artist as `Subtitle`, cover `Image` and `Location`.
+- **Safeguard:** `/api/guide` fills any reserved slot starting within 24 hours before
+  answering (`Guide.FillDue`). A lock keeps it and the job from filling at once, and a slot
+  already filled elsewhere is left alone.
 - **Tables** are `channels` and `programs` in `guide.db` next to the other media
   databases. The program times are columns `start_at` and `end_at`, since `end` is an SQL
   keyword. JSON still uses `Start` and `End`.

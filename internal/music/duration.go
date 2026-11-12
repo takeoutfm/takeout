@@ -63,3 +63,11 @@ func (m *Music) SyncDurations(ctx context.Context, client *http.Client, limit in
 	}
 	return results
 }
+
+// BreakTracks returns up to limit tracks, in no particular order, that have a
+// recording ID and a scanned duration, for channel music breaks.
+func (m *Music) BreakTracks(limit int) []Track {
+	var list []Track
+	m.db.Where("duration > 0 and r_id <> '' and key <> ''").Order("random()").Limit(limit).Find(&list)
+	return list
+}

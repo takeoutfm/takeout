@@ -25,6 +25,7 @@ import (
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/people"
 	"takeoutfm.dev/takeout/lib/date"
+	"takeoutfm.dev/takeout/lib/log"
 	"takeoutfm.dev/takeout/model"
 
 	. "takeoutfm.dev/takeout/view"
@@ -482,7 +483,12 @@ func GuideView(ctx Context, now, start, end time.Time) *Guide {
 	if g == nil || !start.Before(end) {
 		return view
 	}
-	for _, l := range g.Listings(start, end, guide.NewLibrary(ctx.Film(), ctx.TV())) {
+	lib := guide.NewLibrary(ctx.Film(), ctx.TV(), ctx.Music())
+	// a feature slot about to air gets its programs now if the job is late
+	if err := g.FillDue(now, lib); err != nil {
+		log.Println(err)
+	}
+	for _, l := range g.Listings(start, end, lib) {
 		channel := Channel{Name: l.Channel.Name}
 		for _, e := range l.Programs {
 			channel.Programs = append(channel.Programs, guideProgram(ctx, e))
@@ -526,6 +532,15 @@ func guideProgram(ctx Context, e guide.Entry) Program {
 		p.ETag = ep.ETag
 		p.Size = ep.Size
 		p.Location = ctx.LocateTVEpisode(ep)
+	case e.Track != nil:
+		t := *e.Track
+		p.TargetID = t.ID
+		p.Title = t.Title
+		p.Subtitle = t.PreferredArtist()
+		p.Image = ctx.TrackImage(t)
+		p.ETag = t.ETag
+		p.Size = t.Size
+		p.Location = ctx.LocateTrack(t)
 	case e.Kind == model.ProgramReserved:
 		// a feature whose programs aren't chosen yet
 		p.Title = e.Block

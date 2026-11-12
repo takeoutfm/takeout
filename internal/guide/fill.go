@@ -28,8 +28,9 @@ import (
 
 // Title is a movie or episode that can be scheduled.
 type Title struct {
-	Kind    string // ProgramMovie or ProgramEpisode
+	Kind    string // ProgramMovie, ProgramEpisode or ProgramTrack
 	TMID    int64
+	RID     string // track recording
 	TVID    int64
 	Season  int
 	Episode int
@@ -44,6 +45,9 @@ func (t Title) duration() time.Duration {
 
 // key identifies the title itself.
 func (t Title) key() string {
+	if t.Kind == ProgramTrack {
+		return "t:" + t.RID
+	}
 	if t.Kind == ProgramEpisode {
 		return fmt.Sprintf("e:%d:%d:%d", t.TVID, t.Season, t.Episode)
 	}
@@ -59,7 +63,7 @@ func (t Title) unit() string {
 }
 
 func programTitle(p Program) Title {
-	return Title{Kind: p.Kind, TMID: p.TMID, TVID: p.TVID, Season: p.Season, Episode: p.Episode}
+	return Title{Kind: p.Kind, TMID: p.TMID, TVID: p.TVID, Season: p.Season, Episode: p.Episode, RID: p.RID}
 }
 
 func (t Title) program(start time.Time) Program {
@@ -71,6 +75,7 @@ func (t Title) program(start time.Time) Program {
 		TVID:    t.TVID,
 		Season:  t.Season,
 		Episode: t.Episode,
+		RID:     t.RID,
 	}
 }
 
@@ -307,6 +312,10 @@ func fill(plan fillPlan, pool []Title, history []Program, busy busyTimes) []Prog
 
 	prev := ""
 	for _, p := range history {
+		if p.Kind == ProgramTrack || p.Kind == ProgramReserved {
+			// breaks and slots don't count as what aired before
+			continue
+		}
 		t := programTitle(p)
 		if u, ok := byKey[t.unit()]; ok {
 			u.aired(t, p.Start)

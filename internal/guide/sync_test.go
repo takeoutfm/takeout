@@ -32,6 +32,9 @@ type fakeLibrary map[string][]Title
 func (l fakeLibrary) Movies(query string, limit int) []Title { return l[query] }
 func (l fakeLibrary) Shows(query string, limit int) []Title  { return l[query] }
 
+// Break tracks are the key "music:<query>".
+func (l fakeLibrary) BreakTracks(query string, limit int) []Title { return l["music:"+query] }
+
 // Recent movies are the keys "recent:added" and "recent:released".
 func (l fakeLibrary) RecentMovies(source string) []Title { return l["recent:"+source] }
 
@@ -221,6 +224,10 @@ func (fakeResolver) Movie(tmid int64) (Movie, bool) {
 func (fakeResolver) Episode(tvid int64, season, episode int) (TVSeries, TVEpisode, bool) {
 	return TVSeries{TVID: tvid, Name: "Show"},
 		TVEpisode{TVID: tvid, Season: season, Episode: episode, Name: "Pilot"}, tvid == 7
+}
+
+func (fakeResolver) Track(rid string) (Track, bool) {
+	return Track{RID: rid, Title: "track " + rid}, rid != ""
 }
 
 func TestResolve(t *testing.T) {

@@ -20,10 +20,12 @@ package guide
 import (
 	"hash/fnv"
 	"sort"
+	"sync"
 	"time"
 
 	"takeoutfm.dev/takeout/internal/config"
 	"takeoutfm.dev/takeout/internal/film"
+	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/tv"
 	"takeoutfm.dev/takeout/lib/date"
 	"takeoutfm.dev/takeout/lib/log"
@@ -51,17 +53,49 @@ type Library interface {
 	Collection(name string) []Title
 	// RecentMovies is movies recently "added" or "released", newest first.
 	RecentMovies(source string) []Title
+	// BreakTracks is music for breaks: tracks matching query (any track if
+	// empty) that have a recording ID and a scanned duration.
+	BreakTracks(query string, limit int) []Title
 }
 
 // MediaLibrary is the Library and Resolver for a media collection.
 type MediaLibrary struct {
 	film   *film.Film
 	tv     *tv.TV
+	music  *music.Music // nil: no music breaks
 	series map[int64]*TVSeries
 }
 
-func NewLibrary(f *film.Film, t *tv.TV) *MediaLibrary {
-	return &MediaLibrary{film: f, tv: t, series: make(map[int64]*TVSeries)}
+func NewLibrary(f *film.Film, t *tv.TV, m *music.Music) *MediaLibrary {
+	return &MediaLibrary{film: f, tv: t, music: m, series: make(map[int64]*TVSeries)}
+}
+
+func (l *MediaLibrary) Track(rid string) (Track, bool) {
+	if l.music == nil {
+		return Track{}, false
+	}
+	t, err := l.music.LookupRID(rid)
+	return t, err == nil && t.Key != ""
+}
+
+func (l *MediaLibrary) BreakTracks(query string, limit int) []Title {
+	if l.music == nil {
+		return nil
+	}
+	var tracks []Track
+	if query == "" {
+		tracks = l.music.BreakTracks(limit)
+	} else {
+		tracks = l.music.Search(query, limit)
+	}
+	var titles []Title
+	for _, t := range tracks {
+		if t.RID == "" || t.Duration <= 0 {
+			continue
+		}
+		titles = append(titles, Title{Kind: ProgramTrack, RID: t.RID, Seconds: t.Duration})
+	}
+	return titles
 }
 
 func (l *MediaLibrary) Movie(tmid int64) (Movie, bool) {
@@ -191,10 +225,48 @@ func seed(name string, t time.Time) uint64 {
 	return h.Sum64() ^ uint64(t.Unix())
 }
 
+// fillMu keeps the guide job and a guide request filling feature slots from
+// running at once in this process.
+var fillMu sync.Mutex
+
+// FillDue fills the feature slots starting within a day, if the job hasn't
+// yet, so a slot never airs empty when the server was down. The guide API
+// calls it before answering.
+func (g *Guide) FillDue(now time.Time, lib Library) error {
+	if !g.hasReservedBefore(now.Add(featureLead)) {
+		return nil
+	}
+	fillMu.Lock()
+	defer fillMu.Unlock()
+	cfg := g.config.Guide
+	loc := cfg.Location()
+	busy := busyTimes{}
+	for _, p := range g.airing(now) {
+		busy.add(p, p.End)
+	}
+	for _, cc := range cfg.Lineup {
+		if len(cc.Features) == 0 {
+			continue
+		}
+		ch, err := g.findChannel(cc.Name)
+		if err != nil {
+			continue
+		}
+		align, minBreak := channelSettings(cfg, cc)
+		if err := g.fillFeatures(now, ch, cc, channelPool(cc, lib, cfg.SearchLimit), lib, busy,
+			align, minBreak, loc); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Sync extends every lineup channel's schedule to now + Horizon and removes
 // programs that ended more than a day ago. Programs already scheduled never
 // change, so it's safe to run at any time and catches up after downtime.
 func (g *Guide) Sync(now time.Time, lib Library) error {
+	fillMu.Lock()
+	defer fillMu.Unlock()
 	cfg := g.config.Guide
 	if len(cfg.Lineup) == 0 {
 		return nil
@@ -313,6 +385,16 @@ func (g *Guide) Sync(now time.Time, lib Library) error {
 		if len(programs) > 0 {
 			log.Printf("channels: %s scheduled %d programs to %s\n", f.cc.Name, len(programs),
 				programs[len(programs)-1].Start.In(loc).Format(time.RFC3339))
+		}
+	}
+	// Music in the gaps, on every channel, including ones not extended now.
+	for _, cc := range cfg.Lineup {
+		ch, err := g.findChannel(cc.Name)
+		if err != nil {
+			continue
+		}
+		if err := g.fillBreaks(now, ch, cc, lib); err != nil {
+			return err
 		}
 	}
 	return nil

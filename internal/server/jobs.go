@@ -303,12 +303,17 @@ func syncGuide(ctx context.Context, config *config.Config, mediaConfig *config.C
 		return err
 	}
 	defer t.Close()
+	m := music.NewMusic(mediaConfig)
+	if err := m.Open(ctx); err != nil {
+		return err
+	}
+	defer m.Close()
 	c := guide.NewGuide(mediaConfig)
 	if err := c.Open(); err != nil {
 		return err
 	}
 	defer c.Close()
-	return c.Sync(time.Now(), guide.NewLibrary(f, t))
+	return c.Sync(time.Now(), guide.NewLibrary(f, t, m))
 }
 
 // Range requests for reading media file headers.
