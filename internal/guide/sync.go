@@ -33,8 +33,6 @@ import (
 )
 
 const (
-	// a channel needs this much distinct content to be scheduled
-	minPool = 48 * time.Hour
 	// how long ended programs are kept, for the day's guide
 	keepEnded = 24 * time.Hour
 	// added to a TMDB runtime when the file duration isn't known
@@ -219,6 +217,15 @@ func channelSettings(gc config.GuideConfig, cc config.LineupEntry) (align, minBr
 	return
 }
 
+// minContent is how much content a channel needs to be scheduled: its own
+// MinContent, else the guide's.
+func minContent(gc config.GuideConfig, cc config.LineupEntry) time.Duration {
+	if cc.MinContent > 0 {
+		return cc.MinContent
+	}
+	return gc.MinContent
+}
+
 func seed(name string, t time.Time) uint64 {
 	h := fnv.New64a()
 	h.Write([]byte(name))
@@ -329,7 +336,7 @@ func (g *Guide) Sync(now time.Time, lib Library) error {
 		}
 
 		pool := channelPool(cc, lib, cfg.SearchLimit)
-		if d := poolDuration(pool); d < minPool {
+		if d := poolDuration(pool); d == 0 || d < minContent(cfg, cc) {
 			log.Printf("channels: skipping %s, only %s of content\n", cc.Name, d.Round(time.Minute))
 			continue
 		}

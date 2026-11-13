@@ -250,3 +250,53 @@ func TestResolve(t *testing.T) {
 		t.Error("nil resolver resolved")
 	}
 }
+
+func TestSyncMinContent(t *testing.T) {
+	lib := fakeLibrary{"short": series(30, 2, 10, 44*60)} // about 22 hours
+	c := makeGuide(t, []config.LineupEntry{
+		{Name: "Short", Shows: "short"},
+		{Name: "Loop", Shows: "short", MinContent: 12 * time.Hour},
+		{Name: "Too Short", Shows: "short", MinContent: 30 * time.Hour},
+	})
+	now := at("2026-11-11 19:07:00")
+	if err := c.Sync(now, lib); err != nil {
+		t.Fatal(err)
+	}
+
+	guide := c.Listings(now, now.Add(c.Horizon()), nil)
+	var names []string
+	for _, g := range guide {
+		names = append(names, g.Channel.Name)
+	}
+	// under the default 48h only with a lower MinContent of its own
+	if want := []string{"Loop"}; !equal(names, want) {
+		t.Fatalf("guide channels %v want %v", names, want)
+	}
+
+	// the series runs in order, starting over after its last episode
+	var wraps int
+	var prev *Entry
+	for i := range guide[0].Programs {
+		p := &guide[0].Programs[i]
+		if p.Kind != ProgramEpisode {
+			continue
+		}
+		if p.Season == 0 {
+			t.Fatalf("season 0 aired at %s", p.Start)
+		}
+		if prev != nil {
+			next := prev.Season == p.Season && p.Episode == prev.Episode+1 ||
+				p.Season == prev.Season+1 && p.Episode == 1
+			wrap := prev.Season == 2 && prev.Episode == 10 && p.Season == 1 && p.Episode == 1
+			if wrap {
+				wraps++
+			} else if !next {
+				t.Fatalf("S%dE%d after S%dE%d", p.Season, p.Episode, prev.Season, prev.Episode)
+			}
+		}
+		prev = p
+	}
+	if wraps < 2 {
+		t.Errorf("series started over %d times in a week", wraps)
+	}
+}

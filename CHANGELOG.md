@@ -1,3 +1,10 @@
+## 0.31.1
+
+- channels: Guide.MinContent (default 48h) sets how much content a channel
+  needs to be scheduled, in place of the fixed two days, and a Lineup entry
+  can set its own, such as a lower one for a channel that loops a short
+  series
+
 ## 0.31.0
 
 Channels: a TV-style guide of what's on, scheduled from your library and

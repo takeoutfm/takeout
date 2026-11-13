@@ -241,6 +241,7 @@ type GuideConfig struct {
 	MinBreak     time.Duration // shortest gap between programs
 	SearchLimit  int           // max search results for a channel's pool
 	BreakMusic   string        // music search query for breaks; empty is the whole library
+	MinContent   time.Duration // a channel with less content than this isn't scheduled
 	Lineup       []LineupEntry
 }
 
@@ -252,6 +253,9 @@ type LineupEntry struct {
 	Shows    string // tv episode search query
 	Align    time.Duration
 	MinBreak time.Duration
+	// a channel with less content than this isn't scheduled, instead of
+	// Guide.MinContent; a series looping on its own needs less
+	MinContent time.Duration
 	// music search query for this channel's breaks, instead of Guide.BreakMusic
 	BreakMusic string
 	Specials   SpecialsConfig
@@ -585,6 +589,7 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Guide.Align", "5m")
 	v.SetDefault("Guide.MinBreak", "0")
 	v.SetDefault("Guide.SearchLimit", "5000")
+	v.SetDefault("Guide.MinContent", "48h")
 
 	v.SetDefault("Film.DB.Driver", "sqlite3")
 	v.SetDefault("Film.DB.Source", "film.db")

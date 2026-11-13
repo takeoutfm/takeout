@@ -52,6 +52,7 @@ particularly how multiple terms combine.
 | `Align` | `5m` | Programs start on multiples of this. Longer values mean longer music breaks. Can be set per channel. |
 | `MinBreak` | `0` | If a gap would be shorter than this, the next program moves to the following mark, giving a longer break. Can be set per channel. |
 | `BreakMusic` | whole library | Music search query for breaks. Can be set per channel. |
+| `MinContent` | `48h` | A channel with less content than this is skipped. Can be set per channel, for example lower for a channel that loops one short series. |
 
 Rules:
 
@@ -62,8 +63,9 @@ Rules:
   in season.
 - **Seasonal channels** come and go on their own. The job checks the window for each day with
   `date.MatchTime`, and the guide only lists channels with programs in the requested range.
-- **Too little content:** skip and log a channel whose query can't fill about two days without
-  repeating.
+- **Too little content:** skip and log a channel whose query can't fill `MinContent` (about two
+  days) without repeating. A channel meant to repeat, such as one series on a loop, can set a
+  lower `MinContent` of its own.
 - **Search limit:** `Film.Search` and `TV.Search` take a limit. The default of 100 is too small
   for a channel pool, so pass a larger one.
 - **Default:** a collection with no `Channels` section has no channels.
@@ -549,7 +551,9 @@ Phase 2 as built, where it differs from or fills in the design above:
   keywords to each episode's index fields in `syncEpisode` would fix this, after a full TV
   re-sync.
 - **Config:** `Guide.SearchLimit` (default 5000) is the pool search limit. Per-channel
-  `Align` and `MinBreak` override the collection's, and so does `BreakMusic`.
+  `Align`, `MinBreak` and `MinContent` override the collection's, and so does `BreakMusic`.
+  `MinContent` counts every title the query returns, with a file duration or else its TMDB
+  runtime; a channel with nothing is always skipped.
 - **Specials** (`internal/guide/special.go`): a channel's specials are its `Themes`, then, with
   `Collections`, every collection with at least `MinFilms` of the channel's pool movies, less
   `Skip`. A collection plays every film owned from it in release order; a theme plays its
