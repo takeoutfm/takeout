@@ -30,6 +30,7 @@ import (
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/podcast"
 	"takeoutfm.dev/takeout/internal/progress"
+	"takeoutfm.dev/takeout/internal/radio"
 	"takeoutfm.dev/takeout/internal/tv"
 	"takeoutfm.dev/takeout/lib/duration"
 	"takeoutfm.dev/takeout/lib/log"
@@ -97,6 +98,9 @@ func schedule(ctx context.Context, config *config.Config) {
 
 	// channel guide
 	mediaSync(ctx, config.Guide.SyncInterval, syncGuide, true)
+
+	// live radio
+	mediaSync(ctx, config.Radio.SyncInterval, syncRadio, true)
 
 	scheduler.Every(time.Minute * 5).WaitForSchedule().Do(func() {
 		a := auth.NewAuth(config)
@@ -316,6 +320,20 @@ func syncGuide(ctx context.Context, config *config.Config, mediaConfig *config.C
 	return c.Sync(time.Now(), guide.NewLibrary(f, t, m))
 }
 
+func syncRadio(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
+	m := music.NewMusic(mediaConfig)
+	if err := m.Open(ctx); err != nil {
+		return err
+	}
+	defer m.Close()
+	r := radio.NewRadio(mediaConfig)
+	if err := r.Open(); err != nil {
+		return err
+	}
+	defer r.Close()
+	return r.Sync(time.Now(), radio.NewLibrary(m))
+}
+
 // Range requests for reading media file headers.
 var durationClient = &http.Client{Timeout: time.Minute}
 
@@ -445,6 +463,8 @@ func Job(ctx context.Context, config *config.Config, name string) error {
 			syncFilmBackdrops(ctx, config, mediaConfig)
 		case "guide":
 			syncGuide(ctx, config, mediaConfig)
+		case "radio":
+			syncRadio(ctx, config, mediaConfig)
 		case "durations":
 			syncFilmDurations(ctx, config, mediaConfig)
 			syncTVDurations(ctx, config, mediaConfig)

@@ -304,81 +304,34 @@ func (m *Music) Search(q string, limit ...int) []Track {
 
 const (
 	// rename to Radio* or Station*
-	TypeArtist  = "artist"  // Songs by single artist
-	TypeGenre   = "genre"   // Songs from one or more genres
-	TypeSimilar = "similar" // Songs from similar artists
-	TypePeriod  = "period"  // Songs from one or more time periods
-	TypeSeries  = "series"  // Songs from one or more series (chart)
-	TypeStream  = "stream"  // Internet radio stream
-	TypeOther   = "other"
+	TypeArtist      = "artist"  // Songs by single artist
+	TypeGenre       = "genre"   // Songs from one or more genres
+	TypeSimilar     = "similar" // Songs from similar artists
+	TypePeriod      = "period"  // Songs from one or more time periods
+	TypeSeries      = "series"  // Songs from one or more series (chart)
+	TypeStream      = "stream"  // Internet radio stream
+	TypeLiveStation = "live"    // Live radio scheduled from the library
+	TypeOther       = "other"
 )
 
 func (m *Music) ClearStations() {
 	m.clearStationPlaylists()
 }
 
+// DeleteStations deletes every station except live ones, which belong to
+// the radio job.
 func (m *Music) DeleteStations() {
 	m.deleteStations()
 }
 
+// ArtistGenres is every artist genre in the library, in order.
+func (m *Music) ArtistGenres() []string {
+	return m.artistGenres()
+}
+
+// CreateStations creates the internet radio stream stations. Live stations
+// come from the radio job (internal/radio).
 func (m *Music) CreateStations() {
-	genres := m.config.Music.RadioGenres
-	if len(m.config.Music.RadioGenres) == 0 {
-		genres = m.artistGenres()
-	}
-	for _, g := range genres {
-		if len(g) == 0 {
-			continue
-		}
-		station := Station{
-			User:    TakeoutUser,
-			Shared:  true,
-			Type:    TypeGenre,
-			Name:    strings.Title(g),
-			Creator: "Takeout",
-			Ref: fmt.Sprintf(`/music/search?q=%s&radio=1`,
-				url.QueryEscape(fmt.Sprintf(`+genre:"%s" +type:single +popularity:<11 -artist:"Various Artists"`, g)))}
-		m.CreateStation(&station)
-	}
-
-	decades := []int{1960, 1970, 1980, 1990, 2000, 2010, 2020}
-	for _, d := range decades {
-		station := Station{
-			User:    TakeoutUser,
-			Shared:  true,
-			Type:    TypePeriod,
-			Name:    fmt.Sprintf("%ds Top Tracks", d),
-			Creator: "Takeout",
-			Ref: fmt.Sprintf(`/music/search?q=%s&radio=1`,
-				url.QueryEscape(fmt.Sprintf(
-					`+first_date:>="%d-01-01" +first_date:<="%d-12-31" +type:single +popularity:<11`, d, d+9)))}
-		m.CreateStation(&station)
-	}
-
-	for _, s := range m.config.Music.RadioSeries {
-		station := Station{
-			User:    TakeoutUser,
-			Shared:  true,
-			Type:    TypeSeries,
-			Name:    s,
-			Creator: "Takeout",
-			Ref: fmt.Sprintf(`/music/search?q=%s&radio=1`,
-				url.QueryEscape(fmt.Sprintf(`+series:"%s"`, s)))}
-		m.CreateStation(&station)
-	}
-
-	for k, v := range m.config.Music.RadioOther {
-		station := Station{
-			User:    TakeoutUser,
-			Shared:  true,
-			Type:    TypeOther,
-			Name:    k,
-			Creator: "Takeout",
-			Ref: fmt.Sprintf(`/music/search?q=%s&radio=1`,
-				url.QueryEscape(v))}
-		m.CreateStation(&station)
-	}
-
 	for _, v := range m.config.Music.RadioStreams {
 		src, err := json.Marshal(v.Source)
 		if err != nil {

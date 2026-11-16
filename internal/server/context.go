@@ -32,6 +32,7 @@ import (
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/podcast"
 	"takeoutfm.dev/takeout/internal/progress"
+	"takeoutfm.dev/takeout/internal/radio"
 	"takeoutfm.dev/takeout/internal/tv"
 	"takeoutfm.dev/takeout/lib/client"
 	"takeoutfm.dev/takeout/lib/str"
@@ -66,6 +67,7 @@ type Context interface {
 	Film() *film.Film
 	TV() *tv.TV
 	Guide() *guide.Guide
+	Radio() *radio.Radio
 	ImageClient() client.Getter
 
 	LocateTrack(model.Track) string
@@ -190,6 +192,10 @@ func (ctx RequestContext) TV() *tv.TV {
 
 func (ctx RequestContext) Guide() *guide.Guide {
 	return ctx.media.guide
+}
+
+func (ctx RequestContext) Radio() *radio.Radio {
+	return ctx.media.radio
 }
 
 func (RequestContext) LocateTrack(t model.Track) string {

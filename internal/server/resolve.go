@@ -28,6 +28,7 @@ import (
 
 	"takeoutfm.dev/takeout/internal/config"
 	"takeoutfm.dev/takeout/internal/music"
+	"takeoutfm.dev/takeout/internal/radio"
 	"takeoutfm.dev/takeout/lib/date"
 	"takeoutfm.dev/takeout/lib/log"
 	"takeoutfm.dev/takeout/lib/pls"
@@ -558,6 +559,33 @@ func resolveFavoriteArtistTracksRef(ctx Context, res string, entries []spiff.Ent
 	return entries, nil
 }
 
+// liveStationLimit is how many scheduled tracks a live station's playlist
+// has, about six hours.
+const liveStationLimit = 100
+
+func liveStationEntries(ctx Context, s *model.Station, now time.Time) []spiff.Entry {
+	entries := []spiff.Entry{}
+	r := ctx.Radio()
+	if r == nil {
+		return entries
+	}
+	m := ctx.Music()
+	if err := r.ExtendDue(now, radio.NewLibrary(m)); err != nil {
+		log.Println(err)
+	}
+	for _, rt := range r.StationSchedule(s.Ref, now, now.Add(r.Horizon())) {
+		t, err := m.LookupRID(rt.RID)
+		if err != nil {
+			continue
+		}
+		entries = append(entries, trackEntry(ctx, t))
+		if len(entries) == liveStationLimit {
+			break
+		}
+	}
+	return entries
+}
+
 func RefreshStation(ctx Context, s *model.Station) *spiff.Playlist {
 	plist := spiff.NewPlaylist(spiff.TypeMusic)
 	plist.Spiff.Location = fmt.Sprintf("/api/stations/%d", s.ID)
@@ -605,6 +633,10 @@ func RefreshStation(ctx Context, s *model.Station) *spiff.Playlist {
 			// TODO add m3u, others?
 			log.Printf("unsupported stream %s\n", s.Ref)
 		}
+	} else if s.Type == music.TypeLiveStation {
+		// the schedule from the current track on, for players that can't
+		// follow it live
+		plist.Spiff.Entries = liveStationEntries(ctx, s, time.Now())
 	} else {
 		plist.Spiff.Entries = []spiff.Entry{{Ref: s.Ref}}
 		Resolve(ctx, plist)

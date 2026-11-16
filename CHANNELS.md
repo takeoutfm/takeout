@@ -3,10 +3,11 @@
 Status: proposal. Phases 1 (durations) and 2 (server schedule) are implemented. In the TV app,
 phase 3 (live player) and phase 4 (guide grid, days, Watch Now, Start Over) are built, except
 Open to Live TV; live playback hasn't been tested yet. Of phase 5, specials, features and music
-breaks are implemented; music channels are not. Of phase 6, the phone and Linux apps have the
-guide and a live player; Apple doesn't yet, Wear OS won't (video doesn't fit a watch), and
-the Android TV home screen is deferred (see "Home screen integration"). See
-"Implementation notes" at the end for where the server code differs from this text.
+breaks are implemented; music channels became live radio (RADIO.md), not yet built. Of phase 6,
+the phone and Linux apps have the guide and a live player; Apple doesn't yet, Wear OS won't have
+video channels (they don't fit a watch), and the Android TV home screen is deferred (see "Home
+screen integration"). See "Implementation notes" at the end for where the server code differs
+from this text.
 
 A TV-style guide of named channels with movies and shows "already playing", primarily for
 Android TV. Someone used to watching TV sees what's on, picks a channel and joins wherever the
@@ -483,10 +484,10 @@ Every channel change opens a new file, and the Chromecast is the risk.
   normal on-demand player with normal progress. Real TV can't do this.
 - **Open to Live TV on launch:** a setting, and what makes this work for someone used to TV.
 
-## Music channels (later)
+## Music channels
 
-Start simply: all-day guide blocks that launch an existing `/api/radio` station or radio stream
-in the current music player. These don't need wall-clock sync between TVs.
+Moved to [RADIO.md](RADIO.md). Live music stations are scheduled like channels, but they're
+served through `/api/radio` and built in `internal/radio`, separately from the guide.
 
 ## Phases
 
@@ -497,7 +498,7 @@ in the current music player. These don't need wall-clock sync between TVs.
    tuning speed on the Chromecast before building the grid.
 4. **Full guide:** the grid, day browsing, Start Over, Open to Live TV.
 5. **Richer programming:** specials (themes, then automatic collections), features with late
-   filling, music breaks, music channels.
+   filling, music breaks. (Music channels moved to RADIO.md.)
 6. **Other surfaces:** phone and other apps, Android TV home-screen integration, optional
    automatic genre channels.
 

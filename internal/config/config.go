@@ -307,6 +307,42 @@ func (c GuideConfig) Location() *time.Location {
 	return time.Local
 }
 
+// RadioConfig is live radio: stations scheduled from music search queries.
+// Unset Genres, Series and Lineup fall back to Music.RadioGenres, RadioSeries
+// and RadioOther, so existing configs keep their stations.
+type RadioConfig struct {
+	DB           DatabaseConfig
+	Timezone     string        // for Layout/Match windows; empty is server local time
+	SyncInterval time.Duration // how often schedules are extended
+	Horizon      time.Duration // how far ahead schedules are built
+	MinContent   time.Duration // a station with less music than this isn't scheduled
+	SearchLimit  int           // max search results for a station's pool; 0 is Music.RadioSearchLimit
+	Genres       []string      // automatic genre stations; empty is every artist genre
+	Decades      []int         // automatic decade stations
+	Series       []string      // automatic series (chart) stations
+	Lineup       []RadioEntry  // hand-written stations, listed first
+}
+
+type RadioEntry struct {
+	Name        string
+	Layout      string // optional date window, as in DateRecommend
+	Match       string
+	Music       string // music search query
+	Image       string
+	Description string
+	MinContent  time.Duration // instead of Radio.MinContent
+}
+
+// Location is the time zone used for station date windows.
+func (c RadioConfig) Location() *time.Location {
+	if c.Timezone != "" {
+		if loc, err := time.LoadLocation(c.Timezone); err == nil {
+			return loc
+		}
+	}
+	return time.Local
+}
+
 type ActivityConfig struct {
 	DB                DatabaseConfig
 	RecentMoviesTitle string
@@ -410,6 +446,7 @@ type Config struct {
 	Activity     ActivityConfig
 	Favorite     FavoriteConfig
 	Guide        GuideConfig
+	Radio        RadioConfig
 }
 
 func (c Config) NewGetter() client.Getter {
@@ -590,6 +627,15 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Guide.MinBreak", "0")
 	v.SetDefault("Guide.SearchLimit", "5000")
 	v.SetDefault("Guide.MinContent", "48h")
+
+	v.SetDefault("Radio.DB.Driver", "sqlite3")
+	v.SetDefault("Radio.DB.Source", "radio.db")
+	v.SetDefault("Radio.DB.Logger", "default")
+	v.SetDefault("Radio.SyncInterval", "1h")
+	v.SetDefault("Radio.Horizon", "24h")
+	v.SetDefault("Radio.MinContent", "2h")
+	v.SetDefault("Radio.SearchLimit", "0")
+	v.SetDefault("Radio.Decades", []int{1960, 1970, 1980, 1990, 2000, 2010, 2020})
 
 	v.SetDefault("Film.DB.Driver", "sqlite3")
 	v.SetDefault("Film.DB.Source", "film.db")
@@ -890,6 +936,7 @@ func TestingConfig() (*Config, error) {
 	v.SetDefault("Film.DB.Source", "${Activity.DB.Source}")
 	v.SetDefault("TV.DB.Source", "${Activity.DB.Source}")
 	v.SetDefault("Guide.DB.Source", "${Activity.DB.Source}")
+	v.SetDefault("Radio.DB.Source", "${Activity.DB.Source}")
 
 	v.SetDefault("Auth.AccessToken.Issuer", "takeout.test")
 	v.SetDefault("Auth.AccessToken.Age", "5m")

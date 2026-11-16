@@ -325,6 +325,7 @@ func Serve(c context.Context, config *config.Config) error {
 	mux.Handle("GET /api/artists/{id}/{res}/playlist", accessTokenAuthHandler(ctx, apiArtistGetPlaylist))
 	mux.Handle("GET /api/artists/{id}/{res}/playlist.xspf", accessTokenAuthHandler(ctx, apiArtistGetPlaylist))
 	mux.Handle("GET /api/radio", accessTokenAuthHandler(ctx, apiRadioGet))
+	mux.Handle("GET /api/radio/schedule", accessTokenAuthHandler(ctx, apiRadioSchedule))
 	mux.Handle("GET /api/radio/{id}", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))
 	mux.Handle("GET /api/radio/{id}/playlist", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))
 	mux.Handle("GET /api/radio/{id}/playlist.xspf", accessTokenAuthHandler(ctx, apiRadioStationGetPlaylist))

@@ -245,6 +245,7 @@ type Station struct {
 	Image       string
 	Description string
 	Playlist    []byte `json:"-"`
+	Rank        int    `json:"-"` // a live station's place in the radio lineup
 }
 
 func (s *Station) Visible(user string) bool {

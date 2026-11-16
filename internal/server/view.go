@@ -19,11 +19,13 @@ package server
 
 import (
 	"fmt"
+	"sort"
 	"time"
 
 	"takeoutfm.dev/takeout/internal/guide"
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/people"
+	"takeoutfm.dev/takeout/internal/radio"
 	"takeoutfm.dev/takeout/lib/date"
 	"takeoutfm.dev/takeout/lib/log"
 	"takeoutfm.dev/takeout/model"
@@ -215,10 +217,18 @@ func RadioView(ctx Context) *Radio {
 			view.Series = append(view.Series, s)
 		case music.TypeStream:
 			view.Stream = append(view.Stream, s)
+		case music.TypeLiveStation:
+			view.Live = append(view.Live, s)
 		default:
 			view.Other = append(view.Other, s)
 		}
 	}
+	sort.SliceStable(view.Live, func(i, j int) bool {
+		if view.Live[i].Rank != view.Live[j].Rank {
+			return view.Live[i].Rank < view.Live[j].Rank
+		}
+		return view.Live[i].ID < view.Live[j].ID
+	})
 	return view
 }
 
@@ -473,6 +483,64 @@ func FavoriteArtistsView(ctx Context) *FavoriteArtists {
 func FavoriteTracksView(ctx Context) *FavoriteTracks {
 	fav := ctx.Favorite()
 	return &FavoriteTracks{Tracks: fav.Tracks(ctx)}
+}
+
+// RadioScheduleView is what's on each live station between start and end, in
+// lineup order. Stations with nothing in the range are left out.
+func RadioScheduleView(ctx Context, now, start, end time.Time) *RadioSchedule {
+	view := &RadioSchedule{Time: now.UnixMilli(), Start: start.UTC(), End: end.UTC()}
+	view.Stations = []RadioStation{}
+	r := ctx.Radio()
+	if r == nil || !start.Before(end) {
+		return view
+	}
+	m := ctx.Music()
+	lib := radio.NewLibrary(m)
+	// a schedule about to run out is extended if the job is late
+	if err := r.ExtendDue(now, lib); err != nil {
+		log.Println(err)
+	}
+	byStation := make(map[string][]model.RadioTrack)
+	for _, t := range r.Schedule(start, end) {
+		byStation[t.Station] = append(byStation[t.Station], t)
+	}
+	tracks := make(map[string]model.Track)
+	for _, s := range m.TakeoutStations() {
+		if s.Type != music.TypeLiveStation {
+			continue
+		}
+		list := byStation[s.Ref]
+		if len(list) == 0 {
+			continue
+		}
+		station := RadioStation{ID: s.ID, Tracks: []RadioTrack{}}
+		for _, rt := range list {
+			t, ok := tracks[rt.RID]
+			if !ok {
+				var err error
+				t, err = m.LookupRID(rt.RID)
+				if err != nil {
+					// left the library: skip it, the gap is short
+					continue
+				}
+				tracks[rt.RID] = t
+			}
+			station.Tracks = append(station.Tracks, RadioTrack{
+				Start:    rt.Start.UTC(),
+				End:      rt.End.UTC(),
+				Title:    t.Title,
+				Artist:   t.PreferredArtist(),
+				Release:  t.ReleaseTitle,
+				Image:    ctx.TrackImage(t),
+				Location: ctx.LocateTrack(t),
+				ETag:     t.ETag,
+				Size:     t.Size,
+				TargetID: t.ID,
+			})
+		}
+		view.Stations = append(view.Stations, station)
+	}
+	return view
 }
 
 // GuideView is what's on each channel between start and end.

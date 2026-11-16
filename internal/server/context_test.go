@@ -33,6 +33,7 @@ import (
 	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/podcast"
 	"takeoutfm.dev/takeout/internal/progress"
+	"takeoutfm.dev/takeout/internal/radio"
 	"takeoutfm.dev/takeout/internal/tv"
 	"takeoutfm.dev/takeout/lib/client"
 	"takeoutfm.dev/takeout/lib/gorm"
@@ -68,6 +69,7 @@ type TestContext struct {
 	f    *film.Film
 	tv   *tv.TV
 	ch   *guide.Guide
+	r    *radio.Radio
 }
 
 func NewTestContext(t *testing.T) *TestContext {
@@ -187,6 +189,17 @@ func (c *TestContext) TV() *tv.TV {
 		}
 	}
 	return c.tv
+}
+
+func (c *TestContext) Radio() *radio.Radio {
+	if c.r == nil {
+		c.r = radio.NewRadio(c.Config())
+		err := c.r.Open()
+		if err != nil {
+			c.t.Fatal(err)
+		}
+	}
+	return c.r
 }
 
 func (c *TestContext) Guide() *guide.Guide {

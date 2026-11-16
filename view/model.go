@@ -152,6 +152,7 @@ type Search struct {
 }
 
 type Radio struct {
+	Live    []model.Station // live stations, in lineup order
 	Artist  []model.Station
 	Genre   []model.Station
 	Similar []model.Station
@@ -163,6 +164,35 @@ type Radio struct {
 
 type Movies struct {
 	Movies []model.Movie
+}
+
+// RadioSchedule is what's on each live station between Start and End.
+type RadioSchedule struct {
+	Time     int64 // server time in milliseconds; use it, not the device clock
+	Start    time.Time
+	End      time.Time
+	Stations []RadioStation
+}
+
+// RadioStation is a live station's tracks in the requested range. ID is the
+// station's ID in /api/radio.
+type RadioStation struct {
+	ID     uint
+	Tracks []RadioTrack
+}
+
+// RadioTrack is a scheduled track. TargetID is the track row.
+type RadioTrack struct {
+	Start    time.Time
+	End      time.Time
+	Title    string
+	Artist   string
+	Release  string `json:",omitempty"`
+	Image    string `json:",omitempty"`
+	Location string
+	ETag     string `json:",omitempty"`
+	Size     int64  `json:",omitempty"`
+	TargetID uint
 }
 
 type Movie struct {

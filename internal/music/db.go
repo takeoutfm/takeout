@@ -1057,7 +1057,15 @@ func (m *Music) clearStationPlaylists() {
 }
 
 func (m *Music) deleteStations() {
-	m.db.Exec(`delete from stations`)
+	m.db.Exec(`delete from stations where type <> ?`, TypeLiveStation)
+}
+
+// TakeoutStations returns the stations Takeout creates (live, stream and
+// older generated ones), live ones in lineup order.
+func (m *Music) TakeoutStations() []Station {
+	var stations []Station
+	m.db.Where("user = ?", TakeoutUser).Order("rank, id").Find(&stations)
+	return stations
 }
 
 // Obtain user station by id.

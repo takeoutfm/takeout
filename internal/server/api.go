@@ -785,6 +785,42 @@ func apiRadioGet(w http.ResponseWriter, r *http.Request) {
 	apiView(w, r, RadioView(ctx))
 }
 
+// GET /api/radio/schedule[?start=<RFC3339>][&end=<RFC3339>]
+//
+// What's on each live station; start defaults to now and end to start + 30m.
+func apiRadioSchedule(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	now := time.Now()
+	start := now
+	if v := r.URL.Query().Get(QueryStart); v != "" {
+		t, err := time.Parse(time.RFC3339, v)
+		if err != nil {
+			badRequest(w, ErrInvalidParameter)
+			return
+		}
+		start = t
+	}
+	end := start.Add(30 * time.Minute)
+	if v := r.URL.Query().Get(QueryEnd); v != "" {
+		t, err := time.Parse(time.RFC3339, v)
+		if err != nil {
+			badRequest(w, ErrInvalidParameter)
+			return
+		}
+		end = t
+	}
+	if end.Before(start) {
+		badRequest(w, ErrInvalidParameter)
+		return
+	}
+	if rd := ctx.Radio(); rd != nil {
+		if limit := now.Add(rd.Horizon()); end.After(limit) {
+			end = limit
+		}
+	}
+	apiView(w, r, RadioScheduleView(ctx, now, start, end))
+}
+
 func apiRadioPost(w http.ResponseWriter, r *http.Request) {
 	ctx := contextValue(r)
 	var s model.Station
