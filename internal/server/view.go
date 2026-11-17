@@ -513,7 +513,7 @@ func RadioScheduleView(ctx Context, now, start, end time.Time) *RadioSchedule {
 		if len(list) == 0 {
 			continue
 		}
-		station := RadioStation{ID: s.ID, Tracks: []RadioTrack{}}
+		station := RadioStation{ID: s.ID, Name: s.Name, Tracks: []RadioTrack{}}
 		for _, rt := range list {
 			t, ok := tracks[rt.RID]
 			if !ok {
@@ -535,7 +535,7 @@ func RadioScheduleView(ctx Context, now, start, end time.Time) *RadioSchedule {
 				Location: ctx.LocateTrack(t),
 				ETag:     t.ETag,
 				Size:     t.Size,
-				TargetID: t.ID,
+				ID:       t.ID,
 			})
 		}
 		view.Stations = append(view.Stations, station)

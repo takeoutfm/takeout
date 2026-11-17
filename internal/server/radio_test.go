@@ -49,8 +49,6 @@ func (l radioLibrary) Tracks(query string, limit int) []radio.Title {
 	return nil
 }
 
-func (l radioLibrary) Genres() []string { return nil }
-
 type radioContext struct {
 	*TestContext
 	r *radio.Radio
@@ -125,7 +123,7 @@ func TestApiRadioSchedule(t *testing.T) {
 	if d := s.End.Sub(s.Start); d != 30*time.Minute {
 		t.Errorf("default range %s", d)
 	}
-	if len(s.Stations) != 1 || s.Stations[0].ID != station.ID {
+	if len(s.Stations) != 1 || s.Stations[0].ID != station.ID || s.Stations[0].Name != "Test FM" {
 		t.Fatalf("stations %+v", s.Stations)
 	}
 	tracks := s.Stations[0].Tracks
@@ -134,7 +132,7 @@ func TestApiRadioSchedule(t *testing.T) {
 		t.Fatalf("tracks %+v", tracks)
 	}
 	for _, x := range tracks {
-		if x.Location == "" || x.Title == "" || x.Artist == "" || x.TargetID == 0 {
+		if x.Location == "" || x.Title == "" || x.Artist == "" || x.ID == 0 {
 			t.Fatalf("unresolved %+v", x)
 		}
 	}

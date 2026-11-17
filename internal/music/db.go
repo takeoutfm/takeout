@@ -1137,23 +1137,6 @@ func (m *Music) artistImages(a Artist) []string {
 	return list
 }
 
-func (m *Music) artistGenres() []string {
-	var genres []string
-	rows, err := m.db.Table("artists").
-		Select("distinct(genre)").
-		Order("genre").Rows()
-	if err != nil {
-		return genres
-	}
-	for rows.Next() {
-		var v string
-		rows.Scan(&v)
-		genres = append(genres, v)
-	}
-	rows.Close()
-	return genres
-}
-
 func (m *Music) TrackCount() int64 {
 	var count int64
 	m.db.Model(&Track{}).Count(&count)

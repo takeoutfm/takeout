@@ -19,6 +19,7 @@ package radio
 
 import (
 	"errors"
+	"fmt"
 	"path/filepath"
 	"testing"
 	"time"
@@ -30,7 +31,6 @@ import (
 
 type fakeLibrary struct {
 	pools    map[string][]Title
-	genres   []string
 	stations map[uint]Station
 	nextID   uint
 }
@@ -47,7 +47,6 @@ func newLibrary() *fakeLibrary {
 }
 
 func (l *fakeLibrary) Tracks(query string, limit int) []Title { return l.pools[query] }
-func (l *fakeLibrary) Genres() []string                       { return l.genres }
 
 func (l *fakeLibrary) TakeoutStations() []Station {
 	var list []Station
@@ -194,6 +193,9 @@ func TestSyncRemoved(t *testing.T) {
 	if _, ok := lib.byName()["Other"]; !ok {
 		t.Error("new station missing")
 	}
+	if len(r.history("Big")) != 0 {
+		t.Error("removed station's schedule kept")
+	}
 }
 
 func TestExtendDue(t *testing.T) {
@@ -245,53 +247,42 @@ func TestLineup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// unset Radio settings fall back to the Music ones
+	// no Radio settings, no stations
 	cfg.Radio.Lineup = nil
 	cfg.Radio.Genres = nil
+	cfg.Radio.Decades = nil
 	cfg.Radio.Series = nil
+	if list := lineup(cfg); len(list) != 0 {
+		t.Fatalf("got %+v", list)
+	}
+
+	// lineup, genres, decades, series; a repeated name keeps the first
+	cfg.Radio.Lineup = []config.RadioEntry{{Name: "Rock", Music: "my rock"}, {Name: "Empty"}}
+	cfg.Radio.Genres = []string{"rock", "", "jazz"}
 	cfg.Radio.Decades = []int{1980}
-	cfg.Music.RadioOther = map[string]string{"Zed": "z", "Alpha": "a"}
-	cfg.Music.RadioGenres = nil
-	cfg.Music.RadioSeries = []string{"Hot 100"}
-	list := lineup(cfg, func() []string { return []string{"rock", "", "jazz"} })
+	cfg.Radio.Series = []string{"Hot 100"}
+	list := lineup(cfg)
 	var names []string
 	for _, s := range list {
 		names = append(names, s.Name)
 	}
-	want := []string{"Alpha", "Zed", "Rock", "Jazz", "1980s Top Tracks", "Hot 100"}
-	if len(names) != len(want) {
-		t.Fatalf("got %v", names)
-	}
-	for i := range want {
-		if names[i] != want[i] {
-			t.Fatalf("got %v", names)
-		}
-	}
-
-	// Radio settings win, and a repeated name keeps the first
-	cfg.Radio.Lineup = []config.RadioEntry{{Name: "Rock", Music: "my rock"}}
-	cfg.Radio.Genres = []string{"rock"}
-	cfg.Radio.Series = []string{}
-	list = lineup(cfg, nil)
-	if len(list) != 3 || list[0].Query != "my rock" || list[1].Name != "1980s Top Tracks" ||
-		list[2].Name != "Hot 100" {
+	want := []string{"Rock", "Jazz", "1980s Top Tracks", "Hot 100"}
+	if fmt.Sprint(names) != fmt.Sprint(want) || list[0].Query != "my rock" {
 		t.Fatalf("got %+v", list)
 	}
 }
 
-func TestSyncConvertsGenerated(t *testing.T) {
+func TestSyncDeletesGenerated(t *testing.T) {
 	r := makeRadio(t, []config.RadioEntry{{Name: "Big", Music: "big"}})
 	lib := newLibrary()
-	lib.add(5, Station{Name: "Big", Type: music.TypeGenre, Ref: "/music/search?q=x&radio=1",
-		Playlist: []byte("old")})
+	lib.add(5, Station{Name: "Big", Type: music.TypeGenre, Ref: "/music/search?q=x&radio=1"})
 	lib.add(6, Station{Name: "Gone", Type: music.TypePeriod})
 	lib.add(7, Station{Name: "KEXP", Type: music.TypeStream})
 	if err := r.Sync(t0, lib); err != nil {
 		t.Fatal(err)
 	}
-	big := lib.stations[5]
-	if big.Type != music.TypeLiveStation || big.Ref != "Big" || big.Playlist != nil {
-		t.Errorf("not converted %+v", big)
+	if _, ok := lib.stations[5]; ok {
+		t.Error("old generated station kept")
 	}
 	if _, ok := lib.stations[6]; ok {
 		t.Error("old generated station kept")
@@ -299,8 +290,12 @@ func TestSyncConvertsGenerated(t *testing.T) {
 	if s := lib.stations[7]; s.Type != music.TypeStream {
 		t.Error("stream station changed")
 	}
+	big, ok := lib.byName()["Big"]
+	if !ok || big.Type != music.TypeLiveStation || big.Ref != "Big" {
+		t.Errorf("live station not created %+v", big)
+	}
 	if len(r.history("Big")) == 0 {
-		t.Error("converted station not scheduled")
+		t.Error("live station not scheduled")
 	}
 }
 
@@ -318,5 +313,23 @@ func TestScheduleLocalTime(t *testing.T) {
 	list := r.StationSchedule("Big", now, now.Add(10*time.Minute))
 	if len(list) == 0 || list[0].Start.After(now) || !list[0].End.After(now) {
 		t.Fatalf("not on now: %+v", list)
+	}
+}
+
+func TestSyncNameTaken(t *testing.T) {
+	r := makeRadio(t, []config.RadioEntry{{Name: "KEXP", Music: "big"}, {Name: "Big", Music: "big"}})
+	lib := newLibrary()
+	lib.add(7, Station{Name: "KEXP", Type: music.TypeStream})
+	if err := r.Sync(t0, lib); err != nil {
+		t.Fatal(err)
+	}
+	if s := lib.stations[7]; s.Type != music.TypeStream {
+		t.Error("stream station changed")
+	}
+	if len(r.history("KEXP")) != 0 {
+		t.Error("scheduled a station without a row")
+	}
+	if len(r.history("Big")) == 0 {
+		t.Error("other stations not scheduled")
 	}
 }

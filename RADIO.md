@@ -38,8 +38,9 @@ Each plays a fresh shuffled playlist of up to `RadioLimit` tracks, with skipping
 create stations: the POST, PUT, PATCH and DELETE handlers in `api.go` aren't routed. Artist and
 track radio are ad-hoc `&radio=1` search refs, not stations, and aren't affected.
 
-Live stations replace the generated ones one for one, with the same names and queries, so a fresh
-server still has radio with no configuration.
+Live stations replace the generated ones, and there's no migration: the generated stations and
+their `Music.RadioGenres`, `RadioSeries` and `RadioOther` settings go away, and live stations
+come only from the `Radio:` section. A server with no `Radio:` stations has only stream radio.
 
 **The deliberate loss is skipping.** Genre and decade radio no longer skip or reshuffle. That's
 the point of real radio, but it's a change. Artist and track radio stay on-demand.
@@ -51,7 +52,7 @@ A `Radio:` section per media collection, like `Guide:`:
 ```yaml
 Radio:
   Timezone: America/Los_Angeles
-  Genres: []                  # empty: every artist genre in the library
+  Genres: [jazz, rock]
   Decades: [1960, 1970, 1980, 1990, 2000, 2010, 2020]
   Series: ["Billboard Hot 100"]
   Lineup:
@@ -64,18 +65,18 @@ Radio:
 | `Timezone` | server local | For `Layout`/`Match` windows. |
 | `SyncInterval` | `1h` | How often the radio job runs. `0` disables it. |
 | `Horizon` | `24h` | How far ahead schedules are built. Nobody browses radio a week ahead, and a short horizon keeps the table small: 40 stations at about 4 minutes a track is about 15,000 rows. |
-| `Genres` | all artist genres | Automatic genre stations, with today's query (`+genre:"…" +type:single +popularity:<11 -artist:"Various Artists"`). |
-| `Decades` | 1960–2020 | Automatic decade stations ("1980s Top Tracks"), with today's query. |
+| `Genres` | none | Automatic genre stations, with today's query (`+genre:"…" +type:single +popularity:<11 -artist:"Various Artists"`). |
+| `Decades` | none | Automatic decade stations ("1980s Top Tracks"), with today's query. |
 | `Series` | none | Automatic series (chart) stations. |
-| `Lineup` | none | Hand-written stations: `Name`, `Music` query, optional `Layout`/`Match`, `Image`, `Description`, `MinContent`. Replaces `RadioOther`. |
+| `Lineup` | none | Hand-written stations: `Name`, `Music` query, optional `Layout`/`Match`, `Image`, `Description`, `MinContent`. |
 | `MinContent` | `2h` | A station whose pool is shorter than this is skipped and logged. Can be set per station. |
-| `SearchLimit` | `Music.RadioSearchLimit` | Pool search limit. |
+| `SearchLimit` | `1000` | Pool search limit. |
 
 **Order:** `Lineup` first in its order, then genres, decades and series.
 
-**Migration:** for a release or two, `Music.RadioGenres`, `RadioSeries` and `RadioOther` are read
-as `Radio.Genres`, `Series` and `Lineup` when the `Radio` settings are unset, with a log line saying
-to move them. `RadioLimit` goes away. `RadioStreams` stays where it is.
+**No migration:** `Music.RadioGenres`, `RadioSeries` and `RadioOther` are gone and aren't read.
+`RadioStreams` stays where it is, and `RadioLimit` and `RadioSearchLimit` stay for artist and
+track radio.
 
 ## Schedule
 
@@ -145,19 +146,19 @@ Auto.
 
 ```json
 {"Time": 1763240000000,
- "Stations": [{"ID": 41,
+ "Stations": [{"ID": 41, "Name": "Jazz FM",
                "Tracks": [{"Start": "…", "End": "…", "Title": "So What",
                            "Artist": "Miles Davis", "Release": "Kind of Blue",
-                           "Image": "…", "Location": "…", "ETag": "…", "TargetID": 1234}]}]}
+                           "Image": "…", "Location": "…", "ETag": "…", "ID": 1234}]}]}
 ```
 
 - **No "now playing" field.** As with `/api/guide`, the server sends a time window and the apps
   work out what's on now. A now-playing field would go stale when the track changed, and the
   apps need the schedule anyway to know when to refresh.
-- **`ID`** is the station's ID from `/api/radio`.
+- **Stations** carry the `ID` and `Name` from `/api/radio`, so the schedule reads on its own.
 - **`Time`** is the server's time in milliseconds, as in `/api/index` and `/api/guide`. Apps use
   it for offsets, since device clocks can be wrong.
-- **`TargetID`** is the track row, for "go to album" and favorites.
+- **A track's `ID`** is its track row, for "go to album" and favorites.
 - **Safeguard:** if a schedule ends within 2 hours of the request (the job didn't run because
   the server was down, say), the request extends it before answering.
 
@@ -185,16 +186,29 @@ screen, media notifications, Bluetooth, Android Auto and Wear OS all work.
   Davis – So What") and refetches when the earliest current track ends.
 - **Tuning in:** fetch the schedule, and with the server's time open the current track at
   `now - Start`. Seeking into a FLAC file is an HTTP range request on the normal `Location` URL,
-  which ExoPlayer and beep already do. Queue the next tracks so transitions are gapless, and
-  refetch the schedule when fewer than a few tracks remain.
+  which ExoPlayer and beep already do. Only the first track after tuning in starts mid-song;
+  the rest play from the top.
+- **Queue:** the tracks from the default 30-minute window (the current track and about 6–8
+  more), at least the current track and the next, so transitions are gapless. Apps on devices
+  that may lose the network, such as Wear OS and Android Auto, can ask for `end=now+1h`.
+- **Refresh:** refetch the schedule each time a track starts, and always when 2 or fewer tracks
+  are left in the queue. Append the new tracks after the last queued one (matched by `Start`),
+  and never replace the playing track. Behind live, refetch with `start` set to the last queued
+  track's `End`, so the delayed copy has no gap. If a refetch fails, keep playing the queue and
+  retry at the next track.
 - **Staying in sync:** `Duration` is whole seconds, so a file can run up to a second longer or
   shorter than its slot. Let each file finish and start the next from the top, and only correct
   when playback is more than 5 seconds off the schedule. Correct by starting the next track at its
-  offset, never by cutting a track short.
+  offset, never by cutting a track short. Behind live, there's no correction.
 - **Controls:** play/pause, no skip, no seek, and a progress bar for the current track. Media
   session metadata changes on each track.
-- **Pause:** allowed. On resume show "Behind live · Jump to live". Behind live, the queue keeps
-  playing the schedule's tracks in order, so it's a delayed copy of the station.
+- **Pause and resume:** pausing is allowed. On resume, the player keeps playing from where it
+  paused if it's behind live by less than 5 minutes or the paused track's remaining time,
+  whichever is longer. It shows "Behind live · Jump to live" and plays the queued tracks in
+  order, a delayed copy of the station. Further behind than that, resume jumps to live: it
+  refetches and starts the track that's on now at its offset, like tuning in. This also avoids
+  a delayed queue that can't be refilled, since the server keeps ended tracks for only an hour.
+  "Jump to live" does the same at any time.
 - **Listens:** on, as for today's stations. Live stations replace them, so turning listens off
   would quietly stop scrobbling what's scrobbled now.
 - **Android TV:** the music section's radio screen, not the guide grid.
@@ -209,7 +223,7 @@ screen, media notifications, Bluetooth, Android Auto and Wear OS all work.
 - **Server:** a `radio` job in `jobs.go` replacing `stations`, `/api/radio/schedule`, live
   playlists in `RefreshStation`, and `RadioView` with only `Live` and `Stream`.
 - **Music:** `Music.CreateStations` keeps only `RadioStreams`. `TypeLive` (`"live"`) joins
-  `TypeStream`; the other types go after migration.
+  `TypeStream`; the other types go in clean-up.
 
 ## Clean-up
 
@@ -219,17 +233,16 @@ Once live stations replace the generated ones:
   `RadioView` groups.
 - The unrouted `apiRadioPost` and `apiStation` handlers, and `recvStation`.
 - `Station.User`, now always the Takeout user, and `Station.Playlist`, which is never saved.
-- `Music.RadioGenres`, `RadioSeries`, `RadioOther` and `RadioLimit`, after the migration window.
 
 ## Phases
 
-1. **Server:** `internal/radio`, the picker with tests, the `Radio` config with migration, the
+1. **Server:** `internal/radio`, the picker with tests, the `Radio` config, the
    radio job, `Live` stations in `/api/radio`, `/api/radio/schedule`, and the playlist
    fallback. Testable with the playlist before any app work.
 2. **Phone and Linux apps:** live mode in the music player, and live stations through every entry
    point.
 3. **Android TV, Wear OS and Android Auto.**
-4. **Clean-up,** after the migration window.
+4. **Clean-up,** once the apps ship.
 
 ## Implementation notes
 
@@ -240,16 +253,17 @@ Phase 1 as built:
   and at startup, and can be run by name like other jobs.
 - **Station type:** the constant is `music.TypeLiveStation` (`"live"`), since `music.TypeLive`
   already names live recordings. `Station.Rank` (not in JSON) holds the lineup order.
-- **Migration of stations:** the radio job turns a generated station (genre, period, series or
-  other) with a live station's name into that live station in place, so its ID stays the same
-  for apps, and deletes the generated stations left over. Stream stations are never touched.
-  The `stations` job (and `takeout radio`) now only creates stream stations, and no longer
-  deletes live ones.
-- **Migration of settings:** an empty `Radio.Lineup`, `Genres` or `Series` falls back to
-  `Music.RadioOther` (in name order), `RadioGenres` (then every artist genre) and
-  `RadioSeries`. Since those have defaults, today's "Top Hits" and Rolling Stone stations carry
-  over; to drop the series station, set `Music.RadioSeries: []` as well. There's no log line
-  about moving settings yet.
+- **Old stations:** the radio job deletes generated stations (genre, period, series or other)
+  left from older releases; live stations are new rows with new IDs. Stream stations are never
+  touched. The `stations` job (and `takeout radio`) now only creates stream stations, and no
+  longer deletes live ones.
+- **Settings:** stations come only from `Radio.Lineup`, `Genres`, `Decades` and `Series`, none of
+  which have defaults. The old `Music.RadioGenres`, `RadioSeries` and `RadioOther` settings are
+  removed, and ignored if a config still has them.
+- **Names are unique across all stations.** A live station whose name is taken by a stream
+  station isn't created or scheduled; the radio job logs it.
+- **Station images** can be server paths, such as an album cover
+  (`/img/mb/re/<release id>/front`), since the apps resolve them against the server.
 - **Pools** dedupe a recording on several releases, and separate releases by release group.
 - **API:** `/api/radio` has the new `Live` group sorted by `Rank`; the older groups are still in
   the response (empty once the radio job has run) until clean-up. `/api/radio/schedule` lists

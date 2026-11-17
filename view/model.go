@@ -178,10 +178,11 @@ type RadioSchedule struct {
 // station's ID in /api/radio.
 type RadioStation struct {
 	ID     uint
+	Name   string
 	Tracks []RadioTrack
 }
 
-// RadioTrack is a scheduled track. TargetID is the track row.
+// RadioTrack is a scheduled track. ID is the track row.
 type RadioTrack struct {
 	Start    time.Time
 	End      time.Time
@@ -192,7 +193,7 @@ type RadioTrack struct {
 	Location string
 	ETag     string `json:",omitempty"`
 	Size     int64  `json:",omitempty"`
-	TargetID uint
+	ID       uint
 }
 
 type Movie struct {

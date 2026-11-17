@@ -135,11 +135,8 @@ type MusicConfig struct {
 	DB                   DatabaseConfig
 	DeepLimit            int
 	PopularLimit         int
-	RadioGenres          []string
 	RadioLimit           int
-	RadioOther           map[string]string
 	RadioSearchLimit     int
-	RadioSeries          []string
 	RadioStreams         []RadioStream
 	Recent               time.Duration
 	RecentLimit          int
@@ -308,16 +305,16 @@ func (c GuideConfig) Location() *time.Location {
 }
 
 // RadioConfig is live radio: stations scheduled from music search queries.
-// Unset Genres, Series and Lineup fall back to Music.RadioGenres, RadioSeries
-// and RadioOther, so existing configs keep their stations.
+// There are no default stations; each comes from Lineup, Genres, Decades or
+// Series.
 type RadioConfig struct {
 	DB           DatabaseConfig
 	Timezone     string        // for Layout/Match windows; empty is server local time
 	SyncInterval time.Duration // how often schedules are extended
 	Horizon      time.Duration // how far ahead schedules are built
 	MinContent   time.Duration // a station with less music than this isn't scheduled
-	SearchLimit  int           // max search results for a station's pool; 0 is Music.RadioSearchLimit
-	Genres       []string      // automatic genre stations; empty is every artist genre
+	SearchLimit  int           // max search results for a station's pool
+	Genres       []string      // automatic genre stations
 	Decades      []int         // automatic decade stations
 	Series       []string      // automatic series (chart) stations
 	Lineup       []RadioEntry  // hand-written stations, listed first
@@ -634,8 +631,7 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Radio.SyncInterval", "1h")
 	v.SetDefault("Radio.Horizon", "24h")
 	v.SetDefault("Radio.MinContent", "2h")
-	v.SetDefault("Radio.SearchLimit", "0")
-	v.SetDefault("Radio.Decades", []int{1960, 1970, 1980, 1990, 2000, 2010, 2020})
+	v.SetDefault("Radio.SearchLimit", "1000")
 
 	v.SetDefault("Film.DB.Driver", "sqlite3")
 	v.SetDefault("Film.DB.Source", "film.db")
@@ -688,21 +684,6 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("TV.StillSyncInterval", "24h")
 	v.SetDefault("TV.DurationSyncInterval", "1h")
 	v.SetDefault("TV.DurationSyncLimit", "1000")
-
-	// see https://musicbrainz.org/search (series)
-	v.SetDefault("Music.RadioSeries", []string{
-		"The Rolling Stone Magazine's 500 Greatest Songs of All Time",
-	})
-
-	v.SetDefault("Music.RadioOther", map[string]string{
-		"Series Hits": "+series:*",
-		"Top Hits":    "+popularity:1",
-		"Top 3 Hits":  "+popularity:<4",
-		"Top 5 Hits":  "+popularity:<6",
-		"Top 10 Hits": "+popularity:<11",
-		"Covers":      "+type:cover",
-		"Live Hits":   "+type:live +popularity:<3",
-	})
 
 	v.SetDefault("Assistant.ProjectID", "undefined")
 	v.SetDefault("Assistant.TrackLimit", "10")

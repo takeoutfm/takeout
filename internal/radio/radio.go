@@ -122,3 +122,14 @@ func (r *Radio) createTracks(list []RadioTrack) error {
 func (r *Radio) deleteEnded(t time.Time) error {
 	return r.db.Unscoped().Where("end_at < ?", t.UTC()).Delete(&RadioTrack{}).Error
 }
+
+// deleteOthers deletes the schedules of stations not in keep.
+func (r *Radio) deleteOthers(keep []string) error {
+	q := r.db.Unscoped()
+	if len(keep) > 0 {
+		q = q.Where("station not in ?", keep)
+	} else {
+		q = q.Where("1 = 1")
+	}
+	return q.Delete(&RadioTrack{}).Error
+}

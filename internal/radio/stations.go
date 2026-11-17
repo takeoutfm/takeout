@@ -19,7 +19,6 @@ package radio
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 	"time"
 
@@ -45,25 +44,12 @@ func (s station) onAir(day time.Time) bool {
 }
 
 // lineup returns the configured stations in order: the lineup, then genres,
-// decades and series. Unset Radio settings fall back to the older Music.Radio*
-// ones, and genres to every artist genre (from genres). A name used twice
-// keeps its first station.
-func lineup(cfg *config.Config, genres func() []string) []station {
+// decades and series. Only the Radio settings make stations; a name used
+// twice keeps its first station.
+func lineup(cfg *config.Config) []station {
 	var list []station
 
-	entries := cfg.Radio.Lineup
-	if len(entries) == 0 {
-		// Music.RadioOther is a map, so give it a stable order
-		var names []string
-		for name := range cfg.Music.RadioOther {
-			names = append(names, name)
-		}
-		sort.Strings(names)
-		for _, name := range names {
-			entries = append(entries, config.RadioEntry{Name: name, Music: cfg.Music.RadioOther[name]})
-		}
-	}
-	for _, e := range entries {
+	for _, e := range cfg.Radio.Lineup {
 		list = append(list, station{
 			Name:        e.Name,
 			Query:       e.Music,
@@ -75,14 +61,7 @@ func lineup(cfg *config.Config, genres func() []string) []station {
 		})
 	}
 
-	g := cfg.Radio.Genres
-	if len(g) == 0 {
-		g = cfg.Music.RadioGenres
-	}
-	if len(g) == 0 && genres != nil {
-		g = genres()
-	}
-	for _, genre := range g {
+	for _, genre := range cfg.Radio.Genres {
 		if genre == "" {
 			continue
 		}
@@ -101,11 +80,7 @@ func lineup(cfg *config.Config, genres func() []string) []station {
 		})
 	}
 
-	series := cfg.Radio.Series
-	if len(series) == 0 {
-		series = cfg.Music.RadioSeries
-	}
-	for _, s := range series {
+	for _, s := range cfg.Radio.Series {
 		list = append(list, station{Name: s, Query: fmt.Sprintf(`+series:"%s"`, s)})
 	}
 

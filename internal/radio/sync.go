@@ -40,8 +40,6 @@ type Library interface {
 	// Tracks is the pool for a query: tracks with a recording ID and a
 	// scanned duration.
 	Tracks(query string, limit int) []Title
-	// Genres is every artist genre, for automatic genre stations.
-	Genres() []string
 	// TakeoutStations is the stations Takeout creates: live, stream and
 	// older generated ones.
 	TakeoutStations() []Station
@@ -74,10 +72,6 @@ func (l MusicLibrary) Tracks(query string, limit int) []Title {
 	return titles
 }
 
-func (l MusicLibrary) Genres() []string {
-	return l.ArtistGenres()
-}
-
 func seed(name string, t time.Time) uint64 {
 	h := fnv.New64a()
 	h.Write([]byte(name))
@@ -89,10 +83,7 @@ func seed(name string, t time.Time) uint64 {
 var syncMu sync.Mutex
 
 func (r *Radio) searchLimit() int {
-	if r.config.Radio.SearchLimit > 0 {
-		return r.config.Radio.SearchLimit
-	}
-	return r.config.Music.RadioSearchLimit
+	return r.config.Radio.SearchLimit
 }
 
 func (r *Radio) minContent(s station) time.Duration {
@@ -143,7 +134,7 @@ func (r *Radio) sync(now time.Time, lib Library) error {
 		pool []Title
 	}
 	var fills []fill
-	for _, s := range lineup(r.config, lib.Genres) {
+	for _, s := range lineup(r.config) {
 		if !s.onAir(now.In(loc)) {
 			continue
 		}
@@ -159,16 +150,28 @@ func (r *Radio) sync(now time.Time, lib Library) error {
 	for _, f := range fills {
 		active = append(active, f.station)
 	}
-	if err := syncStations(active, lib); err != nil {
+	listed, err := syncStations(active, lib)
+	if err != nil {
 		return err
 	}
 
+	var keep []string
+	for name := range listed {
+		keep = append(keep, name)
+	}
+	if err := r.deleteOthers(keep); err != nil {
+		return err
+	}
 	if err := r.deleteEnded(now.Add(-keepEnded)); err != nil {
 		return err
 	}
 
 	until := now.Add(cfg.Horizon)
 	for _, f := range fills {
+		if !listed[f.Name] {
+			// no station row, so nobody could tune in
+			continue
+		}
 		history := r.history(f.Name)
 		start := now
 		if n := len(history); n > 0 && history[n-1].End.After(start) {
@@ -209,27 +212,33 @@ func (r *Radio) sync(now time.Time, lib Library) error {
 // the same, and ones no longer active deleted. An older generated station
 // (genre, decade, series or other) with a live station's name becomes that
 // live station, keeping its ID; the rest are deleted. Stream stations are
-// left alone.
-func syncStations(active []station, lib Library) error {
+// left alone. It returns the names of the active stations that have a row.
+func syncStations(active []station, lib Library) (map[string]bool, error) {
+	listed := make(map[string]bool)
 	existing := make(map[string]Station)
 	for _, s := range lib.TakeoutStations() {
-		if s.Type != music.TypeStream {
+		switch s.Type {
+		case music.TypeStream:
+		case music.TypeLiveStation:
 			existing[s.Name] = s
+		default:
+			// generated stations from older releases
+			if err := lib.DeleteStation(&s); err != nil {
+				return nil, err
+			}
 		}
 	}
 	for i, a := range active {
 		s, ok := existing[a.Name]
 		delete(existing, a.Name)
 		if ok {
-			if s.Type == music.TypeLiveStation && s.Rank == i && s.Image == a.Image &&
-				s.Description == a.Description {
+			listed[a.Name] = true
+			if s.Rank == i && s.Image == a.Image && s.Description == a.Description {
 				continue
 			}
-			s.Type, s.Creator, s.Ref = music.TypeLiveStation, "Takeout", a.Name
 			s.Rank, s.Image, s.Description = i, a.Image, a.Description
-			s.Playlist = nil
 			if err := lib.UpdateStation(&s); err != nil {
-				return err
+				return nil, err
 			}
 			continue
 		}
@@ -247,12 +256,14 @@ func syncStations(active []station, lib Library) error {
 		if err := lib.CreateStation(&s); err != nil {
 			// for example a stream station with the same name
 			log.Printf("radio: can't create station %s: %s\n", a.Name, err)
+			continue
 		}
+		listed[a.Name] = true
 	}
 	for _, s := range existing {
 		if err := lib.DeleteStation(&s); err != nil {
-			return err
+			return nil, err
 		}
 	}
-	return nil
+	return listed, nil
 }

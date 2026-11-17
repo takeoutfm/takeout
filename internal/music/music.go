@@ -324,11 +324,6 @@ func (m *Music) DeleteStations() {
 	m.deleteStations()
 }
 
-// ArtistGenres is every artist genre in the library, in order.
-func (m *Music) ArtistGenres() []string {
-	return m.artistGenres()
-}
-
 // CreateStations creates the internet radio stream stations. Live stations
 // come from the radio job (internal/radio).
 func (m *Music) CreateStations() {
