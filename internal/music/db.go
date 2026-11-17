@@ -725,13 +725,16 @@ func (m *Music) RecentlyAdded() []Release {
 
 	// select releases.name from releases inner join tracks on tracks.re_id
 	// = releases.re_id and tracks.last_modified > '2022-01-01' group by
-	// releases.artist, releases.name order by tracks.last_modified desc
-	// limit 100;
+	// releases.artist, releases.name order by max(tracks.last_modified)
+	// desc limit 100;
+	//
+	// Order by the newest track in each group; tracks.last_modified alone
+	// would be taken from an arbitrary track in the group.
 
 	m.db.Joins("inner join tracks on tracks.re_id = releases.re_id"+
 		" and tracks.last_modified >= ?", time.Now().Add(m.config.Music.Recent*-1)).
 		Group("releases.artist, releases.name").
-		Order("tracks.last_modified desc").
+		Order("max(tracks.last_modified) desc").
 		Limit(m.config.Music.RecentLimit).
 		Find(&releases)
 	return releases
@@ -744,13 +747,17 @@ func (m *Music) RecentlyReleased() []Release {
 	var releases []Release
 
 	// select releases.artist, releases.name from releases inner join
-	// tracks on tracks.re_id = releases.re_id group by releases.artist,
-	// releases.name having releases.date > 2026-01-01 order by releases.date
-	// desc limit 25;
+	// tracks on tracks.re_id = releases.re_id where releases.date >
+	// 2026-01-01 group by releases.artist, releases.name order by
+	// releases.date desc limit 25;
+	//
+	// Filter by date before grouping. Releases with the same artist and
+	// name (e.g. Weezer's self-titled albums) share a group, and HAVING
+	// on the ungrouped date would test an arbitrary row in that group.
 
 	m.db.Joins("inner join tracks on tracks.re_id = releases.re_id").
+		Where("releases.date >= ?", time.Now().Add(m.config.Music.Recent*-1)).
 		Group("releases.artist, releases.name").
-		Having("releases.date >= ?", time.Now().Add(m.config.Music.Recent*-1)).
 		Order("releases.date desc").
 		Limit(m.config.Music.RecentLimit).
 		Find(&releases)
