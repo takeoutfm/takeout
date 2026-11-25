@@ -19,7 +19,8 @@ package server
 
 import (
 	"fmt"
-	"sort"
+	"slices"
+	"strings"
 	"time"
 
 	"takeoutfm.dev/takeout/internal/guide"
@@ -176,14 +177,10 @@ func SearchView(ctx Context, query string) *Search {
 	p := ctx.Podcast()
 	tv := ctx.TV()
 	view := &Search{}
-	artists, releases, _, stations := m.Query(query)
+	artists, releases, _ := m.Query(query)
 	view.Artists = artists
 	view.Releases = releases
-	for _, s := range stations {
-		if s.Visible(ctx.User().Name) {
-			view.Stations = append(view.Stations, s)
-		}
-	}
+	view.Stations = searchRadio(ctx, query)
 	view.Query = query
 	view.Tracks = m.Search(query)
 	view.Movies = f.Search(query)
@@ -200,35 +197,34 @@ func SearchView(ctx Context, query string) *Search {
 	return view
 }
 
-func RadioView(ctx Context) *Radio {
-	m := ctx.Music()
-	view := &Radio{}
-	for _, s := range m.Stations(ctx.User()) {
-		switch s.Type {
-		case music.TypeArtist:
-			view.Artist = append(view.Artist, s)
-		case music.TypeGenre:
-			view.Genre = append(view.Genre, s)
-		case music.TypeSimilar:
-			view.Similar = append(view.Similar, s)
-		case music.TypePeriod:
-			view.Period = append(view.Period, s)
-		case music.TypeSeries:
-			view.Series = append(view.Series, s)
-		case music.TypeStream:
-			view.Stream = append(view.Stream, s)
-		case music.TypeLiveStation:
-			view.Live = append(view.Live, s)
+// searchRadio returns the stations matching a search query: all of it, or
+// the terms of a "radio:" or "station:" query. Other fields match none.
+func searchRadio(ctx Context, query string) []model.Station {
+	r := ctx.Radio()
+	if r == nil {
+		return nil
+	}
+	if field, terms, ok := strings.Cut(query, ":"); ok {
+		switch strings.TrimPrefix(field, "+") {
+		case "radio", "station":
+			query = terms
 		default:
-			view.Other = append(view.Other, s)
+			return nil
 		}
 	}
-	sort.SliceStable(view.Live, func(i, j int) bool {
-		if view.Live[i].Rank != view.Live[j].Rank {
-			return view.Live[i].Rank < view.Live[j].Rank
-		}
-		return view.Live[i].ID < view.Live[j].ID
-	})
+	query = strings.Trim(query, `"'`)
+	if query == "" {
+		return nil
+	}
+	return r.StationsLike(query)
+}
+
+func RadioView(ctx Context) *Radio {
+	view := &Radio{Live: []model.Station{}, Stream: []model.Station{}}
+	if r := ctx.Radio(); r != nil {
+		view.Live = append(view.Live, r.Live()...)
+		view.Stream = append(view.Stream, r.Streams()...)
+	}
 	return view
 }
 
@@ -486,8 +482,9 @@ func FavoriteTracksView(ctx Context) *FavoriteTracks {
 }
 
 // RadioScheduleView is what's on each live station between start and end, in
-// lineup order. Stations with nothing in the range are left out.
-func RadioScheduleView(ctx Context, now, start, end time.Time) *RadioSchedule {
+// lineup order, or only on the station with ID only when it isn't 0.
+// Stations with nothing in the range are left out.
+func RadioScheduleView(ctx Context, now, start, end time.Time, only uint) *RadioSchedule {
 	view := &RadioSchedule{Time: now.UnixMilli(), Start: start.UTC(), End: end.UTC()}
 	view.Stations = []RadioStation{}
 	r := ctx.Radio()
@@ -505,15 +502,12 @@ func RadioScheduleView(ctx Context, now, start, end time.Time) *RadioSchedule {
 		byStation[t.Station] = append(byStation[t.Station], t)
 	}
 	tracks := make(map[string]model.Track)
-	for _, s := range m.TakeoutStations() {
-		if s.Type != music.TypeLiveStation {
+	for _, s := range r.Live() {
+		list := byStation[s.Name]
+		if len(list) == 0 || (only != 0 && s.ID != only) {
 			continue
 		}
-		list := byStation[s.Ref]
-		if len(list) == 0 {
-			continue
-		}
-		station := RadioStation{ID: s.ID, Name: s.Name, Tracks: []RadioTrack{}}
+		station := RadioStation{ID: s.ID, Name: s.Name, Image: s.Image, Tracks: []RadioTrack{}}
 		for _, rt := range list {
 			t, ok := tracks[rt.RID]
 			if !ok {
@@ -536,7 +530,16 @@ func RadioScheduleView(ctx Context, now, start, end time.Time) *RadioSchedule {
 				ETag:     t.ETag,
 				Size:     t.Size,
 				ID:       t.ID,
+				Show:     rt.Show,
 			})
+			if rt.Show != "" && !slices.ContainsFunc(station.Shows,
+				func(s RadioShow) bool { return s.Name == rt.Show }) {
+				show := RadioShow{Name: rt.Show}
+				if c, ok := r.Show(s.Name, rt.Show); ok {
+					show.Image, show.Description = c.Image, c.Description
+				}
+				station.Shows = append(station.Shows, show)
+			}
 		}
 		view.Stations = append(view.Stations, station)
 	}

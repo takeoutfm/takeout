@@ -18,72 +18,47 @@
 package radio
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 	"testing"
 	"time"
 
 	"takeoutfm.dev/takeout/internal/config"
-	"takeoutfm.dev/takeout/internal/music"
 	. "takeoutfm.dev/takeout/model"
 )
 
 type fakeLibrary struct {
-	pools    map[string][]Title
-	stations map[uint]Station
-	nextID   uint
+	pools map[string][]Title
 }
 
 func newLibrary() *fakeLibrary {
 	return &fakeLibrary{
 		pools: map[string][]Title{
-			"big":              pool(400, 80),
-			"tiny":             pool(10, 5), // about 35 minutes
-			`+series:"Charts"`: pool(200, 40),
+			"big":                  pool(400, 80),
+			"tiny":                 pool(10, 5), // about 35 minutes
+			`+series:"Charts"`:     pool(200, 40),
+			`+artist:"Gary Numan"`: showPool("g", 60),
 		},
-		stations: make(map[uint]Station),
 	}
 }
 
 func (l *fakeLibrary) Tracks(query string, limit int) []Title { return l.pools[query] }
 
-func (l *fakeLibrary) TakeoutStations() []Station {
-	var list []Station
-	for _, s := range l.stations {
-		list = append(list, s)
-	}
-	return list
-}
-
-func (l *fakeLibrary) CreateStation(s *Station) error {
-	for _, x := range l.stations {
-		if x.Name == s.Name {
-			return errors.New("duplicate")
-		}
-	}
-	l.nextID++
-	s.ID = l.nextID
-	l.stations[s.ID] = *s
-	return nil
-}
-
-// add puts an existing station row in the library.
-func (l *fakeLibrary) add(id uint, s Station) {
-	s.ID = id
-	l.stations[id] = s
-	l.nextID = max(l.nextID, id)
-}
-
-func (l *fakeLibrary) UpdateStation(s *Station) error { l.stations[s.ID] = *s; return nil }
-func (l *fakeLibrary) DeleteStation(s *Station) error { delete(l.stations, s.ID); return nil }
-
-func (l *fakeLibrary) byName() map[string]Station {
+// byName is every station row, on the air or not.
+func byName(r *Radio) map[string]Station {
 	m := make(map[string]Station)
-	for _, s := range l.stations {
+	for _, s := range r.stations() {
 		m[s.Name] = s
 	}
 	return m
+}
+
+func names(list []Station) string {
+	var n []string
+	for _, s := range list {
+		n = append(n, s.Name)
+	}
+	return fmt.Sprint(n)
 }
 
 func makeRadio(t *testing.T, lineup []config.RadioEntry) *Radio {
@@ -116,20 +91,25 @@ func TestSync(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	stations := lib.byName()
-	if len(stations) != 2 {
+	// every configured station has a row; only those with music in season
+	// are on the air
+	stations := byName(r)
+	if len(stations) != 4 {
 		t.Fatalf("stations %v", stations)
 	}
 	big := stations["Big"]
-	if big.Type != music.TypeLiveStation || big.Rank != 0 || big.Image != "big.png" ||
-		big.Ref != "Big" || !big.Shared {
+	if big.Type != TypeLive || big.Rank != 0 || big.Image != "big.png" ||
+		big.Description != "Lots" || big.Creator != "Takeout" || !big.OnAir {
 		t.Errorf("big %+v", big)
 	}
-	if stations["Charts"].Rank != 1 {
-		t.Errorf("charts rank %d", stations["Charts"].Rank)
-	}
-	if _, ok := stations["Tiny"]; ok {
+	if stations["Tiny"].OnAir {
 		t.Error("tiny station has too little music")
+	}
+	if stations["Spooky"].OnAir {
+		t.Error("spooky station out of season")
+	}
+	if got := names(r.Live()); got != "[Big Charts]" {
+		t.Errorf("live %s", got)
 	}
 
 	for _, name := range []string{"Big", "Charts"} {
@@ -160,20 +140,25 @@ func TestSync(t *testing.T) {
 	if h[0].End.Before(later.Add(-keepEnded)) {
 		t.Errorf("old tracks kept: %v", h[0].End)
 	}
-	if lib.byName()["Big"].ID != big.ID {
+	if byName(r)["Big"].ID != big.ID {
 		t.Error("station ID changed")
 	}
 
-	// in season: the seasonal station appears, in lineup order
+	// in season: the seasonal station comes on the air in lineup order,
+	// with the ID it had
+	spooky := byName(r)["Spooky"]
 	oct := time.Date(2026, 10, 10, 12, 0, 0, 0, time.UTC)
 	if err := r.Sync(oct, lib); err != nil {
 		t.Fatal(err)
 	}
-	if s, ok := lib.byName()["Spooky"]; !ok || s.Rank != 1 {
-		t.Fatalf("spooky %+v", s)
+	if got := names(r.Live()); got != "[Big Spooky Charts]" {
+		t.Errorf("live %s", got)
 	}
-	if lib.byName()["Charts"].Rank != 2 {
-		t.Error("charts not moved down")
+	if byName(r)["Spooky"].ID != spooky.ID {
+		t.Error("seasonal station ID changed")
+	}
+	if len(r.history("Spooky")) == 0 {
+		t.Error("seasonal station not scheduled")
 	}
 }
 
@@ -187,10 +172,10 @@ func TestSyncRemoved(t *testing.T) {
 	if err := r.Sync(t0.Add(time.Hour), lib); err != nil {
 		t.Fatal(err)
 	}
-	if _, ok := lib.byName()["Big"]; ok {
+	if _, ok := byName(r)["Big"]; ok {
 		t.Error("removed station kept")
 	}
-	if _, ok := lib.byName()["Other"]; !ok {
+	if _, ok := byName(r)["Other"]; !ok {
 		t.Error("new station missing")
 	}
 	if len(r.history("Big")) != 0 {
@@ -272,30 +257,71 @@ func TestLineup(t *testing.T) {
 	}
 }
 
-func TestSyncDeletesGenerated(t *testing.T) {
-	r := makeRadio(t, []config.RadioEntry{{Name: "Big", Music: "big"}})
+func TestStreams(t *testing.T) {
+	r := makeRadio(t, nil)
+	r.config.Radio.Series = nil
+	r.config.Radio.Streams = []config.RadioStream{
+		{Creator: "KEXP", Title: "KEXP", Source: []config.ContentDescription{
+			{ContentType: "audio/aac", URL: "https://kexp.org/kexp.aac"}}},
+		{Creator: "SomaFM", Title: "Groove Salad", Image: "gs.png"},
+	}
 	lib := newLibrary()
-	lib.add(5, Station{Name: "Big", Type: music.TypeGenre, Ref: "/music/search?q=x&radio=1"})
-	lib.add(6, Station{Name: "Gone", Type: music.TypePeriod})
-	lib.add(7, Station{Name: "KEXP", Type: music.TypeStream})
 	if err := r.Sync(t0, lib); err != nil {
 		t.Fatal(err)
 	}
-	if _, ok := lib.stations[5]; ok {
-		t.Error("old generated station kept")
+	list := r.Streams()
+	if got := names(list); got != "[KEXP Groove Salad]" {
+		t.Fatalf("streams %s", got)
 	}
-	if _, ok := lib.stations[6]; ok {
-		t.Error("old generated station kept")
+	if list[0].Type != TypeStream || list[0].Source != `[{"contentType":"audio/aac","url":"https://kexp.org/kexp.aac"}]` {
+		t.Errorf("kexp %+v", list[0])
 	}
-	if s := lib.stations[7]; s.Type != music.TypeStream {
-		t.Error("stream station changed")
+	if len(r.Live()) != 0 {
+		t.Error("streams listed as live")
 	}
-	big, ok := lib.byName()["Big"]
-	if !ok || big.Type != music.TypeLiveStation || big.Ref != "Big" {
-		t.Errorf("live station not created %+v", big)
+
+	// changed and removed streams; IDs stay with names
+	kexp := list[0]
+	r.config.Radio.Streams = []config.RadioStream{{Creator: "KEXP", Title: "KEXP", Image: "new.png"}}
+	if err := r.Sync(t0.Add(time.Hour), lib); err != nil {
+		t.Fatal(err)
 	}
-	if len(r.history("Big")) == 0 {
-		t.Error("live station not scheduled")
+	list = r.Streams()
+	if names(list) != "[KEXP]" || list[0].ID != kexp.ID || list[0].Image != "new.png" {
+		t.Errorf("streams %+v", list)
+	}
+}
+
+func TestFindStation(t *testing.T) {
+	r := makeRadio(t, []config.RadioEntry{
+		{Name: "Big", Music: "big"},
+		{Name: "Bigger", Music: "big"},
+		{Name: "Tiny", Music: "tiny"},
+	})
+	r.config.Radio.Streams = []config.RadioStream{{Creator: "SomaFM", Title: "Groove Salad"}}
+	if err := r.Sync(t0, newLibrary()); err != nil {
+		t.Fatal(err)
+	}
+	big := byName(r)["Big"]
+	if s, err := r.FindStation(fmt.Sprint(big.ID)); err != nil || s.Name != "Big" {
+		t.Errorf("by id %+v %v", s, err)
+	}
+	if s, err := r.FindStation("name:big"); err != nil || s.ID != big.ID {
+		t.Errorf("by name %+v %v", s, err)
+	}
+	if s, err := r.FindStation("name:soma"); err != nil || s.Name != "Groove Salad" {
+		t.Errorf("by creator %+v %v", s, err)
+	}
+	// off the air: not offered
+	tiny := byName(r)["Tiny"]
+	if _, err := r.FindStation(fmt.Sprint(tiny.ID)); err != ErrStationNotFound {
+		t.Errorf("found off-air station: %v", err)
+	}
+	if _, err := r.FindStation("name:tiny"); err != ErrStationNotFound {
+		t.Errorf("found off-air station by name: %v", err)
+	}
+	if got := names(r.StationsLike("r")); got != "[Bigger Charts Groove Salad]" {
+		t.Errorf("like %s", got)
 	}
 }
 
@@ -318,18 +344,18 @@ func TestScheduleLocalTime(t *testing.T) {
 
 func TestSyncNameTaken(t *testing.T) {
 	r := makeRadio(t, []config.RadioEntry{{Name: "KEXP", Music: "big"}, {Name: "Big", Music: "big"}})
-	lib := newLibrary()
-	lib.add(7, Station{Name: "KEXP", Type: music.TypeStream})
-	if err := r.Sync(t0, lib); err != nil {
+	r.config.Radio.Streams = []config.RadioStream{{Creator: "KEXP", Title: "KEXP"}}
+	if err := r.Sync(t0, newLibrary()); err != nil {
 		t.Fatal(err)
 	}
-	if s := lib.stations[7]; s.Type != music.TypeStream {
-		t.Error("stream station changed")
+	// the live station comes first, so the stream with its name is dropped
+	if s := byName(r)["KEXP"]; s.Type != TypeLive {
+		t.Errorf("kexp %+v", s)
 	}
-	if len(r.history("KEXP")) != 0 {
-		t.Error("scheduled a station without a row")
+	if len(r.Streams()) != 0 {
+		t.Error("stream with a taken name kept")
 	}
-	if len(r.history("Big")) == 0 {
-		t.Error("other stations not scheduled")
+	if len(r.history("KEXP")) == 0 || len(r.history("Big")) == 0 {
+		t.Error("live stations not scheduled")
 	}
 }

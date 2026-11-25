@@ -152,14 +152,8 @@ type Search struct {
 }
 
 type Radio struct {
-	Live    []model.Station // live stations, in lineup order
-	Artist  []model.Station
-	Genre   []model.Station
-	Similar []model.Station
-	Period  []model.Station
-	Series  []model.Station
-	Other   []model.Station
-	Stream  []model.Station
+	Live   []model.Station // live stations on the air, in config order
+	Stream []model.Station // internet radio, in config order
 }
 
 type Movies struct {
@@ -179,7 +173,16 @@ type RadioSchedule struct {
 type RadioStation struct {
 	ID     uint
 	Name   string
+	Image  string `json:",omitempty"`
 	Tracks []RadioTrack
+	Shows  []RadioShow `json:",omitempty"` // the shows named by Tracks
+}
+
+// RadioShow is a regular show on a live station.
+type RadioShow struct {
+	Name        string
+	Image       string `json:",omitempty"`
+	Description string `json:",omitempty"`
 }
 
 // RadioTrack is a scheduled track. ID is the track row.
@@ -194,6 +197,7 @@ type RadioTrack struct {
 	ETag     string `json:",omitempty"`
 	Size     int64  `json:",omitempty"`
 	ID       uint
+	Show     string `json:",omitempty"` // the show it's part of, if any
 }
 
 type Movie struct {

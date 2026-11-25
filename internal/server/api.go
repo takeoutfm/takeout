@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"takeoutfm.dev/takeout/internal/auth"
+	"takeoutfm.dev/takeout/internal/radio"
 	"takeoutfm.dev/takeout/lib/date"
 	"takeoutfm.dev/takeout/lib/encoding/xspf"
 	"takeoutfm.dev/takeout/lib/header"
@@ -374,31 +375,6 @@ func writePlaylist(w http.ResponseWriter, r *http.Request, plist *spiff.Playlist
 		result, _ := plist.Marshal()
 		w.Write(result)
 	}
-}
-
-// TODO check
-func recvStation(w http.ResponseWriter, r *http.Request,
-	s *model.Station) error {
-	ctx := contextValue(r)
-	body, _ := io.ReadAll(r.Body)
-	err := json.Unmarshal(body, s)
-	if err != nil {
-		serverErr(w, err)
-		return err
-	}
-	if s.Name == "" || s.Ref == "" {
-		http.Error(w, "bummer", http.StatusBadRequest)
-		return err
-	}
-	s.User = ctx.User().Name
-	if s.Ref == "/api/playlist" {
-		// copy playlist
-		p, err := ctx.Music().UserPlaylist(ctx.User())
-		if err == nil {
-			s.Playlist = p.Playlist
-		}
-	}
-	return nil
 }
 
 func makeEmptyPlaylist(w http.ResponseWriter, r *http.Request) (model.Playlist, error) {
@@ -788,7 +764,24 @@ func apiRadioGet(w http.ResponseWriter, r *http.Request) {
 // GET /api/radio/schedule[?start=<RFC3339>][&end=<RFC3339>]
 //
 // What's on each live station; start defaults to now and end to start + 30m.
+// GET /api/radio/schedule: every live station's schedule.
 func apiRadioSchedule(w http.ResponseWriter, r *http.Request) {
+	radioSchedule(w, r, 0)
+}
+
+// GET /api/radio/{id}/schedule: one live station's schedule, in the same
+// shape.
+func apiRadioStationSchedule(w http.ResponseWriter, r *http.Request) {
+	ctx := contextValue(r)
+	s, err := ctx.FindStation(r.PathValue(ParamID))
+	if err != nil || s.Type != radio.TypeLive {
+		notFoundErr(w)
+		return
+	}
+	radioSchedule(w, r, s.ID)
+}
+
+func radioSchedule(w http.ResponseWriter, r *http.Request, only uint) {
 	ctx := contextValue(r)
 	now := time.Now()
 	start := now
@@ -818,24 +811,7 @@ func apiRadioSchedule(w http.ResponseWriter, r *http.Request) {
 			end = limit
 		}
 	}
-	apiView(w, r, RadioScheduleView(ctx, now, start, end))
-}
-
-func apiRadioPost(w http.ResponseWriter, r *http.Request) {
-	ctx := contextValue(r)
-	var s model.Station
-	err := recvStation(w, r, &s)
-	if err != nil {
-		return
-	}
-	err = ctx.Music().CreateStation(&s)
-	if err != nil {
-		serverErr(w, err)
-		return
-	}
-	w.WriteHeader(http.StatusCreated)
-	enc := json.NewEncoder(w)
-	enc.Encode(s)
+	apiView(w, r, RadioScheduleView(ctx, now, start, end, only))
 }
 
 func apiRadioStationGetPlaylist(w http.ResponseWriter, r *http.Request) {
@@ -843,10 +819,6 @@ func apiRadioStationGetPlaylist(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue(ParamID)
 	station, err := ctx.FindStation(id)
 	if err != nil {
-		notFoundErr(w)
-		return
-	}
-	if !station.Visible(ctx.User().Name) {
 		notFoundErr(w)
 		return
 	}
@@ -1067,83 +1039,6 @@ func apiPodcastEpisodeGetPlaylist(w http.ResponseWriter, r *http.Request) {
 			EpisodeView(ctx, episode),
 			r.URL.Path)
 		writePlaylist(w, r, plist)
-	}
-}
-
-// TODO check
-//
-// PUT /api/radio/1 < Station{}
-// 204: no content
-// 404: not found
-// 500: error
-//
-// PATCH /api/radio/1 < json+patch > 204
-// 204: no content
-// 404: not found
-// 500: error
-//
-// DELETE /api/radio/1
-// 204: success, no content
-// 404: not found
-// 500: error
-func apiStation(w http.ResponseWriter, r *http.Request, id int) {
-	ctx := contextValue(r)
-	s, err := ctx.Music().LookupStation(id)
-	if err != nil {
-		notFoundErr(w)
-		return
-	}
-	if !s.Visible(ctx.User().Name) {
-		notFoundErr(w)
-		return
-	}
-
-	switch r.Method {
-	case http.MethodGet:
-		RefreshStation(ctx, &s)
-		w.WriteHeader(http.StatusOK)
-		w.Write(s.Playlist)
-	case http.MethodPut:
-		var up model.Station
-		err := recvStation(w, r, &up)
-		if err != nil {
-			return
-		}
-		s.Name = up.Name
-		s.Ref = up.Ref
-		s.Playlist = up.Playlist
-		err = ctx.Music().UpdateStation(&s)
-		if err != nil {
-			serverErr(w, err)
-			return
-		}
-		w.WriteHeader(http.StatusNoContent)
-	case http.MethodPatch:
-		patch, _ := io.ReadAll(r.Body)
-		s.Playlist, err = spiff.Patch(s.Playlist, patch)
-		if err != nil {
-			serverErr(w, err)
-			return
-		}
-		// unmarshal & resovle
-		plist, _ := spiff.Unmarshal(s.Playlist)
-		Resolve(ctx, plist)
-		if plist.Spiff.Entries == nil {
-			plist.Spiff.Entries = []spiff.Entry{}
-		}
-		// marshal & persist
-		s.Playlist, _ = plist.Marshal()
-		ctx.Music().UpdateStation(&s)
-		w.WriteHeader(http.StatusNoContent)
-	case http.MethodDelete:
-		err = ctx.Music().DeleteStation(&s)
-		if err != nil {
-			serverErr(w, err)
-			return
-		}
-		w.WriteHeader(http.StatusNoContent)
-	default:
-		http.Error(w, "bummer", http.StatusBadRequest)
 	}
 }
 

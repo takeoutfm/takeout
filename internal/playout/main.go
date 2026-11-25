@@ -77,13 +77,7 @@ func (playout *Playout) Play(options PlayOptions) error {
 		} else {
 			name = options.Radio
 			spiffType = spiff.TypeMusic
-			list = append(list, result.Artist...)
-			list = append(list, result.Genre...)
-			list = append(list, result.Other...)
-			list = append(list, result.Period...)
-			list = append(list, result.Series...)
-			list = append(list, result.Similar...)
-			list = append(list, result.Stream...)
+			list = append(list, result.Live...)
 		}
 
 		for _, s := range list {

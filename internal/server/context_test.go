@@ -271,7 +271,7 @@ func (c *TestContext) FindTrack(id string) (model.Track, error) {
 
 func (c *TestContext) FindStation(id string) (model.Station, error) {
 	if id == TestStationID {
-		return model.Station{Name: "test station", Shared: true}, nil
+		return model.Station{Name: "test station", Type: radio.TypeLive}, nil
 	}
 	return model.Station{}, errors.New("station not found")
 }

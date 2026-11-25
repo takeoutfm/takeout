@@ -3,7 +3,7 @@
 Status: proposal. Phases 1 (durations) and 2 (server schedule) are implemented. In the TV app,
 phase 3 (live player) and phase 4 (guide grid, days, Watch Now, Start Over) are built, except
 Open to Live TV; live playback hasn't been tested yet. Of phase 5, specials, features and music
-breaks are implemented; music channels became live radio (RADIO.md), not yet built. Of phase 6,
+breaks are implemented; music channels became live radio (RADIO.md). Of phase 6,
 the phone and Linux apps have the guide and a live player; Apple doesn't yet, Wear OS won't have
 video channels (they don't fit a watch), and the Android TV home screen is deferred (see "Home
 screen integration"). See "Implementation notes" at the end for where the server code differs

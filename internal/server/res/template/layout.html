@@ -98,6 +98,11 @@
 	    <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek">
 	    <span class="np-time" data-np="dur"></span>
 	  </div>
+	  <div class="np-seek" data-np="liveprogress" hidden>
+	    <progress class="live-progress" max="1000" value="0" data-np="livebar" aria-label="Track progress"></progress>
+	    <span class="np-time" data-np="remaining"></span>
+	  </div>
+	  <div class="muted np-next" data-np="next" hidden></div>
 	  <div class="live-badge" data-np="live" hidden>LIVE</div>
 	  <div class="np-buttons">
 	    <button type="button" class="icon-button" data-action="prev" data-np="seekable" title="Previous">
@@ -106,16 +111,20 @@
 	    <button type="button" class="icon-button big" data-action="playpause" title="Play">
 	      <svg aria-hidden="true"><use data-np="playicon" href="#i-play"></use></svg>
 	    </button>
-	    <button type="button" class="icon-button" data-action="next" title="Next">
+	    <button type="button" class="icon-button" data-action="next" data-np="seekable" title="Next">
 	      <svg aria-hidden="true"><use href="#i-next"></use></svg>
 	    </button>
 	  </div>
+	  <button type="button" class="behind-live" data-np="behind" data-action="jumplive" hidden>Behind live &middot; Jump to live</button>
 	</div>
 	<div class="np-queue">
 	  <div class="section-head">
-	    <h2>Queue</h2>
-	    <span class="np-queue-actions">
+	    <h2 data-np="queue-title">Queue</h2>
+	    <span class="np-queue-actions" data-np="queue-actions">
 	      <a href="#" data-action="shuffle">Shuffle</a> &middot; <a href="#" data-action="clear">Clear</a>
+	    </span>
+	    <span class="np-queue-actions" data-np="live-actions" hidden>
+	      <a href="#" data-action="leavelive">Stop radio</a>
 	    </span>
 	  </div>
 	  <ol class="tracks" id="queue"></ol>
@@ -148,7 +157,12 @@
 	      <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek">
 	      <span class="np-time" data-np="time"></span>
 	    </div>
+	    <div class="mini-seek" data-np="liveprogress" hidden>
+	      <progress class="live-progress" max="1000" value="0" data-np="livebar" aria-label="Track progress"></progress>
+	      <span class="np-time" data-np="remaining"></span>
+	    </div>
 	    <span class="live-badge" data-np="live" hidden>LIVE</span>
+	    <button type="button" class="behind-live" data-np="behind" data-action="jumplive" hidden>Jump to live</button>
 	    <button type="button" class="icon-button" data-action="nowplaying" title="Queue">
 	      <svg aria-hidden="true"><use href="#i-queue"></use></svg>
 	    </button>

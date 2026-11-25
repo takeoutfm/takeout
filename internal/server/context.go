@@ -231,7 +231,11 @@ func (ctx RequestContext) FindTrack(id string) (model.Track, error) {
 }
 
 func (ctx RequestContext) FindStation(id string) (model.Station, error) {
-	return ctx.Music().FindStation(id)
+	r := ctx.Radio()
+	if r == nil {
+		return model.Station{}, radio.ErrStationNotFound
+	}
+	return r.FindStation(id)
 }
 
 func (ctx RequestContext) FindPlaylist(id string) (model.Playlist, error) {

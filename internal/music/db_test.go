@@ -372,56 +372,6 @@ func TestArtistImage(t *testing.T) {
 	}
 }
 
-func TestStation(t *testing.T) {
-	m := makeMusic(t)
-
-	user := "takeout"
-	s := model.Station{
-		User:        user,
-		Name:        "test station",
-		Creator:     "test creator",
-		Ref:         "/music/search?q=artist:test",
-		Shared:      true,
-		Type:        TypeArtist,
-		Image:       "https://image.png",
-		Description: "test description",
-	}
-
-	err := m.CreateStation(&s)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if s.ID == 0 {
-		t.Error("expect id")
-	}
-	if s.CreatedAt.IsZero() {
-		t.Error("expect CreatedAt")
-	}
-	if s.UpdatedAt.IsZero() {
-		t.Error("expect UpdatedAt")
-	}
-
-	s2, err := m.LookupStation(int(s.ID))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if s2.ID != s.ID {
-		t.Error("expect same id")
-	}
-	if s2.Name != "test station" {
-		t.Error("expect name")
-	}
-
-	err = m.DeleteStation(&s)
-	if err != nil {
-		t.Fatal(err)
-	}
-	s2, err = m.LookupStation(int(s.ID))
-	if err == nil {
-		t.Error("expect deleted")
-	}
-}
-
 func TestPlaylist(t *testing.T) {
 	user := "takeout"
 

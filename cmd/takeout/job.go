@@ -50,6 +50,6 @@ func init() {
 	jobCmd.Flags().StringVarP(&configFile, "config", "c", "", "config file")
 	jobCmd.Flags().StringVarP(
 		&jobName, "name", "n", "",
-		"backdrops, covers, durations, fanart, film, guide, lastfm, music, popular, podcasts, posters, profiles, radio, similar, still, stations")
+		"backdrops, covers, durations, fanart, film, guide, lastfm, music, popular, podcasts, posters, profiles, radio, similar, still")
 	rootCmd.AddCommand(jobCmd)
 }

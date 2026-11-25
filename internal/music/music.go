@@ -20,8 +20,6 @@ package music
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"math/rand"
 	"net/url"
@@ -36,14 +34,12 @@ import (
 	"takeoutfm.dev/takeout/lib/fanart"
 	"takeoutfm.dev/takeout/lib/lastfm"
 	"takeoutfm.dev/takeout/lib/listenbrainz"
-	"takeoutfm.dev/takeout/lib/log"
 	"takeoutfm.dev/takeout/lib/musicbrainz"
 	"takeoutfm.dev/takeout/lib/search"
 	. "takeoutfm.dev/takeout/model"
 )
 
 const (
-	TakeoutUser    = "takeout"
 	VariousArtists = "Various Artists"
 )
 
@@ -130,12 +126,6 @@ func CoverSmall(o any) string {
 		return Cover(o.(Release), "250")
 	case Track:
 		return TrackCover(o.(Track), "250")
-	case Station:
-		img := o.(Station).Image
-		if img == "" {
-			img = "/static/radio-white-24dp.svg"
-		}
-		return img
 	}
 	return ""
 }
@@ -203,21 +193,6 @@ func (m *Music) FindRelease(identifier string) (Release, error) {
 	} else {
 
 		return m.LookupRelease(id)
-	}
-}
-
-func (m *Music) FindStation(identifier string) (Station, error) {
-	id, err := strconv.Atoi(identifier)
-	if err != nil {
-		if strings.HasPrefix(identifier, "name:") {
-			stations := m.StationsLike("%" + identifier[5:] + "%")
-			if len(stations) > 0 {
-				return stations[0], nil
-			}
-		}
-		return Station{}, errors.New("station not found")
-	} else {
-		return m.LookupStation(id)
 	}
 }
 
@@ -300,52 +275,6 @@ func (m *Music) Search(q string, limit ...int) []Track {
 	}
 
 	return tracks
-}
-
-const (
-	// rename to Radio* or Station*
-	TypeArtist      = "artist"  // Songs by single artist
-	TypeGenre       = "genre"   // Songs from one or more genres
-	TypeSimilar     = "similar" // Songs from similar artists
-	TypePeriod      = "period"  // Songs from one or more time periods
-	TypeSeries      = "series"  // Songs from one or more series (chart)
-	TypeStream      = "stream"  // Internet radio stream
-	TypeLiveStation = "live"    // Live radio scheduled from the library
-	TypeOther       = "other"
-)
-
-func (m *Music) ClearStations() {
-	m.clearStationPlaylists()
-}
-
-// DeleteStations deletes every station except live ones, which belong to
-// the radio job.
-func (m *Music) DeleteStations() {
-	m.deleteStations()
-}
-
-// CreateStations creates the internet radio stream stations. Live stations
-// come from the radio job (internal/radio).
-func (m *Music) CreateStations() {
-	for _, v := range m.config.Music.RadioStreams {
-		src, err := json.Marshal(v.Source)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		ref := string(src)
-		station := Station{
-			User:        TakeoutUser,
-			Shared:      true,
-			Type:        TypeStream,
-			Name:        v.Title,
-			Creator:     v.Creator,
-			Ref:         ref,
-			Image:       v.Image,
-			Description: v.Description,
-		}
-		m.CreateStation(&station)
-	}
 }
 
 func (m *Music) ArtistRadio(artist Artist) []Track {

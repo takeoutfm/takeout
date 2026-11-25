@@ -306,11 +306,8 @@ func searchStations(ctx Context, u *url.URL) []model.Station {
 		return stations
 	}
 
-	list := ctx.Music().StationsLike("%" + q + "%")
-	for _, s := range list {
-		if s.Visible(ctx.User().Name) {
-			stations = append(stations, s)
-		}
+	if r := ctx.Radio(); r != nil {
+		stations = r.StationsLike(q)
 	}
 
 	if match != "" {
@@ -403,9 +400,6 @@ func resolveStationRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.E
 			return entries, err
 		}
 	}
-	if !s.Visible(ctx.User().Name) {
-		return entries, err
-	}
 	entries = addStationEntries(ctx, s, entries)
 	return entries, nil
 }
@@ -431,11 +425,11 @@ func resolvePlaylistRef(ctx Context, id string, entries []spiff.Entry) ([]spiff.
 // TODO - ideally the entries should include the source ContentType but
 // currently there's no field for this in spiff. Clients can use the extension
 // (aac, mp3, etc.) to determine ContentType for now.
-func resolveSourceRef(ctx Context, ref string, s *model.Station, entries []spiff.Entry) ([]spiff.Entry, error) {
+func resolveSourceRef(ctx Context, s *model.Station, entries []spiff.Entry) ([]spiff.Entry, error) {
 	var locations []string
 	var sizes []int64
 	var sources []config.ContentDescription
-	json.Unmarshal([]byte(ref), &sources)
+	json.Unmarshal([]byte(s.Source), &sources)
 
 	queue := make(chan string, len(sources))
 	for _, src := range sources {
@@ -489,31 +483,6 @@ func resolveSourceRef(ctx Context, ref string, s *model.Station, entries []spiff
 		Identifier: []string{},
 		Date:       date.FormatJson(time.Now()),
 	})
-
-	return entries, nil
-}
-
-func resolvePlsRef(ctx Context, url, creator, image string, entries []spiff.Entry) ([]spiff.Entry, error) {
-	client := ctx.Config().NewGetter()
-	result, err := client.GetPLS(url)
-	if err != nil {
-		return entries, err
-	}
-
-	for _, v := range result.Entries {
-		entry := spiff.Entry{
-			Creator:    creator,
-			Album:      v.Title,
-			Title:      v.Title,
-			Image:      image,
-			Background: "", // TODO no bg for pls yet
-			Location:   []string{v.File},
-			Identifier: []string{},
-			Size:       []int64{int64(v.Length)},
-			Date:       date.FormatJson(time.Now()),
-		}
-		entries = append(entries, entry)
-	}
 
 	return entries, nil
 }
@@ -573,7 +542,7 @@ func liveStationEntries(ctx Context, s *model.Station, now time.Time) []spiff.En
 	if err := r.ExtendDue(now, radio.NewLibrary(m)); err != nil {
 		log.Println(err)
 	}
-	for _, rt := range r.StationSchedule(s.Ref, now, now.Add(r.Horizon())) {
+	for _, rt := range r.StationSchedule(s.Name, now, now.Add(r.Horizon())) {
 		t, err := m.LookupRID(rt.RID)
 		if err != nil {
 			continue
@@ -588,66 +557,29 @@ func liveStationEntries(ctx Context, s *model.Station, now time.Time) []spiff.En
 
 func RefreshStation(ctx Context, s *model.Station) *spiff.Playlist {
 	plist := spiff.NewPlaylist(spiff.TypeMusic)
-	plist.Spiff.Location = fmt.Sprintf("/api/stations/%d", s.ID)
+	plist.Spiff.Location = fmt.Sprintf("/api/radio/%d", s.ID)
 	plist.Spiff.Title = s.Name
 	plist.Spiff.Image = s.Image
 	plist.Spiff.Background = "" // todo no station bg
 	plist.Spiff.Creator = s.Creator
 	plist.Spiff.Date = date.FormatJson(time.Now())
 
-	if s.Type == music.TypeStream {
-		// internet radio streams
+	switch s.Type {
+	case radio.TypeStream:
 		plist.Type = spiff.TypeStream
-		if strings.HasSuffix(s.Ref, ".pls") {
-			var entries []spiff.Entry
-			entries, err := resolvePlsRef(ctx, s.Ref, s.Creator, s.Image, entries)
-			if err != nil {
-				log.Printf("pls error %s\n", err)
-				return nil
-			}
-			plist.Spiff.Entries = entries
-		} else if strings.HasPrefix(s.Ref, "[{") {
-			var entries []spiff.Entry
-			entries, err := resolveSourceRef(ctx, s.Ref, s, entries)
-			if err != nil {
-				log.Printf("src error %s\n", err)
-				return nil
-			}
-			plist.Spiff.Entries = entries
-		} else if strings.HasSuffix(s.Ref, ".mp3") ||
-			strings.HasSuffix(s.Ref, ".aac") ||
-			strings.HasSuffix(s.Ref, ".ogg") ||
-			strings.HasSuffix(s.Ref, ".flac") {
-			plist.Spiff.Entries = []spiff.Entry{{
-				Creator:    s.Creator,
-				Album:      "",
-				Title:      s.Name,
-				Image:      s.Image,
-				Background: "", // TODO no bg for stations
-				Location:   []string{s.Ref},
-				Identifier: []string{},
-				Size:       []int64{-1},
-				Date:       date.FormatJson(time.Now()),
-			}}
-		} else {
-			// TODO add m3u, others?
-			log.Printf("unsupported stream %s\n", s.Ref)
+		entries, err := resolveSourceRef(ctx, s, []spiff.Entry{})
+		if err != nil {
+			log.Printf("src error %s\n", err)
+			return nil
 		}
-	} else if s.Type == music.TypeLiveStation {
+		plist.Spiff.Entries = entries
+	case radio.TypeLive:
 		// the schedule from the current track on, for players that can't
 		// follow it live
 		plist.Spiff.Entries = liveStationEntries(ctx, s, time.Now())
-	} else {
-		plist.Spiff.Entries = []spiff.Entry{{Ref: s.Ref}}
-		Resolve(ctx, plist)
-		if plist.Spiff.Entries == nil {
-			plist.Spiff.Entries = []spiff.Entry{}
-		}
+	default:
+		plist.Spiff.Entries = []spiff.Entry{}
 	}
-
-	// TODO not saved for now
-	//s.Playlist, _ = plist.Marshal()
-	//m.UpdateStation(s)
 
 	return plist
 }

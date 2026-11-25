@@ -47,13 +47,18 @@
 {{ end }}
 
 {{ define "station-tile" }}
+{{ if eq .Type "live" }}
+<a class="tile" href="#" data-action="live" data-live="{{ .ID }}" data-name="{{ .Name }}" data-image="{{ .Image }}" title="Listen to {{ .Name }}">
+{{ else }}
 <a class="tile" href="#" data-playlist="add-ref" data-ref="{{.|ref}}" title="Play {{ .Name }}">
+{{ end }}
   {{ if .Image }}
   <img src="{{ .Image }}" alt="" loading="lazy">
   {{ else }}
   <div class="tile-icon"><img src="/static/radio-white-24dp.svg" alt=""></div>
   {{ end }}
   <div class="tile-title">{{ .Name }}</div>
+  {{ if eq .Type "live" }}<div class="tile-sub tile-now" data-radio-now="{{ .ID }}"></div>{{ end }}
   {{ if .Description }}<div class="tile-sub">{{ .Description }}</div>{{ end }}
 </a>
 {{ end }}

@@ -53,7 +53,7 @@ func (r *Radio) Open() error {
 	if err != nil {
 		return err
 	}
-	return r.db.AutoMigrate(&RadioTrack{})
+	return r.db.AutoMigrate(&Station{}, &RadioTrack{})
 }
 
 func (r *Radio) Close() {
@@ -65,6 +65,21 @@ func (r *Radio) Close() {
 		return
 	}
 	conn.Close()
+}
+
+// Show returns a live station's show from the config, by name.
+func (r *Radio) Show(station, name string) (config.RadioShow, bool) {
+	for _, e := range r.config.Radio.Lineup {
+		if e.Name != station {
+			continue
+		}
+		for _, s := range e.Shows {
+			if s.Name == name {
+				return s, true
+			}
+		}
+	}
+	return config.RadioShow{}, false
 }
 
 // Horizon is how far ahead schedules are built.
@@ -121,6 +136,13 @@ func (r *Radio) createTracks(list []RadioTrack) error {
 // deleteEnded removes tracks that ended before t.
 func (r *Radio) deleteEnded(t time.Time) error {
 	return r.db.Unscoped().Where("end_at < ?", t.UTC()).Delete(&RadioTrack{}).Error
+}
+
+// deleteAfter deletes a station's tracks that start after t, keeping the
+// one on at t.
+func (r *Radio) deleteAfter(station string, t time.Time) error {
+	return r.db.Unscoped().Where("station = ? and start_at > ?", station, t.UTC()).
+		Delete(&RadioTrack{}).Error
 }
 
 // deleteOthers deletes the schedules of stations not in keep.

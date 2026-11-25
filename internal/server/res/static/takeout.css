@@ -980,6 +980,36 @@ button.mini-track {
     min-width: 0;
 }
 
+progress.live-progress {
+    flex: 1;
+    min-width: 0;
+    height: 4px;
+    border: none;
+    border-radius: 2px;
+    background-color: #555;
+    accent-color: orange;
+}
+
+progress.live-progress::-webkit-progress-bar {
+    border-radius: 2px;
+    background-color: #555;
+}
+
+progress.live-progress::-webkit-progress-value {
+    border-radius: 2px;
+    background-color: orange;
+}
+
+progress.live-progress::-moz-progress-bar {
+    border-radius: 2px;
+    background-color: orange;
+}
+
+.np-next {
+    margin-top: 8px;
+    font-size: 0.9em;
+}
+
 /* Now Playing: cover, title, seek bar and controls beside the queue, over
    the artist's photo, faded */
 
@@ -1045,6 +1075,41 @@ button.mini-track {
 
 .np-main .live-badge {
     margin-top: 16px;
+}
+
+.behind-live {
+    padding: 4px 12px;
+    border: 1px solid #a33;
+    border-radius: 999px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: 0.8em;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.behind-live:hover {
+    background-color: #a33;
+}
+
+.np-main .behind-live {
+    margin-top: 12px;
+}
+
+.track.scheduled {
+    cursor: default;
+}
+
+.track.scheduled .when {
+    margin-left: auto;
+    font-size: 0.8em;
+    opacity: 0.7;
+    font-variant-numeric: tabular-nums;
+}
+
+.tile-now {
+    opacity: 0.85;
 }
 
 .np-buttons {

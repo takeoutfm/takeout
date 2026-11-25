@@ -234,24 +234,6 @@ type Playlist struct {
 	TrackCount int
 }
 
-type Station struct {
-	gorm.Model
-	User        string `gorm:"uniqueIndex:idx_stations_user_name,priority:1" json:"-"`
-	Name        string `gorm:"uniqueIndex:idx_stations_user_name,priority:2"`
-	Creator     string
-	Ref         string `json:"-"`
-	Shared      bool   `json:"-"`
-	Type        string
-	Image       string
-	Description string
-	Playlist    []byte `json:"-"`
-	Rank        int    `json:"-"` // a live station's place in the radio lineup
-}
-
-func (s *Station) Visible(user string) bool {
-	return s.User == user || s.Shared
-}
-
 type ArtistImage struct {
 	gorm.Model
 	Artist string `gorm:"uniqueIndex:idx_artist_images_artist_url_source,priority:1"`

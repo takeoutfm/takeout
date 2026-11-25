@@ -128,16 +128,15 @@ type RadioStream struct {
 
 type MusicConfig struct {
 	ArtistFile           string
-	ArtistRadioBreadth   int
-	ArtistRadioDepth     int
-	TrackRadioBreadth    int
-	TrackRadioDepth      int
+	ArtistRadioBreadth   int // artist radio: similar artists
+	ArtistRadioDepth     int // artist radio: tracks per artist
+	TrackRadioBreadth    int // track radio: similar artists
+	TrackRadioDepth      int // track radio: tracks per artist
+	RadioLimit           int // tracks in artist, track and search radio, deep tracks and shuffle
+	RadioSearchLimit     int // search results for search radio, before RadioLimit
 	DB                   DatabaseConfig
 	DeepLimit            int
 	PopularLimit         int
-	RadioLimit           int
-	RadioSearchLimit     int
-	RadioStreams         []RadioStream
 	Recent               time.Duration
 	RecentLimit          int
 	ReleaseCountries     []string
@@ -314,6 +313,7 @@ type RadioConfig struct {
 	Horizon      time.Duration // how far ahead schedules are built
 	MinContent   time.Duration // a station with less music than this isn't scheduled
 	SearchLimit  int           // max search results for a station's pool
+	Streams      []RadioStream // internet radio stations
 	Genres       []string      // automatic genre stations
 	Decades      []int         // automatic decade stations
 	Series       []string      // automatic series (chart) stations
@@ -328,6 +328,21 @@ type RadioEntry struct {
 	Image       string
 	Description string
 	MinContent  time.Duration // instead of Radio.MinContent
+	Shows       []RadioShow   // regular shows on this station
+}
+
+// RadioShow is a regular show on a live station, like "Gary Numan Fridays":
+// for its time slot the station plays the show's music instead of its own.
+type RadioShow struct {
+	Name        string
+	Layout      string // which days, as in DateRecommend; every day if empty
+	Match       string
+	At          string        // local start time, "00:00" if empty
+	Length      time.Duration // 24h if zero
+	Music       string        // music search query
+	Released    time.Duration // only recordings first released this recently
+	Image       string
+	Description string
 }
 
 // Location is the time zone used for station date windows.
@@ -570,10 +585,10 @@ func configDefaults(v *viper.Viper) {
 	v.SetDefault("Music.ArtistRadioDepth", "3")
 	v.SetDefault("Music.TrackRadioBreadth", "10")
 	v.SetDefault("Music.TrackRadioDepth", "5")
-	v.SetDefault("Music.DeepLimit", "50")
-	v.SetDefault("Music.PopularLimit", "50")
 	v.SetDefault("Music.RadioLimit", "25")
 	v.SetDefault("Music.RadioSearchLimit", "1000")
+	v.SetDefault("Music.DeepLimit", "50")
+	v.SetDefault("Music.PopularLimit", "50")
 
 	v.SetDefault("Music.Recent", "8760h") // 1 year
 	v.SetDefault("Music.RecentLimit", "50")

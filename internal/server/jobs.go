@@ -433,18 +433,6 @@ func syncPodcasts(ctx context.Context, config *config.Config, mediaConfig *confi
 	return p.Sync()
 }
 
-func createStations(ctx context.Context, config *config.Config, mediaConfig *config.Config) error {
-	m := music.NewMusic(mediaConfig)
-	err := m.Open(ctx)
-	if err != nil {
-		return err
-	}
-	defer m.Close()
-	m.DeleteStations()
-	m.CreateStations()
-	return nil
-}
-
 func Job(ctx context.Context, config *config.Config, name string) error {
 	list, err := assignedMedia(config)
 	if err != nil {
@@ -511,8 +499,6 @@ func Job(ctx context.Context, config *config.Config, name string) error {
 			syncFilm(ctx, config, mediaConfig)
 		case "tv":
 			syncTV(ctx, config, mediaConfig)
-		case "stations":
-			createStations(ctx, config, mediaConfig)
 		}
 	}
 	return nil

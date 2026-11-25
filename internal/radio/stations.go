@@ -19,6 +19,7 @@ package radio
 
 import (
 	"fmt"
+	"hash/fnv"
 	"strings"
 	"time"
 
@@ -36,6 +37,15 @@ type station struct {
 	Layout      string // optional date window, as in DateRecommend
 	Match       string
 	MinContent  time.Duration // 0 is Radio.MinContent
+	Shows       []config.RadioShow
+}
+
+// plan sums up what decides the station's schedule, so the radio job can
+// tell when it changed.
+func (s station) plan() string {
+	h := fnv.New64a()
+	fmt.Fprintf(h, "%q %s %+v", s.Query, s.MinContent, s.Shows)
+	return fmt.Sprintf("%x", h.Sum64())
 }
 
 // onAir reports whether the station's date window includes day.
@@ -58,6 +68,7 @@ func lineup(cfg *config.Config) []station {
 			Layout:      e.Layout,
 			Match:       e.Match,
 			MinContent:  e.MinContent,
+			Shows:       e.Shows,
 		})
 	}
 

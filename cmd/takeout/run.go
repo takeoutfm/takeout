@@ -170,7 +170,7 @@ func run(opts *viper.Viper) error {
 
 func doMusic(cfg *config.Config) {
 	server.Job(context.TODO(), cfg, "music")
-	server.Job(context.TODO(), cfg, "stations")
+	server.Job(context.TODO(), cfg, "radio")
 }
 
 func doFilm(cfg *config.Config) {

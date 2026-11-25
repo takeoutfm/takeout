@@ -18,25 +18,26 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http/httptest"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"takeoutfm.dev/takeout/internal/config"
-	"takeoutfm.dev/takeout/internal/music"
 	"takeoutfm.dev/takeout/internal/radio"
 	"takeoutfm.dev/takeout/model"
 	"takeoutfm.dev/takeout/view"
 )
 
 // radioLibrary is the real music library with a pool for query "x" only, so
-// the default Music.Radio* stations find nothing.
+// the default stations find nothing.
 type radioLibrary struct {
 	radio.MusicLibrary
 	pool []radio.Title
@@ -55,6 +56,8 @@ type radioContext struct {
 }
 
 func (c radioContext) Radio() *radio.Radio { return c.r }
+
+func (c radioContext) FindStation(id string) (model.Station, error) { return c.r.FindStation(id) }
 
 func radioScheduleRequest(t *testing.T, ctx Context, query string) (int, view.RadioSchedule) {
 	r := httptest.NewRequest("GET", "https://takeout/api/radio/schedule"+query, nil)
@@ -86,11 +89,6 @@ func TestApiRadioSchedule(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		db.Unscoped().Where("r_id like ?", "radio-rid-%").Delete(&model.Track{})
-		for _, s := range m.TakeoutStations() {
-			if s.Type == music.TypeLiveStation {
-				m.DeleteStation(&s)
-			}
-		}
 	})
 
 	cfg, err := config.TestingConfig()
@@ -98,7 +96,12 @@ func TestApiRadioSchedule(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfg.Radio.DB.Source = filepath.Join(t.TempDir(), "radio.db")
-	cfg.Radio.Lineup = []config.RadioEntry{{Name: "Test FM", Music: "x", Description: "Testing"}}
+	cfg.Radio.Lineup = []config.RadioEntry{
+		{Name: "Test FM", Music: "x", Description: "Testing"},
+		{Name: "Show FM", Music: "x", Shows: []config.RadioShow{
+			{Name: "All Day", Music: "x", Image: "all-day.png", Description: "Every day"}}},
+	}
+	cfg.Radio.Streams = []config.RadioStream{{Creator: "Test", Title: "Test Stream"}}
 	r := radio.NewRadio(cfg)
 	if err := r.Open(); err != nil {
 		t.Fatal(err)
@@ -111,10 +114,24 @@ func TestApiRadioSchedule(t *testing.T) {
 
 	// the station is listed as live
 	rv := RadioView(ctx)
-	if len(rv.Live) != 1 || rv.Live[0].Name != "Test FM" || rv.Live[0].Description != "Testing" {
+	if len(rv.Live) != 2 || rv.Live[0].Name != "Test FM" || rv.Live[0].Description != "Testing" {
 		t.Fatalf("live %+v", rv.Live)
 	}
 	station := rv.Live[0]
+	if len(rv.Stream) != 1 || rv.Stream[0].Name != "Test Stream" {
+		t.Fatalf("stream %+v", rv.Stream)
+	}
+
+	// search finds stations by name, or with a radio: query
+	if got := searchRadio(ctx, "test fm"); len(got) != 1 || got[0].ID != station.ID {
+		t.Errorf("search %+v", got)
+	}
+	if got := searchRadio(ctx, "radio:test"); len(got) != 2 {
+		t.Errorf("radio search %+v", got)
+	}
+	if got := searchRadio(ctx, "artist:test"); len(got) != 0 {
+		t.Errorf("artist search %+v", got)
+	}
 
 	code, s := radioScheduleRequest(t, ctx, "")
 	if code != 200 {
@@ -123,8 +140,22 @@ func TestApiRadioSchedule(t *testing.T) {
 	if d := s.End.Sub(s.Start); d != 30*time.Minute {
 		t.Errorf("default range %s", d)
 	}
-	if len(s.Stations) != 1 || s.Stations[0].ID != station.ID || s.Stations[0].Name != "Test FM" {
+	if len(s.Stations) != 2 || s.Stations[0].ID != station.ID || s.Stations[0].Name != "Test FM" {
 		t.Fatalf("stations %+v", s.Stations)
+	}
+	if len(s.Stations[0].Shows) != 0 || s.Stations[0].Tracks[0].Show != "" {
+		t.Errorf("show on Test FM %+v", s.Stations[0])
+	}
+	// an all-day show: every track is in it, and the station names it once
+	shows := s.Stations[1]
+	if len(shows.Shows) != 1 || shows.Shows[0] != (view.RadioShow{Name: "All Day",
+		Image: "all-day.png", Description: "Every day"}) {
+		t.Errorf("shows %+v", shows.Shows)
+	}
+	for _, x := range shows.Tracks {
+		if x.Show != "All Day" {
+			t.Fatalf("track not in the show %+v", x)
+		}
 	}
 	tracks := s.Stations[0].Tracks
 	now := time.UnixMilli(s.Time)
@@ -149,11 +180,61 @@ func TestApiRadioSchedule(t *testing.T) {
 		}
 	}
 
+	// one station's schedule: the same shape, only that station
+	code, one := radioStationScheduleRequest(t, ctx, fmt.Sprint(station.ID))
+	if code != 200 || len(one.Stations) != 1 || one.Stations[0].ID != station.ID ||
+		len(one.Stations[0].Tracks) != len(tracks) || one.Time == 0 {
+		t.Errorf("station schedule %d %+v", code, one)
+	}
+	if code, _ := radioStationScheduleRequest(t, ctx, fmt.Sprint(rv.Stream[0].ID)); code != 404 {
+		t.Errorf("stream schedule: got %d", code)
+	}
+	if code, _ := radioStationScheduleRequest(t, ctx, "9999"); code != 404 {
+		t.Errorf("missing station schedule: got %d", code)
+	}
+
+	// live tiles tune in; stream tiles play through the queue
+	page := radioPage(t, ctx)
+	for _, want := range []string{
+		fmt.Sprintf(`data-action="live" data-live="%d" data-name="Test FM"`, station.ID),
+		fmt.Sprintf(`data-radio-now="%d"`, station.ID),
+		fmt.Sprintf(`data-ref="/music/stations/%d"`, rv.Stream[0].ID),
+	} {
+		if !strings.Contains(page, want) {
+			t.Errorf("radio page lacks %s", want)
+		}
+	}
+	if strings.Contains(page, fmt.Sprintf(`data-ref="/music/stations/%d"`, station.ID)) {
+		t.Error("live station plays through the queue")
+	}
+
 	// the playlist starts with the current track
 	plist := RefreshStation(ctx, &station)
 	if len(plist.Spiff.Entries) == 0 || plist.Spiff.Entries[0].Location[0] != tracks[0].Location {
 		t.Errorf("playlist %+v", plist.Spiff.Entries)
 	}
+}
+
+func radioStationScheduleRequest(t *testing.T, ctx Context, id string) (int, view.RadioSchedule) {
+	r := httptest.NewRequest("GET", "https://takeout/api/radio/"+id+"/schedule", nil)
+	r.SetPathValue(ParamID, id)
+	r = withContext(r, ctx)
+	w := httptest.NewRecorder()
+	apiRadioStationSchedule(w, r)
+	resp := w.Result()
+	body, _ := io.ReadAll(resp.Body)
+	var s view.RadioSchedule
+	json.Unmarshal(body, &s)
+	return resp.StatusCode, s
+}
+
+// radioPage renders the Radio page's tiles.
+func radioPage(t *testing.T, ctx Context) string {
+	var buf bytes.Buffer
+	if err := ctx.Template().ExecuteTemplate(&buf, "radio.html", RadioView(ctx)); err != nil {
+		t.Fatal(err)
+	}
+	return buf.String()
 }
 
 func TestApiRadioScheduleEmpty(t *testing.T) {

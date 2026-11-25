@@ -39,7 +39,7 @@ func TestDefaultConfig(t *testing.T) {
 		t.Error("expect no lastfm secret")
 	}
 
-	// if len(config.Music.RadioStreams) == 0 {
+	// if len(config.Radio.Streams) == 0 {
 	// 	t.Error("expect radio streams")
 	// }
 	if len(config.Podcast.Series) == 0 {

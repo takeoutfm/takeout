@@ -20,6 +20,7 @@ package server
 import (
 	"testing"
 
+	"takeoutfm.dev/takeout/internal/radio"
 	"takeoutfm.dev/takeout/model"
 	"takeoutfm.dev/takeout/spiff"
 )
@@ -115,7 +116,9 @@ func TestAddEpisodeEntries(t *testing.T) {
 func TestAddStationEntries(t *testing.T) {
 	ctx := NewTestContext(t)
 	station := model.Station{
-		Name: "test station",
+		Name:   "test station",
+		Type:   radio.TypeStream,
+		Source: `[{"contentType":"audio/mpeg","url":"https://radio.test/stream.mp3"}]`,
 	}
 
 	var entries []spiff.Entry

@@ -20,6 +20,10 @@
 // go to /api/activity (4 minutes in or half way, as the apps count them),
 // podcast positions to /api/progress, and neither for radio streams. Each
 // entry's kind comes from its location, since a queue can mix them.
+//
+// Live radio plays off the queue: tuning in to a live station follows its
+// schedule (/api/radio/{id}/schedule), joining the track on now part way
+// through, and leaves the queue as it was. See RADIO.md.
 
 "use strict";
 
@@ -30,6 +34,11 @@
     const Finished = 120;         // seconds from the end counts as finished
     const OffsetsMaxAge = 10000;  // ms before podcast progress is fetched again
     const RetryKey = "takeout.listens";
+    const LiveKey = "takeout.live";   // the live station tuned in, for a reload
+    const LiveDrift = 5;              // seconds off the schedule before correcting
+    const LiveBehind = 300;           // seconds behind live a resume may stay
+    const LiveRefill = 2;             // tracks left before fetching more
+    const LivePreload = 30;           // seconds left when the next track loads
 
     let audio = null;
     let queue = [];      // {creator, album, title, image, locations, etag, kind}
@@ -50,6 +59,13 @@
     let offsets = null;  // podcast progress from the server, by etag
     let offsetsAt = 0;   // when it was fetched (ms)
     let locationIndex = 0;
+
+    // live radio: {id, name, image, shows, tracks, i, skew, behind, pausedAt,
+    // pending}, or null. tracks are the scheduled tracks from the one
+    // playing (i), skew the server's clock less this one's (ms).
+    let live = null;
+    let spare = null;    // {track, el}: the next live track, loading
+    let fetchingLive = false;
 
     const $ = id => document.getElementById(id);
 
@@ -82,6 +98,9 @@
     };
 
     const saveState = function(keepalive = false) {
+	if (live) {
+	    return; // live radio isn't in the queue
+	}
 	const pos = audio && !isStream() ? audio.currentTime || 0 : 0;
 	patch(statePatch(index, pos), keepalive);
     };
@@ -325,6 +344,371 @@
 	patch(ops).then(() => playIndex(0));
     };
 
+    // ---- live radio
+
+    const isLive = () => live != null;
+    const serverNow = () => Date.now() + (live ? live.skew : 0);
+
+    const rememberLive = function(station) {
+	try {
+	    if (station) {
+		localStorage.setItem(LiveKey, JSON.stringify(station));
+	    } else {
+		localStorage.removeItem(LiveKey);
+	    }
+	} catch (e) {
+	}
+    };
+
+    const rememberedLive = function() {
+	try {
+	    return JSON.parse(localStorage.getItem(LiveKey));
+	} catch (e) {
+	    return null;
+	}
+    };
+
+    // a scheduled track, shaped like a queue entry
+    const scheduled = function(x, station) {
+	const show = (station.Shows || []).find(s => s.Name == x.Show) || {};
+	return {
+	    creator: x.Artist || "",
+	    album: x.Release || "",
+	    title: x.Title || "",
+	    image: x.Image || show.Image || station.Image || "",
+	    background: "",
+	    locations: [x.Location],
+	    etag: x.ETag || "",
+	    kind: "music",
+	    start: Date.parse(x.Start),
+	    end: Date.parse(x.End),
+	    show: x.Show || ""
+	};
+    };
+
+    // the station's schedule from start (a server time in ms, or now)
+    const fetchSchedule = async function(id, start) {
+	let url = "/api/radio/" + id + "/schedule";
+	if (start) {
+	    url += "?start=" + encodeURIComponent(new Date(start).toISOString());
+	}
+	const sent = Date.now();
+	const resp = await fetch(url);
+	if (!resp.ok) {
+	    throw new Error("schedule " + resp.status);
+	}
+	const data = await resp.json();
+	const skew = data.Time - (sent + Date.now()) / 2;
+	const station = (data.Stations || [])[0];
+	return {skew: skew, station: station,
+		tracks: station ? (station.Tracks || []).map(x => scheduled(x, station)) : []};
+    };
+
+    // add the tracks after the last one held
+    const appendLive = function(tracks) {
+	const last = live.tracks[live.tracks.length - 1];
+	const after = last ? last.end - 1000 : -Infinity;
+	tracks.forEach(t => {
+	    if (t.start >= after && !live.tracks.some(x => x.start == t.start)) {
+		live.tracks.push(t);
+	    }
+	});
+    };
+
+    // fetch more of the schedule, from the end of what's held
+    const refillLive = async function() {
+	if (!live || fetchingLive) {
+	    return;
+	}
+	const station = live;
+	const last = live.tracks[live.tracks.length - 1];
+	fetchingLive = true;
+	try {
+	    const got = await fetchSchedule(station.id, last ? last.end : 0);
+	    if (live === station) {
+		live.skew = got.skew;
+		appendLive(got.tracks);
+		renderQueue();
+		showLive();
+	    }
+	} catch (e) {
+	    console.log("radio: " + e); // keep playing what's held
+	} finally {
+	    fetchingLive = false;
+	}
+    };
+
+    // tune in to a live station; play is false after a reload, when the
+    // browser won't play until a click
+    const tuneIn = async function(id, name, image, play = true) {
+	if (current() != null && playing != null && !isLive()) {
+	    // leave the queue where it was
+	    finishPodcast();
+	    saveState();
+	}
+	dropSpare();
+	audio.pause();
+	live = {id: id, name: name || "", image: image || "", tracks: [], i: -1, skew: 0,
+		behind: false, pausedAt: null, pending: !play};
+	rememberLive({id: id, name: name, image: image});
+	setSessionActions();
+	try {
+	    const got = await fetchSchedule(id, 0);
+	    if (live == null || live.id != id) {
+		return;
+	    }
+	    live.skew = got.skew;
+	    if (got.station) {
+		live.name = got.station.Name;
+		live.image = got.station.Image || live.image;
+	    }
+	    live.tracks = got.tracks;
+	} catch (e) {
+	    console.log("radio: " + e);
+	}
+	if (live.tracks.length == 0) {
+	    flash("Nothing's on " + (live.name || "this station") + " right now");
+	    leaveLive();
+	    return;
+	}
+	if (play) {
+	    jumpLive();
+	} else {
+	    // show what's on; a click on play joins it
+	    live.i = Math.max(0, onNow());
+	    playing = null;
+	    showTrack(live.tracks[live.i]);
+	}
+    };
+
+    // the index of the track on now, or -1
+    const onNow = function() {
+	const now = serverNow();
+	return live.tracks.findIndex(t => t.start <= now && now < t.end);
+    };
+
+    // play the track on now, part way through
+    const jumpLive = async function() {
+	if (!live) {
+	    return;
+	}
+	live.behind = false;
+	live.pausedAt = null;
+	live.pending = false;
+	let i = onNow();
+	if (i < 0) {
+	    live.tracks = [];
+	    await refillLive();
+	    i = live ? onNow() : -1;
+	}
+	if (i < 0) {
+	    flash("Couldn't find what's on now");
+	    return;
+	}
+	const t = live.tracks[i];
+	playLive(i, Math.max(0, (serverNow() - t.start) / 1000));
+    };
+
+    // play live.tracks[i] from offset seconds
+    const playLive = function(i, offset) {
+	finishPodcast();
+	live.tracks = live.tracks.slice(i);
+	live.i = 0;
+	const t = live.tracks[0];
+	if (spare && spare.track === t && offset < 1) {
+	    swapSpare();
+	} else {
+	    dropSpare();
+	    resumeAt = offset >= 1 ? offset : 0;
+	    resetPlay();
+	    start(t);
+	}
+	// more of the schedule with each track, as the apps do
+	refillLive();
+    };
+
+    // the next scheduled track: from the top, or at its offset when playback
+    // is more than LiveDrift off the schedule
+    const nextLive = async function() {
+	if (live.tracks.length - 1 - live.i <= LiveRefill) {
+	    await refillLive();
+	    if (!live) {
+		return;
+	    }
+	}
+	const i = live.i + 1;
+	if (i >= live.tracks.length) {
+	    jumpLive();
+	    return;
+	}
+	const late = (serverNow() - live.tracks[i].start) / 1000;
+	if (!live.behind && late > LiveDrift) {
+	    jumpLive();
+	    return;
+	}
+	playLive(i, 0);
+    };
+
+    // resume after a pause: carry on behind live if it's not too far,
+    // otherwise join what's on now
+    const resumeLive = function() {
+	const t = live.tracks[live.i];
+	if (live.pending || t == null || !audio.getAttribute("src")) {
+	    jumpLive();
+	    return;
+	}
+	const at = t.start + (audio.currentTime || 0) * 1000;
+	const behind = (serverNow() - at) / 1000;
+	const left = (t.end - at) / 1000;
+	if (behind > Math.max(LiveBehind, left)) {
+	    jumpLive();
+	    return;
+	}
+	live.pausedAt = null;
+	live.behind = live.behind || behind > LiveDrift;
+	showLive();
+	audio.play().catch(err => console.log("play: " + err.name));
+    };
+
+    // stop the radio and go back to the queue
+    const leaveLive = function() {
+	if (!live) {
+	    return;
+	}
+	live = null;
+	rememberLive(null);
+	dropSpare();
+	audio.pause();
+	audio.removeAttribute("src");
+	audio.load();
+	playing = null;
+	resetPlay();
+	setSessionActions();
+	const t = current();
+	if (t != null) {
+	    showTrack(t);
+	} else {
+	    $("playing").hidden = true;
+	    showNowPlaying(false);
+	    setAll("queue-title", e => { e.textContent = "Queue"; });
+	    setAll("queue-actions", e => { e.hidden = false; });
+	    setAll("live-actions", e => { e.hidden = true; });
+	    setAll("liveprogress", e => { e.hidden = true; });
+	    showLive();
+	    renderQueue();
+	}
+    };
+
+    // load the next live track while this one ends, for a short gap
+    const preloadLive = function() {
+	const t = live.tracks[live.i + 1];
+	if (t == null || (spare && spare.track === t)) {
+	    return;
+	}
+	dropSpare();
+	const el = new Audio();
+	el.preload = "auto";
+	el.src = t.locations[0];
+	spare = {track: t, el: el};
+    };
+
+    const dropSpare = function() {
+	if (spare) {
+	    spare.el.removeAttribute("src");
+	    spare.el.load();
+	    spare = null;
+	}
+    };
+
+    // play the loaded next track in place of the audio element
+    const swapSpare = function() {
+	const old = audio;
+	unbind(old);
+	old.pause();
+	old.removeAttribute("src");
+	old.load();
+	audio = spare.el;
+	const t = spare.track;
+	spare = null;
+	bind(audio);
+	resetPlay();
+	resumeAt = 0;
+	playing = {track: t, type: t.kind};
+	showTrack(t);
+	lastTime = audio.currentTime || 0;
+	play();
+    };
+
+    // the parts of the player that differ for live radio
+    const showLive = function() {
+	setAll("behind", e => { e.hidden = !(live && live.behind); });
+	const n = live && live.tracks[live.i + 1];
+	setAll("next", e => {
+	    e.hidden = !n;
+	    e.textContent = n ? "Next: " + [n.creator, n.title].filter(x => x).join(" \u2013 ") : "";
+	});
+    };
+
+    const setSessionActions = function() {
+	if (!("mediaSession" in navigator)) {
+	    return;
+	}
+	const actions = {
+	    play: userPlay,
+	    pause: pause,
+	    nexttrack: isLive() ? null : next,
+	    previoustrack: isLive() ? null : prev,
+	    seekto: isLive() ? null : d => {
+		if (!isStream()) {
+		    audio.currentTime = d.seekTime;
+		}
+	    }
+	};
+	for (const [action, handler] of Object.entries(actions)) {
+	    try {
+		navigator.mediaSession.setActionHandler(action, handler);
+	    } catch (e) {
+	    }
+	}
+    };
+
+    // ---- radio page: what's on each live station
+
+    let radioTimer = null;
+
+    const showOnNow = async function() {
+	clearTimeout(radioTimer);
+	const lines = document.querySelectorAll("#main [data-radio-now]");
+	if (lines.length == 0) {
+	    return;
+	}
+	let data;
+	const sent = Date.now();
+	try {
+	    data = await (await fetch("/api/radio/schedule")).json();
+	} catch (e) {
+	    console.log("radio: " + e);
+	    return;
+	}
+	const now = data.Time + (Date.now() - sent) / 2;
+	let soonest = Infinity;
+	const byID = {};
+	(data.Stations || []).forEach(st => {
+	    const x = (st.Tracks || []).find(x => Date.parse(x.Start) <= now && now < Date.parse(x.End));
+	    if (x) {
+		byID[st.ID] = x;
+		soonest = Math.min(soonest, Date.parse(x.End));
+	    }
+	});
+	lines.forEach(e => {
+	    const x = byID[e.getAttribute("data-radio-now")];
+	    e.textContent = x ? [x.Artist + " \u2013 " + x.Title, x.Show].filter(s => s).join(" \u00b7 ") : "";
+	});
+	if (isFinite(soonest)) {
+	    radioTimer = setTimeout(showOnNow, Math.max(1000, soonest - now + 1000));
+	}
+    };
+
     // ---- playback
 
     const resetPlay = function() {
@@ -338,6 +722,12 @@
     };
 
     const playIndex = function(i, position = 0) {
+	if (live) {
+	    live = null;
+	    rememberLive(null);
+	    dropSpare();
+	    setSessionActions();
+	}
 	if (i < 0 || i >= queue.length) {
 	    stop();
 	    return;
@@ -382,15 +772,30 @@
 	audio.pause();
     };
 
+    // play, from the play button or media keys
+    const userPlay = function() {
+	if (live) {
+	    resumeLive();
+	} else {
+	    play();
+	}
+    };
+
     const toggle = function() {
 	if (audio.paused) {
-	    play();
+	    userPlay();
 	} else {
 	    pause();
 	}
     };
 
     const stop = function() {
+	if (live) {
+	    live = null;
+	    rememberLive(null);
+	    dropSpare();
+	    setSessionActions();
+	}
 	finishPodcast();
 	audio.pause();
 	audio.removeAttribute("src");
@@ -406,6 +811,10 @@
     };
 
     const next = function() {
+	if (live) {
+	    nextLive();
+	    return;
+	}
 	if (index + 1 < queue.length) {
 	    playIndex(index + 1);
 	} else {
@@ -415,6 +824,9 @@
     };
 
     const prev = function() {
+	if (live) {
+	    return;
+	}
 	if (!isStream() && audio.currentTime > 5) {
 	    audio.currentTime = 0;
 	} else if (index > 0) {
@@ -447,6 +859,13 @@
 	}
 	showProgress();
 
+	if (live && !live.pending) {
+	    const d = audio.duration;
+	    if (isFinite(d) && d - now <= LivePreload) {
+		preloadLive();
+	    }
+	}
+
 	if (playing.type == "music" && !listened && t.etag) {
 	    const d = audio.duration;
 	    if (played >= FourMinutes || (d > 0 && played >= d / 2)) {
@@ -477,6 +896,9 @@
     };
 
     const onPause = function() {
+	if (live && !audio.ended) {
+	    live.pausedAt = Date.now();
+	}
 	showControls();
 	showEpisode();
 	if (playing && !audio.ended && audio.getAttribute("src")) {
@@ -500,6 +922,9 @@
 	if (playing.type == "stream") {
 	    flash("This station can't play here; try the TakeoutFM app");
 	    audio.pause();
+	} else if (live) {
+	    flash("Couldn't play " + t.title);
+	    setTimeout(() => { if (live) { nextLive(); } }, 1500);
 	} else {
 	    flash("Couldn't play " + t.title);
 	    if (index + 1 < queue.length) {
@@ -516,12 +941,17 @@
     };
 
     const showTrack = function(t) {
-	const live = t.kind == "stream";
+	const stream = t.kind == "stream";
+	const onAir = stream || isLive();
 	$("playing").hidden = false;
 	setAll("title", e => { e.textContent = t.title; });
-	// a station's name is its album; a track's second line is its artist
-	setAll("artist", e => { e.textContent = live ? t.album || t.creator : t.creator; });
-	setAll("album", e => { e.textContent = live ? "" : t.album; });
+	// a station's name is its album; a track's second line is its artist;
+	// on live radio the third line is the station and show
+	setAll("artist", e => { e.textContent = stream ? t.album || t.creator : t.creator; });
+	setAll("album", e => {
+	    e.textContent = isLive() ? [live.name, t.show].filter(x => x).join(" \u00b7 ") :
+		stream ? "" : t.album;
+	});
 	setAll("cover", e => {
 	    if (t.image) {
 		e.src = t.image;
@@ -537,8 +967,13 @@
 		e.removeAttribute("src");
 	    }
 	});
-	setAll("seekable", e => { e.hidden = live; });
-	setAll("live", e => { e.hidden = !live; });
+	setAll("seekable", e => { e.hidden = onAir; });
+	setAll("live", e => { e.hidden = !onAir; });
+	setAll("queue-title", e => { e.textContent = isLive() ? "Up next on " + live.name : "Queue"; });
+	setAll("queue-actions", e => { e.hidden = isLive(); });
+	setAll("live-actions", e => { e.hidden = !isLive(); });
+	setAll("liveprogress", e => { e.hidden = !isLive(); });
+	showLive();
 	showControls();
 	showProgress();
 	renderQueue();
@@ -577,6 +1012,19 @@
     const showProgress = function() {
 	const d = audio.duration;
 	const pos = audio.currentTime || 0;
+	if (live) {
+	    // what's heard, not the schedule, so it's right behind live too
+	    const known = isFinite(d) && d > 0;
+	    setAll("livebar", e => { e.value = known ? Math.round(pos / d * 1000) : 0; });
+	    setAll("remaining", e => { e.textContent = known ? "\u2212" + time(Math.max(0, d - pos)) : ""; });
+	    if (known && "mediaSession" in navigator && navigator.mediaSession.setPositionState) {
+		try {
+		    navigator.mediaSession.setPositionState({duration: d, position: Math.min(pos, d)});
+		} catch (e) {
+		}
+	    }
+	    return;
+	}
 	if (dragging) {
 	    return;
 	}
@@ -610,7 +1058,23 @@
 	})[c]);
     };
 
+    const clock = ms => new Date(ms).toLocaleTimeString([], {hour: "numeric", minute: "2-digit"});
+
     const renderQueue = function() {
+	if (live) {
+	    // what's scheduled; it can't be changed
+	    const rows = live.tracks.slice(Math.max(0, live.i)).map((t, k) =>
+		'<li class="track scheduled' + (k == 0 ? ' current' : '') + '">' +
+		    '<span class="num">' + (k == 0 ?
+			'<svg class="playing-icon" aria-label="Playing"><use href="#i-play"></use></svg>' : '') + '</span>' +
+		    '<img class="thumb" src="' + esc(t.image) + '" alt="" loading="lazy">' +
+		    '<div class="text"><div class="title">' + esc(t.title) + '</div>' +
+		    '<div class="sub">' + esc([t.creator, t.show].filter(x => x).join(" \u00b7 ")) + '</div></div>' +
+		    '<span class="when">' + esc(clock(t.start - live.skew)) + '</span>' +
+		'</li>');
+	    $("queue").innerHTML = rows.join("");
+	    return;
+	}
 	const rows = queue.map((t, i) =>
 	    '<li class="track' + (i == index ? ' current' : '') + '" data-action="entry" data-index="' + i + '">' +
 		'<span class="num">' + (i == index ?
@@ -644,7 +1108,7 @@
 	    } else {
 		showNowPlaying(false);
 	    }
-	} else if (current() != null) {
+	} else if (current() != null || live) {
 	    history.replaceState(Object.assign({}, history.state, {scroll: window.scrollY}), "");
 	    history.pushState({scroll: 0, nowplaying: true}, "", location.href);
 	    showNowPlaying(true);
@@ -708,7 +1172,7 @@
 	navigator.mediaSession.metadata = new MediaMetadata({
 	    title: t.title,
 	    artist: t.creator,
-	    album: t.album,
+	    album: isLive() ? [live.name, t.show].filter(x => x).join(" \u00b7 ") : t.album,
 	    artwork: t.image ? [{src: t.image}] : []
 	});
     };
@@ -750,6 +1214,10 @@
 	    case "shuffle": shuffle(); break;
 	    case "clear": clear(); break;
 	    case "entry": playIndex(i); break;
+	    case "live": tuneIn(e.getAttribute("data-live"), e.getAttribute("data-name"),
+				e.getAttribute("data-image")); break;
+	    case "jumplive": jumpLive(); break;
+	    case "leavelive": leaveLive(); break;
 	    case "remove": remove(i); break;
 	    default: return;
 	    }
@@ -760,11 +1228,13 @@
     const onKey = function(event) {
 	const tag = document.activeElement && document.activeElement.tagName;
 	if (tag == "INPUT" || tag == "TEXTAREA" || event.metaKey || event.ctrlKey || event.altKey ||
-	    current() == null) {
+	    (current() == null && !live)) {
 	    return;
 	}
 	if (event.key == " ") {
 	    toggle();
+	} else if (live) {
+	    return;
 	} else if (event.key == "ArrowRight") {
 	    next();
 	} else if (event.key == "ArrowLeft") {
@@ -802,58 +1272,65 @@
 
     const init = function() {
 	audio = $("audio");
-	audio.addEventListener("timeupdate", onTime);
-	audio.addEventListener("loadedmetadata", onLoaded);
-	audio.addEventListener("play", onPlay);
-	audio.addEventListener("pause", onPause);
-	audio.addEventListener("ended", next);
-	audio.addEventListener("error", onError);
-	audio.addEventListener("durationchange", showProgress);
+	bind(audio);
 
 	document.addEventListener("click", onClick);
 	document.addEventListener("keydown", onKey);
 	document.addEventListener("takeout:page", () => {
 	    showNowPlaying(false);
 	    showEpisode();
+	    showOnNow();
 	});
 	// Back or Forward to the same page: Now Playing open or closed
 	document.addEventListener("takeout:history", event => {
-	    showNowPlaying(!!(event.detail && event.detail.nowplaying) && current() != null);
+	    showNowPlaying(!!(event.detail && event.detail.nowplaying) && (current() != null || live != null));
 	});
 	document.addEventListener("input", onSeekInput);
 	document.addEventListener("change", onSeekChange);
 	window.addEventListener("pagehide", () => {
 	    finishPodcast();
-	    if (current() != null && !audio.paused) {
+	    if (current() != null && !live && !audio.paused) {
 		saveState(true);
 	    }
 	});
 	window.addEventListener("online", retryListens);
 
-	if ("mediaSession" in navigator) {
-	    const actions = {
-		play: play,
-		pause: pause,
-		nexttrack: next,
-		previoustrack: prev,
-		seekto: d => {
-		    if (!isStream()) {
-			audio.currentTime = d.seekTime;
-		    }
-		}
-	    };
-	    for (const [action, handler] of Object.entries(actions)) {
-		try {
-		    navigator.mediaSession.setActionHandler(action, handler);
-		} catch (e) {
-		}
-	    }
-	}
+	setSessionActions();
 
 	renderQueue();
-	fetchQueue();
+	fetchQueue().then(() => {
+	    // tuned in to a live station before the reload: show what's on
+	    const station = rememberedLive();
+	    if (station && station.id) {
+		tuneIn(station.id, station.name, station.image, false);
+	    }
+	});
 	retryListens();
 	showEpisode();
+	showOnNow();
+    };
+
+    // the audio element's events; a live track change swaps the element
+    const events = () => ({
+	timeupdate: onTime,
+	loadedmetadata: onLoaded,
+	play: onPlay,
+	pause: onPause,
+	ended: next,
+	error: onError,
+	durationchange: showProgress
+    });
+
+    const bind = function(el) {
+	for (const [name, fn] of Object.entries(events())) {
+	    el.addEventListener(name, fn);
+	}
+    };
+
+    const unbind = function(el) {
+	for (const [name, fn] of Object.entries(events())) {
+	    el.removeEventListener(name, fn);
+	}
     };
 
     if (document.readyState == "loading") {

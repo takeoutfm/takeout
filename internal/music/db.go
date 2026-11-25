@@ -36,7 +36,6 @@ var (
 	ErrArtistNotFound   = errors.New("artist not found")
 	ErrReleaseNotFound  = errors.New("release not found")
 	ErrPlaylistNotFound = errors.New("playlist not found")
-	ErrStationNotFound  = errors.New("station not found")
 )
 
 func (m *Music) openDB() (err error) {
@@ -59,7 +58,7 @@ func (m *Music) openDB() (err error) {
 	}
 
 	m.db.AutoMigrate(&Artist{}, &ArtistBackground{}, &ArtistImage{}, &ArtistTag{}, &Media{}, &Playlist{},
-		&Popular{}, &Similar{}, &Station{}, &Release{}, &Track{})
+		&Popular{}, &Similar{}, &Release{}, &Track{})
 	return
 }
 
@@ -939,13 +938,12 @@ func (m *Music) LookupETag(etag string) (Track, error) {
 	return track, err
 }
 
-// Simple sql search for artists, releases, tracks and stations. Use config
+// Simple sql search for artists, releases and tracks. Use config
 // SearchLimit to change the result count.
-func (m *Music) Query(query string) ([]Artist, []Release, []Track, []Station) {
+func (m *Music) Query(query string) ([]Artist, []Release, []Track) {
 	var artists []Artist
 	var releases []Release
 	var tracks []Track
-	var stations []Station
 
 	queryArtists := func(name string) {
 		m.db.Where("name like ?", name).
@@ -966,11 +964,6 @@ func (m *Music) Query(query string) ([]Artist, []Release, []Track, []Station) {
 			Order("title").Limit(m.config.Music.SearchLimit).Find(&tracks)
 	}
 
-	queryStations := func(name string) {
-		m.db.Where("name like ? or creator like ?", name, name).
-			Limit(m.config.Music.SearchLimit).Find(&stations)
-	}
-
 	s := strings.Split(query, ":")
 	if len(s) > 1 {
 		field, terms := s[0], strings.Join(s[1:], "")
@@ -983,8 +976,6 @@ func (m *Music) Query(query string) ([]Artist, []Release, []Track, []Station) {
 			queryReleases(terms)
 		case "+title", "title":
 			queryTitles(terms)
-		case "+radio", "radio", "+station", "station":
-			queryStations(terms)
 		}
 	} else {
 		// remove any quotes
@@ -993,10 +984,9 @@ func (m *Music) Query(query string) ([]Artist, []Release, []Track, []Station) {
 		queryArtists(query)
 		queryReleases(query)
 		queryTitles(query)
-		queryStations(query)
 	}
 
-	return artists, releases, tracks, stations
+	return artists, releases, tracks
 }
 
 // Lookup user playlist
@@ -1043,55 +1033,6 @@ func (m *Music) UpdatePlaylist(p *Playlist) error {
 
 func (m *Music) DeletePlaylist(user auth.User, id int) error {
 	return m.db.Unscoped().Where("user = ? and id = ?", user.Name, id).Delete(Playlist{}).Error
-}
-
-// Obtain user stations.
-func (m *Music) Stations(user auth.User) []Station {
-	var stations []Station
-	m.db.Where("user = ? or shared = 1", user.Name).Find(&stations)
-	return stations
-}
-
-// Stations by name
-func (m *Music) StationsLike(name string) []Station {
-	var stations []Station
-	m.db.Where("name like ? or creator like ?", name, name).Find(&stations)
-	return stations
-}
-
-func (m *Music) clearStationPlaylists() {
-	m.db.Exec(`update stations set playlist = ""`)
-}
-
-func (m *Music) deleteStations() {
-	m.db.Exec(`delete from stations where type <> ?`, TypeLiveStation)
-}
-
-// TakeoutStations returns the stations Takeout creates (live, stream and
-// older generated ones), live ones in lineup order.
-func (m *Music) TakeoutStations() []Station {
-	var stations []Station
-	m.db.Where("user = ?", TakeoutUser).Order("rank, id").Find(&stations)
-	return stations
-}
-
-// Obtain user station by id.
-func (m *Music) LookupStation(id int) (Station, error) {
-	var s Station
-	err := m.db.First(&s, id).Error
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return Station{}, ErrStationNotFound
-	}
-	return s, err
-}
-
-// Update a station.
-func (m *Music) UpdateStation(s *Station) error {
-	return m.db.Save(s).Error
-}
-
-func (m *Music) DeleteStation(s *Station) error {
-	return m.db.Unscoped().Delete(s).Error
 }
 
 func (m *Music) favoriteArtists(limit int) ([]string, error) {
@@ -1213,10 +1154,6 @@ func (m *Music) createArtistTag(t *ArtistTag) error {
 
 func (m *Music) CreatePlaylist(p *Playlist) error {
 	return m.db.Create(p).Error
-}
-
-func (m *Music) CreateStation(s *Station) error {
-	return m.db.Create(s).Error
 }
 
 func (m *Music) createArtistBackground(bg *ArtistBackground) error {

@@ -322,15 +322,17 @@ import (
 // responses:
 //  200: RadioResponse
 
-// swagger:route POST /radio RadioUpdate
+// swagger:route GET /radio/schedule RadioSchedule
+// parameters:
+//  + in: query
+//    name: start
+//    type: string
+//  + in: query
+//    name: end
+//    type: string
 // responses:
-//  200: RadioResponse
-
-
-// POST /api/radio < Station{}
-// 201: created
-// 400: bad request
-// 500: error
+//  200: description: live stations' scheduled tracks
+//  400: description: bad start or end
 
 // ---------------------------------------------------------------------------
 
