@@ -1034,6 +1034,23 @@ progress.live-progress::-moz-progress-bar {
     pointer-events: none;
 }
 
+.np-close {
+    position: absolute;
+    top: 12px;
+    right: 0;
+    z-index: 1;
+}
+
+/* the mini player hides while Now Playing is open; messages still show */
+body.np-open .mini {
+    display: none;
+}
+
+body.np-open .footer {
+    border-top: none;
+    background: none;
+}
+
 .np-main {
     flex: 3;
     min-width: 0;
@@ -1171,6 +1188,11 @@ li.empty {
     .np-backdrop {
         inset: 0;
         width: 100%;
+    }
+
+    /* room for the close button above a full-width cover */
+    .nowplaying {
+        padding-top: 56px;
     }
 
     .mini {

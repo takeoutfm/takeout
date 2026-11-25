@@ -1088,9 +1088,12 @@
 	$("queue").innerHTML = rows.length > 0 ? rows.join("") : '<li class="empty">Nothing queued.</li>';
     };
 
+    // Now Playing replaces the page; the mini player hides while it's open,
+    // since Now Playing shows the same and more
     const showNowPlaying = function(show) {
 	$("nowplaying").hidden = !show;
 	$("main").hidden = show;
+	document.body.classList.toggle("np-open", show);
 	if (show) {
 	    window.scrollTo(0, 0);
 	    const row = document.querySelector("#queue .current");
