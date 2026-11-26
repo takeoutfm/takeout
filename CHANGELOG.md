@@ -1,3 +1,62 @@
+## 0.32.0
+
+Live radio: stations scheduled from your library, where everyone hears the
+same thing and tuning in joins the track that's on now. Radio now has only
+live and stream stations, and the older generated stations are gone, with no
+migration: live stations come only from the new Radio section. The design
+and configuration are in RADIO.md.
+
+- live radio: stations are set up per media collection under Radio.Lineup
+  (Name, Music query, optional Layout/Match date window for seasonal
+  stations, Image, Description, MinContent) and Radio.Genres, Decades and
+  Series, none of which have defaults, with Radio.Timezone, Horizon (24h),
+  MinContent (2h), SearchLimit (1000) and SyncInterval (1h); the "radio" job
+  extends each schedule and runs at startup. Tracks play back to back from
+  library tracks with a recording ID and a scanned duration, without
+  repeating a track for a while, keeping the same artist apart and never
+  playing two tracks from one release in a row. Changing a station's music
+  or shows reschedules it from the next track
+- radio shows: Lineup entries can have Shows (Name, Layout/Match days, At,
+  Length, Music and/or Released for recordings first released recently,
+  Image, Description), a regular slot where the station plays the show's
+  music instead of its own; the track playing when a show starts or ends
+  plays to its end, and a show with too little music is skipped
+- stations are kept in radio.db and matched to the config by name, so a
+  station keeps its ID while its name stays the same, including a seasonal
+  station that's off the air; a live station off the air isn't listed or
+  found
+- Music.RadioStreams is now Radio.Streams; artist, track and search radio
+  keep their Music settings
+- GET /api/radio has only Live (stations on the air, in config order) and
+  Stream
+- GET /api/radio/schedule[?start=&end=] returns each live station's tracks
+  (default now to 30 minutes ahead, RFC3339 times, capped at the horizon)
+  with title, artist, release, image, Location, ETag, track ID and the Show
+  it's part of, each station's Shows, and the server's Time; GET
+  /api/radio/{id}/schedule returns one station's schedule in the same shape.
+  Both extend a schedule that's about to run out if the radio job hasn't
+- GET /api/radio/{id}/playlist for a live station is its schedule from the
+  current track on (up to 100 tracks), for players that can't follow it
+  live
+- live radio listens count as for any library track (4 minutes or half the
+  track heard); ListenBrainz stays with the clients, and the server never
+  submits listens to it
+- web UI: live stations tune in and play live, off the queue, joining the
+  track on now, with play/pause, the time left in the track, what's next,
+  and "Jump to live" after a pause; the Radio page shows what's on each live
+  station
+- web UI: the mini player hides while Now Playing is open, and Now Playing
+  has its own close button
+- removed: the generated radio stations (genre, period, series, artist,
+  similar and other) and the Music.RadioGenres, RadioSeries and RadioOther
+  settings; the "stations" job (takeout run now runs the "radio" job after a
+  music sync) and the takeout radio command; /api/stations/{id}, replaced by
+  /api/radio/{id}; the unrouted station create, update and delete handlers;
+  and the station fields User, Shared, Ref and Playlist. The stations table
+  in music.db is no longer used and can be dropped
+- fixed: New Releases dropped a release when another with the same artist
+  and name was older, such as Weezer's self-titled albums
+
 ## 0.31.1
 
 - channels: Guide.MinContent (default 48h) sets how much content a channel
