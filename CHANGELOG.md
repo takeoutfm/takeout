@@ -1,3 +1,9 @@
+## 0.32.1
+
+- live radio: a Lineup entry's or show's Music can be a list of queries,
+  and the station or show plays what any of them finds, such as one query
+  per artist; a single string is still one query, commas and all
+
 ## 0.32.0
 
 Live radio: stations scheduled from your library, where everyone hears the
