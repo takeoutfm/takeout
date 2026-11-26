@@ -81,6 +81,16 @@ func (r *Radio) searchLimit() int {
 	return r.config.Radio.SearchLimit
 }
 
+// pool is the tracks found by any of queries, each searched up to
+// SearchLimit, without repeats.
+func (r *Radio) pool(lib Library, queries []string) []Title {
+	var all []Title
+	for _, q := range queries {
+		all = append(all, lib.Tracks(q, r.searchLimit())...)
+	}
+	return usable(all)
+}
+
 func (r *Radio) minContent(s station) time.Duration {
 	if s.MinContent > 0 {
 		return s.MinContent
@@ -132,7 +142,7 @@ func (r *Radio) sync(now time.Time, lib Library) error {
 		if !s.onAir(now.In(loc)) {
 			continue
 		}
-		pool := usable(lib.Tracks(s.Query, r.searchLimit()))
+		pool := r.pool(lib, s.Queries)
 		if d := poolDuration(pool); d == 0 || d < r.minContent(s) {
 			log.Printf("radio: skipping %s, only %s of music\n", s.Name, d.Round(time.Minute))
 			continue
@@ -144,7 +154,7 @@ func (r *Radio) sync(now time.Time, lib Library) error {
 				log.Printf("radio: %s: %s\n", s.Name, err)
 				continue
 			}
-			showPool := usable(lib.Tracks(sh.query(now), r.searchLimit()))
+			showPool := r.pool(lib, sh.queries(now))
 			need := min(sh.Length, r.minContent(s))
 			if d := poolDuration(showPool); d == 0 || d < need {
 				log.Printf("radio: skipping show %s on %s, only %s of music\n",

@@ -31,7 +31,7 @@ import (
 // an automatic genre, decade or series station.
 type station struct {
 	Name        string
-	Query       string // music search query
+	Queries     []string // music search queries, results combined
 	Image       string
 	Description string
 	Layout      string // optional date window, as in DateRecommend
@@ -44,13 +44,24 @@ type station struct {
 // tell when it changed.
 func (s station) plan() string {
 	h := fnv.New64a()
-	fmt.Fprintf(h, "%q %s %+v", s.Query, s.MinContent, s.Shows)
+	fmt.Fprintf(h, "%q %s %+v", s.Queries, s.MinContent, s.Shows)
 	return fmt.Sprintf("%x", h.Sum64())
 }
 
 // onAir reports whether the station's date window includes day.
 func (s station) onAir(day time.Time) bool {
 	return s.Layout == "" || date.MatchTime(s.Layout, s.Match, day)
+}
+
+// queries returns the non-empty queries.
+func queries(list config.Queries) []string {
+	var result []string
+	for _, q := range list {
+		if q = strings.TrimSpace(q); q != "" {
+			result = append(result, q)
+		}
+	}
+	return result
 }
 
 // lineup returns the configured stations in order: the lineup, then genres,
@@ -62,7 +73,7 @@ func lineup(cfg *config.Config) []station {
 	for _, e := range cfg.Radio.Lineup {
 		list = append(list, station{
 			Name:        e.Name,
-			Query:       e.Music,
+			Queries:     queries(e.Music),
 			Image:       e.Image,
 			Description: e.Description,
 			Layout:      e.Layout,
@@ -78,27 +89,27 @@ func lineup(cfg *config.Config) []station {
 		}
 		list = append(list, station{
 			Name: strings.Title(genre),
-			Query: fmt.Sprintf(`+genre:"%s" +type:single +popularity:<11 -artist:"Various Artists"`,
-				genre),
+			Queries: []string{fmt.Sprintf(`+genre:"%s" +type:single +popularity:<11 -artist:"Various Artists"`,
+				genre)},
 		})
 	}
 
 	for _, d := range cfg.Radio.Decades {
 		list = append(list, station{
 			Name: fmt.Sprintf("%ds Top Tracks", d),
-			Query: fmt.Sprintf(`+first_date:>="%d-01-01" +first_date:<="%d-12-31" +type:single +popularity:<11`,
-				d, d+9),
+			Queries: []string{fmt.Sprintf(`+first_date:>="%d-01-01" +first_date:<="%d-12-31" +type:single +popularity:<11`,
+				d, d+9)},
 		})
 	}
 
 	for _, s := range cfg.Radio.Series {
-		list = append(list, station{Name: s, Query: fmt.Sprintf(`+series:"%s"`, s)})
+		list = append(list, station{Name: s, Queries: []string{fmt.Sprintf(`+series:"%s"`, s)}})
 	}
 
 	seen := make(map[string]bool)
 	var result []station
 	for _, s := range list {
-		if s.Name == "" || s.Query == "" || seen[s.Name] {
+		if s.Name == "" || len(s.Queries) == 0 || seen[s.Name] {
 			continue
 		}
 		seen[s.Name] = true

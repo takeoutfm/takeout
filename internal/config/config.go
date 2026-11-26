@@ -26,6 +26,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 	"sync"
@@ -33,6 +34,7 @@ import (
 	"time"
 	_ "time/tzdata" // channel time zones in minimal containers
 
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -324,11 +326,30 @@ type RadioEntry struct {
 	Name        string
 	Layout      string // optional date window, as in DateRecommend
 	Match       string
-	Music       string // music search query
+	Music       Queries // music search query, or several whose results are combined
 	Image       string
 	Description string
 	MinContent  time.Duration // instead of Radio.MinContent
 	Shows       []RadioShow   // regular shows on this station
+}
+
+// Queries is one search query or a list of them. In the config it's a
+// string or a list of strings; a string is one query, never split at
+// commas.
+type Queries []string
+
+var queriesType = reflect.TypeOf(Queries{})
+
+// queriesHook decodes a string into Queries as a single query, before
+// viper's hook that would split it at commas.
+func queriesHook(f reflect.Type, t reflect.Type, data any) (any, error) {
+	if t != queriesType || f.Kind() != reflect.String {
+		return data, nil
+	}
+	if s := data.(string); s != "" {
+		return Queries{s}, nil
+	}
+	return Queries{}, nil
 }
 
 // RadioShow is a regular show on a live station, like "Gary Numan Fridays":
@@ -339,7 +360,7 @@ type RadioShow struct {
 	Match       string
 	At          string        // local start time, "00:00" if empty
 	Length      time.Duration // 24h if zero
-	Music       string        // music search query
+	Music       Queries       // music search query, or several whose results are combined
 	Released    time.Duration // only recordings first released this recently
 	Image       string
 	Description string
@@ -759,7 +780,9 @@ func makeConfig(v *viper.Viper, rootDir string) (*Config, error) {
 	postProcessConfig(v, rootDir)
 
 	var config Config
-	err := v.Unmarshal(&config)
+	err := v.Unmarshal(&config, func(c *mapstructure.DecoderConfig) {
+		c.DecodeHook = mapstructure.ComposeDecodeHookFunc(queriesHook, c.DecodeHook)
+	})
 	config.Music.readMaps()
 	return &config, err
 }

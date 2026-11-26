@@ -50,18 +50,18 @@ func la(t *testing.T) *time.Location {
 }
 
 func TestNewShow(t *testing.T) {
-	s, err := newShow(config.RadioShow{Name: "All Day", Music: "x"})
+	s, err := newShow(config.RadioShow{Name: "All Day", Music: config.Queries{"x"}})
 	if err != nil || s.Length != 24*time.Hour || s.hour != 0 || s.min != 0 {
 		t.Errorf("defaults %+v %v", s, err)
 	}
-	s, err = newShow(config.RadioShow{Name: "Late", Music: "x", At: "23:30", Length: time.Hour})
+	s, err = newShow(config.RadioShow{Name: "Late", Music: config.Queries{"x"}, At: "23:30", Length: time.Hour})
 	if err != nil || s.hour != 23 || s.min != 30 {
 		t.Errorf("at %+v %v", s, err)
 	}
 	for _, bad := range []config.RadioShow{
-		{Music: "x"},
+		{Music: config.Queries{"x"}},
 		{Name: "No music"},
-		{Name: "Bad time", Music: "x", At: "8pm"},
+		{Name: "Bad time", Music: config.Queries{"x"}, At: "8pm"},
 	} {
 		if _, err := newShow(bad); err == nil {
 			t.Errorf("accepted %+v", bad)
@@ -69,28 +69,63 @@ func TestNewShow(t *testing.T) {
 	}
 }
 
-func TestShowQuery(t *testing.T) {
+func TestShowQueries(t *testing.T) {
 	now := time.Date(2026, 11, 21, 9, 0, 0, 0, time.UTC)
-	s, _ := newShow(config.RadioShow{Name: "New", Released: 30 * 24 * time.Hour})
-	if q := s.query(now); q != `+first_date:>="2026-10-22"` {
-		t.Errorf("released only %q", q)
+	month := 30 * 24 * time.Hour
+	for _, c := range []struct {
+		show config.RadioShow
+		want []string
+	}{
+		{config.RadioShow{Name: "New", Released: month},
+			[]string{`+first_date:>="2026-10-22"`}},
+		{config.RadioShow{Name: "New Rock", Music: config.Queries{"+genre:rock"}, Released: month},
+			[]string{`+genre:rock +first_date:>="2026-10-22"`}},
+		{config.RadioShow{Name: "Gary", Music: config.Queries{`+artist:"Gary Numan"`}},
+			[]string{`+artist:"Gary Numan"`}},
+		// several queries, each limited to new releases; empty ones dropped
+		{config.RadioShow{Name: "New Shoegaze", Released: month,
+			Music: config.Queries{`+artist:"DIIV"`, " ", `+artist:"Slowdive"`}},
+			[]string{`+artist:"DIIV" +first_date:>="2026-10-22"`,
+				`+artist:"Slowdive" +first_date:>="2026-10-22"`}},
+	} {
+		s, err := newShow(c.show)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := s.queries(now); fmt.Sprint(got) != fmt.Sprint(c.want) {
+			t.Errorf("%s: %q", c.show.Name, got)
+		}
 	}
-	s, _ = newShow(config.RadioShow{Name: "New Rock", Music: "+genre:rock",
-		Released: 30 * 24 * time.Hour})
-	if q := s.query(now); q != `+genre:rock +first_date:>="2026-10-22"` {
-		t.Errorf("with music %q", q)
+	if _, err := newShow(config.RadioShow{Name: "Blank", Music: config.Queries{" "}}); err == nil {
+		t.Error("accepted a show with only blank queries")
 	}
-	s, _ = newShow(config.RadioShow{Name: "Gary", Music: `+artist:"Gary Numan"`})
-	if q := s.query(now); q != `+artist:"Gary Numan"` {
-		t.Errorf("music only %q", q)
+}
+
+func TestPoolQueries(t *testing.T) {
+	r := makeRadio(t, []config.RadioEntry{
+		// two queries combined; the overlap isn't repeated
+		{Name: "Both", Music: config.Queries{"tiny", "half"}},
+	})
+	r.config.Radio.Series = nil
+	lib := newLibrary()
+	lib.pools["half"] = append(pool(10, 5), showPool("h", 30)...)
+	got := r.pool(lib, []string{"tiny", "half"})
+	if len(got) != 40 {
+		t.Errorf("pool has %d tracks, want 40", len(got))
+	}
+	if err := r.Sync(t0, lib); err != nil {
+		t.Fatal(err)
+	}
+	if names(r.Live()) != "[Both]" {
+		t.Errorf("live %s", names(r.Live()))
 	}
 }
 
 func TestSlots(t *testing.T) {
 	loc := la(t)
-	fri, _ := newShow(config.RadioShow{Name: "Late Friday", Music: "x",
+	fri, _ := newShow(config.RadioShow{Name: "Late Friday", Music: config.Queries{"x"},
 		Layout: "Mon", Match: "Fri", At: "23:00", Length: 3 * time.Hour})
-	sat, _ := newShow(config.RadioShow{Name: "Saturday", Music: "x",
+	sat, _ := newShow(config.RadioShow{Name: "Saturday", Music: config.Queries{"x"},
 		Layout: "Mon", Match: "Sat", At: "09:00", Length: 2 * time.Hour})
 	shows := []show{fri, sat}
 
@@ -118,17 +153,17 @@ func TestSlots(t *testing.T) {
 	}
 
 	// every day when there's no Layout
-	daily, _ := newShow(config.RadioShow{Name: "Daily", Music: "x", At: "06:00", Length: time.Hour})
+	daily, _ := newShow(config.RadioShow{Name: "Daily", Music: config.Queries{"x"}, At: "06:00", Length: time.Hour})
 	if n := len(slots([]show{daily}, from, from.Add(7*24*time.Hour), loc)); n != 7 {
 		t.Errorf("daily slots %d", n)
 	}
 }
 
 func TestSyncShow(t *testing.T) {
-	gary := config.RadioShow{Name: "Gary Numan Mondays", Music: `+artist:"Gary Numan"`,
+	gary := config.RadioShow{Name: "Gary Numan Mondays", Music: config.Queries{`+artist:"Gary Numan"`},
 		Layout: "Mon", Match: "Mon", At: "06:00", Length: 2 * time.Hour, Image: "gary.png"}
 	r := makeRadio(t, []config.RadioEntry{
-		{Name: "Big", Music: "big", Shows: []config.RadioShow{gary}},
+		{Name: "Big", Music: config.Queries{"big"}, Shows: []config.RadioShow{gary}},
 	})
 	lib := newLibrary()
 	loc := la(t)
@@ -161,10 +196,10 @@ func TestSyncShow(t *testing.T) {
 }
 
 func TestSyncShowResume(t *testing.T) {
-	gary := config.RadioShow{Name: "Gary", Music: `+artist:"Gary Numan"`,
+	gary := config.RadioShow{Name: "Gary", Music: config.Queries{`+artist:"Gary Numan"`},
 		At: "06:00", Length: 2 * time.Hour}
 	r := makeRadio(t, []config.RadioEntry{
-		{Name: "Big", Music: "big", Shows: []config.RadioShow{gary}},
+		{Name: "Big", Music: config.Queries{"big"}, Shows: []config.RadioShow{gary}},
 	})
 	lib := newLibrary()
 	loc := la(t)
@@ -181,9 +216,9 @@ func TestSyncShowResume(t *testing.T) {
 }
 
 func TestSyncShowTooSmall(t *testing.T) {
-	r := makeRadio(t, []config.RadioEntry{{Name: "Big", Music: "big", Shows: []config.RadioShow{
-		{Name: "Tiny Show", Music: "tiny", At: "06:00", Length: 3 * time.Hour},
-		{Name: "Nothing", Music: "nothing", At: "10:00", Length: time.Hour},
+	r := makeRadio(t, []config.RadioEntry{{Name: "Big", Music: config.Queries{"big"}, Shows: []config.RadioShow{
+		{Name: "Tiny Show", Music: config.Queries{"tiny"}, At: "06:00", Length: 3 * time.Hour},
+		{Name: "Nothing", Music: config.Queries{"nothing"}, At: "10:00", Length: time.Hour},
 	}}})
 	if err := r.Sync(t0, newLibrary()); err != nil {
 		t.Fatal(err)

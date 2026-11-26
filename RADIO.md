@@ -74,7 +74,7 @@ Radio:
 | `Genres` | none | Automatic genre stations, with today's query (`+genre:"…" +type:single +popularity:<11 -artist:"Various Artists"`). |
 | `Decades` | none | Automatic decade stations ("1980s Top Tracks"), with today's query. |
 | `Series` | none | Automatic series (chart) stations. |
-| `Lineup` | none | Hand-written stations: `Name`, `Music` query, optional `Layout`/`Match`, `Image`, `Description`, `MinContent`, `Shows` (see "Shows"). |
+| `Lineup` | none | Hand-written stations: `Name`, `Music` (a query, or a list of them; see "Several queries"), optional `Layout`/`Match`, `Image`, `Description`, `MinContent`, `Shows` (see "Shows"). |
 | `MinContent` | `2h` | A station whose pool is shorter than this is skipped and logged. Can be set per station. |
 | `SearchLimit` | `1000` | Search limit for a station's pool. |
 | `Streams` | none | Internet radio stations: `Creator`, `Title`, `Image`, `Description`, `Source`. Was `Music.RadioStreams`. |
@@ -82,6 +82,22 @@ Radio:
 **Order:** `Lineup` first in its order, then genres, decades and series.
 
 **Order:** streams are listed in their config order.
+
+**Several queries:** in a search query, `+` means required, so `+artist:"A" +artist:"B"` finds
+only tracks credited to both. Terms without `+` are alternatives, but only while the query has no
+`+` terms at all: with one, they only affect ranking, and the query string has no parentheses or
+`OR` to group them. So a lineup entry's or show's `Music` can be a list, and the pool is every
+track any of them finds (each searched up to `SearchLimit`), without repeats:
+
+```yaml
+    - Name: Shoegaze Singles
+      Music:
+        - '+artist:"DIIV" +type:single'
+        - '+artist:"Slowdive" +type:single'
+        - '+artist:"My Bloody Valentine" +type:single'
+```
+
+A single string is one query, commas and all.
 
 **No migration:** `Music.RadioGenres`, `RadioSeries` and `RadioOther` are gone and aren't read,
 and `Music.RadioStreams` is now `Radio.Streams`.
@@ -109,7 +125,7 @@ schedule restarts at now rather than filling the past.
 `MinContent` or `Shows`. Then the radio job deletes the station's tracks after the one on now
 and schedules again from there, so a new show is on the next run rather than a day later.
 
-**Pool:** tracks matching the query (the same `Music.Search` as today's refs) that have a recording
+**Pool:** tracks matching the query, or any of the queries (the same `Music.Search` as today's refs), that have a recording
 ID (`RID`, the schedule key) and a scanned `Duration`, the same rule as break tracks.
 
 **Picker:** a pure function of pool, recent history and seed (station name and start time), so it
@@ -167,8 +183,8 @@ Radio:
 | `Layout`, `Match` | every day | Which days, as in `DateRecommend`: `Layout: Mon`, `Match: Fri` is Fridays. |
 | `At` | `00:00` | Local start time, in `Radio.Timezone`. |
 | `Length` | `24h` | How long it's on. With the defaults, a show takes over its whole day. |
-| `Music` | | Search query for the show's music. |
-| `Released` | none | Only recordings first released this recently (`first_date`), for new music. With no `Music`, every such track. |
+| `Music` | | Search query for the show's music, or a list of them whose results are combined. |
+| `Released` | none | Only recordings first released this recently (`first_date`), for new music; with several queries, each is limited. With no `Music`, every such track. |
 | `Image`, `Description` | none | For the apps. |
 
 - **Edges:** the track on when a show starts plays to its end, so the show starts a little late

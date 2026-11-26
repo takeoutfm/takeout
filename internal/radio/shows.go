@@ -20,7 +20,6 @@ package radio
 import (
 	"fmt"
 	"sort"
-	"strings"
 	"time"
 
 	"takeoutfm.dev/takeout/internal/config"
@@ -30,7 +29,7 @@ import (
 // show is a regular show on a live station.
 type show struct {
 	Name        string
-	Query       string
+	Queries     []string
 	Released    time.Duration
 	Image       string
 	Description string
@@ -45,7 +44,7 @@ type show struct {
 func newShow(c config.RadioShow) (show, error) {
 	s := show{
 		Name:        c.Name,
-		Query:       c.Music,
+		Queries:     queries(c.Music),
 		Released:    c.Released,
 		Image:       c.Image,
 		Description: c.Description,
@@ -56,7 +55,7 @@ func newShow(c config.RadioShow) (show, error) {
 	if s.Name == "" {
 		return s, fmt.Errorf("show without a name")
 	}
-	if s.Query == "" && s.Released <= 0 {
+	if len(s.Queries) == 0 && s.Released <= 0 {
 		return s, fmt.Errorf("show %s has no Music or Released", s.Name)
 	}
 	if s.Length <= 0 {
@@ -72,15 +71,21 @@ func newShow(c config.RadioShow) (show, error) {
 	return s, nil
 }
 
-// query is the show's search query as of now: its Music, limited to
-// recordings first released within Released.
-func (s show) query(now time.Time) string {
-	q := s.Query
-	if s.Released > 0 {
-		since := now.Add(-s.Released).Format("2006-01-02")
-		q = strings.TrimSpace(fmt.Sprintf(`%s +first_date:>="%s"`, q, since))
+// queries are the show's search queries as of now: its Music, each limited
+// to recordings first released within Released.
+func (s show) queries(now time.Time) []string {
+	if s.Released <= 0 {
+		return s.Queries
 	}
-	return q
+	since := fmt.Sprintf(`+first_date:>="%s"`, now.Add(-s.Released).Format("2006-01-02"))
+	if len(s.Queries) == 0 {
+		return []string{since}
+	}
+	var list []string
+	for _, q := range s.Queries {
+		list = append(list, q+" "+since)
+	}
+	return list
 }
 
 // slot is one airing of a show.

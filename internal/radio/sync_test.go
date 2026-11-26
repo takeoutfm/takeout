@@ -81,9 +81,9 @@ func makeRadio(t *testing.T, lineup []config.RadioEntry) *Radio {
 
 func TestSync(t *testing.T) {
 	r := makeRadio(t, []config.RadioEntry{
-		{Name: "Big", Music: "big", Image: "big.png", Description: "Lots"},
-		{Name: "Tiny", Music: "tiny"},
-		{Name: "Spooky", Music: "big", Layout: "Jan", Match: "Oct"},
+		{Name: "Big", Music: config.Queries{"big"}, Image: "big.png", Description: "Lots"},
+		{Name: "Tiny", Music: config.Queries{"tiny"}},
+		{Name: "Spooky", Music: config.Queries{"big"}, Layout: "Jan", Match: "Oct"},
 	})
 	lib := newLibrary()
 	now := t0
@@ -163,12 +163,12 @@ func TestSync(t *testing.T) {
 }
 
 func TestSyncRemoved(t *testing.T) {
-	r := makeRadio(t, []config.RadioEntry{{Name: "Big", Music: "big"}})
+	r := makeRadio(t, []config.RadioEntry{{Name: "Big", Music: config.Queries{"big"}}})
 	lib := newLibrary()
 	if err := r.Sync(t0, lib); err != nil {
 		t.Fatal(err)
 	}
-	r.config.Radio.Lineup = []config.RadioEntry{{Name: "Other", Music: "big"}}
+	r.config.Radio.Lineup = []config.RadioEntry{{Name: "Other", Music: config.Queries{"big"}}}
 	if err := r.Sync(t0.Add(time.Hour), lib); err != nil {
 		t.Fatal(err)
 	}
@@ -184,7 +184,7 @@ func TestSyncRemoved(t *testing.T) {
 }
 
 func TestExtendDue(t *testing.T) {
-	r := makeRadio(t, []config.RadioEntry{{Name: "Big", Music: "big"}})
+	r := makeRadio(t, []config.RadioEntry{{Name: "Big", Music: config.Queries{"big"}}})
 	lib := newLibrary()
 	if err := r.Sync(t0, lib); err != nil {
 		t.Fatal(err)
@@ -208,7 +208,7 @@ func TestExtendDue(t *testing.T) {
 }
 
 func TestSchedule(t *testing.T) {
-	r := makeRadio(t, []config.RadioEntry{{Name: "Big", Music: "big"}})
+	r := makeRadio(t, []config.RadioEntry{{Name: "Big", Music: config.Queries{"big"}}})
 	lib := newLibrary()
 	if err := r.Sync(t0, lib); err != nil {
 		t.Fatal(err)
@@ -242,7 +242,7 @@ func TestLineup(t *testing.T) {
 	}
 
 	// lineup, genres, decades, series; a repeated name keeps the first
-	cfg.Radio.Lineup = []config.RadioEntry{{Name: "Rock", Music: "my rock"}, {Name: "Empty"}}
+	cfg.Radio.Lineup = []config.RadioEntry{{Name: "Rock", Music: config.Queries{"my rock"}}, {Name: "Empty"}}
 	cfg.Radio.Genres = []string{"rock", "", "jazz"}
 	cfg.Radio.Decades = []int{1980}
 	cfg.Radio.Series = []string{"Hot 100"}
@@ -252,7 +252,7 @@ func TestLineup(t *testing.T) {
 		names = append(names, s.Name)
 	}
 	want := []string{"Rock", "Jazz", "1980s Top Tracks", "Hot 100"}
-	if fmt.Sprint(names) != fmt.Sprint(want) || list[0].Query != "my rock" {
+	if fmt.Sprint(names) != fmt.Sprint(want) || fmt.Sprint(list[0].Queries) != "[my rock]" {
 		t.Fatalf("got %+v", list)
 	}
 }
@@ -294,9 +294,9 @@ func TestStreams(t *testing.T) {
 
 func TestFindStation(t *testing.T) {
 	r := makeRadio(t, []config.RadioEntry{
-		{Name: "Big", Music: "big"},
-		{Name: "Bigger", Music: "big"},
-		{Name: "Tiny", Music: "tiny"},
+		{Name: "Big", Music: config.Queries{"big"}},
+		{Name: "Bigger", Music: config.Queries{"big"}},
+		{Name: "Tiny", Music: config.Queries{"tiny"}},
 	})
 	r.config.Radio.Streams = []config.RadioStream{{Creator: "SomaFM", Title: "Groove Salad"}}
 	if err := r.Sync(t0, newLibrary()); err != nil {
@@ -326,7 +326,7 @@ func TestFindStation(t *testing.T) {
 }
 
 func TestScheduleLocalTime(t *testing.T) {
-	r := makeRadio(t, []config.RadioEntry{{Name: "Big", Music: "big"}})
+	r := makeRadio(t, []config.RadioEntry{{Name: "Big", Music: config.Queries{"big"}}})
 	lib := newLibrary()
 	la, err := time.LoadLocation("America/Los_Angeles")
 	if err != nil {
@@ -343,7 +343,7 @@ func TestScheduleLocalTime(t *testing.T) {
 }
 
 func TestSyncNameTaken(t *testing.T) {
-	r := makeRadio(t, []config.RadioEntry{{Name: "KEXP", Music: "big"}, {Name: "Big", Music: "big"}})
+	r := makeRadio(t, []config.RadioEntry{{Name: "KEXP", Music: config.Queries{"big"}}, {Name: "Big", Music: config.Queries{"big"}}})
 	r.config.Radio.Streams = []config.RadioStream{{Creator: "KEXP", Title: "KEXP"}}
 	if err := r.Sync(t0, newLibrary()); err != nil {
 		t.Fatal(err)

@@ -97,9 +97,9 @@ func TestApiRadioSchedule(t *testing.T) {
 	}
 	cfg.Radio.DB.Source = filepath.Join(t.TempDir(), "radio.db")
 	cfg.Radio.Lineup = []config.RadioEntry{
-		{Name: "Test FM", Music: "x", Description: "Testing"},
-		{Name: "Show FM", Music: "x", Shows: []config.RadioShow{
-			{Name: "All Day", Music: "x", Image: "all-day.png", Description: "Every day"}}},
+		{Name: "Test FM", Music: config.Queries{"x"}, Description: "Testing"},
+		{Name: "Show FM", Music: config.Queries{"x"}, Shows: []config.RadioShow{
+			{Name: "All Day", Music: config.Queries{"x"}, Image: "all-day.png", Description: "Every day"}}},
 	}
 	cfg.Radio.Streams = []config.RadioStream{{Creator: "Test", Title: "Test Stream"}}
 	r := radio.NewRadio(cfg)
